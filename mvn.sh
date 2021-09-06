@@ -4,6 +4,7 @@ PROJECTS=(
 sharp-dependencies
 sharp-common
 sharp-database
+sharp-meta
 sharp-excel
 sharp-sms
 )

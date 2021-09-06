@@ -33,3 +33,9 @@ sharp:
 更多用法：
 * [https://xhope.top/?p=1220](https://xhope.top/?p=1220)
 * [https://xhope.top/?p=1229](https://xhope.top/?p=1229)
+
+# sharp-meta
+`sharp-meta`可以对「字典」和「KV属性」进行读取和操作。
+
+更多用法：
+* [https://xhope.top/?p=1242](https://xhope.top/?p=1242)
