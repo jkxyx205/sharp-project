@@ -14,4 +14,6 @@ public interface DictService {
     Optional<DictDO> getDictByTypeAndName(String type, String name);
 
     List<DictDO> getDictByType(String type);
+
+    void rebuild(String type);
 }

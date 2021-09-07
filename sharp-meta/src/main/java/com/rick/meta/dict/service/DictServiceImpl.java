@@ -6,6 +6,8 @@ import com.rick.db.service.SharpService;
 import com.rick.meta.dict.dao.dataobject.DictDO;
 import com.rick.meta.dict.model.DictProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
@@ -18,14 +20,14 @@ import java.util.stream.Collectors;
  * @createdAt 2021-09-06 17:45:00
  */
 @RequiredArgsConstructor
+@Slf4j
 public class DictServiceImpl implements DictService, InitializingBean {
 
     private final SharpService sharpService;
 
     private final DictProperties dictProperties;
 
-    private static final String SELECT_SQL = "SELECT * FROM sys_dict";
-
+    private static final String SELECT_SQL = "SELECT type, name, label, sort FROM sys_dict WHERE type = :type";
 
     @Override
     public Optional<DictDO> getDictByTypeAndName(String type, String name) {
@@ -41,9 +43,28 @@ public class DictServiceImpl implements DictService, InitializingBean {
     }
 
     @Override
+    public void rebuild(String type) {
+        // sys_dict
+        Map<String, Object> params = Maps.newLinkedHashMapWithExpectedSize(1);
+        params.put("type", type);
+        List<DictDO> list = getDbDictList(params);
+        if (CollectionUtils.isNotEmpty(list)) {
+            DictUtils.dictMap.put(type, list);
+            return;
+        }
+
+        // yml
+        for (DictProperties.Item item : dictProperties.getItems()) {
+            if (item.getType().equals(type)) {
+                initYml(item);
+            }
+        }
+    }
+
+    @Override
     public void afterPropertiesSet() {
         // sys_dict
-        List<DictDO> list = sharpService.query(SELECT_SQL, null, DictDO.class);
+        List<DictDO> list = getDbDictList(null);
 
         Map<String, List<DictDO>> map = list.stream().collect(Collectors.groupingBy(DictDO::getType));
         DictUtils.dictMap = Maps.newHashMapWithExpectedSize(dictProperties.getItems().size() + map.size());
@@ -54,11 +75,25 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
         // yml
         for (DictProperties.Item item : dictProperties.getItems()) {
-            if (Objects.nonNull(item.getMap())) {
-                initMap(item.getType(), item.getMap());
-            } else if (Objects.nonNull(item.getSql())) {
-                initSQL(item.getType(), item.getSql());
-            }
+            initYml(item);
+        }
+    }
+
+    private List<DictDO> getDbDictList(Map<String, Object> params) {
+        try {
+            List<DictDO> list = sharpService.query(SELECT_SQL, params, DictDO.class);
+            return list;
+        } catch (Exception e) {
+            log.warn("sys_dict表没有创建成功！");
+            return Collections.emptyList();
+        }
+    }
+
+    private void initYml(DictProperties.Item item) {
+        if (Objects.nonNull(item.getMap())) {
+            initMap(item.getType(), item.getMap());
+        } else if (Objects.nonNull(item.getSql())) {
+            initSQL(item.getType(), item.getSql());
         }
     }
 
