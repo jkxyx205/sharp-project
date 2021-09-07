@@ -3,6 +3,8 @@ package com.rick.db.formatter;
 import com.rick.db.dto.PageModel;
 import org.apache.commons.lang3.StringUtils;
 
+import static com.rick.db.config.Constants.GROUP_DUMMY_TABLE_NAME;
+
 /**
  * All rights Reserved, Designed By www.xhope.top
  *
@@ -18,7 +20,7 @@ public class MysqlSqlFormatter extends AbstractSqlFormatter {
     public  String pageSql(String sql, PageModel model) {
         StringBuilder sb = new  StringBuilder();
         sb.append("SELECT * FROM ")
-                .append("(").append(sql).append(") temp_");
+                .append("(").append(sql).append(") ").append(GROUP_DUMMY_TABLE_NAME);
 
         if (model != null && (StringUtils.isNotBlank(model.getSidx()) && StringUtils
                 .isNotBlank(model.getSord()))) {

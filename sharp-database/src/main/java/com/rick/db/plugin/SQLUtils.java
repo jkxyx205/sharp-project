@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
+import static com.rick.db.config.Constants.DB_MYSQL;
+import static com.rick.db.config.Constants.GROUP_DUMMY_TABLE_NAME;
+
 /**
  * @author Rick
  * @createdAt 2021-02-07 17:40:00
@@ -57,13 +60,13 @@ public final class SQLUtils {
     }
 
     /**
-     * 排序会带上id一起排序
+     * 如果是Mysql，排序会带上id一起排序
      * @param pageModel
      * @param sortableColumns
      * @return
      */
     public static void setOrderParams(PageModel pageModel, String[] sortableColumns) {
-        String groupBy = getOrderBy("temp_", pageModel.getSidx(), Objects.equals("asc", pageModel.getSord()), sortableColumns);
+        String groupBy = getOrderBy(GROUP_DUMMY_TABLE_NAME, pageModel.getSidx(), Objects.equals("asc", pageModel.getSord()), sortableColumns);
         if (StringUtils.isNotBlank(groupBy)) {
             int blank = groupBy.indexOf(" ");
             pageModel.setSidx(groupBy.substring(0, blank));
@@ -81,7 +84,7 @@ public final class SQLUtils {
 
         tablePrefix = StringUtils.isBlank(tablePrefix) ? "" : tablePrefix + ".";
         asc = ObjectUtils.defaultIfNull(asc, false);
-        if (SQLUtils.SHARP_DATABASE_PROPERTIES.getType().equals("mysql")) {
+        if (SQLUtils.SHARP_DATABASE_PROPERTIES.getType().equals(DB_MYSQL)) {
             return tablePrefix + column + " " + (asc ? "asc," : "desc, ") + tablePrefix + "id DESC";
         }
 
@@ -132,6 +135,13 @@ public final class SQLUtils {
         return deletedCount;
     }
 
+    /**
+     * 是否支持排序
+     * @param column
+     * @param sortableColumns
+     * @param ignoreCase
+     * @return
+     */
     private static boolean sortable(String column, String[] sortableColumns, boolean ignoreCase) {
         if (StringUtils.isBlank(column) || Objects.isNull(sortableColumns)) {
             return false;
