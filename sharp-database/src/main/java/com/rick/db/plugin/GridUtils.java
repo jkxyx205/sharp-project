@@ -28,18 +28,18 @@ public final class GridUtils {
     }
 
     public static final Grid<Map<String, Object>> list(String sql, Map<String, ?> params) {
-        return list(sql, params, null, null);
+        return list(sql, params, null, (String) params.get(PageModel.PARAM_SIDX));
     }
 
     public static final Grid<Map<String, Object>> list(String sql, Map<String, ?> params, String countSQL) {
-        return list(sql, params, countSQL, null);
+        return list(sql, params, countSQL, (String) params.get(PageModel.PARAM_SIDX));
     }
     /**
      *
      * @param sql
      * @param params
      * @param countSQL 可以单独指定count的SQL，可以为null
-     * @param sortableColumns 可以允许排序的列，查询字段必须包含id列，不然mysql排序会有问题
+     * @param sortableColumns 可以允许排序的列，查询字段必须包含id列，不然mysql排序会有问题。如果为null。所有列运行排序
      * @return
      */
     public static final Grid<Map<String, Object>> list(String sql, Map<String, ?> params, String countSQL, String... sortableColumns) {

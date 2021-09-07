@@ -18,4 +18,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SharpDatabaseProperties {
 
     private String type = "mysql";
+
 }

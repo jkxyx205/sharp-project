@@ -63,12 +63,13 @@ public class GridServiceAutoConfiguration {
     static class UtilGridServiceConfiguration {
 
         @Autowired
-        public void setGridService(GridService gridService) {
+        public void setGridService(GridService gridService, SharpDatabaseProperties sharpDatabaseProperties) {
             GridUtils gridUtils = new GridUtils();
             gridUtils.setGridService(gridService);
 
             SQLUtils sqlUtils = new SQLUtils();
             sqlUtils.setJdbcTemplate(gridService.getNamedJdbcTemplate().getJdbcTemplate());
+            sqlUtils.setSharpDatabaseProperties(sharpDatabaseProperties);
         }
     }
 

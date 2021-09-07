@@ -2,6 +2,7 @@ package com.rick.db.plugin;
 
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.db.dto.Grid;
+import com.rick.db.dto.PageModel;
 import lombok.experimental.UtilityClass;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +26,8 @@ public final class GridHttpServletRequestUtils {
     }
 
     public static Grid<Map<String, Object>> list(String sql, HttpServletRequest request, Map<String, ?> extendParams, String countSQ) {
-        return GridUtils.list(sql, HttpServletRequestUtils.getParameterMap(request, extendParams), countSQ, null);
+        Map<String, ?> parameterMap = HttpServletRequestUtils.getParameterMap(request, extendParams);
+        return GridUtils.list(sql, parameterMap, countSQ, (String) parameterMap.get(PageModel.PARAM_SIDX));
     }
 
     public static List<BigDecimal> numericObject(String sql, HttpServletRequest request) {

@@ -25,32 +25,34 @@ public class QueryModel {
 
     public static QueryModel of(Map<String, ?> requestMap) {
         QueryModel queryModel = new QueryModel();
-        queryModel.setParams(requestMap);
 
         PageModel pageModel = new PageModel();
 
-        Object page = requestMap.get(PageModel.PARAM_PAGE);
-        Object size = requestMap.get(PageModel.PARAM_SIZE);
-        Object sidx = requestMap.get(PageModel.PARAM_SIDX);
-        Object sord = requestMap.get(PageModel.PARAM_SORD);
+        if (Objects.nonNull(requestMap)) {
+            Object page = requestMap.get(PageModel.PARAM_PAGE);
+            Object size = requestMap.get(PageModel.PARAM_SIZE);
+            Object sidx = requestMap.get(PageModel.PARAM_SIDX);
+            Object sord = requestMap.get(PageModel.PARAM_SORD);
 
-        if (Objects.nonNull(page)) {
-            pageModel.setPage(Integer.valueOf(String.valueOf(page)));
+            if (Objects.nonNull(page)) {
+                pageModel.setPage(Integer.valueOf(String.valueOf(page)));
+            }
+
+            if (Objects.nonNull(size)) {
+                pageModel.setSize(Integer.valueOf(String.valueOf(size)));
+            }
+
+            if (Objects.nonNull(sidx)) {
+                pageModel.setSidx((String) sidx);
+            }
+
+            if (Objects.nonNull(sord)) {
+                pageModel.setSord((String) sord);
+            }
         }
-
-        if (Objects.nonNull(size)) {
-            pageModel.setSize(Integer.valueOf(String.valueOf(size)));
-        }
-
-        if (Objects.nonNull(sidx)) {
-            pageModel.setSidx((String) sidx);
-        }
-
-        if (Objects.nonNull(sord)) {
-            pageModel.setSord((String) sord);
-        }
-
         queryModel.setPageModel(pageModel);
+        queryModel.setParams(requestMap);
+
         return queryModel;
     }
 

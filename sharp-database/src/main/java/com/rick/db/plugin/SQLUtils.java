@@ -1,6 +1,6 @@
 package com.rick.db.plugin;
 
-import com.google.common.base.CaseFormat;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.dto.PageModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,8 +25,14 @@ public final class SQLUtils {
 
     private static final String SQL_PATH_NOT_IN = "NOT IN";
 
+    private static SharpDatabaseProperties SHARP_DATABASE_PROPERTIES;
+
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         SQLUtils.JDBC_TEMPLATE = jdbcTemplate;
+    }
+
+    public void setSharpDatabaseProperties(SharpDatabaseProperties sharpDatabaseProperties) {
+        SQLUtils.SHARP_DATABASE_PROPERTIES = sharpDatabaseProperties;
     }
 
     /**
@@ -57,7 +63,7 @@ public final class SQLUtils {
      * @return
      */
     public static void setOrderParams(PageModel pageModel, String[] sortableColumns) {
-        String groupBy = getOrderBy("temp_", pageModel.getSidx(), Objects.equals("asc", pageModel.getSord()), sortableColumns, true);
+        String groupBy = getOrderBy("temp_", pageModel.getSidx(), Objects.equals("asc", pageModel.getSord()), sortableColumns);
         if (StringUtils.isNotBlank(groupBy)) {
             int blank = groupBy.indexOf(" ");
             pageModel.setSidx(groupBy.substring(0, blank));
@@ -68,19 +74,18 @@ public final class SQLUtils {
         }
     }
 
-    public static String getOrderBy(String tablePrefix, String column, Boolean asc, String[] sortableColumns, boolean lowerUnderscore) {
+    public static String getOrderBy(String tablePrefix, String column, Boolean asc, String[] sortableColumns) {
         if (!sortable(column, sortableColumns, true)) {
             return null;
         }
 
-        if (lowerUnderscore) {
-            column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column);
-        }
-
         tablePrefix = StringUtils.isBlank(tablePrefix) ? "" : tablePrefix + ".";
         asc = ObjectUtils.defaultIfNull(asc, false);
+        if (SQLUtils.SHARP_DATABASE_PROPERTIES.getType().equals("mysql")) {
+            return tablePrefix + column + " " + (asc ? "asc," : "desc, ") + tablePrefix + "id DESC";
+        }
 
-        return tablePrefix + column + " " + (asc ? "asc," : "desc, ") + tablePrefix + "id DESC";
+        return tablePrefix + column + " " + (asc ? "asc" : "desc");
     }
 
     /**
@@ -131,6 +136,7 @@ public final class SQLUtils {
         if (StringUtils.isBlank(column) || Objects.isNull(sortableColumns)) {
             return false;
         }
+
         boolean columnSortable = false;
         for (String sortableColumn : sortableColumns) {
             if (ignoreCase) {
