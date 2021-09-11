@@ -166,6 +166,5 @@ gradle-app.setting
 .classpath
 .idea
 target
-sharp-sms
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,jetbrains+iml,java,gradle
