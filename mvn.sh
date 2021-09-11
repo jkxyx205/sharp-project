@@ -3,10 +3,10 @@
 PROJECTS=(
 sharp-dependencies
 sharp-common
-#sharp-database
+sharp-database
 sharp-meta
-#sharp-excel
-#sharp-sms
+sharp-excel
+sharp-sms
 )
 
 for p in $PROJECTS
