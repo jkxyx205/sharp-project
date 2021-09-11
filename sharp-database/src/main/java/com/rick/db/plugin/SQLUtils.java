@@ -40,6 +40,19 @@ public final class SQLUtils {
 
     /**
      *
+     * @param tableName t_xx
+     * @param columnNames id, namme
+     * @return INSERT INTO t_xx(id, namme) VALUES(?, ?)
+     */
+    public static String getInsertSQL(String tableName, String columnNames) {
+        return String.format("INSERT INTO %s(%s) VALUES(%s)",
+                tableName,
+                columnNames,
+                StringUtils.join(Collections.nCopies(columnNames.split("\\s*,\\s*").length, "?"), ","));
+    }
+
+    /**
+     *
      * @param deleteValues [23,13]
      * @param tableName t_user
      * @param deleteColumn id

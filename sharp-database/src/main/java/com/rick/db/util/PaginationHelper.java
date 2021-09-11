@@ -14,11 +14,11 @@ import java.util.Map;
  */
 public final class PaginationHelper {
     /**
-     *
+     * 当分页较多的时候，希望显示部分分页
      * @param total 总页数
-     * @param displayPage ui显示页数
+     * @param displayPage 希望ui显示页数
      * @param activePage 当前页
-     * @return
+     * @return startPage endPage
      */
     public static Map<String, Long> limitPages(long total, long displayPage, long activePage) {
         Map<String, Long> pages = new HashMap<>(2);
