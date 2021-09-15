@@ -79,6 +79,19 @@ public abstract class AbstractSqlFormatter {
 	
 	private static final Map<String,String> DATE_FORMAT_MAP;
 
+    private Pattern orderSQLPattern = Pattern.compile("order\\s*by\\s+(" + COLUMN_REGEX + ")+(\\s+(desc|asc)(?!\\w+))?", Pattern.CASE_INSENSITIVE);
+
+    private Pattern inFullPattern = Pattern.compile(IN_FULL_REGEX);
+    private Pattern columnPattern = Pattern.compile("^" + COLUMN_REGEX);
+    private Pattern operatorPattern = Pattern.compile(OPERATOR_REGEX);
+    private Pattern namePattern = Pattern.compile("[(].*[)]");
+    private Pattern holdParamPattern = Pattern.compile("(:|\\{\\s*)(\\w+)(\\s*})?");
+
+    private Pattern fullPattern = Pattern.compile(FULL_REGEX);
+    private Pattern fullPattern2 = Pattern.compile(FULL_REGEX2);
+    private Pattern paramPattern = Pattern.compile(PARAM_REGEX);
+    private Pattern paramPattern2 = Pattern.compile(PARAM_REGEX2);
+
 	static {
 		DATE_FORMAT_MAP = new HashMap<>(2);
 		DATE_FORMAT_MAP.put("\\d{4}/\\d{2}/\\d{2}", "yyyy/MM/dd");
@@ -99,7 +112,7 @@ public abstract class AbstractSqlFormatter {
 
 		srcSql = handleHolderSQL(srcSql, params);
 
-		List<ParamHolder> paramList = splitParam(srcSql, FULL_REGEX, PARAM_REGEX);
+		List<ParamHolder> paramList = splitParam(srcSql, fullPattern, paramPattern);
 
 		for(ParamHolder h : paramList) {
 			String name = h.param;
@@ -219,46 +232,6 @@ public abstract class AbstractSqlFormatter {
 		sb.append("SELECT COUNT(0) FROM (").append(removeOrders(srcSql)).append(") temp");
 		return sb.toString();
 	}
-	
-	private static List<ParamHolder> splitParam(String sql, String fullRegex, String paramRegex) {
-		Pattern pat = Pattern.compile(fullRegex);
-		Matcher mat = pat.matcher(sql);  
-		List<ParamHolder> paramList = new ArrayList<ParamHolder>();
-		
-		while (mat.find()) {
-			 ParamHolder holder = new ParamHolder();
-			 String matchRet = mat.group().trim();
-			 holder.full = matchRet;
-			 //再进行拆分列名
-			 Pattern pat1 = Pattern.compile("^" + COLUMN_REGEX);
-			 Matcher mat1 = pat1.matcher(matchRet);
-			 while(mat1.find()) {
-				 String matchRet1 = mat1.group().trim();
-				 holder.column = matchRet1;
-			 }
-			 
-			 //再进行拆分出变量
-			 Pattern pat2 = Pattern.compile(OPERATOR_REGEX);
-			 Matcher mat2 = pat2.matcher(matchRet);
-			 while(mat2.find()) {
-				 String matchRet2 = mat2.group().trim();
-				 holder.operator = matchRet2;
-			 }
-
-			//再进行拆分出「变量」
-			 Pattern pat3 = Pattern.compile(paramRegex);
-			 Matcher mat3 = pat3.matcher(matchRet);
-			 while(mat3.find()) {
-				 String matchRet3 = mat3.group().trim();
-                 Matcher mat4 = Pattern.compile("(:|\\{\\s*)(\\w+)(\\s*})?").matcher(matchRet3);
-                 mat4.find();
-                 holder.param  = mat4.group(2);
-			 }
-            paramList.add(holder);
-        }
-
-		return paramList;
-	}
 
 	private static String likeEscape(String str) {
 		return str.replaceAll("%", "\\\\%")
@@ -287,39 +260,50 @@ public abstract class AbstractSqlFormatter {
 
 	public abstract String escapeString();
 
-    public static String changeInSQL(String sql) {
-        Pattern pat = Pattern.compile(IN_FULL_REGEX);
-        Matcher mat = pat.matcher(sql);
-
+    private List<ParamHolder> splitParam(String sql, Pattern fullPattern, Pattern paramPattern) {
+        Matcher mat = fullPattern.matcher(sql);
+        List<ParamHolder> paramList = new ArrayList<ParamHolder>();
         while (mat.find()) {
-            ParamHolder holder = new ParamHolder();
-            String matchRet = mat.group().trim();
-            holder.full = matchRet;
-            //再进行拆分
-            Pattern pat1 = Pattern.compile("^" + COLUMN_REGEX);
-            Matcher mat1 = pat1.matcher(matchRet);
-            while (mat1.find()) {
-                String matchRet1 = mat1.group().trim();
-                holder.column = matchRet1;
-            }
+            paramList.add(getParamHolder(mat));
+        }
 
-            //再进行拆分
-            Pattern pat2 = Pattern.compile(OPERATOR_REGEX);
-            Matcher mat2 = pat2.matcher(matchRet);
-            while (mat2.find()) {
-                String matchRet2 = mat2.group().trim();
-                holder.operator = matchRet2;
-            }
+        return paramList;
+    }
 
-            //再进行拆分
-            Pattern pat3 = Pattern.compile("[(].*[)]");
-            Matcher mat3 = pat3.matcher(matchRet);
-            while (mat3.find()) {
-                String matchRet3 = mat3.group().trim();
-                holder.param = matchRet3;
-            }
+    private ParamHolder getParamHolder(Matcher mat) {
+        ParamHolder holder = new ParamHolder();
+        String matchRet = mat.group().trim();
+        holder.full = matchRet;
+        //再进行拆分列名
+        Matcher mat1 = columnPattern.matcher(matchRet);
+        while(mat1.find()) {
+            String matchRet1 = mat1.group().trim();
+            holder.column = matchRet1;
+        }
 
-            //
+        //再进行拆分出变量
+        Matcher mat2 = operatorPattern.matcher(matchRet);
+        while(mat2.find()) {
+            String matchRet2 = mat2.group().trim();
+            holder.operator = matchRet2;
+        }
+
+        //再进行拆分出「变量」
+        Matcher mat3 = paramPattern.matcher(matchRet);
+        while(mat3.find()) {
+            String matchRet3 = mat3.group().trim();
+            Matcher mat4 = holdParamPattern.matcher(matchRet3);
+            mat4.find();
+            holder.param  = mat4.group(2);
+        }
+        return holder;
+    }
+
+    private String changeInSQL(String sql) {
+        Matcher mat = inFullPattern.matcher(sql);
+        while (mat.find()) {
+            ParamHolder holder = getParamHolder(mat);
+
             StringBuilder newInSQL = new StringBuilder();
             newInSQL.append("(");
 
@@ -363,14 +347,14 @@ public abstract class AbstractSqlFormatter {
     }
 
     /**
-     * 去除hql的orderBy子句。
+     * 去除sql的orderBy子句。
      *
      * @param
      * @return
      */
+
     protected String removeOrders(String sqlString) {
-        Pattern p = Pattern.compile("order\\s*by\\s+(" + COLUMN_REGEX + ")+(\\s+(desc|asc)(?!\\w+))?", Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(sqlString);
+        Matcher m = orderSQLPattern.matcher(sqlString);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
             m.appendReplacement(sb, "");
@@ -434,7 +418,7 @@ public abstract class AbstractSqlFormatter {
     private static final char SUFFIX = '}';
 
     private String handleHolderSQL(String srcSQL, Map<String, ?> params) {
-        List<ParamHolder> paramList = splitParam(srcSQL, FULL_REGEX2, PARAM_REGEX2);
+        List<ParamHolder> paramList = splitParam(srcSQL, fullPattern2, paramPattern2);
 
         Set<String> paramSet = paramList.stream().map(ph -> ph.param).collect(Collectors.toSet());
 
