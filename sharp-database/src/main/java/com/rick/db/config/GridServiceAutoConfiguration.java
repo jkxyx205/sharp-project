@@ -68,7 +68,7 @@ public class GridServiceAutoConfiguration {
             gridUtils.setGridService(gridService);
 
             SQLUtils sqlUtils = new SQLUtils();
-            sqlUtils.setJdbcTemplate(gridService.getNamedJdbcTemplate().getJdbcTemplate());
+            sqlUtils.setNamedJdbcTemplate(gridService.getNamedJdbcTemplate());
             sqlUtils.setSharpDatabaseProperties(sharpDatabaseProperties);
         }
     }

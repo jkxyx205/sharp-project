@@ -70,11 +70,11 @@ public final class JsonUtils {
     }
 
     public static JsonNode toJsonNode(String json) throws IOException {
-        JsonNode retval = null;
+        JsonNode jsonNode = null;
         if (StringUtils.isNotEmpty(json)) {
-            retval = objectMapper.readValue(json, JsonNode.class);
+            jsonNode = objectMapper.readValue(json, JsonNode.class);
         }
-        return retval;
+        return jsonNode;
     }
 
     public static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {

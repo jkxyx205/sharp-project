@@ -1,16 +1,17 @@
 package com.rick.db.plugin;
 
+import com.google.common.collect.Maps;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.dto.PageModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.rick.db.config.Constants.DB_MYSQL;
 import static com.rick.db.config.Constants.GROUP_DUMMY_TABLE_NAME;
@@ -24,18 +25,63 @@ public final class SQLUtils {
 
     private static JdbcTemplate JDBC_TEMPLATE;
 
+    private static NamedParameterJdbcTemplate NAMED_JDBC_TEMPLATE;
+
     private static final int IN_SIZE = 2;
 
     private static final String SQL_PATH_NOT_IN = "NOT IN";
 
     private static SharpDatabaseProperties SHARP_DATABASE_PROPERTIES;
 
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        SQLUtils.JDBC_TEMPLATE = jdbcTemplate;
+
+    public void setNamedJdbcTemplate(NamedParameterJdbcTemplate namedJdbcTemplate) {
+        SQLUtils.NAMED_JDBC_TEMPLATE = namedJdbcTemplate;
+        SQLUtils.JDBC_TEMPLATE = namedJdbcTemplate.getJdbcTemplate();
     }
 
     public void setSharpDatabaseProperties(SharpDatabaseProperties sharpDatabaseProperties) {
         SQLUtils.SHARP_DATABASE_PROPERTIES = sharpDatabaseProperties;
+    }
+
+    /**
+     * 全量维护关联表关系
+     * updateRelationShip("t_user_role", "role_id", "user_id", roleId, userIds)：表示为角色roleId，添加用户userIds
+     * @param refTableName 关联表名称 t_user_role
+     * @param keyColumn 关联的对象列名 role_id
+     * @param guestColumn 被关联的对象列名 user_id
+     * @param keyInstance 关联的对象列值 roleId
+     * @param guestInstanceIds 被关联的对象列名值 userIds
+     */
+    public static void updateRefTable(String refTableName, String keyColumn, String guestColumn, long keyInstance, Collection<?> guestInstanceIds) {
+        // 删除
+        if (CollectionUtils.isEmpty(guestInstanceIds)) {
+            SQLUtils.JDBC_TEMPLATE.update(String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn), keyInstance);
+            return;
+        }
+
+        Map deleteParams = Maps.newHashMapWithExpectedSize(1);
+        deleteParams.put("guestInstanceIds", guestInstanceIds);
+        deleteParams.put("keyInstance", keyInstance);
+
+        SQLUtils.NAMED_JDBC_TEMPLATE.update(String.format("DELETE FROM %s WHERE %s = :keyInstance AND %s NOT IN (:guestInstanceIds)", refTableName, keyColumn, guestColumn), deleteParams);
+
+        String queryAllGuestInstanceIdsSQL = String.format("SELECT %s FROM %s WHERE %s = ?", guestColumn, refTableName, keyColumn);
+
+        // 库中
+        List<?> dbGuestInstanceIds = SQLUtils.JDBC_TEMPLATE.queryForList(queryAllGuestInstanceIdsSQL, guestInstanceIds.iterator().next().getClass(), keyInstance);
+
+        // 新增
+        List<?> newGuestInstanceIds = guestInstanceIds.stream().filter(guestId -> !dbGuestInstanceIds.contains(guestId)).collect(Collectors.toList());
+
+        if (newGuestInstanceIds.size() == 0) {
+            return;
+        }
+
+        String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
+
+        List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
+
+        SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
     }
 
     /**
