@@ -11,14 +11,14 @@
     <parent>
         <artifactId>sharp-dependencies</artifactId>
         <groupId>com.rick</groupId>
-        <version>1.0.0</version>
+        <version>2.5.4</version>
+        <relativePath>../sharp-dependencies</relativePath>
     </parent>
     
     <dependencies>
         <dependency>
-            <groupId>com.rick</groupId>
+            <groupId>com.rick.common</groupId>
             <artifactId>sharp-common</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>

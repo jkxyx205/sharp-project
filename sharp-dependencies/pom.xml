@@ -4,63 +4,72 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.4</version>
+    </parent>
+
     <groupId>com.rick</groupId>
     <artifactId>sharp-dependencies</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
-
-    <parent>
-        <groupId>io.spring.platform</groupId>
-        <artifactId>platform-bom</artifactId>
-        <version>Cairo-SR8</version>
-    </parent>
+    <version>2.5.4</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <spring-cloud.version>Finchley.SR1</spring-cloud.version>
         <mybatis.version>3.5.6</mybatis.version>
-<!--        <mybatis-spring-boot-starter.version>2.1.4</mybatis-spring-boot-starter.version>-->
-<!--        <mybatis-plus-boot-starter.version>3.4.2</mybatis-plus-boot-starter.version>-->
         <commons-collections4.version>4.4</commons-collections4.version>
         <jsoup.version>1.11.3</jsoup.version>
-        <poi.version>4.1.2</poi.version>
-        <servlet-api.version>3.1.0</servlet-api.version>
-        <commons-codec-version>1.11</commons-codec-version>
-        <lombok.version>1.18.16</lombok.version>
+        <poi.version>5.0.0</poi.version>
+        <guava.version>20.0</guava.version>
+        <sharp.version>1.0-SNAPSHOT</sharp.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- pom依赖 Begin-->
+            <!-- sharp依赖 -->
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>com.rick.common</groupId>
+                <artifactId>sharp-common</artifactId>
+                <version>${sharp.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.rick.db</groupId>
+                <artifactId>sharp-database</artifactId>
+                <version>${sharp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rick.excel</groupId>
+                <artifactId>sharp-excel</artifactId>
+                <version>${sharp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rick.meta</groupId>
+                <artifactId>sharp-meta</artifactId>
+                <version>${sharp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rick.sms</groupId>
+                <artifactId>sharp-sms</artifactId>
+                <version>${sharp.version}</version>
+            </dependency>
+            <!-- pom依赖 Begin-->
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
                 <version>${mybatis.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.mybatis.spring.boot</groupId>-->
-<!--                <artifactId>mybatis-spring-boot-starter</artifactId>-->
-<!--                <version>${mybatis-spring-boot-starter.version}</version>-->
-<!--                <type>jar</type>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>com.baomidou</groupId>-->
-<!--                <artifactId>mybatis-plus-boot-starter</artifactId>-->
-<!--                <version>${mybatis-plus-boot-starter.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
@@ -72,8 +81,17 @@
                 <artifactId>servlet-api</artifactId>
                 <version>${servlet-api.version}</version>
             </dependency>
-            <!-- pom依赖 Begin-->
-
+            <!-- POI Begin-->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
