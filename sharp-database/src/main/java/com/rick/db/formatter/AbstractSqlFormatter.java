@@ -85,11 +85,12 @@ public abstract class AbstractSqlFormatter {
     private Pattern columnPattern = Pattern.compile("^" + COLUMN_REGEX);
     private Pattern operatorPattern = Pattern.compile(OPERATOR_REGEX);
     private Pattern namePattern = Pattern.compile("[(].*[)]");
-    private Pattern holdParamPattern = Pattern.compile("(:|\\{\\s*)(\\w+)(\\s*})?");
+    private Pattern onlyParamNamePattern = Pattern.compile("(:|\\{\\s*)(\\w+)(\\s*})?");
 
     private Pattern fullPattern = Pattern.compile(FULL_REGEX);
-    private Pattern fullPattern2 = Pattern.compile(FULL_REGEX2);
     private Pattern paramPattern = Pattern.compile(PARAM_REGEX);
+
+    private Pattern fullPattern2 = Pattern.compile(FULL_REGEX2);
     private Pattern paramPattern2 = Pattern.compile(PARAM_REGEX2);
 
 	static {
@@ -264,13 +265,13 @@ public abstract class AbstractSqlFormatter {
         Matcher mat = fullPattern.matcher(sql);
         List<ParamHolder> paramList = new ArrayList<ParamHolder>();
         while (mat.find()) {
-            paramList.add(getParamHolder(mat));
+            paramList.add(getParamHolder(mat, paramPattern));
         }
 
         return paramList;
     }
 
-    private ParamHolder getParamHolder(Matcher mat) {
+    private ParamHolder getParamHolder(Matcher mat, Pattern paramPattern) {
         ParamHolder holder = new ParamHolder();
         String matchRet = mat.group().trim();
         holder.full = matchRet;
@@ -292,9 +293,13 @@ public abstract class AbstractSqlFormatter {
         Matcher mat3 = paramPattern.matcher(matchRet);
         while(mat3.find()) {
             String matchRet3 = mat3.group().trim();
-            Matcher mat4 = holdParamPattern.matcher(matchRet3);
-            mat4.find();
-            holder.param  = mat4.group(2);
+            // 去掉:只要name
+            Matcher mat4 = onlyParamNamePattern.matcher(matchRet3);
+            if (mat4.find()) {
+                holder.param  = mat4.group(2);
+            } else {
+                holder.param = matchRet3;
+            }
         }
         return holder;
     }
@@ -302,7 +307,7 @@ public abstract class AbstractSqlFormatter {
     private String changeInSQL(String sql) {
         Matcher mat = inFullPattern.matcher(sql);
         while (mat.find()) {
-            ParamHolder holder = getParamHolder(mat);
+            ParamHolder holder = getParamHolder(mat, namePattern);
 
             StringBuilder newInSQL = new StringBuilder();
             newInSQL.append("(");
