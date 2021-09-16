@@ -6,6 +6,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.rick.sms.core.AliSender;
 import com.rick.sms.core.Sender;
+import com.rick.sms.core.ValidateCodeSender;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,11 @@ public class SmsServiceAutoConfiguration {
         @Bean
         public Sender getAliSender(IAcsClient client) {
             return new AliSender(client);
+        }
+
+        @Bean
+        public ValidateCodeSender getValidateCodeSender(Sender sender) {
+            return new ValidateCodeSender(sender);
         }
     }
 }

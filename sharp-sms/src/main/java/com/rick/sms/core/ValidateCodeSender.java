@@ -11,15 +11,14 @@ import java.util.Map;
  * @author Rick
  * @createdAt 2021-03-03 15:30:00
  */
-@Component
 @RequiredArgsConstructor
 public class ValidateCodeSender {
 
-    private final AliSender aliSender;
+    private final Sender sender;
 
     public void send(String phone, String signName, String templateCode, String code) {
         Map<String, String> params = new HashMap<>(1);
         params.put("code", code);
-        aliSender.send(phone, signName, templateCode, params);
+        sender.send(phone, signName, templateCode, params);
     }
 }
