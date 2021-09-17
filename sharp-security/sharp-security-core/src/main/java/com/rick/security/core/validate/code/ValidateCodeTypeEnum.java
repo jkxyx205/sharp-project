@@ -1,7 +1,7 @@
 
 package com.rick.security.core.validate.code;
 
-import com.rick.security.core.properties.SecurityConstants;
+import com.rick.security.core.support.SecurityConstants;
 
 /**
  * 

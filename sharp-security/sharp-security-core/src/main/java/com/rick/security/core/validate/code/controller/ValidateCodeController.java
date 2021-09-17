@@ -1,7 +1,7 @@
 
 package com.rick.security.core.validate.code;
 
-import com.rick.security.core.properties.SecurityConstants;
+import com.rick.security.core.support.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

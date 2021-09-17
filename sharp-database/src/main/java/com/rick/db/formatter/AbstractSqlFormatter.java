@@ -31,8 +31,6 @@ public abstract class AbstractSqlFormatter {
 	/**
 	 * 合法名字：数字字母下划线
 	 */
-//	private static final String LEGAL_NAME = "\\w+";
-		
 	private static final String COLUMN_REGEX = "((?i)(to_char|NVL)?\\s*([(][^([(]|[)])]*[)])|[a-zA-Z0-9'[.]_[-]]+)";
 
 	/**
@@ -41,7 +39,8 @@ public abstract class AbstractSqlFormatter {
 	private static final String OPERATOR_REGEX = "(?i)(like|!=|>=|<=|<|>|=|\\s+in|\\s+not\\s+in|regexp)";
 
     /**
-     * 合法的变量名称:name
+     * 合法的变量名称
+     * 以字母开头:name :nameA :name0 :name_a
      */
     private static final String LEGAL_PARAM_NAME_REGEX = "[a-zA-Z]+\\w*";
 
@@ -60,6 +59,8 @@ public abstract class AbstractSqlFormatter {
      */
     private static final String PARAM_REGEX = ":" + LEGAL_PARAM_NAME_REGEX;
 
+    private static final String IN_PARAM_REGEX = "[(]"+PARAM_REGEX+"[)]";
+
     /**
      * ${name}
      */
@@ -69,29 +70,31 @@ public abstract class AbstractSqlFormatter {
 	 * 逻辑IN和NOT IN操作符
 	 */
 	private static final String OPERATOR_IN_REGEX = "(?i)(\\s+in|\\s+not\\s+in)";
+
+	private static final String BASE_LEFT_EXPRESSION = COLUMN_REGEX + "\\s*" + OPERATOR_REGEX + "\\s*";
 	
-	private static final String FULL_REGEX = new StringBuilder().append(COLUMN_REGEX).append("\\s*").append(OPERATOR_REGEX).append("\\s*").append(HOLDER_REGEX).toString();
+	private static final String FULL_REGEX = BASE_LEFT_EXPRESSION + HOLDER_REGEX;
 
-	private static final String FULL_REGEX2 = new StringBuilder().append(COLUMN_REGEX).append("\\s*").append(OPERATOR_REGEX).append("\\s*").append(HOLDER_REGEX2).toString();
+	private static final String FULL_REGEX2 = BASE_LEFT_EXPRESSION + HOLDER_REGEX2;
 
-	private static final String IN_FULL_REGEX = new StringBuilder().append(COLUMN_REGEX).append("\\s*").append(OPERATOR_IN_REGEX).append("\\s*")
-		    .append("[(][^)]+[)]").toString();
+    //IN_PARAM_REGEX = "[(][^)]+[)]";
+	private static final String IN_FULL_REGEX = COLUMN_REGEX + "\\s*" + OPERATOR_IN_REGEX + "\\s*" + IN_PARAM_REGEX;
 	
 	private static final Map<String,String> DATE_FORMAT_MAP;
 
-    private Pattern orderSQLPattern = Pattern.compile("order\\s*by\\s+(" + COLUMN_REGEX + ")+(\\s+(desc|asc)(?!\\w+))?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern orderSQLPattern = Pattern.compile("order\\s*by\\s+(" + COLUMN_REGEX + ")+(\\s+(desc|asc)(?!\\w+))?", Pattern.CASE_INSENSITIVE);
 
-    private Pattern inFullPattern = Pattern.compile(IN_FULL_REGEX);
-    private Pattern columnPattern = Pattern.compile("^" + COLUMN_REGEX);
-    private Pattern operatorPattern = Pattern.compile(OPERATOR_REGEX);
-    private Pattern namePattern = Pattern.compile("[(].*[)]");
-    private Pattern onlyParamNamePattern = Pattern.compile("(:|\\{\\s*)(\\w+)(\\s*})?");
+    private static final Pattern inFullPattern = Pattern.compile(IN_FULL_REGEX);
+    private static final Pattern columnPattern = Pattern.compile("^" + COLUMN_REGEX);
+    private static final Pattern operatorPattern = Pattern.compile(OPERATOR_REGEX);
+    private static final Pattern inNamePattern = Pattern.compile(IN_PARAM_REGEX);
+    private static final Pattern onlyParamNamePattern = Pattern.compile("(:|\\{\\s*)(\\w+)(\\s*})?");
 
-    private Pattern fullPattern = Pattern.compile(FULL_REGEX);
-    private Pattern paramPattern = Pattern.compile(PARAM_REGEX);
+    private static final Pattern fullPattern = Pattern.compile(FULL_REGEX);
+    private static final Pattern paramPattern = Pattern.compile(PARAM_REGEX);
 
-    private Pattern fullPattern2 = Pattern.compile(FULL_REGEX2);
-    private Pattern paramPattern2 = Pattern.compile(PARAM_REGEX2);
+    private static final Pattern fullPattern2 = Pattern.compile(FULL_REGEX2);
+    private static final Pattern paramPattern2 = Pattern.compile(PARAM_REGEX2);
 
 	static {
 		DATE_FORMAT_MAP = new HashMap<>(2);
@@ -295,11 +298,8 @@ public abstract class AbstractSqlFormatter {
             String matchRet3 = mat3.group().trim();
             // 去掉:只要name
             Matcher mat4 = onlyParamNamePattern.matcher(matchRet3);
-            if (mat4.find()) {
-                holder.param  = mat4.group(2);
-            } else {
-                holder.param = matchRet3;
-            }
+            mat4.find();
+            holder.param  = mat4.group(2);
         }
         return holder;
     }
@@ -307,7 +307,7 @@ public abstract class AbstractSqlFormatter {
     private String changeInSQL(String sql) {
         Matcher mat = inFullPattern.matcher(sql);
         while (mat.find()) {
-            ParamHolder holder = getParamHolder(mat, namePattern);
+            ParamHolder holder = getParamHolder(mat, inNamePattern);
 
             StringBuilder newInSQL = new StringBuilder();
             newInSQL.append("(");

@@ -5,6 +5,7 @@ import com.rick.security.core.properties.SecurityProperties;
 import com.rick.security.core.validate.code.image.ImageCodeGenerator;
 import com.rick.security.core.validate.code.sms.DefaultSmsCodeSender;
 import com.rick.security.core.validate.code.sms.SmsCodeSender;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +19,10 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
+@RequiredArgsConstructor
 public class ValidateCodeBeanConfig {
 	
-	@Autowired
-	private SecurityProperties securityProperties;
+	private final SecurityProperties securityProperties;
 	
 	/**
 	 * 图片验证码图片生成器
