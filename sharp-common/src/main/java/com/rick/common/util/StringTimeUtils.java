@@ -36,9 +36,9 @@ public final class StringTimeUtils {
 
     private static final String HOUR_END = "59:59";
 
-    private static final DateTimeFormatter sqlTimeFormatter = DateTimeFormatter.ofPattern(SQL_TIME);
+    private static final DateTimeFormatter SQL_TIME_FORMATTER = DateTimeFormatter.ofPattern(SQL_TIME);
 
-    private static final DateTimeFormatter timeShortFormatter = DateTimeFormatter.ofPattern(TIME_SHORT);
+    private static final DateTimeFormatter TIME_SHORT_FORMATTER = DateTimeFormatter.ofPattern(TIME_SHORT);
 
     /**
      * 将yyyy-MM-dd[ HH:mm:ss]转成日期类型
@@ -61,7 +61,7 @@ public final class StringTimeUtils {
             formatValue = value;
         }
 
-        return LocalDateTime.parse(formatValue, sqlTimeFormatter).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return LocalDateTime.parse(formatValue, SQL_TIME_FORMATTER).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     public static Instant toInstant(String value) {
@@ -87,7 +87,7 @@ public final class StringTimeUtils {
      * @return
      */
     public static LocalTime toTime(String value) {
-        return LocalTime.parse(value, timeShortFormatter);
+        return LocalTime.parse(value, TIME_SHORT_FORMATTER);
     }
 
     /**
