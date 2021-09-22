@@ -31,6 +31,8 @@ public final class SQLUtils {
 
     private static final String SQL_PATH_NOT_IN = "NOT IN";
 
+    private static final String ASC = "ASC";
+
     private static SharpDatabaseProperties SHARP_DATABASE_PROPERTIES;
 
 
@@ -125,7 +127,7 @@ public final class SQLUtils {
      * @return
      */
     public static void setOrderParams(PageModel pageModel, String[] sortableColumns) {
-        String groupBy = getOrderBy(GROUP_DUMMY_TABLE_NAME, pageModel.getSidx(), Objects.equals("asc", pageModel.getSord()), sortableColumns);
+        String groupBy = getOrderBy(GROUP_DUMMY_TABLE_NAME, pageModel.getSidx(), ASC.equalsIgnoreCase(pageModel.getSord()), sortableColumns);
         if (StringUtils.isNotBlank(groupBy)) {
             int blank = groupBy.indexOf(" ");
             pageModel.setSidx(groupBy.substring(0, blank));
