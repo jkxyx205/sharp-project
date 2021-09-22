@@ -12,6 +12,10 @@ package com.rick.common.http.model;
 public class ExceptionResult<T> extends Result<T> {
 
     public ExceptionResult(int code, String msg) {
-        super(false, code, msg, null);
+        this(code, msg, null);
+    }
+
+    public ExceptionResult(int code, String msg, T t) {
+        super(false, code, msg, t);
     }
 }

@@ -28,7 +28,11 @@ public final class ResultUtils {
     }
 
     public static ExceptionResult exception(int code, String message) {
-        return new ExceptionResult(code, message);
+        return exception(code, message, null);
+    }
+
+    public static <T> ExceptionResult<T> exception(int code, String message, T data) {
+        return new ExceptionResult(code, message, data);
     }
 
 }
