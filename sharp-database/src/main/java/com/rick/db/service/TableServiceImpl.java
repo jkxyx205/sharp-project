@@ -73,8 +73,22 @@ public class TableServiceImpl<T> {
         SQLUtils.deleteByIn(tableName, "id", ids);
     }
 
+    /**
+     * 更新所有字段
+     * @param params
+     * @param id
+     */
     public void update(Object[] params, Serializable id) {
         SQLUtils.update(tableName, columnNames, params, id);
+    }
+
+    /**
+     * 指定更新字段
+     * @param params
+     * @param id
+     */
+    public void update(String updateColumnNames, Object[] params, Serializable id) {
+        SQLUtils.update(tableName, updateColumnNames, params, id);
     }
 
     /**
