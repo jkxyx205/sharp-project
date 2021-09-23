@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,53 @@ public final class SQLUtils {
 
     public void setSharpDatabaseProperties(SharpDatabaseProperties sharpDatabaseProperties) {
         SQLUtils.SHARP_DATABASE_PROPERTIES = sharpDatabaseProperties;
+    }
+
+    /**
+     * 单个批量插入
+     * @param tableName t_xx
+     * @param columnNames id, namme
+     * @return INSERT INTO t_xx(id, namme) VALUES(?, ?)
+     */
+    public static int insert(String tableName, String columnNames, Object[] params) {
+        return SQLUtils.JDBC_TEMPLATE.update(getInsertSQL(tableName, columnNames),params);
+    }
+
+    /**
+     * 批量插入
+     * @param tableName
+     * @param columnNames
+     * @param paramsList
+     * @return
+     */
+    public static int[] insert(String tableName, String columnNames, List<Object[]> paramsList) {
+        return SQLUtils.JDBC_TEMPLATE.batchUpdate(getInsertSQL(tableName, columnNames), paramsList);
+    }
+
+    /**
+     * 根据id删除数据
+     * @param tableName
+     * @param id
+     * @return
+     */
+    public static int deleteById(String tableName, Serializable id) {
+        return SQLUtils.JDBC_TEMPLATE.update("DELETE FROM " + tableName + " WHERE id = ?", id);
+    }
+
+    /**
+     * 根据id更新内容
+     * @param tableName  t_xx
+     * @param updateColumnNames a, b, c
+     * @param params
+     * @param id 1
+     * UPDATE t_xx SET a = ?, b = ?, c = ? WHERE id = ?
+     * @return
+     */
+    public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id) {
+        Object[] mergedParams = new Object[params.length + 1];
+        mergedParams[params.length] = id;
+        System.arraycopy(params, 0, mergedParams, 0, params.length);
+        return SQLUtils.JDBC_TEMPLATE.update(getUpdateSQL(tableName, updateColumnNames), mergedParams);
     }
 
     /**
@@ -88,15 +136,16 @@ public final class SQLUtils {
 
     /**
      *
-     * @param tableName t_xx
-     * @param columnNames id, namme
-     * @return INSERT INTO t_xx(id, namme) VALUES(?, ?)
+     * @param deleteValues 23,13
+     * @param tableName t_user
+     * @param deleteColumn id
+     * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)，如果deleteValues是空，将不会删除任何数据
      */
-    public static String getInsertSQL(String tableName, String columnNames) {
-        return String.format("INSERT INTO %s(%s) VALUES(%s)",
-                tableName,
-                columnNames,
-                StringUtils.join(Collections.nCopies(columnNames.split("\\s*,\\s*").length, "?"), ","));
+    public static int deleteByIn(String tableName, String deleteColumn, String deleteValues) {
+        if (StringUtils.isBlank(deleteValues)) {
+            return 0;
+        }
+        return deleteData(tableName, deleteColumn, "IN", Arrays.asList(deleteValues.split(",")));
     }
 
     /**
@@ -167,7 +216,12 @@ public final class SQLUtils {
     }
 
     private static int deleteData(String tableName, String deleteColumn, String sqlPatch, Collection<?> deleteValues) {
+        if (CollectionUtils.isEmpty(deleteValues)) {
+            return 0;
+        }
+
         int size = deleteValues.size();
+
         if (SQL_PATH_NOT_IN.equals(sqlPatch) && size > IN_SIZE) {
             throw new RuntimeException("SQL_PATH_NOT_IN in的个数不能超过" + IN_SIZE);
         }
@@ -185,8 +239,8 @@ public final class SQLUtils {
             int lastIndex = (i == count) ? size : i * IN_SIZE;
             Object[] currentDeleteValue = Arrays.copyOfRange(valueArray, (i - 1) * IN_SIZE, lastIndex);
             // remove old records
-            String inSql = String.join(",", Collections.nCopies(currentDeleteValue.length, "?"));
-            String deleteSQL = String.format("DELETE FROM " + tableName + " WHERE " + deleteColumn + " " + sqlPatch + "(%s)", inSql);
+            String inSql = formatInSQLPlaceHolder(currentDeleteValue.length);
+            String deleteSQL = String.format("DELETE FROM " + tableName + " WHERE " + deleteColumn + " " + sqlPatch + "%s", inSql);
             deletedCount += SQLUtils.JDBC_TEMPLATE.update(deleteSQL, currentDeleteValue);
             if (log.isDebugEnabled()) {
                 log.debug("SQL=> [{}], args:=> [{}]", deleteSQL, currentDeleteValue);
@@ -226,5 +280,22 @@ public final class SQLUtils {
         }
 
         return true;
+    }
+
+    /**
+     *
+     * @param tableName t_xx
+     * @param columnNames id, namme
+     * @return INSERT INTO t_xx(id, namme) VALUES(?, ?)
+     */
+    private static String getInsertSQL(String tableName, String columnNames) {
+        return String.format("INSERT INTO %s(%s) VALUES(%s)",
+                tableName,
+                columnNames,
+                StringUtils.join(Collections.nCopies(columnNames.split("\\s*,\\s*").length, "?"), ","));
+    }
+
+    private static String getUpdateSQL(String tableName, String columnNames) {
+        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(",\\s*"), " = ?,") + " = ? WHERE id = ?";
     }
 }
