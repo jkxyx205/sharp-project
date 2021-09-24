@@ -25,9 +25,9 @@ public final class GridHttpServletRequestUtils {
         return list(sql, request, null, countSQL);
     }
 
-    public static Grid<Map<String, Object>> list(String sql, HttpServletRequest request, Map<String, ?> extendParams, String countSQ) {
+    public static Grid<Map<String, Object>> list(String sql, HttpServletRequest request, Map<String, ?> extendParams, String countSQL) {
         Map<String, ?> parameterMap = HttpServletRequestUtils.getParameterMap(request, extendParams);
-        return GridUtils.list(sql, parameterMap, countSQ, (String) parameterMap.get(PageModel.PARAM_SIDX));
+        return GridUtils.list(sql, parameterMap, countSQL, (String) parameterMap.get(PageModel.PARAM_SIDX));
     }
 
     public static List<BigDecimal> numericObject(String sql, HttpServletRequest request) {
