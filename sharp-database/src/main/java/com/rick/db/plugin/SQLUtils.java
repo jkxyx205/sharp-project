@@ -30,6 +30,8 @@ public final class SQLUtils {
 
     private static final int IN_SIZE = 1000;
 
+    private static final String SQL_PATH_IN = "IN";
+
     private static final String SQL_PATH_NOT_IN = "NOT IN";
 
     private static final String ASC = "ASC";
@@ -68,20 +70,10 @@ public final class SQLUtils {
     }
 
     /**
-     * 根据id删除数据
-     * @param tableName
-     * @param id
-     * @return
-     */
-    public static int deleteById(String tableName, Serializable id) {
-        return SQLUtils.JDBC_TEMPLATE.update("DELETE FROM " + tableName + " WHERE id = ?", id);
-    }
-
-    /**
      * 根据id更新内容
      * @param tableName  t_xx
      * @param updateColumnNames a, b, c
-     * @param params
+     * @param params set的参数
      * @param id 1
      * UPDATE t_xx SET a = ?, b = ?, c = ? WHERE id = ?
      * @return
@@ -90,7 +82,19 @@ public final class SQLUtils {
         Object[] mergedParams = new Object[params.length + 1];
         mergedParams[params.length] = id;
         System.arraycopy(params, 0, mergedParams, 0, params.length);
-        return SQLUtils.JDBC_TEMPLATE.update(getUpdateSQL(tableName, updateColumnNames), mergedParams);
+        return update(tableName, updateColumnNames, mergedParams, "id = ?");
+    }
+
+    /**
+     *
+     * @param tableName
+     * @param updateColumnNames
+     * @param params set和conditionSQL的参数
+     * @param conditionSQL
+     * @return
+     */
+    public static int update(String tableName, String updateColumnNames, Object[] params, String conditionSQL) {
+        return SQLUtils.JDBC_TEMPLATE.update(getUpdateSQL(tableName, updateColumnNames, conditionSQL), params);
     }
 
     /**
@@ -109,39 +113,35 @@ public final class SQLUtils {
             return;
         }
 
-        Map deleteParams = Maps.newHashMapWithExpectedSize(1);
+        Map<String, Object> deleteParams = Maps.newHashMapWithExpectedSize(1);
         deleteParams.put("guestInstanceIds", guestInstanceIds);
         deleteParams.put("keyInstance", keyInstance);
-
+        // 1. 删除
         SQLUtils.NAMED_JDBC_TEMPLATE.update(String.format("DELETE FROM %s WHERE %s = :keyInstance AND %s NOT IN (:guestInstanceIds)", refTableName, keyColumn, guestColumn), deleteParams);
 
+        // 2. 插入新增
+        // 2.1 库中
         String queryAllGuestInstanceIdsSQL = String.format("SELECT %s FROM %s WHERE %s = ?", guestColumn, refTableName, keyColumn);
-
-        // 库中
         List<?> dbGuestInstanceIds = SQLUtils.JDBC_TEMPLATE.queryForList(queryAllGuestInstanceIdsSQL, guestInstanceIds.iterator().next().getClass(), keyInstance);
-
-        // 新增
+        // 2.2 新增
         List<?> newGuestInstanceIds = guestInstanceIds.stream().filter(guestId -> !dbGuestInstanceIds.contains(guestId)).collect(Collectors.toList());
-
         if (newGuestInstanceIds.size() == 0) {
             return;
         }
 
         String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
-
         List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
-
         SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
     }
 
     /**
-     *
+     * 指定某字段删除数据
      * @param deleteValues 23,13
      * @param tableName t_user
      * @param deleteColumn id
      * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)，如果deleteValues是空，将不会删除任何数据
      */
-    public static int deleteByIn(String tableName, String deleteColumn, String deleteValues) {
+    public static int delete(String tableName, String deleteColumn, String deleteValues) {
         if (StringUtils.isBlank(deleteValues)) {
             return 0;
         }
@@ -149,23 +149,35 @@ public final class SQLUtils {
     }
 
     /**
-     *
+     * 指定某字段删除数据
      * @param deleteValues [23,13]
      * @param tableName t_user
      * @param deleteColumn id
      * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)
      */
-    public static int deleteByIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
-        return deleteData(tableName, deleteColumn, "IN", deleteValues);
+    public static int delete(String tableName, String deleteColumn, Collection<?> deleteValues) {
+        return deleteData(tableName, deleteColumn, SQL_PATH_IN, deleteValues);
     }
 
     /**
+     * 构造删除条件
+     * @param tableName
+     * @param params
+     * @param conditionSQL
+     * @return
+     */
+    public static int delete(String tableName, Object[] params, String conditionSQL) {
+        return SQLUtils.JDBC_TEMPLATE.update("DELETE FROM " + tableName + " WHERE " + conditionSQL, params);
+    }
+
+    /**
+     * 指定某字段不删除数据，其他的都删除
      * @param deleteValues ['a', 'b']数量不能大于IN_SIZE = 1000
      * @param tableName t_product
      * @param deleteColumn name
      * 相当于执行SQL：DELETE FROM t_product WHERE not id IN('a', 'b')
      */
-    public static int deleteByNotIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
+    public static int deleteNotIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
         return deleteData(tableName, deleteColumn, SQL_PATH_NOT_IN, deleteValues);
     }
 
@@ -221,6 +233,14 @@ public final class SQLUtils {
         }
 
         int size = deleteValues.size();
+        // 处理单值
+        if (size == 1) {
+            if (SQL_PATH_IN.equals(sqlPatch)) {
+                return delete(tableName, deleteValues.toArray(), deleteColumn + " = ?");
+            } else if (SQL_PATH_NOT_IN.equals(sqlPatch)) {
+                return delete(tableName, deleteValues.toArray(), deleteColumn + " <> ?");
+            }
+        }
 
         if (SQL_PATH_NOT_IN.equals(sqlPatch) && size > IN_SIZE) {
             throw new RuntimeException("SQL_PATH_NOT_IN in的个数不能超过" + IN_SIZE);
@@ -295,7 +315,7 @@ public final class SQLUtils {
                 StringUtils.join(Collections.nCopies(columnNames.split("\\s*,\\s*").length, "?"), ","));
     }
 
-    private static String getUpdateSQL(String tableName, String columnNames) {
-        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(",\\s*"), " = ?,") + " = ? WHERE id = ?";
+    private static String getUpdateSQL(String tableName, String columnNames, String conditionSQL) {
+        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(",\\s*"), " = ?,") + " = ? WHERE " + conditionSQL;
     }
 }
