@@ -1,5 +1,6 @@
 package com.rick.db.formatter;
 
+import com.rick.db.config.Constants;
 import com.rick.db.dto.PageModel;
 import com.rick.db.util.NamedParameterUtils;
 import com.rick.db.util.ParsedSql;
@@ -20,8 +21,6 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractSqlFormatter {
 
-	private static final String PARAM_IN_SEPARATOR = ",";
-	
 	private static final int QUERY_IN_MAX_COUNT = 1000;
 
 	private static final String BEFORE_END = "(?<![\\w.]+)";
@@ -135,7 +134,7 @@ public abstract class AbstractSqlFormatter {
 				if(values.length > 0) {
 					StringBuilder sb = new StringBuilder();
 					for(String s : values) {
-						sb.append(s).append(PARAM_IN_SEPARATOR);
+						sb.append(s).append(Constants.PARAM_IN_SEPARATOR);
 					}
 					value = sb.toString();
 				}
@@ -167,7 +166,7 @@ public abstract class AbstractSqlFormatter {
                     }
                 } else { // 其他当字符串处理
                     String strValue = String.valueOf(value);
-                    set.addAll(Arrays.asList(strValue.split(PARAM_IN_SEPARATOR)));
+                    set.addAll(Arrays.asList(strValue.split(Constants.PARAM_IN_SEPARATOR)));
                 }
 
 				if (set.size() > 0) {

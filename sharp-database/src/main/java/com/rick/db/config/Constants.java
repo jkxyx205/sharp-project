@@ -12,4 +12,5 @@ public final class Constants {
 
     public static final String GROUP_DUMMY_TABLE_NAME = "temp_";
 
+    public static final String PARAM_IN_SEPARATOR = ",";
 }

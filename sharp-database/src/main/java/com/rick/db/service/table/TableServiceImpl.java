@@ -1,8 +1,9 @@
 package com.rick.db.service.table;
 
-import com.google.common.base.CaseFormat;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
+import com.rick.db.config.Constants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.SharpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +40,18 @@ public class TableServiceImpl<T> {
         this.jdbcTemplate = sharpService.getNamedJdbcTemplate().getJdbcTemplate();
         this.tableName = tableName;
         this.columnNames = columnNames;
-        this.columnNameList = Arrays.asList(columnNames.split(",\\s*"));
+        this.columnNameList = getColumnNameListFromString(columnNames);
     }
 
-    public void insert(Object[] params) {
-        SQLUtils.insert(tableName, columnNames, handleAutoFill(params));
+    public int insert(Object[] params) {
+        return SQLUtils.insert(tableName, columnNames, handleAutoFill(params, columnNameList));
     }
 
     /**
      * 批量持久化
      */
-    public void insert(List<Object[]> paramsList) {
-        SQLUtils.insert(tableName, columnNames, handleAutoFill(paramsList));
+    public int[] insert(List<Object[]> paramsList) {
+        return SQLUtils.insert(tableName, columnNames, handleAutoFill(paramsList, columnNameList));
     }
 
     /**
@@ -58,8 +59,8 @@ public class TableServiceImpl<T> {
      *
      * @param id
      */
-    public void deleteById(Serializable id) {
-        SQLUtils.deleteById(tableName, id);
+    public int deleteById(Serializable id) {
+        return SQLUtils.deleteById(tableName, id);
     }
 
     /**
@@ -67,12 +68,12 @@ public class TableServiceImpl<T> {
      *
      * @param ids
      */
-    public void deleteByIds(String ids) {
-        SQLUtils.deleteByIn(tableName, "id", ids);
+    public int deleteByIds(String ids) {
+        return SQLUtils.deleteByIn(tableName, "id", ids);
     }
 
-    public void deleteByIds(Collection<?> ids) {
-        SQLUtils.deleteByIn(tableName, "id", ids);
+    public int deleteByIds(Collection<?> ids) {
+        return SQLUtils.deleteByIn(tableName, "id", ids);
     }
 
     /**
@@ -80,8 +81,8 @@ public class TableServiceImpl<T> {
      * @param params
      * @param id
      */
-    public void update(Object[] params, Serializable id) {
-        SQLUtils.update(tableName, columnNames, params, id);
+    public int update(Object[] params, Serializable id) {
+        return SQLUtils.update(tableName, columnNames, handleAutoFill(params, columnNameList), id);
     }
 
     /**
@@ -89,8 +90,8 @@ public class TableServiceImpl<T> {
      * @param params
      * @param id
      */
-    public void update(String updateColumnNames, Object[] params, Serializable id) {
-        SQLUtils.update(tableName, updateColumnNames, params, id);
+    public int update(String updateColumnNames, Object[] params, Serializable id) {
+        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, getColumnNameListFromString(updateColumnNames)), id);
     }
 
     /**
@@ -124,13 +125,32 @@ public class TableServiceImpl<T> {
     }
 
     /**
+     * name=23&age=15,13 => name=:name AND age IN(:age)
+     *
+     * @param queryString
+     * @return
+     */
+    public List<T> selectByParams(String queryString) {
+        return selectByParams(queryString, null);
+    }
+
+    public List<T> selectByParams(String queryString, String conditionSQL) {
+        final Map<String, String> map = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryString);
+        return selectByParams(map, conditionSQL);
+    }
+
+    /**
      * 根据条件查找
      *
      * @param
      * @return
      */
-    public List<T> selectByParams(Map<String, Object> params) {
-        return (List<T>) sharpService.query(getSelectSQL() + " WHERE " + getConditionSQL(),
+    public List<T> selectByParams(Map<String, ?> params) {
+        return selectByParams(params, null);
+    }
+
+    public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
+        return (List<T>) sharpService.query(getSelectSQL() + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL),
                 params,
                 getActualTypeArgument());
     }
@@ -152,13 +172,28 @@ public class TableServiceImpl<T> {
         return "SELECT " + columnNames + " FROM " + tableName;
     }
 
-    private String getConditionSQL() {
+    private String getConditionSQL(Map<String, ?> params) {
         StringBuilder sb = new StringBuilder();
         for (String columnName : columnNameList) {
-            sb.append(columnName).append(" = :").append(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, columnName)).append(" AND ");
+            Object value = params.get(columnName);
+            sb.append(columnName).append(decideParamHolder(columnName, value)).append(" AND ");
         }
 
         return sb.substring(0, sb.length() - 5);
+    }
+
+    private String decideParamHolder(String columnName, Object value) {
+        if (Objects.isNull(value)) {
+            return " = :" + columnName;
+        }
+        if (value instanceof Iterable || value.getClass().isArray() || (((String) value).split(Constants.PARAM_IN_SEPARATOR).length > 1)) {
+            return " IN (:" + columnName + ")";
+        } /*else if (((String) value).startsWith(Constants.PARAM_LIKE_SEPARATOR)) {
+            params.put(columnName, ((String) value).substring(1));
+            return " LIKE :" + columnName;
+        }*/
+
+        return " = :" + columnName;
     }
 
     private List<T> findByIds(Map<String, Object> params) {
@@ -167,14 +202,14 @@ public class TableServiceImpl<T> {
                 getActualTypeArgument());
     }
 
-    private List<Object[]> handleAutoFill(List<Object[]> paramsList) {
+    private List<Object[]> handleAutoFill(List<Object[]> paramsList, List<String> columnNameList) {
         for (Object[] params : paramsList) {
-            handleAutoFill(params);
+            handleAutoFill(params, columnNameList);
         }
         return paramsList;
     }
 
-    private Object[] handleAutoFill(Object[] params) {
+    private Object[] handleAutoFill(Object[] params, List<String> columnNameList) {
         if (Objects.nonNull(tableColumnAutoFill)) {
             Map<String, Object> fill = tableColumnAutoFill.fill();
 
@@ -192,5 +227,9 @@ public class TableServiceImpl<T> {
         }
 
         return params;
+    }
+
+    private List<String>  getColumnNameListFromString(String columnNames) {
+        return Arrays.asList(columnNames.split(",\\s*"));
     }
 }
