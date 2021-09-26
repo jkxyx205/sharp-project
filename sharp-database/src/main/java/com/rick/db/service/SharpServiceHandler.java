@@ -1,6 +1,4 @@
-package com.rick.db.plugin.mybatis;
-
-import com.rick.db.service.SharpService;
+package com.rick.db.service;
 
 import java.util.Map;
 

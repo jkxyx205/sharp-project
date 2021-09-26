@@ -1,17 +1,16 @@
-package com.rick.db.service;
+package com.rick.db.service.table;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
 import com.rick.db.plugin.SQLUtils;
+import com.rick.db.service.SharpService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author Rick
@@ -30,25 +29,28 @@ public class TableServiceImpl<T> {
      */
     private final String columnNames;
 
-    private final String[] columnArray;
+    private final List<String> columnNameList;
+
+    @Autowired(required = false)
+    private TableColumnAutoFill tableColumnAutoFill;
 
     public TableServiceImpl(SharpService sharpService, String tableName, String columnNames) {
         this.sharpService = sharpService;
         this.jdbcTemplate = sharpService.getNamedJdbcTemplate().getJdbcTemplate();
         this.tableName = tableName;
         this.columnNames = columnNames;
-        this.columnArray = columnNames.split(",\\s*");
+        this.columnNameList = Arrays.asList(columnNames.split(",\\s*"));
     }
 
     public void save(Object[] params) {
-        SQLUtils.insert(tableName, columnNames, params);
+        SQLUtils.insert(tableName, columnNames, handleAutoFill(params));
     }
 
     /**
      * 批量持久化
      */
     public void saveAll(List<Object[]> paramsList) {
-        SQLUtils.insert(tableName, columnNames, paramsList);
+        SQLUtils.insert(tableName, columnNames, handleAutoFill(paramsList));
     }
 
     /**
@@ -152,7 +154,7 @@ public class TableServiceImpl<T> {
 
     private String getConditionSQL() {
         StringBuilder sb = new StringBuilder();
-        for (String columnName : columnArray) {
+        for (String columnName : columnNameList) {
             sb.append(columnName).append(" = :").append(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, columnName)).append(" AND ");
         }
 
@@ -163,5 +165,32 @@ public class TableServiceImpl<T> {
         return (List<T>) sharpService.query(getSelectSQL() + " WHERE id IN(:ids)",
                 params,
                 getActualTypeArgument());
+    }
+
+    private List<Object[]> handleAutoFill(List<Object[]> paramsList) {
+        for (Object[] params : paramsList) {
+            handleAutoFill(params);
+        }
+        return paramsList;
+    }
+
+    private Object[] handleAutoFill(Object[] params) {
+        if (Objects.nonNull(tableColumnAutoFill)) {
+            Map<String, Object> fill = tableColumnAutoFill.fill();
+
+            for (Map.Entry<String, Object> en : fill.entrySet()) {
+                String fillColumnName = en.getKey();
+                Object fillColumnValue = en.getValue();
+
+                int index = columnNameList.indexOf(fillColumnName);
+                if (index > -1) {
+                    params[index] = fillColumnValue;
+                }
+
+            }
+
+        }
+
+        return params;
     }
 }

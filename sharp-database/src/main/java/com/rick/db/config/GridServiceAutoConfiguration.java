@@ -3,14 +3,17 @@ package com.rick.db.config;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
 import com.rick.db.formatter.OracleSqlFormatter;
+import com.rick.db.middleware.mybatis.MappedSharpService;
 import com.rick.db.plugin.GridUtils;
 import com.rick.db.plugin.SQLUtils;
-import com.rick.db.plugin.mybatis.MappedSharpService;
 import com.rick.db.service.GridService;
+import com.rick.db.service.table.DefaultTableColumnAutoFill;
+import com.rick.db.service.table.TableColumnAutoFill;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -55,6 +58,12 @@ public class GridServiceAutoConfiguration {
         @Primary
         public GridService gridService() {
             return new GridService();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public TableColumnAutoFill fill() {
+            return new DefaultTableColumnAutoFill();
         }
 
     }

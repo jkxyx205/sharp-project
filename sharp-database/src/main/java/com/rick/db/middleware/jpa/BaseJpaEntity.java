@@ -56,7 +56,7 @@ public class BaseJpaEntity {
     @PrePersist
     public void prePersist() {
         if (Objects.isNull(id)) {
-            id = IdGenerator.getId();
+            id = IdGenerator.getSequenceId();
         }
         deleted = false;
     }
