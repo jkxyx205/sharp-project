@@ -28,7 +28,7 @@ public final class SQLUtils {
 
     private static NamedParameterJdbcTemplate NAMED_JDBC_TEMPLATE;
 
-    private static final int IN_SIZE = 2;
+    private static final int IN_SIZE = 1000;
 
     private static final String SQL_PATH_NOT_IN = "NOT IN";
 
