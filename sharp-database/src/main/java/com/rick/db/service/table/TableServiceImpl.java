@@ -42,14 +42,14 @@ public class TableServiceImpl<T> {
         this.columnNameList = Arrays.asList(columnNames.split(",\\s*"));
     }
 
-    public void save(Object[] params) {
+    public void insert(Object[] params) {
         SQLUtils.insert(tableName, columnNames, handleAutoFill(params));
     }
 
     /**
      * 批量持久化
      */
-    public void saveAll(List<Object[]> paramsList) {
+    public void insert(List<Object[]> paramsList) {
         SQLUtils.insert(tableName, columnNames, handleAutoFill(paramsList));
     }
 
@@ -99,7 +99,7 @@ public class TableServiceImpl<T> {
      * @param id
      * @return
      */
-    public Optional<T> findById(Serializable id) {
+    public Optional<T> selectById(Serializable id) {
         List<T> list = (List<T>) jdbcTemplate.query(getSelectSQL() + " WHERE id = ?",
                 new BeanPropertyRowMapper<>(getActualTypeArgument()), new Object[]{id});
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
@@ -111,13 +111,13 @@ public class TableServiceImpl<T> {
      * @param ids
      * @return
      */
-    public List<T> findByIds(String ids) {
+    public List<T> selectByIds(String ids) {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("ids", ids);
         return findByIds(params);
     }
 
-    public List<T> findByIds(Collection<?> ids) {
+    public List<T> selectByIds(Collection<?> ids) {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
         params.put("ids", ids);
         return findByIds(params);
@@ -129,7 +129,7 @@ public class TableServiceImpl<T> {
      * @param
      * @return
      */
-    public List<T> findByParams(Map<String, Object> params) {
+    public List<T> selectByParams(Map<String, Object> params) {
         return (List<T>) sharpService.query(getSelectSQL() + " WHERE " + getConditionSQL(),
                 params,
                 getActualTypeArgument());
@@ -140,7 +140,7 @@ public class TableServiceImpl<T> {
      *
      * @return
      */
-    public List<T> findAll() {
+    public List<T> selectAll() {
         return (List<T>) jdbcTemplate.query(getSelectSQL(), new BeanPropertyRowMapper<>(getActualTypeArgument()));
     }
 
