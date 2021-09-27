@@ -30,7 +30,7 @@ public abstract class PojoObjectAttributeConverter<T> implements AttributeConver
 
     @Override
     public T convertToEntityAttribute(String json) {
-        Class<?> clazz = ClassUtils.getActualTypeArgument(this.getClass())[0];
+        Class<?> clazz = ClassUtils.getClassGenericsTypes(this.getClass())[0];
         if (StringUtils.isBlank(json)) {
             return null;
         }

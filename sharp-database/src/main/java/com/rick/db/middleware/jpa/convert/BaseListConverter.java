@@ -32,7 +32,7 @@ public abstract class BaseListConverter<T> implements AttributeConverter<List<T>
 
     @Override
     public List<T> convertToEntityAttribute(String json) {
-        Class<?> clazz = ClassUtils.getActualTypeArgument(this.getClass())[0];
+        Class<?> clazz = ClassUtils.getClassGenericsTypes(this.getClass())[0];
 
         if (StringUtils.isBlank(json)) {
             return Collections.emptyList();

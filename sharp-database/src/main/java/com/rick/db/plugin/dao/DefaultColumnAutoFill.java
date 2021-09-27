@@ -1,4 +1,4 @@
-package com.rick.db.service.table;
+package com.rick.db.plugin.dao;
 
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
@@ -10,7 +10,7 @@ import java.util.Map;
  * @author Rick
  * @createdAt 2021-09-26 10:21:00
  */
-public class DefaultTableColumnAutoFill implements TableColumnAutoFill {
+public class DefaultColumnAutoFill implements ColumnAutoFill {
 
     @Override
     public Map<String, Object> fill() {

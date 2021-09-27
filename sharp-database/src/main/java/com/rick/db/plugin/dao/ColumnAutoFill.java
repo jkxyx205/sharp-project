@@ -1,4 +1,4 @@
-package com.rick.db.service.table;
+package com.rick.db.plugin.dao;
 
 import java.util.Map;
 
@@ -6,7 +6,7 @@ import java.util.Map;
  * @author Rick
  * @createdAt 2021-09-26 10:21:00
  */
-public interface TableColumnAutoFill {
+public interface ColumnAutoFill {
     /**
      * 将填充的字段返回
      * @return

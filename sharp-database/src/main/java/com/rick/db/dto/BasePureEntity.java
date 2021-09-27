@@ -1,5 +1,6 @@
 package com.rick.db.dto;
 
+import com.rick.db.config.annotation.ColumnName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -26,6 +27,7 @@ public class BasePureEntity {
 
     private Instant updatedAt;
 
+    @ColumnName("is_deleted")
     private Boolean deleted;
 
     @Override

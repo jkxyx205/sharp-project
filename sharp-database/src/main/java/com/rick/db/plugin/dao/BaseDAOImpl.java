@@ -1,4 +1,4 @@
-package com.rick.db.service.table;
+package com.rick.db.plugin.dao;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
@@ -6,9 +6,9 @@ import com.rick.common.util.ClassUtils;
 import com.rick.db.config.Constants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.SharpService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.Serializable;
 import java.util.*;
@@ -17,32 +17,69 @@ import java.util.*;
  * @author Rick
  * @createdAt 2021-09-23 16:41:00
  */
-public class TableServiceImpl<T> {
+@Slf4j
+public class BaseDAOImpl<T> {
 
-    private final SharpService sharpService;
+    @Autowired
+    private SharpService sharpService;
 
-    private final JdbcTemplate jdbcTemplate;
-
-    private final String tableName;
+    private String tableName;
 
     /**
      * column1, column2, column3
      */
-    private final String columnNames;
+    private String columnNames;
 
-    private final List<String> columnNameList;
+    private String properties;
+
+    private List<String> columnNameList;
+
+    private List<String> propertyList;
 
     private static final String PRIMARY_COLUMN = "id";
 
-    @Autowired(required = false)
-    private TableColumnAutoFill tableColumnAutoFill;
+    private Class<?> entityClass;
 
-    public TableServiceImpl(SharpService sharpService, String tableName, String columnNames) {
-        this.sharpService = sharpService;
-        this.jdbcTemplate = sharpService.getNamedJdbcTemplate().getJdbcTemplate();
+    private String selectSQL;
+
+
+    @Autowired(required = false)
+    private ColumnAutoFill columnAutoFill;
+
+    public BaseDAOImpl() {
+        this.init();
+    }
+
+    public BaseDAOImpl(String tableName, String columnNames) {
         this.tableName = tableName;
         this.columnNames = columnNames;
-        this.columnNameList = getColumnNameListFromString(columnNames);
+        this.init();
+    }
+
+    private void init() {
+        Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
+        if (Objects.nonNull(actualTypeArgument)) {
+            this.entityClass = actualTypeArgument[0];
+            if (Map.class.isAssignableFrom(this.entityClass)) {
+                this.entityClass = Map.class;
+            } else {
+                TableMeta resolve = TableMetaResolver.resolve(this.entityClass);
+                this.properties = resolve.getProperties();
+                if (Objects.isNull(this.tableName) || Objects.isNull(this.columnNames)) {
+                    this.tableName = resolve.getTableName();
+                    this.columnNames = resolve.getColumnNames();
+                }
+
+                this.propertyList = convertToArray(properties);
+            }
+        } else {
+            this.entityClass = Map.class;
+        }
+
+        this.columnNameList = convertToArray(columnNames);
+
+        initSelectSQL();
+        log.info("tableName: {}, columnNames: {}, properties: {}", this.tableName, this.columnNames, this.properties);
     }
 
     /**
@@ -122,7 +159,7 @@ public class TableServiceImpl<T> {
      * @param id
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
-        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, getColumnNameListFromString(updateColumnNames)), id);
+        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames)), id);
     }
     /**
      * 指定更新字段，构造条件更新
@@ -131,7 +168,7 @@ public class TableServiceImpl<T> {
      * @param conditionSQL
      */
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
-        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, getColumnNameListFromString(updateColumnNames)), conditionSQL);
+        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames)), conditionSQL);
     }
 
     /**
@@ -193,9 +230,9 @@ public class TableServiceImpl<T> {
      * @return
      */
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
-        return (List<T>) sharpService.query(getSelectSQL() + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL),
+        return (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL),
                 params,
-                getActualTypeArgument());
+                this.entityClass);
     }
 
     /**
@@ -204,15 +241,7 @@ public class TableServiceImpl<T> {
      * @return
      */
     public List<T> selectAll() {
-        return (List<T>) jdbcTemplate.query(getSelectSQL(), new BeanPropertyRowMapper<>(getActualTypeArgument()));
-    }
-
-    private Class<?> getActualTypeArgument() {
-        return ClassUtils.getActualTypeArgument(this.getClass())[0];
-    }
-
-    private String getSelectSQL() {
-        return "SELECT " + columnNames + " FROM " + tableName;
+        return (List<T>) sharpService.query(this.selectSQL, null, this.entityClass);
     }
 
     private String getConditionSQL(Map<String, ?> params) {
@@ -247,8 +276,8 @@ public class TableServiceImpl<T> {
     }
 
     private Object[] handleAutoFill(Object[] params, List<String> columnNameList) {
-        if (Objects.nonNull(tableColumnAutoFill)) {
-            Map<String, Object> fill = tableColumnAutoFill.fill();
+        if (Objects.nonNull(columnAutoFill)) {
+            Map<String, Object> fill = columnAutoFill.fill();
 
             for (Map.Entry<String, Object> en : fill.entrySet()) {
                 String fillColumnName = en.getKey();
@@ -264,7 +293,24 @@ public class TableServiceImpl<T> {
         return params;
     }
 
-    private List<String>  getColumnNameListFromString(String columnNames) {
-        return Arrays.asList(columnNames.split(",\\s*"));
+    private List<String> convertToArray(String values) {
+        return Arrays.asList(values.split(",\\s*"));
+    }
+
+    private void initSelectSQL() {
+        if (CollectionUtils.isEmpty(this.propertyList)) {
+            this.selectSQL = "SELECT " + columnNames + " FROM " + tableName;
+            return;
+        }
+
+        int columnSize = this.columnNameList.size();
+        StringBuilder selectSQLBuilder = new StringBuilder("SELECT ");
+        for (int i = 0; i < columnSize; i++) {
+            selectSQLBuilder.append(this.columnNameList.get(i))
+                    .append(" AS \"").append(this.propertyList.get(i)).append("\",");
+        }
+        selectSQLBuilder.deleteCharAt(selectSQLBuilder.length() - 1).append(" FROM ").append(this.tableName);
+
+        this.selectSQL = selectSQLBuilder.toString();
     }
 }
