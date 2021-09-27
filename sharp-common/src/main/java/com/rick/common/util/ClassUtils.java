@@ -18,7 +18,7 @@ public class ClassUtils {
      * @param clazz
      * @return
      */
-    public static Class<?>[] getActualTypeArgument(Class<?> clazz) {
+    public static Class<?>[] getClassGenericsTypes(Class<?> clazz) {
         Class<?>[] classes = null;
         Type genericSuperclass = clazz.getGenericSuperclass();
         if (genericSuperclass instanceof ParameterizedType) {
