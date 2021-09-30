@@ -36,7 +36,7 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
     }
 
     @Override
-    public StoreResponse store(String groupName, String extension, InputStream is) throws IOException {
+    public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
         String[] uploadResults;
         StorageClient storageClient;
         storageClient = getTrackerClient();
@@ -74,6 +74,7 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
         return trackerServer;
     }
 
+    @Override
     public String getServerUrl() {
         try {
             return "http://" + getTrackerServer().getInetSocketAddress().getHostString() + ":" + ClientGlobal.getG_tracker_http_port() + "/";

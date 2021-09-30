@@ -1,6 +1,5 @@
 package com.rick.fileupload.impl.local;
 
-import com.rick.common.util.IdGenerator;
 import com.rick.fileupload.core.AbstractInputStreamStore;
 import com.rick.fileupload.core.model.StoreResponse;
 import com.rick.fileupload.impl.local.property.LocalProperties;
@@ -23,8 +22,8 @@ public class LocalInputStreamStore extends AbstractInputStreamStore {
     private final LocalProperties localProperties;
 
     @Override
-    public StoreResponse store(String groupName, String extension, InputStream is) throws IOException {
-        String storeName = IdGenerator.getSequenceId() + "." + extension;
+    public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
+        String storeFullName = storeName + "." + extension;
 
         String storePath = getGroupNamePath(groupName);
 
@@ -33,8 +32,8 @@ public class LocalInputStreamStore extends AbstractInputStreamStore {
             storePathFolder.mkdirs();
         }
 
-        IOUtils.copy(is, new FileOutputStream(new File(storePath, storeName)));
-        return new StoreResponse(groupName, storeName,storePath + File.separator + storeName , getURL(groupName, storeName));
+        IOUtils.copy(is, new FileOutputStream(new File(storePath, storeFullName)));
+        return new StoreResponse(groupName, storeFullName,storePath + File.separator + storeFullName , getURL(groupName, storeFullName));
     }
 
     @Override

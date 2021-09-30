@@ -1,5 +1,7 @@
 package com.rick.fileupload.core;
 
+import com.rick.common.util.IdGenerator;
+import com.rick.fileupload.core.model.StoreResponse;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,10 +28,19 @@ public abstract class AbstractInputStreamStore implements InputStreamStore {
     }
 
     @Override
+    public StoreResponse store(String groupName, String extension, InputStream is) throws IOException {
+        return store(groupName, String.valueOf(IdGenerator.getSequenceId()), extension, is);
+    }
+
+    @Override
     public String getURL(String groupName, String path) {
         return getServerUrl() + groupName + "/" + path;
     }
 
+    /**
+     * 根访问地址
+     * @return
+     */
     protected abstract String getServerUrl();
 
 }

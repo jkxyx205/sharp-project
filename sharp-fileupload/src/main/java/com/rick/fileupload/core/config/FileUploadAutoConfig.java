@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -94,8 +95,8 @@ public class FileUploadAutoConfig {
 
     static class OSSConfig {
 
-//        @Bean
-//        @Primary
+        @Bean
+        @Primary
         public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
             OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
             return new OSSInputStreamStore(ossClient, ossProperties);

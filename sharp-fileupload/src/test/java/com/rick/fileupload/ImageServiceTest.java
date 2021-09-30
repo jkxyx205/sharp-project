@@ -43,6 +43,13 @@ public class ImageServiceTest {
 
     @Test
     @Order(1)
+    public void testCreateImage2() throws IOException {
+        String image = imageService.createImage("张三", "header", "Rick");
+        System.out.println(image);
+    }
+
+    @Test
+    @Order(1)
     public void testCropPic() throws IOException {
         File file = new File("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg");
         FileMeta fileMeta = FileMetaUtils.parse(file);

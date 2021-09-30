@@ -11,14 +11,18 @@ import java.io.InputStream;
  */
 public interface InputStreamStore {
 
+    StoreResponse store(String groupName, String extension, InputStream is) throws IOException;
+
     /**
+     *
      * @param groupName
+     * @param storeName 磁盘存储的文件名
      * @param extension
      * @param is
-     * @return 存储地址
+     * @return
      * @throws IOException
      */
-    StoreResponse store(String groupName, String extension, InputStream is) throws IOException;
+    StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException;
 
     /**
      * 删除文件

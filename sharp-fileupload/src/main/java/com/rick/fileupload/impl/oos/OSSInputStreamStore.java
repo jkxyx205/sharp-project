@@ -2,8 +2,7 @@ package com.rick.fileupload.impl.oos;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.OSSObject;
-import com.rick.common.util.IdGenerator;
-import com.rick.fileupload.core.InputStreamStore;
+import com.rick.fileupload.core.AbstractInputStreamStore;
 import com.rick.fileupload.core.model.StoreResponse;
 import com.rick.fileupload.impl.oos.property.OSSProperties;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +16,14 @@ import java.io.InputStream;
  * @createdAt 2021-09-30 22:23:00
  */
 @RequiredArgsConstructor
-public class OSSInputStreamStore implements InputStreamStore {
+public class OSSInputStreamStore extends AbstractInputStreamStore {
 
     private final OSS ossClient;
 
     private final OSSProperties ossProperties;
 
     @Override
-    public StoreResponse store(String groupName, String extension, InputStream is) throws IOException {
-        String storeName = IdGenerator.getSequenceId() + "." + extension;
+    public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
         ossClient.putObject(ossProperties.getBucketName(),
                 groupName + "/" +  storeName,
                 is);
@@ -38,9 +36,10 @@ public class OSSInputStreamStore implements InputStreamStore {
         ossClient.deleteObject(ossProperties.getBucketName(), getOssPath(groupName, path));
     }
 
+
     @Override
-    public String getURL(String groupName, String path) {
-        return "https://" + ossProperties.getBucketName() + "." +ossProperties.getEndpoint()+ "/" + getOssPath(groupName, path);
+    protected String getServerUrl() {
+        return "https://" + ossProperties.getBucketName() + "." + ossProperties.getEndpoint() + "/";
     }
 
     @Override

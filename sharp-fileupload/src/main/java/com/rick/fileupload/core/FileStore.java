@@ -93,6 +93,11 @@ public class FileStore implements InputStreamStore {
     }
 
     @Override
+    public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
+        return inputStreamStore.store(groupName, storeName, extension, is);
+    }
+
+    @Override
     public void delete(String groupName, String path) throws IOException {
         inputStreamStore.delete(groupName, path);
     }

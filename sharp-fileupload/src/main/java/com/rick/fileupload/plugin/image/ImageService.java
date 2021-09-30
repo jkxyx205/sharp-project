@@ -1,5 +1,6 @@
 package com.rick.fileupload.plugin.image;
 
+import com.rick.common.util.IdGenerator;
 import com.rick.fileupload.core.Constants;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.core.exception.NotImageTypeException;
@@ -19,11 +20,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.Executors;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -39,11 +36,6 @@ import java.util.concurrent.Executors;
 public class ImageService {
 
     private final InputStreamStore inputStreamStore;
-
-    /**
-     * 应用内存
-     */
-    private Map<String, String> cache = new HashMap<>();
 
     /**
      * 图片查看
@@ -154,9 +146,13 @@ public class ImageService {
     }
 
     public String createImage(String text, String groupName) throws IOException {
+        return createImage(text, groupName, String.valueOf(IdGenerator.getSequenceId()));
+    }
+
+    public String createImage(String text, String groupName, String storeName) throws IOException {
         byte[] content = NameImageCreator.generateImg(text);
 
-        StoreResponse store = inputStreamStore.store(groupName, "png", new ByteArrayInputStream(content));
+        StoreResponse store = inputStreamStore.store(groupName, storeName, "png", new ByteArrayInputStream(content));
         return inputStreamStore.getURL(groupName, store.getPath());
     }
 
@@ -302,25 +298,5 @@ public class ImageService {
         }
 
         return false;
-    }
-
-    /**
-     * 加入缓存
-     * @param builder
-     * @param urlPath
-     * @param ext
-     */
-    private void makeFileCache(Thumbnails.Builder<BufferedImage> builder, String urlPath, String ext) {
-        // TODO 添加Redis缓存
-        //生产缓存文件
-        Executors.newSingleThreadExecutor().submit(() -> {
-            String cacheName = System.currentTimeMillis() + UUID.randomUUID().toString() + "." + ext;
-            try {
-                builder.toFile(new File(Constants.CACHE, cacheName));
-                cache.put(urlPath, cacheName);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
     }
 }
