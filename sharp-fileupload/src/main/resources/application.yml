@@ -12,3 +12,8 @@ fileupload:
   local:
     server-url: http://localhost:7892/ # 映射到tmp目录
     root-path: /Users/rick/jkxyx205/tmp/fileupload
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKeyId: xxx
+    accessKeySecret: xxx
+    bucketName: sharp-fileupload

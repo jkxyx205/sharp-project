@@ -1,14 +1,17 @@
 package com.rick.fileupload.core.config;
 
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.service.SharpService;
 import com.rick.fileupload.client.DocumentDAO;
 import com.rick.fileupload.client.DocumentServiceImpl;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.InputStreamStore;
-import com.rick.fileupload.core.property.FileUploadProperty;
-import com.rick.fileupload.core.property.LocalProperties;
-import com.rick.fileupload.impl.local.InputStreamStoreImpl;
+import com.rick.fileupload.impl.local.LocalInputStreamStore;
+import com.rick.fileupload.impl.local.property.LocalProperties;
+import com.rick.fileupload.impl.oos.OSSInputStreamStore;
+import com.rick.fileupload.impl.oos.property.OSSProperties;
 import com.rick.fileupload.plugin.image.ImageService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,7 +28,7 @@ import java.lang.reflect.Field;
  * @createdAt 2021-09-29 14:06:00
  */
 @Configuration
-@EnableConfigurationProperties({LocalProperties.class, FileUploadProperty.class})
+@EnableConfigurationProperties({LocalProperties.class, OSSProperties.class})
 public class FileUploadAutoConfig {
 
     @Bean
@@ -47,7 +50,7 @@ public class FileUploadAutoConfig {
     @Bean
     @ConditionalOnMissingBean
     public InputStreamStore inputStreamStore(LocalProperties localProperties) {
-        return new InputStreamStoreImpl(localProperties);
+        return new LocalInputStreamStore(localProperties);
     }
 
     @Bean
@@ -61,7 +64,6 @@ public class FileUploadAutoConfig {
     }
 
     @Bean
-//    @ConditionalOnExpression("#{${fileupload.persist} == true}")
     public DocumentServiceImpl documentService(SharpService sharpService, FileStore fileStore) {
         DocumentDAO documentDAO = new DocumentDAO();
         Field[] allFields = ReflectUtils.getAllFields(DocumentDAO.class);
@@ -88,6 +90,16 @@ public class FileUploadAutoConfig {
 //        public InputStreamStore fastDFSUploaderHandler() throws IOException, MyException {
 //            return new FastDFSInputStreamStore("fdfs_client.properties");
 //        }
+    }
+
+    static class OSSConfig {
+
+//        @Bean
+//        @Primary
+        public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
+            OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
+            return new OSSInputStreamStore(ossClient, ossProperties);
+        }
     }
 
 

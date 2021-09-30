@@ -3,6 +3,7 @@ package com.rick.fileupload.impl.local;
 
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.core.model.StoreResponse;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -10,8 +11,10 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Rick
@@ -19,7 +22,7 @@ import java.io.IOException;
  */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class InputStreamStoreImplTest {
+public class OSSInputStreamStoreTest {
 
     @Autowired
     private InputStreamStore inputStreamStore;
@@ -41,12 +44,20 @@ public class InputStreamStoreImplTest {
     @Test
     @Order(2)
     public void getURL(){
-        String url = inputStreamStore.getURL("g1",path);
+        String url = inputStreamStore.getURL("g1", path);
         System.out.println(url);
     }
 
     @Test
     @Order(3)
+    public void getInputStream() throws IOException {
+        InputStream is = inputStreamStore.getInputStream("g1", path);
+        FileUtils.copyInputStreamToFile(is, new File("/Users/rick/jkxyx205/tmp/fileupload/download/1.png"));
+        is.close();
+    }
+
+    @Test
+    @Order(4)
     public void testPropertyDelete() throws IOException {
         inputStreamStore.delete("g1", path);
     }

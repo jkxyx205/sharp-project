@@ -45,6 +45,10 @@ public class FileMeta {
         return this.getName() + (StringUtils.isEmpty(this.getExtension()) ? "" : "." + this.getExtension());
     }
 
+    public String getFullPath() {
+        return this.getGroupName() + "/" + getPath();
+    }
+
     /**
      * 设置完整名称
      * @param fullName

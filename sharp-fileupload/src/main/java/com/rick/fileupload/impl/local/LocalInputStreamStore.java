@@ -3,7 +3,7 @@ package com.rick.fileupload.impl.local;
 import com.rick.common.util.IdGenerator;
 import com.rick.fileupload.core.AbstractInputStreamStore;
 import com.rick.fileupload.core.model.StoreResponse;
-import com.rick.fileupload.core.property.LocalProperties;
+import com.rick.fileupload.impl.local.property.LocalProperties;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -18,7 +18,7 @@ import java.io.InputStream;
  * @createdAt 2021-09-29 13:54:00
  */
 @RequiredArgsConstructor
-public class InputStreamStoreImpl extends AbstractInputStreamStore {
+public class LocalInputStreamStore extends AbstractInputStreamStore {
 
     private final LocalProperties localProperties;
 

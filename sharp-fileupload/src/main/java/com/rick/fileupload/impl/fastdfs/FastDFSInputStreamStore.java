@@ -51,6 +51,7 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
         }
     }
 
+    @Override
     public void delete(String groupName, String path) throws IOException {
         //删除文件
         StorageClient storageClient = getTrackerClient();

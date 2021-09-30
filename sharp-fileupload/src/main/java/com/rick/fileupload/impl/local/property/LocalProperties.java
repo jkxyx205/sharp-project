@@ -1,4 +1,4 @@
-package com.rick.fileupload.core.property;
+package com.rick.fileupload.impl.local.property;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

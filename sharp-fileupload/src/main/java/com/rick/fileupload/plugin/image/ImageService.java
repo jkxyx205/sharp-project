@@ -52,6 +52,7 @@ public class ImageService {
      * @param imageParam
      */
     public void preview(FileMeta fileMeta, ImageParam imageParam, OutputStream os) throws IOException {
+        // 添加缓存 fileMeta.getFullPath() + imageParam参数降序排列做key
         if (Objects.nonNull(imageParam.getF())) {
             fileMeta.setExtension(imageParam.getF());
         }
