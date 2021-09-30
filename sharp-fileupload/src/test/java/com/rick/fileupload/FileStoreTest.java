@@ -1,10 +1,10 @@
-package com.rick.fileupload.impl.local;
+package com.rick.fileupload;
 
 
-import com.rick.fileupload.client.Document;
-import com.rick.fileupload.client.DocumentService;
+import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileMetaUtils;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -21,39 +21,16 @@ import java.io.IOException;
  */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class DocumentServiceTest {
+public class FileStoreTest {
 
     @Autowired
-    private DocumentService documentService;
-
-    private static long id;
+    private FileStore fileStore;
 
     @Test
     @Order(1)
     public void testStore() throws IOException {
         File file = new File("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg");
         FileMeta fileMeta = FileMetaUtils.parse(file);
-        Document store = documentService.store(fileMeta, "document");
-        id = store.getId();
+        fileStore.storeFileMeta(Lists.newArrayList(fileMeta), "upload").get(0);
     }
-
-    @Test
-    @Order(2)
-    public void testRename() {
-        documentService.rename(id, "Test");
-    }
-
-    @Test
-    @Order(3)
-    public void testGetUrl() {
-        String url = documentService.getURL(id);
-        System.out.println(url);
-    }
-
-    @Test
-    @Order(Order.DEFAULT)
-    public void testDelete() {
-        documentService.delete(id);
-    }
-
 }

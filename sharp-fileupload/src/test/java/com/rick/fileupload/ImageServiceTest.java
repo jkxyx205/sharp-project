@@ -1,4 +1,4 @@
-package com.rick.fileupload.impl.local;
+package com.rick.fileupload;
 
 
 import com.rick.fileupload.core.FileStore;

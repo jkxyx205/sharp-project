@@ -1,4 +1,4 @@
-package com.rick.fileupload.impl.local;
+package com.rick.fileupload;
 
 
 import com.rick.fileupload.core.InputStreamStore;
@@ -22,7 +22,7 @@ import java.io.InputStream;
  */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class OSSInputStreamStoreTest {
+public class LocalInputStreamStoreTest {
 
     @Autowired
     private InputStreamStore inputStreamStore;
@@ -44,7 +44,7 @@ public class OSSInputStreamStoreTest {
     @Test
     @Order(2)
     public void getURL(){
-        String url = inputStreamStore.getURL("g1", path);
+        String url = inputStreamStore.getURL("g1",path);
         System.out.println(url);
     }
 
@@ -57,7 +57,7 @@ public class OSSInputStreamStoreTest {
     }
 
     @Test
-    @Order(4)
+    @Order(Order.DEFAULT)
     public void testPropertyDelete() throws IOException {
         inputStreamStore.delete("g1", path);
     }
