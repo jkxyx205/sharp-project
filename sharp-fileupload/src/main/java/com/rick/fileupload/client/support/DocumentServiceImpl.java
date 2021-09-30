@@ -1,4 +1,4 @@
-package com.rick.fileupload.client;
+package com.rick.fileupload.client.support;
 
 import com.google.common.collect.Lists;
 import com.rick.common.http.HttpServletResponseUtils;
@@ -8,6 +8,7 @@ import com.rick.common.util.ZipUtils;
 import com.rick.fileupload.core.Constants;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.model.FileMeta;
+import com.rick.fileupload.core.support.FileUploadProperties;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -40,6 +41,8 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentDAO documentDAO;
 
     private final FileStore fileStore;
+
+    private final FileUploadProperties fileUploadProperties;
 
     @Override
     public Document store(FileMeta fileMeta, String groupName) throws IOException {
@@ -86,7 +89,7 @@ public class DocumentServiceImpl implements DocumentService {
             }
             document.setName("【批量下载】"+ subDocuments.get(0).getFullName() + "等" + ids.length + "个文件");
 
-            Path path = Files.createTempDirectory(Paths.get(Constants.TMP),null);
+            Path path = Files.createTempDirectory(Paths.get(fileUploadProperties.getTmp()),null);
 
             File _home = path.toFile();
 
@@ -108,14 +111,10 @@ public class DocumentServiceImpl implements DocumentService {
             zipOut.close();
 
             FileCopyUtils.copy(new FileInputStream(zipFile), os);
-
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(_home)));
-//            FileUtils.forceDeleteOnExit(_home);
+            FileUtils.deleteQuietly(_home);
         } else { //单文件下载
             os = HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, document.getFullName());
-//            FileCopyUtils.copy(getFileInputStream(document.getGroupName(), document.getPath()), os);
             FileCopyUtils.copy(getFileInputStream(document.getGroupName(), document.getPath()),  os);
-//            FileCopyUtils.copy(getFileByteArray(document), os);
         }
 
         os.close();

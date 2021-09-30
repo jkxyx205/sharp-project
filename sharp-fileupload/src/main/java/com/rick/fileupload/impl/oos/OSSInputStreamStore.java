@@ -33,7 +33,7 @@ public class OSSInputStreamStore extends AbstractInputStreamStore {
 
     @Override
     public void delete(String groupName, String path) throws IOException {
-        ossClient.deleteObject(ossProperties.getBucketName(), getOssPath(groupName, path));
+        ossClient.deleteObject(ossProperties.getBucketName(), getFullPath(groupName, path));
     }
 
 
@@ -44,11 +44,9 @@ public class OSSInputStreamStore extends AbstractInputStreamStore {
 
     @Override
     public InputStream getInputStream(String groupName, String path) {
-        OSSObject ossObject = ossClient.getObject(ossProperties.getBucketName(), getOssPath(groupName, path));
+        OSSObject ossObject = ossClient.getObject(ossProperties.getBucketName(), getFullPath(groupName, path));
         return ossObject.getObjectContent();
     }
 
-    private String getOssPath(String groupName, String path) {
-        return groupName + "/" + path;
-    }
+
 }

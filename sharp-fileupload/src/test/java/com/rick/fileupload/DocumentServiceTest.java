@@ -1,8 +1,8 @@
 package com.rick.fileupload;
 
 
-import com.rick.fileupload.client.Document;
-import com.rick.fileupload.client.DocumentService;
+import com.rick.fileupload.client.support.Document;
+import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileMetaUtils;
 import org.junit.jupiter.api.MethodOrderer;

@@ -1,4 +1,4 @@
-package com.rick.fileupload.client;
+package com.rick.fileupload.client.support;
 
 import com.rick.fileupload.core.model.FileMeta;
 

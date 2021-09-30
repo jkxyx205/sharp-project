@@ -41,8 +41,6 @@ public class LocalInputStreamStore extends AbstractInputStreamStore {
         FileUtils.forceDelete(new File(getGroupNamePath(groupName) + File.separator + path));
     }
 
-
-
     private String getGroupNamePath(String groupName) {
         return localProperties.getRootPath() + File.separator + groupName;
     }

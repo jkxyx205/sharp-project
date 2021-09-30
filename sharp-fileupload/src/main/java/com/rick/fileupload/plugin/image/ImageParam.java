@@ -1,4 +1,4 @@
-package com.rick.fileupload.core.model;
+package com.rick.fileupload.plugin.image;
 
 import lombok.Data;
 import net.coobird.thumbnailator.geometry.Coordinate;

@@ -14,5 +14,4 @@ public class LocalProperties {
     private String serverUrl;
 
     private String rootPath;
-
 }

@@ -5,7 +5,6 @@ import com.rick.fileupload.core.Constants;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.core.exception.NotImageTypeException;
 import com.rick.fileupload.core.model.FileMeta;
-import com.rick.fileupload.core.model.ImageParam;
 import com.rick.fileupload.core.model.StoreResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

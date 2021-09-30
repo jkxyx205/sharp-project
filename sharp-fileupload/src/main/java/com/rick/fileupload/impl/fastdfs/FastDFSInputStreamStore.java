@@ -37,15 +37,11 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
 
     @Override
     public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
-        String[] uploadResults;
-        StorageClient storageClient;
-        storageClient = getTrackerClient();
+        log.warn("FastDFS 无法指定存储文件名：{}", storeName);
+        StorageClient storageClient = getTrackerClient();
         try {
-            uploadResults = storageClient.upload_file(groupName, IOUtils.toByteArray(is), extension, null);
-            if (uploadResults == null && storageClient != null) {
-                log.error("upload file fail, error code:" + storageClient.getErrorCode());
-            }
-            return new StoreResponse(uploadResults[0], uploadResults[1], null, getURL(uploadResults[0], uploadResults[1]));
+            String[] uploadResults = storageClient.upload_file(groupName, IOUtils.toByteArray(is), extension, null);
+            return new StoreResponse(uploadResults[0], uploadResults[1], getFullPath(groupName, uploadResults[1]) , getURL(uploadResults[0], uploadResults[1]));
         } catch (MyException e) {
             throw new IOException(e);
         }

@@ -37,6 +37,10 @@ public abstract class AbstractInputStreamStore implements InputStreamStore {
         return getServerUrl() + groupName + "/" + path;
     }
 
+    protected String getFullPath(String groupName, String path) {
+        return groupName + "/" + path;
+    }
+
     /**
      * 根访问地址
      * @return

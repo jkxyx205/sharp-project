@@ -1,10 +1,12 @@
-package com.rick.fileupload.client;
+package com.rick.fileupload.client.controller;
 
 import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
+import com.rick.fileupload.client.support.Document;
+import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
-import com.rick.fileupload.core.model.ImageParam;
+import com.rick.fileupload.plugin.image.ImageParam;
 import com.rick.fileupload.core.support.FileMetaUtils;
 import com.rick.fileupload.plugin.image.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
