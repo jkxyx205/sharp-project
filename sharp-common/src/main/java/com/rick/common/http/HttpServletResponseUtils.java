@@ -1,6 +1,7 @@
 package com.rick.common.http;
 
 
+import com.rick.common.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,32 +24,46 @@ public final class HttpServletResponseUtils {
 
     private static final String CHARSET_UTF_8 = StandardCharsets.UTF_8.name();
 
+    //判断是否是ie浏览器
+    private static String[] IEBrowserSignals = {"MSIE", "Trident", "Edge"};
+
+    private static final String ATTACHMENT = "attachment";
+
+    private static final String INLINE = "inline";
+
     private HttpServletResponseUtils() {
     }
 
-    public static OutputStream getOutputStream(HttpServletRequest request, HttpServletResponse response, String fileName) throws IOException {
-        OutputStream os;
-        String _fileName = fileName.replaceAll("[\\/:*?\"<>[|]]", "");
+    public static OutputStream getOutputStreamAsAttachment(HttpServletRequest request, HttpServletResponse response, String fileName) throws IOException {
+        return getOutputStream(request, response, fileName, ATTACHMENT);
+    }
+
+    public static OutputStream getOutputStreamAsView(HttpServletRequest request, HttpServletResponse response, String fileName) throws IOException {
+        return getOutputStream(request, response, fileName, INLINE);
+    }
+
+    public static OutputStream getOutputStream(HttpServletRequest request, HttpServletResponse response, String fileName, String type) throws IOException {
+        String _fileName = fileName.replaceAll("[/:*?\"<>[|]]", "");
 
         String browserType = request.getHeader("User-Agent").toLowerCase();
 
-        if (browserType.indexOf("firefox") > -1) { //FF
-            _fileName = "=?" + CHARSET_UTF_8 + "?B?" + (new String(Base64.encodeBase64(_fileName.getBytes(CHARSET_UTF_8)))) + "?=";
+        if(browserType.indexOf("firefox") > -1) { //FF
+            _fileName = "=?"+ StandardCharsets.UTF_8+"?B?"+(new String(Base64.encodeBase64(_fileName.getBytes(StandardCharsets.UTF_8))))+"?=";
         } else {
-            if (fileName.matches(".*[^\\x00-\\xff]+.*")) {
-                if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > -1) { // IE
-                    _fileName = java.net.URLEncoder.encode(_fileName, CHARSET_UTF_8);
-                } else { //其他
-                    _fileName = new String(_fileName.getBytes(CHARSET_UTF_8), "ISO-8859-1");
+            if(fileName.matches(".*[^\\x00-\\xff]+.*")) { // 是否包含中文
+                if(isMSBrowser(request)) { //IE Edge
+                    _fileName = java.net.URLEncoder.encode(_fileName,StandardCharsets.UTF_8.name());
+                } else  { //其他
+                    _fileName = new String(_fileName.getBytes(StandardCharsets.UTF_8), "ISO-8859-1");
                 }
             }
         }
 
-        response.reset();// 清空输出流   
-        response.setCharacterEncoding(CHARSET_UTF_8);
-        response.setHeader("Content-disposition", "attachment; filename=" + _fileName + "");// 设定输出文件头
-        response.setContentType("application/vnd.ms-excel;charset=" + CHARSET_UTF_8 + "");// 定义输出类型
-        os = response.getOutputStream(); // 取得输出流   
+        response.reset();// 清空输出流
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setHeader("Content-disposition", ""+type+"; filename="+_fileName+"");// 设定输出文件头
+        response.setContentType(StringUtils.getContentType(_fileName));// 定义输出类型
+        OutputStream os = response.getOutputStream(); // 取得输出流Files
         return os;
     }
 
@@ -61,5 +76,14 @@ public final class HttpServletResponseUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean isMSBrowser(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        for (String signal : IEBrowserSignals) {
+            if (userAgent.contains(signal))
+                return true;
+        }
+        return false;
     }
 }
