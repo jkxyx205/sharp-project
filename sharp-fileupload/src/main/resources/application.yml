@@ -4,10 +4,11 @@ spring:
     url: jdbc:mysql://localhost:3306/fastdfs?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2b8
     username: root
     password: jkxyx205
-
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 fileupload:
-  persist: true
   local:
     server-url: http://localhost:7892/ # 映射到tmp目录
-    root-path: /Users/rick/jkxyx205/tmp
-    group-name: fileupload
+    root-path: /Users/rick/jkxyx205/tmp/fileupload

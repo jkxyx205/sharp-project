@@ -1,4 +1,4 @@
-package com.rick.fileupload.persist;
+package com.rick.fileupload.client;
 
 import com.rick.db.plugin.dao.BaseDAOImpl;
 

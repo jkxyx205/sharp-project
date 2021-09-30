@@ -15,6 +15,4 @@ public class LocalProperties {
 
     private String rootPath;
 
-    private String groupName;
-
 }

@@ -1,4 +1,4 @@
-package com.rick.fileupload.image;
+package com.rick.fileupload.plugin.image;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;

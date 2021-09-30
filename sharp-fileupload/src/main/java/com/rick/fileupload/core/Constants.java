@@ -31,7 +31,7 @@ public abstract class Constants {
     public static final String CACHE_URL = "http://207.148.100.137:81/";
 
     /**
-     * 图片自动压缩的阀值
+     * 图片自动压缩的阀值 300KB
      */
-    public static double COMPRESS_THRESHOLD = 300 * 1024;
+    public static double COMPRESS_THRESHOLD = 500 * 1024;
 }

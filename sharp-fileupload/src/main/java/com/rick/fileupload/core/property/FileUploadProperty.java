@@ -11,6 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class FileUploadProperty {
 
-    private boolean persist;
+//    private boolean persist;
 
 }

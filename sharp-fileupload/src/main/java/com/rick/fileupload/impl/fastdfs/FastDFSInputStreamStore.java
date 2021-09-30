@@ -1,7 +1,7 @@
-package com.rick.fileupload.fastdfs;
+package com.rick.fileupload.impl.fastdfs;
 
-import com.rick.common.util.StringUtils;
 import com.rick.fileupload.core.AbstractInputStreamStore;
+import com.rick.fileupload.core.model.StoreResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.csource.common.MyException;
@@ -36,22 +36,21 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
     }
 
     @Override
-    public String[] store(InputStream is, String extension) throws IOException {
+    public StoreResponse store(String groupName, String extension, InputStream is) throws IOException {
         String[] uploadResults;
         StorageClient storageClient;
         storageClient = getTrackerClient();
         try {
-            uploadResults = storageClient.upload_file(IOUtils.toByteArray(is), extension, null);
+            uploadResults = storageClient.upload_file(groupName, IOUtils.toByteArray(is), extension, null);
             if (uploadResults == null && storageClient != null) {
                 log.error("upload file fail, error code:" + storageClient.getErrorCode());
             }
-            return uploadResults;
+            return new StoreResponse(uploadResults[0], uploadResults[1], null, getURL(uploadResults[0], uploadResults[1]));
         } catch (MyException e) {
             throw new IOException(e);
         }
     }
 
-    @Override
     public void delete(String groupName, String path) throws IOException {
         //删除文件
         StorageClient storageClient = getTrackerClient();
@@ -74,7 +73,6 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
         return trackerServer;
     }
 
-    @Override
     public String getServerUrl() {
         try {
             return "http://" + getTrackerServer().getInetSocketAddress().getHostString() + ":" + ClientGlobal.getG_tracker_http_port() + "/";

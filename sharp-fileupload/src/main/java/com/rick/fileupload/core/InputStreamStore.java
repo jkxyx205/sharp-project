@@ -1,5 +1,7 @@
 package com.rick.fileupload.core;
 
+import com.rick.fileupload.core.model.StoreResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,11 +12,13 @@ import java.io.InputStream;
 public interface InputStreamStore {
 
     /**
+     * @param groupName
+     * @param extension
      * @param is
-     * @param extension 文件扩展名
-     * @return 返回 文件相对路径 groupName & path
+     * @return 存储地址
+     * @throws IOException
      */
-    String[] store(InputStream is, String extension) throws IOException;
+    StoreResponse store(String groupName, String extension, InputStream is) throws IOException;
 
     /**
      * 删除文件

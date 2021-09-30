@@ -67,11 +67,6 @@ public class ImageParam {
      */
     private Integer rh;
 
-    /**
-     * 参数是否为空
-     */
-    private boolean empty = false;
-
     private Position position;
 
     public Position getPosition() {
@@ -79,6 +74,16 @@ public class ImageParam {
             position = new Coordinate(x, y);
         }
         return position;
+    }
+
+    public boolean isEmpty() {
+        return p == null && w == null && h == null && r == null && x == null && y == null && f == null
+                && q == null && rw == null && rh == null && position == null;
+    }
+
+    public boolean isSource() {
+        return p != null && w == null && h == null && r == null && x == null && y == null && f == null
+                && q == null && rw == null && rh == null && position == null;
     }
 
 }

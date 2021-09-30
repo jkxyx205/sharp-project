@@ -1,6 +1,5 @@
 package com.rick.fileupload.core;
 
-import com.rick.common.util.StringUtils;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,6 +30,6 @@ public abstract class AbstractInputStreamStore implements InputStreamStore {
         return getServerUrl() + groupName + "/" + path;
     }
 
-    public abstract String getServerUrl();
+    protected abstract String getServerUrl();
 
 }

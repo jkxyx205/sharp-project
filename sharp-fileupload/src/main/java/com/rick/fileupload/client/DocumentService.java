@@ -1,7 +1,6 @@
-package com.rick.fileupload.core;
+package com.rick.fileupload.client;
 
-import com.rick.fileupload.persist.Document;
-import org.springframework.web.multipart.MultipartFile;
+import com.rick.fileupload.core.model.FileMeta;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,24 +8,21 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * All rights Reserved, Designed By www.xhope.top
- *
- * @version V1.0
- * @Description: 文件上传器
- * @author: Rick.Xu
- * @date: 1/7/20 6:33 PM
- * @Copyright: 2020 www.yodean.com. All rights reserved.
+ * @author Rick
+ * @createdAt 2021-09-29 19:18:00
  */
-public interface FileUploader {
+
+public interface DocumentService {
 
     /**
-     * 文件上传
-     * @param multipartFileList
+     * @param fileMeta data数据
+     * @param groupName
      * @return
+     * @throws IOException
      */
-    List<Document> upload(List<MultipartFile> multipartFileList, String groupName, String path);
+    Document store(FileMeta fileMeta, String groupName) throws IOException;
 
-    List<Document> upload2(List<Document> documents, String groupName, String path);
+    List<Document> store(List<FileMeta> fileMetaList, String groupNme) throws IOException;
 
     /**
      * 文件下载
@@ -64,7 +60,7 @@ public interface FileUploader {
      * @param id
      * @throws IOException
      */
-    void view(HttpServletRequest request, HttpServletResponse response, long id) throws IOException;
+    void preview(HttpServletRequest request, HttpServletResponse response, long id) throws IOException;
 
     /**
      * 获取文件网络地址
@@ -72,4 +68,5 @@ public interface FileUploader {
      * @return
      */
     String getURL(long id);
+
 }
