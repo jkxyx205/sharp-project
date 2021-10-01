@@ -45,14 +45,14 @@ public class DocumentServiceTest {
 
     @Test
     @Order(3)
-    public void testGetUrl() {
+    public void testGetUrl() throws IOException {
         String url = documentService.getURL(id);
         System.out.println(url);
     }
 
     @Test
     @Order(Order.DEFAULT)
-    public void testDelete() {
+    public void testDelete() throws IOException {
         documentService.delete(id);
     }
 

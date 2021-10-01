@@ -22,7 +22,7 @@ import java.io.InputStream;
  */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class LocalInputStreamStoreTest {
+public class InputStreamStoreTest {
 
     @Autowired
     private InputStreamStore inputStreamStore;
@@ -32,26 +32,26 @@ public class LocalInputStreamStoreTest {
     @Test
     @Order(1)
     public void testPropertyStore() throws IOException {
-        StoreResponse response = inputStreamStore.store("g1", "jpeg",
+        StoreResponse response = inputStreamStore.store("group", "jpeg",
                 new FileInputStream("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg"));
         System.out.println(response.getGroupName());
         System.out.println(response.getPath());
         System.out.println(response.getFullPath());
         System.out.println(response.getUrl());
-        path = response.getPath();;
+        path = response.getPath();
     }
 
     @Test
     @Order(2)
-    public void getURL(){
-        String url = inputStreamStore.getURL("g1",path);
+    public void getURL() {
+        String url = inputStreamStore.getURL("group", path);
         System.out.println(url);
     }
 
     @Test
     @Order(3)
     public void getInputStream() throws IOException {
-        InputStream is = inputStreamStore.getInputStream("g1", path);
+        InputStream is = inputStreamStore.getInputStream("group", path);
         FileUtils.copyInputStreamToFile(is, new File("/Users/rick/jkxyx205/tmp/fileupload/download/1.png"));
         is.close();
     }
@@ -59,6 +59,6 @@ public class LocalInputStreamStoreTest {
     @Test
     @Order(Order.DEFAULT)
     public void testPropertyDelete() throws IOException {
-        inputStreamStore.delete("g1", path);
+        inputStreamStore.delete("group", path);
     }
 }

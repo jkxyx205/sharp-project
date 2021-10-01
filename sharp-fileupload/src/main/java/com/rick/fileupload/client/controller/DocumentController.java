@@ -1,12 +1,14 @@
 package com.rick.fileupload.client.controller;
 
 
+import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.fileupload.client.support.Document;
 import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileMetaUtils;
+import com.rick.fileupload.plugin.image.ImageParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +34,6 @@ public class DocumentController {
     /**
      * 文件详情
      * @return
-     * @throws IOException
      */
     @GetMapping(value = "/{id}")
     public Result<Document> documentInfo(@PathVariable Long id) {
@@ -55,7 +56,7 @@ public class DocumentController {
      * @return
      */
     @PostMapping("/upload2")
-    public Result<List<?>> fileUpload2(List<MultipartFile> fileList) throws IOException {
+    public Result<List<?>> fileUpload2(@RequestParam(UPLOAD_NAME) List<MultipartFile> fileList) throws IOException {
         return ResultUtils.success(documentService.store(FileMetaUtils.parse(fileList), "upload"));
     }
 
@@ -109,8 +110,9 @@ public class DocumentController {
      * @throws IOException
      */
     @GetMapping(value = "/preview2/{id}")
-    public void view2(HttpServletRequest request, HttpServletResponse response, @PathVariable Long id) throws IOException {
-        documentService.preview(request, response, id);
+    public void view2(HttpServletRequest request, HttpServletResponse response, @PathVariable Long id, ImageParam imageParam) throws IOException {
+        Document document = documentService.findById(id);
+        documentService.preview(id, imageParam, HttpServletResponseUtils.getOutputStreamAsView(request, response, document.getFullName()));
     }
 
     /**
@@ -128,7 +130,6 @@ public class DocumentController {
     /**
      * 删除文件
      * @return
-     * @throws IOException
      */
     @DeleteMapping(value = "/{id}")
     public Result deleteDocument(@PathVariable Long id) {

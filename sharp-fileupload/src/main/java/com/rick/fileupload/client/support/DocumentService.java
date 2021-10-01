@@ -1,10 +1,12 @@
 package com.rick.fileupload.client.support;
 
 import com.rick.fileupload.core.model.FileMeta;
+import com.rick.fileupload.plugin.image.ImageParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -55,12 +57,9 @@ public interface DocumentService {
 
     /**
      * 预览文件
-     * @param request
-     * @param response
-     * @param id
      * @throws IOException
      */
-    void preview(HttpServletRequest request, HttpServletResponse response, long id) throws IOException;
+    void preview(long id, ImageParam imageParam, OutputStream os) throws IOException;
 
     /**
      * 获取文件网络地址

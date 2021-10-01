@@ -6,8 +6,8 @@ import com.rick.common.http.model.ResultUtils;
 import com.rick.fileupload.client.support.Document;
 import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
-import com.rick.fileupload.plugin.image.ImageParam;
 import com.rick.fileupload.core.support.FileMetaUtils;
+import com.rick.fileupload.plugin.image.ImageParam;
 import com.rick.fileupload.plugin.image.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +47,7 @@ public class ImageController {
     @GetMapping("/{id}")
     public void preview(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") Long id, ImageParam imageParam) throws IOException {
         Document document = documentService.findById(id);
-        imageService.preview(document, imageParam, HttpServletResponseUtils.getOutputStreamAsView(request, response, document.getFullName()));
+        imageService.write(document, imageParam, HttpServletResponseUtils.getOutputStreamAsView(request, response, document.getFullName()));
     }
 
     /**

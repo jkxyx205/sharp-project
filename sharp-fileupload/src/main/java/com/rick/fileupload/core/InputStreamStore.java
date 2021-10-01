@@ -17,7 +17,7 @@ public interface InputStreamStore {
      *
      * @param groupName
      * @param storeName 磁盘存储的文件名
-     * @param extension
+     * @param extension 扩展名
      * @param is
      * @return
      * @throws IOException
@@ -32,7 +32,29 @@ public interface InputStreamStore {
      */
     void delete(String groupName, String path) throws IOException;
 
+    /**
+     * 获取访问地址
+     * @param groupName
+     * @param path
+     * @return
+     */
     String getURL(String groupName, String path);
 
+    /**
+     * 获取文件流
+     * @param groupName
+     * @param path
+     * @return
+     * @throws IOException
+     */
     InputStream getInputStream(String groupName, String path) throws IOException;
+
+    /**
+     * 获取字节数据
+     * @param groupName
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    byte[] getByteArray(String groupName, String path) throws IOException;
 }

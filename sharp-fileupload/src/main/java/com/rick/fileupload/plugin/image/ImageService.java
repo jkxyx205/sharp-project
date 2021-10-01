@@ -21,6 +21,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.Objects;
 
+import static com.rick.common.util.StringUtils.isImageType;
+
 /**
  * All rights Reserved, Designed By www.xhope.top
  *
@@ -42,7 +44,7 @@ public class ImageService {
      * @param fileMeta
      * @param imageParam
      */
-    public void preview(FileMeta fileMeta, ImageParam imageParam, OutputStream os) throws IOException {
+    public void write(FileMeta fileMeta, ImageParam imageParam, OutputStream os) throws IOException {
         // 添加缓存 fileMeta.getFullPath() + imageParam参数降序排列做key
         if (Objects.nonNull(imageParam.getF())) {
             fileMeta.setExtension(imageParam.getF());
@@ -148,6 +150,14 @@ public class ImageService {
         return createImage(text, groupName, String.valueOf(IdGenerator.getSequenceId()));
     }
 
+    /**
+     * 获取名字头像
+     * @param text 张三
+     * @param groupName 存储
+     * @param storeName 存储的文件名，可能是用户的id
+     * @return
+     * @throws IOException
+     */
     public String createImage(String text, String groupName, String storeName) throws IOException {
         byte[] content = NameImageCreator.generateImg(text);
 
@@ -272,30 +282,4 @@ public class ImageService {
 
     }
 
-    private boolean isImageType(String extension, String contentType) {
-        if (isImageExtension(extension)) {
-            return true;
-        }
-
-        if (Objects.nonNull(contentType) || contentType.startsWith("image")) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * 判断是否是合法的文件类型
-     * @param extension
-     * @return
-     */
-    private boolean isImageExtension(String extension) {
-        for (String s : Constants.ALLOWED_FORMAT_TYPE) {
-            if (s.equalsIgnoreCase(extension)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

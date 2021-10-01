@@ -5,14 +5,12 @@ import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.util.DateConvertUtils;
 import com.rick.common.util.IdGenerator;
 import com.rick.common.util.ZipUtils;
-import com.rick.fileupload.core.Constants;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileUploadProperties;
+import com.rick.fileupload.plugin.image.ImageParam;
+import com.rick.fileupload.plugin.image.ImageService;
 import lombok.RequiredArgsConstructor;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +29,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
+import static com.rick.common.util.StringUtils.isImageType;
+
 /**
  * @author Rick
  * @createdAt 2021-09-29 18:15:00
@@ -43,6 +43,8 @@ public class DocumentServiceImpl implements DocumentService {
     private final FileStore fileStore;
 
     private final FileUploadProperties fileUploadProperties;
+
+    private final ImageService imageService;
 
     @Override
     public Document store(FileMeta fileMeta, String groupName) throws IOException {
@@ -114,7 +116,7 @@ public class DocumentServiceImpl implements DocumentService {
             FileUtils.deleteQuietly(_home);
         } else { //单文件下载
             os = HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, document.getFullName());
-            FileCopyUtils.copy(getFileInputStream(document.getGroupName(), document.getPath()),  os);
+            FileCopyUtils.copy(fileStore.getInputStream(document.getGroupName(), document.getPath()),  os);
         }
 
         os.close();
@@ -136,38 +138,30 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public Document findById(long id) {
-        return documentDAO.selectById(id).get();
+        Document document = documentDAO.selectById(id).get();
+        document.setUrl(getURL(id));
+        return document;
     }
 
     @Override
-    public void preview(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
+    public void preview(long id, ImageParam imageParam, OutputStream os) throws IOException {
         Document document = findById(id);
-
-        OutputStream os = HttpServletResponseUtils.getOutputStreamAsView(request, response, document.getFullName());
-        FileCopyUtils.copy(getFileInputStream(document.getGroupName(), document.getPath()),  os);
-        os.close();
+        if (isImageType(document.getExtension(), document.getContentType())) {
+            imageService.write(document, imageParam, os);
+        } else {
+            // TODO
+        }
     }
 
     @Override
     public String getURL(long id) {
-        Document document = findById(id);
+        Document document = documentDAO.selectById(id).get();
         return fileStore.getURL(document.getGroupName(), document.getPath());
-    }
-
-    private InputStream getFileInputStream(String groupName, String path) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-        Request req = new Request.Builder()
-                .url(fileStore.getURL(groupName, path))
-                .get()  //默认为GET请求，可以不写
-                .build();
-
-        final Call call = client.newCall(req);
-        return call.execute().body().byteStream();
     }
 
     private void downloadDocument2Folder(File folder, List<Document> subDocuments) throws IOException {
         for (Document subDocument :  subDocuments) {
-            FileCopyUtils.copy(getFileInputStream(subDocument.getGroupName(), subDocument.getPath()), new FileOutputStream(new File(folder, subDocument.getFullName())));
+            FileCopyUtils.copy(fileStore.getInputStream(subDocument.getGroupName(), subDocument.getPath()), new FileOutputStream(new File(folder, subDocument.getFullName())));
         }
     }
 

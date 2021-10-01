@@ -68,7 +68,8 @@ public class FileUploadAutoConfig {
     }
 
     @Bean
-    public DocumentServiceImpl documentService(SharpService sharpService, FileStore fileStore, FileUploadProperties fileUploadProperties) {
+    public DocumentServiceImpl documentService(SharpService sharpService, FileStore fileStore,
+                                               FileUploadProperties fileUploadProperties, ImageService imageService) {
         DocumentDAO documentDAO = new DocumentDAO();
         Field[] allFields = ReflectUtils.getAllFields(DocumentDAO.class);
         for (Field field : allFields) {
@@ -84,7 +85,7 @@ public class FileUploadAutoConfig {
             }
         }
 
-        return new DocumentServiceImpl(documentDAO, fileStore, fileUploadProperties);
+        return new DocumentServiceImpl(documentDAO, fileStore, fileUploadProperties, imageService);
     }
 
     @Configuration
@@ -97,10 +98,10 @@ public class FileUploadAutoConfig {
         }
     }
 
+    @Configuration
     static class OSSConfig {
-
-//        @Bean
-//        @Primary
+ /*       @Bean
+        @Primary*/
         public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
             OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
             return new OSSInputStreamStore(ossClient, ossProperties);

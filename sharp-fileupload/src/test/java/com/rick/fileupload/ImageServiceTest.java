@@ -2,10 +2,9 @@ package com.rick.fileupload;
 
 
 import com.rick.fileupload.core.FileStore;
-import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.core.model.FileMeta;
-import com.rick.fileupload.core.model.StoreResponse;
 import com.rick.fileupload.core.support.FileMetaUtils;
+import com.rick.fileupload.plugin.image.ImageParam;
 import com.rick.fileupload.plugin.image.ImageService;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -37,15 +35,15 @@ public class ImageServiceTest {
     @Test
     @Order(1)
     public void testCreateImage() throws IOException {
-        String image = imageService.createImage("张三", "header");
-        System.out.println(image);
+        String url = imageService.createImage("张三", "header");
+        System.out.println(url);
     }
 
     @Test
     @Order(1)
     public void testCreateImage2() throws IOException {
-        String image = imageService.createImage("张三", "header", "Rick");
-        System.out.println(image);
+        String url = imageService.createImage("张三", "header", "Rick");
+        System.out.println(url);
     }
 
     @Test
@@ -53,8 +51,13 @@ public class ImageServiceTest {
     public void testCropPic() throws IOException {
         File file = new File("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg");
         FileMeta fileMeta = FileMetaUtils.parse(file);
+
         // 裁剪9：5
-        FileMeta cropPicFileMeta = imageService.cropPic(fileMeta, 9, 5);
+        ImageParam imageParam = new  ImageParam();
+        imageParam.setRw(9);
+        imageParam.setRh(5);
+
+        FileMeta cropPicFileMeta = imageService.cropPic(fileMeta, imageParam);
         // 将裁剪的存储到磁盘
         List<? extends FileMeta> crop = fileStore.storeFileMeta(Arrays.asList(cropPicFileMeta), "crop");
         System.out.println(crop.get(0).getUrl());

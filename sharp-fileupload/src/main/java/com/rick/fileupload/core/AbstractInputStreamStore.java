@@ -5,6 +5,7 @@ import com.rick.fileupload.core.model.StoreResponse;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,11 @@ public abstract class AbstractInputStreamStore implements InputStreamStore {
 
         final Call call = client.newCall(req);
         return call.execute().body().byteStream();
+    }
+
+    @Override
+    public byte[] getByteArray(String groupName, String path) throws IOException {
+        return IOUtils.toByteArray(getInputStream(groupName, path));
     }
 
     @Override

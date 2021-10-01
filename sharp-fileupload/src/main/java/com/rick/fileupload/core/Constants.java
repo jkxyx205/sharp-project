@@ -11,8 +11,6 @@ package com.rick.fileupload.core;
  */
 public abstract class Constants {
 
-    public static final String[] ALLOWED_FORMAT_TYPE = {"jpeg", "jpg", "png", "gif", "webp"};
-
     /**
      * 图片自动压缩的阀值 300KB
      */

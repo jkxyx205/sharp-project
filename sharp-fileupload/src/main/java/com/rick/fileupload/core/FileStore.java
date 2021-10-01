@@ -112,5 +112,9 @@ public class FileStore implements InputStreamStore {
         return inputStreamStore.getInputStream(groupName, path);
     }
 
+    @Override
+    public byte[] getByteArray(String groupName, String path) throws IOException {
+        return inputStreamStore.getByteArray(groupName, path);
+    }
 
 }

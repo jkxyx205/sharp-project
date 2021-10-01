@@ -59,5 +59,4 @@ public class FileMeta {
         setName(fileName);
         setExtension(fileExt);
     }
-
 }
