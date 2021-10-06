@@ -1,9 +1,14 @@
 package com.rick.common.util;
 
+import com.rick.common.constant.Constants;
 import org.springframework.lang.Nullable;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.rick.common.util.StringUtils.isImageExtension;
+
 
 /**
  * @author Rick
@@ -265,6 +270,33 @@ public final class StringUtils {
             int separatorIndex = path.lastIndexOf("/");
             return separatorIndex != -1 ? path.substring(separatorIndex + 1) : path;
         }
+    }
+
+    public static boolean isImageType(String extension, String contentType) {
+        if (isImageExtension(extension)) {
+            return true;
+        }
+
+        if (Objects.nonNull(contentType) || contentType.startsWith("image")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 判断是否是合法的文件类型
+     * @param extension
+     * @return
+     */
+    public static boolean isImageExtension(String extension) {
+        for (String s : Constants.IMAGE_TYPE) {
+            if (s.equalsIgnoreCase(extension)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
