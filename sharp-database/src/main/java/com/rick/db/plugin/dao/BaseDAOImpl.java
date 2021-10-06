@@ -3,6 +3,7 @@ package com.rick.db.plugin.dao;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
+import com.rick.common.util.ReflectUtils;
 import com.rick.db.config.Constants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.SharpService;
@@ -11,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -42,6 +44,8 @@ public class BaseDAOImpl<T> {
 
     private String selectSQL;
 
+    private Field[] entityFields;
+
 
     @Autowired(required = false)
     private ColumnAutoFill columnAutoFill;
@@ -71,6 +75,8 @@ public class BaseDAOImpl<T> {
                 }
 
                 this.propertyList = convertToArray(properties);
+
+                this.entityFields = ReflectUtils.getAllFields(this.entityClass);
             }
         } else {
             this.entityClass = Map.class;
@@ -84,7 +90,20 @@ public class BaseDAOImpl<T> {
 
     /**
      * 插入单条数据
-     * @param params
+     * @param t 参数对象
+     * @return
+     */
+    public int insert(T t) {
+        if (this.entityFields == null) {
+            throw new RuntimeException("没有指定范型");
+        }
+
+        return SQLUtils.insert(tableName, columnNames, handleAutoFill(instanceToParamsArray(t), columnNameList));
+    }
+
+    /**
+     * 插入单条数据
+     * @param params 参数数组
      * @return
      */
     public int insert(Object[] params) {
@@ -94,8 +113,22 @@ public class BaseDAOImpl<T> {
     /**
      * 批量插入数据
      */
-    public int[] insert(List<Object[]> paramsList) {
-        return SQLUtils.insert(tableName, columnNames, handleAutoFill(paramsList, columnNameList));
+    public int[] insert(List<?> paramsList) {
+        if (CollectionUtils.isEmpty(paramsList)) {
+            return new int[] {};
+        }
+        Class<?> paramClass = paramsList.get(0).getClass();
+        if (paramClass == this.entityClass) {
+            List<Object[]> params = new ArrayList<>(paramsList.size());
+            for (Object o : paramsList) {
+                params.add(instanceToParamsArray((T) o));
+            }
+            return SQLUtils.insert(tableName, columnNames, handleAutoFill(params, columnNameList));
+        } else if(paramClass == Object[].class) {
+            return SQLUtils.insert(tableName, columnNames, handleAutoFill((List<Object[]>) paramsList, columnNameList));
+        }
+
+        throw new RuntimeException("不支持的批量操作类型");
     }
 
     /**
@@ -312,5 +345,20 @@ public class BaseDAOImpl<T> {
         selectSQLBuilder.deleteCharAt(selectSQLBuilder.length() - 1).append(" FROM ").append(this.tableName);
 
         this.selectSQL = selectSQLBuilder.toString();
+    }
+
+    private Object[] instanceToParamsArray(T t) {
+        Object[] params = new Object[this.columnNameList.size()];
+        try {
+            for (int i = 0; i < this.entityFields.length; i++) {
+                Field field = this.entityFields[i];
+                field.setAccessible(true);
+                Object param = this.entityFields[i].get(t);
+                params[i] = param;
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return params;
     }
 }

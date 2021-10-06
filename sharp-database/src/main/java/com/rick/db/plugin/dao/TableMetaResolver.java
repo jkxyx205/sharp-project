@@ -5,6 +5,7 @@ import com.google.common.base.Converter;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.config.annotation.ColumnName;
 import com.rick.db.config.annotation.TableName;
+import com.rick.db.config.annotation.Transient;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
@@ -29,6 +30,10 @@ class TableMetaResolver {
         StringBuilder columnNamesBuilder = new StringBuilder();
         StringBuilder propertiesBuilder = new StringBuilder();
         for (Field field : fields) {
+            if (field.getAnnotation(Transient.class) != null) {
+                continue;
+            }
+
             ColumnName annotation = field.getAnnotation(ColumnName.class);
             String columnName = ((Objects.isNull(annotation) ? converter.convert(field.getName()) : annotation.value()));
             propertiesBuilder.append(field.getName()).append(",");

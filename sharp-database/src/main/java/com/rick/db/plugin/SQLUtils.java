@@ -318,4 +318,5 @@ public final class SQLUtils {
     private static String getUpdateSQL(String tableName, String columnNames, String conditionSQL) {
         return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(",\\s*"), " = ?,") + " = ? WHERE " + conditionSQL;
     }
+
 }
