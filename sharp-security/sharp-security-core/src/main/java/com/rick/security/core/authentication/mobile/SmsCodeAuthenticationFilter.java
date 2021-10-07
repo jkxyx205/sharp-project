@@ -1,7 +1,7 @@
 
 package com.rick.security.core.authentication.mobile;
 
-import com.rick.security.core.properties.SecurityConstants;
+import com.rick.security.core.support.SecurityConstants;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;

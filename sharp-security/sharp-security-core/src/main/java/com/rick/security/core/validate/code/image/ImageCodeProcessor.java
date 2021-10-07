@@ -1,7 +1,7 @@
 
 package com.rick.security.core.validate.code.image;
 
-import com.rick.security.core.validate.code.impl.AbstractValidateCodeProcessor;
+import com.rick.security.core.validate.code.handler.impl.AbstractValidateCodeProcessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.ServletWebRequest;
 

@@ -37,7 +37,7 @@ public final class ExportHttpServletRequestUtils {
         queryModel.getPageModel().setSize(-1);
         ExportUtils.export(sql,
                 params,
-                HttpServletResponseUtils.getOutputStream(request, response, fileName + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +".xlsx"),
+                HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +".xlsx"),
                 columnList
                 );
     }

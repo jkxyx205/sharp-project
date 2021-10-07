@@ -1,7 +1,4 @@
-/**
- * 
- */
-package com.imooc.security.core.validate.code;
+package com.rick.security.core.validate.code.exception;
 
 import org.springframework.security.core.AuthenticationException;
 

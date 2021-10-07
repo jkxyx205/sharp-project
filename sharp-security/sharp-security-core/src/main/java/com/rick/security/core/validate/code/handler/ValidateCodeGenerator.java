@@ -1,6 +1,7 @@
 
-package com.rick.security.core.validate.code;
+package com.rick.security.core.validate.code.handler;
 
+import com.rick.security.core.validate.code.ValidateCode;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**

@@ -1,6 +1,10 @@
-package com.rick.security.core.validate.code.impl;
+package com.rick.security.core.validate.code.handler.impl;
 
 import com.rick.security.core.validate.code.*;
+import com.rick.security.core.validate.code.exception.ValidateCodeException;
+import com.rick.security.core.validate.code.handler.ValidateCodeGenerator;
+import com.rick.security.core.validate.code.handler.ValidateCodeProcessor;
+import com.rick.security.core.validate.code.handler.ValidateCodeRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -39,7 +43,6 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
 	 * @param request
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private C generate(ServletWebRequest request) {
 		String type = getValidateCodeType(request).toString().toLowerCase();
 		String generatorName = type + ValidateCodeGenerator.class.getSimpleName();
@@ -76,18 +79,16 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
 	 * @param request
 	 * @return
 	 */
-	private ValidateCodeType getValidateCodeType(ServletWebRequest request) {
+	private ValidateCodeTypeEnum getValidateCodeType(ServletWebRequest request) {
 		String type = StringUtils.substringBefore(getClass().getSimpleName(), "CodeProcessor");
-		return ValidateCodeType.valueOf(type.toUpperCase());
+		return ValidateCodeTypeEnum.valueOf(type.toUpperCase());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void validate(ServletWebRequest request) {
+		ValidateCodeTypeEnum codeType = getValidateCodeType(request);
 
-		ValidateCodeType codeType = getValidateCodeType(request);
-
-		C codeInSession = (C) validateCodeRepository.get(request, codeType);
+		C codeInRepository = (C) validateCodeRepository.get(request, codeType);
 
 		String codeInRequest;
 		try {
@@ -101,21 +102,20 @@ public abstract class AbstractValidateCodeProcessor<C extends ValidateCode> impl
 			throw new ValidateCodeException(codeType + "验证码的值不能为空");
 		}
 
-		if (codeInSession == null) {
+		if (codeInRepository == null) {
 			throw new ValidateCodeException(codeType + "验证码不存在");
 		}
 
-		if (codeInSession.isExpried()) {
+		if (codeInRepository.isExpired()) {
 			validateCodeRepository.remove(request, codeType);
 			throw new ValidateCodeException(codeType + "验证码已过期");
 		}
 
-		if (!StringUtils.equals(codeInSession.getCode(), codeInRequest)) {
+		if (!StringUtils.equals(codeInRepository.getCode(), codeInRequest)) {
 			throw new ValidateCodeException(codeType + "验证码不匹配");
 		}
 		
 		validateCodeRepository.remove(request, codeType);
-		
 	}
 
 }

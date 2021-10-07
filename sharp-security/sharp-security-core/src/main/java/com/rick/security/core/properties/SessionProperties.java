@@ -1,6 +1,7 @@
 
 package com.rick.security.core.properties;
 
+import com.rick.security.core.support.SecurityConstants;
 import lombok.Data;
 
 /**

@@ -1,6 +1,7 @@
 
 package com.rick.security.core.authentication.mobile;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,30 +28,17 @@ import java.util.UUID;
  *
  */
 @Component
+@RequiredArgsConstructor
 public class SmsCodeAuthenticationSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 	
-	@Autowired
-	private AuthenticationSuccessHandler authenticationSuccessHandler;
-	
-	@Autowired
-	private AuthenticationFailureHandler authenticationFailureHandler;
-	
-	@Autowired
-	private UserDetailsService userDetailsService;
-	
-	@Autowired
-	private PersistentTokenRepository persistentTokenRepository;
+	private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
-	@Resource
-	private DataSource dataSource;
+	private final AuthenticationFailureHandler authenticationFailureHandler;
 
-	@Bean
-	public PersistentTokenRepository persistentTokenRepository() {
-		JdbcTokenRepositoryImpl db = new JdbcTokenRepositoryImpl();
-		db.setDataSource(dataSource);
-		return db;
-	}
-	
+	private final UserDetailsService userDetailsService;
+
+	private final PersistentTokenRepository persistentTokenRepository;
+
 	@Override
 	public void configure(HttpSecurity http) {
 		SmsCodeAuthenticationFilter smsCodeAuthenticationFilter = new SmsCodeAuthenticationFilter();
@@ -60,9 +48,8 @@ public class SmsCodeAuthenticationSecurityConfig extends SecurityConfigurerAdapt
 		String key = UUID.randomUUID().toString();
 		smsCodeAuthenticationFilter.setRememberMeServices(new PersistentTokenBasedRememberMeServices(key, userDetailsService, persistentTokenRepository));
 		
-		SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider();
-		smsCodeAuthenticationProvider.setUserDetailsService(userDetailsService);
-		
+		SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider(userDetailsService);
+
 		http.authenticationProvider(smsCodeAuthenticationProvider)
 			.addFilterAfter(smsCodeAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 	}

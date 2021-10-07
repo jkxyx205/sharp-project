@@ -39,3 +39,17 @@ sharp:
 
 更多用法：
 * [https://xhope.top/?p=1242](https://xhope.top/?p=1242)
+
+# sharp-fileupload
+`sharp-fileupload` 可以上传文件，对图片的处理（裁剪、选装、缩放）。提供了Restfull接口上传，访问文档。底层存储功能支持：
+
+* 本地存储
+* 阿里云OSS
+* FastDFS
+
+更多用法：
+
+* [https://xhope.top/?p=1280](https://xhope.top/?p=1280)
+* [https://xhope.top/?p=1284](https://xhope.top/?p=1284)
+* [https://xhope.top/?p=1286](https://xhope.top/?p=1286)
+* [https://xhope.top/?p=1288](https://xhope.top/?p=1288)

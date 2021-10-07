@@ -3,7 +3,7 @@ package com.rick.security.core.validate.code.sms;
 
 import com.rick.security.core.properties.SecurityProperties;
 import com.rick.security.core.validate.code.ValidateCode;
-import com.rick.security.core.validate.code.ValidateCodeGenerator;
+import com.rick.security.core.validate.code.handler.ValidateCodeGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

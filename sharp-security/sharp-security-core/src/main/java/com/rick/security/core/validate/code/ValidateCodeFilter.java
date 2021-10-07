@@ -1,11 +1,14 @@
 
 package com.rick.security.core.validate.code;
 
-import com.rick.security.core.properties.SecurityConstants;
 import com.rick.security.core.properties.SecurityProperties;
+import com.rick.security.core.support.SecurityConstants;
+import com.rick.security.core.validate.code.exception.ValidateCodeException;
+import com.rick.security.core.validate.code.handler.ValidateCodeProcessorHolder;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -27,28 +30,26 @@ import java.util.Set;
  * @author zhailiang
  *
  */
-@Component("validateCodeFilter")
+@Component
+@RequiredArgsConstructor
 public class ValidateCodeFilter extends OncePerRequestFilter implements InitializingBean {
 
 	/**
 	 * 验证码校验失败处理器
 	 */
-	@Autowired
-	private AuthenticationFailureHandler authenticationFailureHandler;
+	private final AuthenticationFailureHandler authenticationFailureHandler;
 	/**
 	 * 系统配置信息
 	 */
-	@Autowired
-	private SecurityProperties securityProperties;
+	private final SecurityProperties securityProperties;
 	/**
 	 * 系统中的校验码处理器
 	 */
-	@Autowired
-	private ValidateCodeProcessorHolder validateCodeProcessorHolder;
+	private final ValidateCodeProcessorHolder validateCodeProcessorHolder;
 	/**
 	 * 存放所有需要校验验证码的url
 	 */
-	private Map<String, ValidateCodeType> urlMap = new HashMap<>();
+	private Map<String, ValidateCodeTypeEnum> urlMap = new HashMap<>();
 	/**
 	 * 验证请求url与配置的url是否匹配的工具类
 	 */
@@ -61,11 +62,11 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 	public void afterPropertiesSet() throws ServletException {
 		super.afterPropertiesSet();
 
-		urlMap.put(SecurityConstants.DEFAULT_SIGN_IN_PROCESSING_URL_FORM, ValidateCodeType.IMAGE);
-		addUrlToMap(securityProperties.getCode().getImage().getUrl(), ValidateCodeType.IMAGE);
+		urlMap.put(SecurityConstants.DEFAULT_SIGN_IN_PROCESSING_URL_FORM, ValidateCodeTypeEnum.IMAGE);
+		addUrlToMap(securityProperties.getCode().getImage().getUrl(), ValidateCodeTypeEnum.IMAGE);
 
-		urlMap.put(SecurityConstants.DEFAULT_SIGN_IN_PROCESSING_URL_MOBILE, ValidateCodeType.SMS);
-		addUrlToMap(securityProperties.getCode().getSms().getUrl(), ValidateCodeType.SMS);
+		urlMap.put(SecurityConstants.DEFAULT_SIGN_IN_PROCESSING_URL_MOBILE, ValidateCodeTypeEnum.SMS);
+		addUrlToMap(securityProperties.getCode().getSms().getUrl(), ValidateCodeTypeEnum.SMS);
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 	 * @param urlString
 	 * @param type
 	 */
-	protected void addUrlToMap(String urlString, ValidateCodeType type) {
+	protected void addUrlToMap(String urlString, ValidateCodeTypeEnum type) {
 		if (StringUtils.isNotBlank(urlString)) {
 			String[] urls = StringUtils.splitByWholeSeparatorPreserveAllTokens(urlString, ",");
 			for (String url : urls) {
@@ -87,7 +88,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 
-		ValidateCodeType type = getValidateCodeType(request);
+		ValidateCodeTypeEnum type = getValidateCodeType(request);
 		if (type != null) {
 			logger.info("校验请求(" + request.getRequestURI() + ")中的验证码,验证码类型" + type);
 			try {
@@ -110,9 +111,9 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 	 * @param request
 	 * @return
 	 */
-	private ValidateCodeType getValidateCodeType(HttpServletRequest request) {
-		ValidateCodeType result = null;
-		if (!StringUtils.equalsIgnoreCase(request.getMethod(), "get")) {
+	private ValidateCodeTypeEnum getValidateCodeType(HttpServletRequest request) {
+		ValidateCodeTypeEnum result = null;
+		if (!StringUtils.equalsIgnoreCase(request.getMethod(), HttpMethod.GET.name())) {
 			Set<String> urls = urlMap.keySet();
 			for (String url : urls) {
 				if (pathMatcher.match(url, request.getRequestURI())) {

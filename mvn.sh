@@ -1,13 +1,14 @@
 #!/bin/bash
 
 PROJECTS=(
-#sharp-dependencies
-#sharp-common
-#sharp-database
+sharp-dependencies
+sharp-common
+sharp-database
+sharp-fileupload
 #sharp-meta
 #sharp-excel
 #sharp-sms
-sharp-security
+#sharp-security
 )
 
 for p in $PROJECTS

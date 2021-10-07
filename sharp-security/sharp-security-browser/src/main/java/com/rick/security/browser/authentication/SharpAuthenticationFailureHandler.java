@@ -1,11 +1,11 @@
 
 package com.rick.security.browser.authentication;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rick.common.http.model.ExceptionResult;
-import com.rick.security.core.properties.LoginResponseType;
+import com.rick.common.util.JsonUtils;
 import com.rick.security.core.properties.SecurityProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rick.security.core.support.LoginResponseTypeEnum;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -22,14 +22,11 @@ import java.io.IOException;
  * @author zhailiang
  *
  */
-@Component("sharpAuthenticationFailureHandler")
+@Component
+@RequiredArgsConstructor
 public class SharpAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-	@Autowired
-	private ObjectMapper objectMapper;
-	
-	@Autowired
-	private SecurityProperties securityProperties;
+	private final SecurityProperties securityProperties;
 	
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -37,10 +34,10 @@ public class SharpAuthenticationFailureHandler extends SimpleUrlAuthenticationFa
 		
 		logger.info("登录失败");
 		
-		if (LoginResponseType.JSON.equals(securityProperties.getBrowser().getSignInResponseType())) {
+		if (LoginResponseTypeEnum.JSON.equals(securityProperties.getBrowser().getSignInResponseType())) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json;charset=UTF-8");
-			response.getWriter().write(objectMapper.writeValueAsString(new ExceptionResult(-1, exception.getMessage())));
+			response.getWriter().write(JsonUtils.toJson(new ExceptionResult(-1, exception.getMessage())));
 		}else{
 			super.onAuthenticationFailure(request, response, exception);
 		}

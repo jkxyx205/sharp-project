@@ -10,7 +10,7 @@ import com.rick.security.core.support.SecurityConstants;
  * @author zhailiang
  *
  */
-public enum ValidateCodeType {
+public enum ValidateCodeTypeEnum {
 	
 	/**
 	 * 短信验证码

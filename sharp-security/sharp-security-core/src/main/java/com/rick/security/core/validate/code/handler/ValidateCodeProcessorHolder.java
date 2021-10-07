@@ -1,6 +1,8 @@
 
-package com.rick.security.core.validate.code;
+package com.rick.security.core.validate.code.handler;
 
+import com.rick.security.core.validate.code.ValidateCodeTypeEnum;
+import com.rick.security.core.validate.code.exception.ValidateCodeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +24,7 @@ public class ValidateCodeProcessorHolder {
 	 * @param type
 	 * @return
 	 */
-	public ValidateCodeProcessor findValidateCodeProcessor(ValidateCodeType type) {
+	public ValidateCodeProcessor findValidateCodeProcessor(ValidateCodeTypeEnum type) {
 		return findValidateCodeProcessor(type.toString().toLowerCase());
 	}
 

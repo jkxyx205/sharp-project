@@ -1,6 +1,7 @@
 
 package com.rick.security.core.authentication.mobile;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -16,16 +17,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * @author zhailiang
  *
  */
+@RequiredArgsConstructor
 public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
 
-	private UserDetailsService userDetailsService;
+	private final UserDetailsService userDetailsService;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.security.authentication.AuthenticationProvider#
-	 * authenticate(org.springframework.security.core.Authentication)
-	 */
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
@@ -44,23 +40,9 @@ public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
 		return authenticationResult;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.security.authentication.AuthenticationProvider#
-	 * supports(java.lang.Class)
-	 */
 	@Override
 	public boolean supports(Class<?> authentication) {
 		return SmsCodeAuthenticationToken.class.isAssignableFrom(authentication);
-	}
-
-	public UserDetailsService getUserDetailsService() {
-		return userDetailsService;
-	}
-
-	public void setUserDetailsService(UserDetailsService userDetailsService) {
-		this.userDetailsService = userDetailsService;
 	}
 
 }

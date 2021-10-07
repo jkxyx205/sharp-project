@@ -1,6 +1,8 @@
 
 package com.rick.security.core.properties;
 
+import com.rick.security.core.support.LoginResponseTypeEnum;
+import com.rick.security.core.support.SecurityConstants;
 import lombok.Data;
 
 /**
@@ -32,7 +34,7 @@ public class BrowserProperties {
 	/**
 	 * 登录响应的方式，默认是json
 	 */
-	private LoginResponseType signInResponseType = LoginResponseType.JSON;
+	private LoginResponseTypeEnum signInResponseType = LoginResponseTypeEnum.JSON;
 	/**
 	 * 登录成功后跳转的地址，如果设置了此属性，则登录成功后总是会跳到这个地址上。
 	 * 

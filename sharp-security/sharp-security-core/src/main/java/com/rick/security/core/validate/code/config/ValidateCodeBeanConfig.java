@@ -1,12 +1,12 @@
 
-package com.rick.security.core.validate.code;
+package com.rick.security.core.validate.code.config;
 
 import com.rick.security.core.properties.SecurityProperties;
+import com.rick.security.core.validate.code.handler.ValidateCodeGenerator;
 import com.rick.security.core.validate.code.image.ImageCodeGenerator;
-import com.rick.security.core.validate.code.sms.DefaultSmsCodeSender;
 import com.rick.security.core.validate.code.sms.SmsCodeSender;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class ValidateCodeBeanConfig {
 	
 	private final SecurityProperties securityProperties;
@@ -43,7 +44,10 @@ public class ValidateCodeBeanConfig {
 	@Bean
 	@ConditionalOnMissingBean(SmsCodeSender.class)
 	public SmsCodeSender smsCodeSender() {
-		return new DefaultSmsCodeSender();
+		return (mobile, code) -> {
+			log.warn("请配置真实的短信验证码发送器(SmsCodeSender)");
+			log.info("向手机"+mobile+"发送短信验证码"+code);
+		};
 	}
 
 }

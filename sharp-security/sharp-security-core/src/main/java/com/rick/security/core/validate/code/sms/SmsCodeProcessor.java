@@ -1,13 +1,13 @@
 
 package com.rick.security.core.validate.code.sms;
 
-import com.rick.security.core.properties.SecurityConstants;
+import com.rick.security.core.support.SecurityConstants;
 import com.rick.security.core.validate.code.ValidateCode;
-import com.rick.security.core.validate.code.impl.AbstractValidateCodeProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.context.request.ServletWebRequest;
+import com.rick.security.core.validate.code.handler.impl.AbstractValidateCodeProcessor;
 
 /**
  * 短信验证码处理器

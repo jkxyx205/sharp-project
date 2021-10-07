@@ -2,8 +2,8 @@
 package com.rick.security.browser.validate.code.impl;
 
 import com.rick.security.core.validate.code.ValidateCode;
-import com.rick.security.core.validate.code.ValidateCodeRepository;
-import com.rick.security.core.validate.code.ValidateCodeType;
+import com.rick.security.core.validate.code.handler.ValidateCodeRepository;
+import com.rick.security.core.validate.code.ValidateCodeTypeEnum;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -22,7 +22,7 @@ public class SessionValidateCodeRepository implements ValidateCodeRepository {
 	String SESSION_KEY_PREFIX = "SESSION_KEY_FOR_CODE_";
 	
 	@Override
-	public void save(ServletWebRequest request, ValidateCode code, ValidateCodeType validateCodeType) {
+	public void save(ServletWebRequest request, ValidateCode code, ValidateCodeTypeEnum validateCodeType) {
 		request.getRequest().getSession().setAttribute(getSessionKey(validateCodeType), code);
 	}
 	
@@ -31,17 +31,17 @@ public class SessionValidateCodeRepository implements ValidateCodeRepository {
 	 * 
 	 * @return
 	 */
-	private String getSessionKey(ValidateCodeType validateCodeType) {
+	private String getSessionKey(ValidateCodeTypeEnum validateCodeType) {
 		return SESSION_KEY_PREFIX + validateCodeType.toString().toUpperCase();
 	}
 
 	@Override
-	public ValidateCode get(ServletWebRequest request, ValidateCodeType validateCodeType) {
+	public ValidateCode get(ServletWebRequest request, ValidateCodeTypeEnum validateCodeType) {
 		return (ValidateCode) request.getRequest().getSession().getAttribute(getSessionKey(validateCodeType));
 	}
 
 	@Override
-	public void remove(ServletWebRequest request, ValidateCodeType codeType) {
+	public void remove(ServletWebRequest request, ValidateCodeTypeEnum codeType) {
 		request.getRequest().getSession().removeAttribute(getSessionKey(codeType));
 	}
 

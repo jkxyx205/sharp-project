@@ -1,11 +1,10 @@
 
 package com.rick.security.browser;
 
-import com.rick.security.core.authentication.FormAuthenticationConfig;
 import com.rick.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
-import com.rick.security.core.authorize.AuthorizeConfigManager;
 import com.rick.security.core.properties.SecurityProperties;
-import com.rick.security.core.validate.code.ValidateCodeSecurityConfig;
+import com.rick.security.core.validate.code.config.ValidateCodeSecurityConfig;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,42 +22,27 @@ import org.springframework.security.web.session.SessionInformationExpiredStrateg
  *
  */
 @Configuration
+@RequiredArgsConstructor
 public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	@Autowired
-	private SecurityProperties securityProperties;
+	private final SecurityProperties securityProperties;
 
-	@Autowired
-	private UserDetailsService userDetailsService;
-	
-	@Autowired
-	private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
-	
-	@Autowired
-	private ValidateCodeSecurityConfig validateCodeSecurityConfig;
+	private final UserDetailsService userDetailsService;
 
-	@Autowired
-	private SessionInformationExpiredStrategy sessionInformationExpiredStrategy;
-	
-	@Autowired
-	private InvalidSessionStrategy invalidSessionStrategy;
-	
-	@Autowired
-	private LogoutSuccessHandler logoutSuccessHandler;
-	
-	@Autowired
-	private AuthorizeConfigManager authorizeConfigManager;
-	
-	@Autowired
-	private FormAuthenticationConfig formAuthenticationConfig;
+	private final SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
 
-	@Autowired
-	private PersistentTokenRepository persistentTokenRepository;
+	private final ValidateCodeSecurityConfig validateCodeSecurityConfig;
+
+	private final SessionInformationExpiredStrategy sessionInformationExpiredStrategy;
+
+	private final InvalidSessionStrategy invalidSessionStrategy;
+
+	private final LogoutSuccessHandler logoutSuccessHandler;
+
+	private final PersistentTokenRepository persistentTokenRepository;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		formAuthenticationConfig.configure(http);
-		
 		http.apply(validateCodeSecurityConfig)
 				.and()
 			.apply(smsCodeAuthenticationSecurityConfig)
@@ -82,8 +66,5 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 				.deleteCookies("JSESSIONID")
 				.and()
 			.csrf().disable();
-		
-		authorizeConfigManager.config(http.authorizeRequests());
-		
 	}
 }

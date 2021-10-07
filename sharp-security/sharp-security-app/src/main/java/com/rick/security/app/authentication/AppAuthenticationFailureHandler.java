@@ -21,7 +21,7 @@ import java.io.IOException;
  *
  */
 @Component
-public class AppAuthenctiationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+public class AppAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,

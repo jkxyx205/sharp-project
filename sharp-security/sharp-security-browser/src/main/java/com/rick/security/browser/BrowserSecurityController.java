@@ -3,7 +3,7 @@ package com.rick.security.browser;
 
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
-import com.rick.security.core.properties.SecurityConstants;
+import com.rick.security.core.support.SecurityConstants;
 import com.rick.security.core.properties.SecurityProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -3,6 +3,8 @@ package com.rick.security.core.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * @author zhailiang
@@ -10,6 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "sharp.security")
 @Data
+@Component
 public class SecurityProperties {
 	
 	/**
