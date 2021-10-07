@@ -68,40 +68,6 @@ public class BaseDAOImpl<T> {
         this.init();
     }
 
-    private void init() {
-        Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
-        if (Objects.nonNull(actualTypeArgument)) {
-            this.entityClass = actualTypeArgument[0];
-            if (Map.class.isAssignableFrom(this.entityClass)) {
-                this.entityClass = Map.class;
-            } else {
-                TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
-                if (Objects.isNull(this.tableName) || Objects.isNull(this.columnNames) || Objects.isNull(this.primaryColumn)) {
-                    this.tableName = tableMeta.getTableName();
-                    this.columnNames = tableMeta.getColumnNames();
-                    this.primaryColumn = tableMeta.getIdColumnName();
-                }
-                this.propertyList = convertToArray(tableMeta.getProperties());
-                this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
-                this.entityFields = ReflectUtils.getAllFields(this.entityClass);
-                this.updateColumnNames = tableMeta.getUpdateColumnNames();
-
-                propertyFieldMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
-                for (Field entityField : this.entityFields) {
-                    propertyFieldMap.put(entityField.getName(), entityField);
-                }
-            }
-        } else {
-            this.entityClass = Map.class;
-        }
-
-        this.columnNameList = convertToArray(columnNames);
-        this.updateColumnNameList = convertToArray(updateColumnNames);
-
-        initSelectSQL();
-        log.info("tableName: {}, columnNames: {}", this.tableName, this.columnNames);
-    }
-
     /**
      * 插入单条数据
      * @param t 参数对象
@@ -222,6 +188,7 @@ public class BaseDAOImpl<T> {
     public int update(String updateColumnNames, Object[] params, Serializable id) {
         return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), id);
     }
+
     /**
      * 指定更新字段，构造条件更新
      * @param updateColumnNames name, age
@@ -303,6 +270,42 @@ public class BaseDAOImpl<T> {
      */
     public List<T> selectAll() {
         return (List<T>) sharpService.query(this.selectSQL, null, this.entityClass);
+    }
+
+    private void init() {
+        Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
+        if (Objects.nonNull(actualTypeArgument)) {
+            this.entityClass = actualTypeArgument[0];
+            if (Map.class.isAssignableFrom(this.entityClass)) {
+                this.entityClass = Map.class;
+            } else {
+                TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
+                if (Objects.isNull(this.tableName) || Objects.isNull(this.columnNames) || Objects.isNull(this.primaryColumn)) {
+                    this.tableName = tableMeta.getTableName();
+                    this.columnNames = tableMeta.getColumnNames();
+                    this.primaryColumn = tableMeta.getIdColumnName();
+                }
+                this.propertyList = convertToArray(tableMeta.getProperties());
+                this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
+                this.entityFields = ReflectUtils.getAllFields(this.entityClass);
+                this.updateColumnNames = tableMeta.getUpdateColumnNames();
+
+                propertyFieldMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
+                for (Field entityField : this.entityFields) {
+                    propertyFieldMap.put(entityField.getName(), entityField);
+                }
+
+                log.info("properties: {}", tableMeta.getProperties());
+            }
+        } else {
+            this.entityClass = Map.class;
+        }
+
+        this.columnNameList = convertToArray(columnNames);
+        this.updateColumnNameList = convertToArray(updateColumnNames);
+
+        initSelectSQL();
+        log.info("tableName: {}, columnNames: {}", this.tableName, this.columnNames);
     }
 
     private String getConditionSQL(Map<String, ?> params) {
