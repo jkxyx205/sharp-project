@@ -79,6 +79,9 @@ public final class SQLUtils {
      * @return
      */
     public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id) {
+        if (Objects.isNull(id)) {
+            throw new RuntimeException("主键不能为null");
+        }
         Object[] mergedParams = new Object[params.length + 1];
         mergedParams[params.length] = id;
         System.arraycopy(params, 0, mergedParams, 0, params.length);

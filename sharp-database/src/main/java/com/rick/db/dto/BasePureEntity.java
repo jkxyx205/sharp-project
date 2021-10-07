@@ -1,6 +1,7 @@
 package com.rick.db.dto;
 
 import com.rick.db.config.annotation.ColumnName;
+import com.rick.db.config.annotation.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -17,10 +18,13 @@ import java.time.Instant;
 @SuperBuilder
 public class BasePureEntity {
 
+    @Id
     private Long id;
 
+    @ColumnName(value = "created_by", updatable = false)
     private Long createdBy;
 
+    @ColumnName(value = "created_at",  updatable = false)
     private Instant createdAt;
 
     private Long updatedBy;

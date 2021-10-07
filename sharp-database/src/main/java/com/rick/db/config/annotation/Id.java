@@ -1,17 +1,18 @@
 package com.rick.db.config.annotation;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+
 import java.lang.annotation.*;
 
 /**
  * @author Rick
- * @createdAt 2021-09-27 09:19:00
+ * @createdAt 2021-10-07 07:57:00
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
-public @interface ColumnName {
+public @interface Id {
+    String value() default "";
 
-    String value();
-
-    boolean updatable() default true;
+    IdType type() default IdType.NONE;
 }

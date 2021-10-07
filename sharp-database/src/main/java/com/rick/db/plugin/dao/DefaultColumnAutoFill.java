@@ -13,13 +13,21 @@ import java.util.Map;
 public class DefaultColumnAutoFill implements ColumnAutoFill {
 
     @Override
-    public Map<String, Object> fill() {
+    public Map<String, Object> insertFill() {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(4);
         LocalDateTime now = LocalDateTime.now();
         fillMap.put("id", IdGenerator.getSequenceId());
         fillMap.put("created_at", now);
         fillMap.put("updated_at", now);
         fillMap.put("is_deleted", false);
+        return fillMap;
+    }
+
+    @Override
+    public Map<String, Object> updateFill() {
+        Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(2);
+        LocalDateTime now = LocalDateTime.now();
+        fillMap.put("updated_at", now);
         return fillMap;
     }
 }

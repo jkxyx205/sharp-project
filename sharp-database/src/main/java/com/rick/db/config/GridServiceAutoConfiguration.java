@@ -62,7 +62,7 @@ public class GridServiceAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public ColumnAutoFill fill() {
+        public ColumnAutoFill columnAutoFill() {
             return new DefaultColumnAutoFill();
         }
 

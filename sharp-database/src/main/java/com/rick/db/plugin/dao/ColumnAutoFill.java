@@ -11,5 +11,11 @@ public interface ColumnAutoFill {
      * 将填充的字段返回
      * @return
      */
-    Map<String, Object> fill();
+    Map<String, Object> insertFill();
+
+    /**
+     * 将填充的字段返回
+     * @return
+     */
+    Map<String, Object> updateFill();
 }
