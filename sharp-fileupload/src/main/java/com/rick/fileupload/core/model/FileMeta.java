@@ -26,6 +26,10 @@ public class FileMeta {
 
     private String path;
 
+    /**
+     * data == groupName + path
+     * 获取文件数据
+     */
     @Transient
     @JsonIgnore
     private byte[] data;
@@ -59,4 +63,13 @@ public class FileMeta {
         setName(fileName);
         setExtension(fileExt);
     }
+
+    public Long getSize() {
+        if (size == null && data != null) {
+            return (long) data.length;
+        }
+
+        return size;
+    }
+
 }

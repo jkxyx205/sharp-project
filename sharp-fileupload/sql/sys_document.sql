@@ -25,7 +25,7 @@ CREATE TABLE `sys_document` (
   `id` bigint(20) NOT NULL,
   `name` varchar(255) NOT NULL,
   `extension` varchar(16) DEFAULT NULL,
-  `content_type` varchar(16) DEFAULT NULL,
+  `content_type` varchar(128) DEFAULT NULL,
   `size` int(11) DEFAULT NULL,
   `group_name` varchar(255) NOT NULL,
   `path` varchar(255) NOT NULL,

@@ -18,7 +18,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URL;
 import java.util.Objects;
 
 import static com.rick.common.util.StringUtils.isImageType;
@@ -45,29 +44,33 @@ public class ImageService {
      * @param imageParam
      */
     public void write(FileMeta fileMeta, ImageParam imageParam, OutputStream os) throws IOException {
+        if (Objects.isNull(fileMeta.getData())) {
+            InputStream is = inputStreamStore.getInputStream(fileMeta.getGroupName(), fileMeta.getPath());
+            fileMeta.setData(IOUtils.toByteArray(is));
+//            String url = inputStreamStore.getURL(fileMeta.getGroupName(), fileMeta.getPath());
+        }
+
+        if (Objects.isNull(imageParam) || imageParam.isEmpty()) {
+            // 没有任何参数 自动压缩图片
+            long size = fileMeta.getSize();
+            if (size <= Constants.COMPRESS_THRESHOLD) {
+                os.write(fileMeta.getData());
+                os.close();
+                return;
+            }
+        } else if (imageParam.isSource() && EqualsBuilder.reflectionEquals(imageParam.getP(), 0)) {
+            // 只有一个参数p=0，获取原始图片
+//            os.write(IOUtils.toByteArray(new URL(url)));
+            os.write(fileMeta.getData());
+            os.close();
+            return;
+        }
+
         // 添加缓存 fileMeta.getFullPath() + imageParam参数降序排列做key
         if (Objects.nonNull(imageParam.getF())) {
             fileMeta.setExtension(imageParam.getF());
         }
 
-        InputStream is = inputStreamStore.getInputStream(fileMeta.getGroupName(), fileMeta.getPath());
-        String url = inputStreamStore.getURL(fileMeta.getGroupName(), fileMeta.getPath());
-
-        if (imageParam.isEmpty()) {
-            // 没有任何参数 自动压缩图片
-            long size = fileMeta.getSize();
-            if (size <= Constants.COMPRESS_THRESHOLD) {
-                os.write(IOUtils.toByteArray(new URL(url)));
-                return;
-            }
-        } else if (imageParam.isSource() && EqualsBuilder.reflectionEquals(imageParam.getP(), 0)) {
-            // 只有一个参数p=0，获取原始图片
-            os.write(IOUtils.toByteArray(new URL(url)));
-            return;
-        }
-        if (Objects.isNull(fileMeta.getData())) {
-            fileMeta.setData(IOUtils.toByteArray(is));
-        }
         cropPic(fileMeta, imageParam, os);
     }
 

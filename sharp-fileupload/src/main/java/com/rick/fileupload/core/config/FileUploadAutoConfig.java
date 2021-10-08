@@ -1,7 +1,5 @@
 package com.rick.fileupload.core.config;
 
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.service.SharpService;
 import com.rick.fileupload.client.support.DocumentDAO;
@@ -9,13 +7,10 @@ import com.rick.fileupload.client.support.DocumentServiceImpl;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.core.support.FileUploadProperties;
-import com.rick.fileupload.impl.fastdfs.FastDFSInputStreamStore;
 import com.rick.fileupload.impl.local.LocalInputStreamStore;
 import com.rick.fileupload.impl.local.property.LocalProperties;
-import com.rick.fileupload.impl.oos.OSSInputStreamStore;
 import com.rick.fileupload.impl.oos.property.OSSProperties;
 import com.rick.fileupload.plugin.image.ImageService;
-import org.csource.common.MyException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
@@ -93,18 +87,18 @@ public class FileUploadAutoConfig {
         // 会先执行fastDFSUploaderHandler，再执行DefaultUploadHandler
 //        @Bean
 //        @Primary
-        public InputStreamStore fastDFSInputStreamStore() throws IOException, MyException {
-            return new FastDFSInputStreamStore("fdfs_client.properties");
-        }
+//        public InputStreamStore fastDFSInputStreamStore() throws IOException, MyException {
+//            return new FastDFSInputStreamStore("fdfs_client.properties");
+//        }
     }
 
     @Configuration
     static class OSSConfig {
  /*       @Bean
         @Primary*/
-        public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
-            OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
-            return new OSSInputStreamStore(ossClient, ossProperties);
-        }
+//        public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
+//            OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
+//            return new OSSInputStreamStore(ossClient, ossProperties);
+//        }
     }
 }

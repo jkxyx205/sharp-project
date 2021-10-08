@@ -12,6 +12,7 @@ import com.rick.fileupload.plugin.image.ImageParam;
 import com.rick.fileupload.plugin.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.FileCopyUtils;
@@ -147,9 +148,12 @@ public class DocumentServiceImpl implements DocumentService {
     public void preview(long id, ImageParam imageParam, OutputStream os) throws IOException {
         Document document = findById(id);
         if (isImageType(document.getExtension(), document.getContentType())) {
+            // 预览图片
             imageService.write(document, imageParam, os);
         } else {
-            // TODO
+            // pdf等其他文件
+            os.write(IOUtils.toByteArray(fileStore.getInputStream(document.getGroupName(), document.getPath())));
+            os.close();
         }
     }
 

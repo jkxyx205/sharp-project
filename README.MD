@@ -17,6 +17,7 @@ sharp:
 ```
 更多用法：
 * [https://xhope.top/?p=1170](https://xhope.top/?p=1170)
+* [https://xhope.top/?p=1266](https://xhope.top/?p=1266)
 
 # sharp-excel
 `sharp-excel` 是一个操作Excel的java实现。依赖apache的POI。

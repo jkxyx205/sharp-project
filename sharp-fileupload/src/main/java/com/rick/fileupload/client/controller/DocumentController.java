@@ -98,18 +98,20 @@ public class DocumentController {
      * @return
      * @throws IOException
      */
-    @GetMapping(value = "/preview/{id}")
+    @GetMapping(value = "/preview/{id:\\d+}")
     public void view(HttpServletResponse response, @PathVariable Long id) throws IOException {
         response.sendRedirect(documentService.getURL(id));
     }
 
     /**
-     * 预览文件,将文件写到流中
+     * 预览普通文件,将文件写到流中
      * http://localhost:8080/documents/preview2/475029213054144512
+     * 预览word，必须有后缀
+     * https://view.officeapps.live.com/op/view.aspx?src=http%3A%2F%2Fa923-112-87-216-2.ngrok.io%2Fdocuments%2Fpreview2%2F477896371325009920/hello.docx
      * @return
      * @throws IOException
      */
-    @GetMapping(value = "/preview2/{id}")
+    @GetMapping(value = {"/preview2/{id:\\d+}", "/preview2/{id:\\d+}/{fileName}.{extension:(?i)docx|xlsx|pptx}"})
     public void view2(HttpServletRequest request, HttpServletResponse response, @PathVariable Long id, ImageParam imageParam) throws IOException {
         Document document = documentService.findById(id);
         documentService.preview(id, imageParam, HttpServletResponseUtils.getOutputStreamAsView(request, response, document.getFullName()));

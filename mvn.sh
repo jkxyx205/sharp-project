@@ -3,7 +3,7 @@
 PROJECTS=(
 sharp-dependencies
 sharp-common
-sharp-database
+#sharp-database
 sharp-fileupload
 #sharp-meta
 #sharp-excel

@@ -275,7 +275,7 @@ public final class StringUtils {
             return true;
         }
 
-        if (Objects.nonNull(contentType) || contentType.startsWith("image")) {
+        if (Objects.nonNull(contentType) && contentType.startsWith("image")) {
             return true;
         }
 
