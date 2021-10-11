@@ -8,6 +8,8 @@ import com.rick.common.http.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -68,14 +70,23 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Result AccessDeniedHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
-        this.logStackTrace(ex);
-        if (HttpServletRequestUtils.isAjaxRequest(request)) {
-            return ResultUtils.exception(ResultCode.ACCESS_FORBIDDEN_ERROR.getCode(), ResultCode.ACCESS_FORBIDDEN_ERROR.getMsg());
-        }
+    public Result accessDeniedHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
+        return exceptionHandler(request, response, ex, ResultCode.ACCESS_FORBIDDEN_ERROR);
+    }
 
-        request.getRequestDispatcher("/error").forward(request, response);
-        return null;
+    /**
+     * 验证失败
+     * @param request
+     * @param response
+     * @param ex
+     * @return
+     * @throws IOException
+     * @throws ServletException
+     */
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
+        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID);
     }
 
     /**
@@ -85,10 +96,17 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus
-    public Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
-        this.logStackTrace(ex);
+    public Result elseExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
+        return exceptionHandler(request, response, ex, ResultCode.FAIL);
+    }
+
+    private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, ResultCode resultCode) throws ServletException, IOException {
+        if (log.isErrorEnabled()) {
+            this.logStackTrace(ex);
+        }
+
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
-          return ResultUtils.fail();
+            return ResultUtils.exception(resultCode.getCode(), resultCode.getMsg());
         }
 
         request.getRequestDispatcher("/error").forward(request, response);

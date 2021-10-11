@@ -17,7 +17,8 @@ import lombok.ToString;
 public enum ResultCode {
     FAIL(-1, "服务器异常"),
     OK(0, "OK"),
-    ACCESS_FORBIDDEN_ERROR(1, "访问未授权"),;
+    ACCESS_FORBIDDEN_ERROR(1, "访问未授权"),
+    ARGUMENT_NOT_VALID(2, "参数验证失败");
 
     private int code;
 
