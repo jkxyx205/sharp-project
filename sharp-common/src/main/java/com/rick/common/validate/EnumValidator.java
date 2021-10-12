@@ -1,11 +1,11 @@
 package com.rick.common.validate;
 
+import com.rick.common.util.EnumUtils;
 import com.rick.common.validate.annotation.EnumValid;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -33,11 +33,7 @@ public class EnumValidator implements ConstraintValidator<EnumValid, Object> {
         }
         Class<?> clazz = annotation.target();
         try {
-            /**
-             * valueOfCode 参数使用包装类integer等
-             */
-            Method valueOfCodeMethod = clazz.getMethod("valueOfCode", value.getClass());
-            return Objects.nonNull(valueOfCodeMethod.invoke(null, value));
+            return Objects.nonNull(EnumUtils.valueOfCode(clazz, String.valueOf(value)));
         } catch (Exception e) {
             return false;
         }

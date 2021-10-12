@@ -3,6 +3,7 @@ package com.rick.common.util;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -35,5 +36,19 @@ public class ClassUtils {
         }
 
         return classes;
+    }
+
+    public static Field getField(Class<?> clazz, String name) throws NoSuchFieldException {
+        try {
+            Field f = clazz.getDeclaredField(name);
+            f.setAccessible(true);
+            return f;
+        } catch (NoSuchFieldException e) {
+            if (clazz == Object.class) {
+                throw e;
+            }
+            return getField(clazz.getSuperclass(), name);
+        }
+
     }
 }
