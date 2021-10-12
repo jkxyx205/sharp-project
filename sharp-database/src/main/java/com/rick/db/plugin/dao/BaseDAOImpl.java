@@ -12,6 +12,8 @@ import com.rick.db.service.SharpService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -441,12 +443,18 @@ public class BaseDAOImpl<T> {
         if (Objects.isNull(value)) {
             return null;
         }
+
         if (Enum.class.isAssignableFrom(value.getClass())) {
             return EnumUtils.getCode((Enum) value);
         } else if(value.getClass() == Instant.class) {
             return Timestamp.from((Instant) value);
-        } else {
+        }
+
+        int sqlTypeValue = StatementCreatorUtils.javaTypeToSqlParameterType(value.getClass());
+        if (SqlTypeValue.TYPE_UNKNOWN != sqlTypeValue) {
             return value;
+        } else {
+            return String.valueOf(value);
         }
     }
 
