@@ -1,6 +1,7 @@
 package com.rick.db.service;
 
 import com.rick.common.http.convert.CodeToEnumConverterFactory;
+import com.rick.common.http.convert.StringListConverter;
 import com.rick.common.http.convert.StringToJsonConverterFactory;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.AllArgsConstructor;
@@ -147,6 +148,7 @@ public class SharpService {
     private void customerConversion(DefaultConversionService defaultConversionService) {
         defaultConversionService.addConverterFactory(new CodeToEnumConverterFactory());
         defaultConversionService.addConverterFactory(new StringToJsonConverterFactory());
+        defaultConversionService.addConverter(new StringListConverter());
     }
 
     @AllArgsConstructor

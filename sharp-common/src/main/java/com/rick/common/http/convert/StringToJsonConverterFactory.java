@@ -11,11 +11,10 @@ import java.io.IOException;
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */
-final public class StringToJsonConverterFactory<T> implements ConverterFactory<String, StringToJsonConverterFactory.JsonValue> {
+final public class StringToJsonConverterFactory implements ConverterFactory<String, StringToJsonConverterFactory.JsonValue> {
 
     public StringToJsonConverterFactory() {
     }
-
 
     @Override
     public <T extends StringToJsonConverterFactory.JsonValue> Converter<String, T> getConverter(Class<T> targetType) {
