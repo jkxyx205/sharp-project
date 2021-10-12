@@ -10,7 +10,10 @@ import java.lang.reflect.Method;
  */
 @UtilityClass
 public class EnumUtils {
-    private static final String METHOD_NAME = "valueOfCode";
+
+    private static final String VALUE_OF_CODE_METHOD_NAME = "valueOfCode";
+
+    private static final String GET_CODE_METHOD_NAME = "getCode";
 
     /**
      *
@@ -23,7 +26,7 @@ public class EnumUtils {
         try {
             Enum en;
             for (Method method : methods) {
-                if (method.getName().equals(METHOD_NAME)) {
+                if (method.getName().equals(VALUE_OF_CODE_METHOD_NAME)) {
                     Class<?> parameterType = method.getParameterTypes()[0];
                     if (parameterType == Integer.class || parameterType == int.class) {
                         en = (Enum) method.invoke(null, Integer.parseInt(code));
@@ -37,5 +40,19 @@ public class EnumUtils {
         }
 
         return null;
+    }
+
+    /**
+     * 获取code值
+     * @param en
+     * @return
+     */
+    public static Object getCode(Enum en) {
+        try {
+            Method getCodeMethod = en.getClass().getMethod(GET_CODE_METHOD_NAME);
+            return getCodeMethod.invoke(en);
+        } catch (Exception e) {
+            return en.name();
+        }
     }
 }
