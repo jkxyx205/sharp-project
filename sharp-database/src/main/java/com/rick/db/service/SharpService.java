@@ -1,11 +1,13 @@
 package com.rick.db.service;
 
+import com.rick.common.http.convert.CodeToEnumConverterFactory;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -123,7 +125,12 @@ public class SharpService {
             return (List<T>) query(sql, paramMap);
         }
 
-        return jdbcTemplate.query(sql, paramMap, new BeanPropertyRowMapper<>(clazz));
+        BeanPropertyRowMapper<T> beanPropertyRowMapper = new BeanPropertyRowMapper<>(clazz);
+        DefaultConversionService defaultConversionService = (DefaultConversionService) beanPropertyRowMapper.getConversionService();
+        customerConversion(defaultConversionService);
+
+        List<T> query = jdbcTemplate.query(sql, paramMap, beanPropertyRowMapper);
+        return query;
     }
 
     protected List<Map<String, Object>> toMap(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap) {
@@ -136,9 +143,13 @@ public class SharpService {
         return new SQLFormatter(formatSql, paramMap);
     }
 
+    private void customerConversion(DefaultConversionService defaultConversionService) {
+        defaultConversionService.addConverterFactory(new CodeToEnumConverterFactory());
+    }
+
     @AllArgsConstructor
     @Getter
-    class SQLFormatter {
+    private class SQLFormatter {
 
         private String formatSql;
 

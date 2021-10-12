@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
+import com.rick.common.util.EnumUtils;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.config.Constants;
 import com.rick.db.plugin.SQLUtils;
@@ -64,7 +65,8 @@ public class BaseDAOImpl<T> {
         this.tableName = tableName;
         this.columnNames = columnNames;
         this.primaryColumn = primaryColumn;
-        this.updateColumnNames = columnNames;
+        this.updateColumnNames = resolveUpdateColumnNames(columnNames, primaryColumn);
+
         this.init();
     }
 
@@ -164,7 +166,7 @@ public class BaseDAOImpl<T> {
      * @param id
      */
     public int update(Object[] params, Serializable id) {
-        return SQLUtils.update(tableName, columnNames, handleAutoFill(params, columnNameList, ColumnFillType.UPDATE), id);
+        return SQLUtils.update(tableName, this.updateColumnNames, handleAutoFill(params, updateColumnNameList, ColumnFillType.UPDATE), id);
     }
 
     /**
@@ -384,13 +386,26 @@ public class BaseDAOImpl<T> {
             for (int i = 0; i < this.entityFields.length; i++) {
                 Field field = this.entityFields[i];
                 field.setAccessible(true);
-                Object param = this.entityFields[i].get(t);
+                Object param = resolverValue(this.entityFields[i], t);
                 params[i] = param;
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
         return params;
+    }
+
+    private Object resolverValue(Field field, T t) throws IllegalAccessException {
+        Object value = field.get(t);
+        if (Objects.isNull(value)) {
+            return null;
+        }
+
+        if (field.getType().isEnum()) {
+            return EnumUtils.getCode((Enum) value);
+         } else {
+             return value;
+         }
     }
 
     private Object getPropertyValue(T t, String propertyName) {
@@ -425,6 +440,12 @@ public class BaseDAOImpl<T> {
             params[i] = getPropertyValue(t, includePropertyList.get(i));
         }
         return params;
+    }
+
+    private String resolveUpdateColumnNames(String columnNames, String primaryColumn) {
+        // \bid\b\s*,?
+        String updateColumnNames = columnNames.replaceAll("(?i)(\\b" + primaryColumn + "\\b\\s*,?)", "").trim();
+        return updateColumnNames.endsWith(",") ? updateColumnNames.substring(0, updateColumnNames.length() - 1) : updateColumnNames;
     }
 
 }
