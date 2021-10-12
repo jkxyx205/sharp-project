@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -287,6 +289,7 @@ public class BaseDAOImpl<T> {
                     this.columnNames = tableMeta.getColumnNames();
                     this.primaryColumn = tableMeta.getIdColumnName();
                 }
+
                 this.propertyList = convertToArray(tableMeta.getProperties());
                 this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
                 this.entityFields = ReflectUtils.getAllFields(this.entityClass);
@@ -380,34 +383,6 @@ public class BaseDAOImpl<T> {
         this.selectSQL = selectSQLBuilder.toString();
     }
 
-    private Object[] instanceToParamsArray(T t) {
-        Object[] params = new Object[this.columnNameList.size()];
-        try {
-            for (int i = 0; i < this.entityFields.length; i++) {
-                Field field = this.entityFields[i];
-                field.setAccessible(true);
-                Object param = resolverValue(this.entityFields[i], t);
-                params[i] = param;
-            }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        return params;
-    }
-
-    private Object resolverValue(Field field, T t) throws IllegalAccessException {
-        Object value = field.get(t);
-        if (Objects.isNull(value)) {
-            return null;
-        }
-
-        if (field.getType().isEnum()) {
-            return EnumUtils.getCode((Enum) value);
-         } else {
-             return value;
-         }
-    }
-
     private Object getPropertyValue(T t, String propertyName) {
         try {
             Field field = propertyFieldMap.get(propertyName);
@@ -437,9 +412,42 @@ public class BaseDAOImpl<T> {
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = getPropertyValue(t, includePropertyList.get(i));
+            params[i] = resolverValue(getPropertyValue(t, includePropertyList.get(i)));
         }
         return params;
+    }
+
+    private Object[] instanceToParamsArray(T t) {
+        Object[] params = new Object[this.columnNameList.size()];
+        try {
+            for (int i = 0; i < this.entityFields.length; i++) {
+                Field field = this.entityFields[i];
+                field.setAccessible(true);
+                Object param = resolverValue(this.entityFields[i], t);
+                params[i] = param;
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return params;
+    }
+
+    private Object resolverValue(Field field, T t) throws IllegalAccessException {
+        Object value = field.get(t);
+        return resolverValue(value);
+    }
+
+    private Object resolverValue(Object value) {
+        if (Objects.isNull(value)) {
+            return null;
+        }
+        if (Enum.class.isAssignableFrom(value.getClass())) {
+            return EnumUtils.getCode((Enum) value);
+        } else if(value.getClass() == Instant.class) {
+            return Timestamp.from((Instant) value);
+        } else {
+            return value;
+        }
     }
 
     private String resolveUpdateColumnNames(String columnNames, String primaryColumn) {
