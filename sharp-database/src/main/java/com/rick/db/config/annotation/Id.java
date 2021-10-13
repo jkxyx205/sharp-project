@@ -1,7 +1,5 @@
 package com.rick.db.config.annotation;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-
 import java.lang.annotation.*;
 
 /**
@@ -13,6 +11,4 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 public @interface Id {
     String value() default "";
-
-    IdType type() default IdType.NONE;
 }

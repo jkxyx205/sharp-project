@@ -1,9 +1,11 @@
 package com.rick.db.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.config.annotation.ColumnName;
 import com.rick.db.config.annotation.Id;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -13,12 +15,14 @@ import java.time.Instant;
  * @author Rick
  * @createdAt 2021-09-23 23:10:00
  */
-@Data
-@NoArgsConstructor
 @SuperBuilder
+@Getter
+@Setter
+@NoArgsConstructor
 public class BasePureEntity {
 
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     @ColumnName(value = "created_by", updatable = false)
@@ -32,6 +36,7 @@ public class BasePureEntity {
     private Instant updatedAt;
 
     @ColumnName("is_deleted")
+    @JsonIgnore
     private Boolean deleted;
 
     @Override

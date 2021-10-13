@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 /**
@@ -49,21 +48,11 @@ public abstract class AbstractSqlFormatter {
     private static final String HOLDER_REGEX = "(([(]\\s*:\\w+\\s*[)])|(:\\w+))";
 
     /**
-     * 参数占位符 ${name} or (${name})
-     */
-    private static final String HOLDER_REGEX2 = "(([(]\\s*\\$\\{\\s*\\w+\\s*\\}\\s*[)])|(\\$\\{\\s*\\w+\\s*\\}))";
-
-    /**
      * :name
      */
     private static final String PARAM_REGEX = ":" + LEGAL_PARAM_NAME_REGEX;
 
     private static final String IN_PARAM_REGEX = "[(]"+PARAM_REGEX+"[)]";
-
-    /**
-     * ${name}
-     */
-    private static final String PARAM_REGEX2 = "\\{\\s*("+LEGAL_PARAM_NAME_REGEX+")\\s*\\}";
 
     /**
 	 * 逻辑IN和NOT IN操作符
@@ -73,8 +62,6 @@ public abstract class AbstractSqlFormatter {
 	private static final String BASE_LEFT_EXPRESSION = COLUMN_REGEX + "\\s*" + OPERATOR_REGEX + "\\s*";
 	
 	private static final String FULL_REGEX = BASE_LEFT_EXPRESSION + HOLDER_REGEX;
-
-	private static final String FULL_REGEX2 = BASE_LEFT_EXPRESSION + HOLDER_REGEX2;
 
     //IN_PARAM_REGEX = "[(][^)]+[)]";
 	private static final String IN_FULL_REGEX = COLUMN_REGEX + "\\s*" + OPERATOR_IN_REGEX + "\\s*" + IN_PARAM_REGEX;
@@ -91,9 +78,6 @@ public abstract class AbstractSqlFormatter {
 
     private static final Pattern fullPattern = Pattern.compile(FULL_REGEX);
     private static final Pattern paramPattern = Pattern.compile(PARAM_REGEX);
-
-    private static final Pattern fullPattern2 = Pattern.compile(FULL_REGEX2);
-    private static final Pattern paramPattern2 = Pattern.compile(PARAM_REGEX2);
 
 	static {
 		DATE_FORMAT_MAP = new HashMap<>(2);
@@ -422,10 +406,6 @@ public abstract class AbstractSqlFormatter {
     private static final char SUFFIX = '}';
 
     private String handleHolderSQL(String srcSQL, Map<String, ?> params) {
-        List<ParamHolder> paramList = splitParam(srcSQL, fullPattern2, paramPattern2);
-
-        Set<String> paramSet = paramList.stream().map(ph -> ph.param).collect(Collectors.toSet());
-
         char[] sqlChar = srcSQL.toCharArray();
         int len = sqlChar.length;
 
@@ -443,12 +423,8 @@ public abstract class AbstractSqlFormatter {
                 }
             } else if (findHolder == true && SUFFIX == c) {
                 findHolder = false;
-                String holderName = holderBuilder.toString();
                 Object holderValue = params.get(holderBuilder.toString());
-
-                // 判断是否是参数
-                boolean isExpression = paramSet.contains(holderName);
-                String resultText = isExpression ? ":param" + i + Long.MAX_VALUE : (Objects.isNull(holderValue) ? "" : String.valueOf(holderValue));
+                String resultText = Objects.nonNull(holderValue) ? String.valueOf(holderValue) : "";
 
                 sqlBuilder.append(resultText);
                 holderBuilder.delete(0, holderBuilder.length());

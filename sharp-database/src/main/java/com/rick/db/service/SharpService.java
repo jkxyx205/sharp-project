@@ -57,10 +57,9 @@ public class SharpService {
     }
 
     /**
-     * 两列
+     * 取前两列，忽略其他列
      * 第一列做key
      * 第二列做Value
-     *
      * @param sql
      * @param params
      * @return

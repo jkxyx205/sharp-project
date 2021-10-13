@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.EnumUtils;
+import com.rick.common.util.JsonUtils;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.config.Constants;
 import com.rick.db.plugin.SQLUtils;
@@ -80,12 +81,17 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int insert(T t) {
-        if (this.entityFields == null) {
-            throw new RuntimeException("没有指定范型");
-        }
-        Object[] params = handleAutoFill(instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
+        Object[] params;
         int index = columnNameList.indexOf(this.primaryColumn);
-        setPropertyValue(t, this.primaryColumn, params[index]);
+        if (this.entityClass == Map.class) {
+            Map map = (Map) t;
+            params = handleAutoFill(mapToParamsArray(map, this.columnNameList), columnNameList, ColumnFillType.INSERT);
+            map.put(this.columnNameList, params[index]);
+        } else {
+            params = handleAutoFill(instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
+            setPropertyValue(t, this.primaryColumn, params[index]);
+        }
+
         return SQLUtils.insert(tableName, columnNames, params);
     }
 
@@ -106,17 +112,22 @@ public class BaseDAOImpl<T> {
             return new int[] {};
         }
         Class<?> paramClass = paramsList.get(0).getClass();
-        if (paramClass == this.entityClass) {
+        if (paramClass == this.entityClass || Map.class.isAssignableFrom(paramClass)) {
             List<Object[]> params = Lists.newArrayListWithCapacity(paramsList.size());
             for (Object o : paramsList) {
-                params.add(instanceToParamsArray((T) o));
+                if (this.entityClass == Map.class) {
+                    params.add(mapToParamsArray((Map) o, this.columnNameList));
+                } else {
+                    params.add(instanceToParamsArray((T) o));
+                }
+
             }
             return SQLUtils.insert(tableName, columnNames, handleAutoFill(params, columnNameList, ColumnFillType.INSERT));
         } else if(paramClass == Object[].class) {
             return SQLUtils.insert(tableName, columnNames, handleAutoFill((List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
         }
 
-        throw new RuntimeException("List不支持的批量操作范型类型，目前仅支持Object[]和entity");
+        throw new RuntimeException("List不支持的批量操作范型类型，目前仅支持Object[]、entity、Map");
     }
 
     /**
@@ -179,10 +190,20 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int update(T t) {
+        Object[] params;
+        Serializable id;
+        if (this.entityClass == Map.class) {
+            Map map = (Map)t;
+            params = mapToParamsArray(map, this.updateColumnNameList);
+            id = (Serializable) map.get(this.primaryColumn);
+        } else {
+            params = instanceToParamsArray(t, updatePropertyList);
+            id = (Serializable) getPropertyValue(t, this.primaryColumn);
+        }
         return SQLUtils.update(tableName, this.updateColumnNames,
-                handleAutoFill(instanceToParamsArray(t, updatePropertyList),
+                handleAutoFill(params,
                 updateColumnNameList, ColumnFillType.UPDATE),
-                (Serializable) getPropertyValue(t, this.primaryColumn));
+                id);
     }
 
     /**
@@ -245,6 +266,26 @@ public class BaseDAOImpl<T> {
     public List<T> selectByParams(String queryString, String conditionSQL) {
         final Map<String, String> map = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryString);
         return selectByParams(map, conditionSQL);
+    }
+
+    /**
+     * 根据条件查找
+     *
+     * @param
+     * @return
+     */
+    public List<T> selectByParams(T t) {
+        return selectByParams(t, null);
+    }
+
+    public List<T> selectByParams(T t, String conditionSQL) {
+        Map params;
+        if (this.entityClass == Map.class) {
+            params = (Map) t;
+        } else {
+            params = JsonUtils.objectToMap(t);
+        }
+        return selectByParams(params, conditionSQL);
     }
 
     /**
@@ -329,7 +370,9 @@ public class BaseDAOImpl<T> {
         if (Objects.isNull(value)) {
             return " = :" + columnName;
         }
-        if (value instanceof Iterable || value.getClass().isArray() || (((String) value).split(Constants.PARAM_IN_SEPARATOR).length > 1)) {
+        if (value instanceof Iterable
+                || value.getClass().isArray()
+                || (value.getClass() == String.class && ((String) value).split(Constants.PARAM_IN_SEPARATOR).length > 1)) {
             return " IN (:" + columnName + ")";
         } /*else if (((String) value).startsWith(Constants.PARAM_LIKE_SEPARATOR)) {
             params.put(columnName, ((String) value).substring(1));
@@ -431,6 +474,17 @@ public class BaseDAOImpl<T> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        return params;
+    }
+
+    private Object[] mapToParamsArray(Map map, List<String> updateColumnNameList) {
+        Object[] params = new Object[updateColumnNameList.size()];
+
+        for (int i = 0; i < updateColumnNameList.size(); i++) {
+            Object param = resolverValue(map.get(updateColumnNameList.get(i)));
+            params[i] = param;
+        }
+
         return params;
     }
 
