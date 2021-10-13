@@ -49,8 +49,7 @@ public class PropertyServiceImpl implements PropertyService {
 
         JdbcTemplate jdbcTemplate = sharpService.getNamedJdbcTemplate().getJdbcTemplate();
 
-        int updateCount = jdbcTemplate.update(UPDATE_SQL,
-                name, value);
+        int updateCount = jdbcTemplate.update(UPDATE_SQL, value, name);
 
         if (updateCount == 0) {
             jdbcTemplate.update(INSERT_SQL, name, value);
