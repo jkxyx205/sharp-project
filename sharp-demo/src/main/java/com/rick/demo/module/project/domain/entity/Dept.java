@@ -1,4 +1,4 @@
-package com.rick.common.model;
+package com.rick.demo.module.project.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
