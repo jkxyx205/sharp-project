@@ -191,8 +191,8 @@ public class BaseDAOImplTest {
         Map<Serializable, Project> serializableProjectMap2 = projectDAO.selectByIdsAsMap("47972313492976435,47972313492976432");
         assertThat(serializableProjectMap1.size()).isEqualTo(2);
         assertThat(serializableProjectMap1.get(479723134929764352L).getSex()).isEqualTo(SexEnum.MALE);
-        assertThat(serializableProjectMap1.get(479723134929764352L).getAddress().getCode()).isEqualTo("001");
-        assertThat(serializableProjectMap1.get(479723134929764352L).getList().get(0).getCode()).isEqualTo("001");
+        assertThat(serializableProjectMap1.get(479723663504343040L).getAddress().getCode()).isEqualTo("001");
+        assertThat(serializableProjectMap1.get(479723663504343040L).getList().get(0).getCode()).isEqualTo("001");
 
         assertThat(serializableProjectMap2.size()).isEqualTo(0);
     }

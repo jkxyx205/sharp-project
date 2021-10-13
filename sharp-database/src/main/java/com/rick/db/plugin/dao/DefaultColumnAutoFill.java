@@ -3,7 +3,7 @@ package com.rick.db.plugin.dao;
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -15,7 +15,7 @@ public class DefaultColumnAutoFill implements ColumnAutoFill {
     @Override
     public Map<String, Object> insertFill() {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(4);
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         fillMap.put("id", IdGenerator.getSequenceId());
         fillMap.put("created_at", now);
         fillMap.put("updated_at", now);
@@ -26,7 +26,7 @@ public class DefaultColumnAutoFill implements ColumnAutoFill {
     @Override
     public Map<String, Object> updateFill() {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(2);
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         fillMap.put("updated_at", now);
         return fillMap;
     }

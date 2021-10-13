@@ -409,7 +409,7 @@ public class BaseDAOImpl<T> {
 
                 int index = columnNameList.indexOf(fillColumnName);
                 if (index > -1) {
-                    params[index] = fillColumnValue;
+                    params[index] = resolverValue(fillColumnValue);
                 }
             }
         }
