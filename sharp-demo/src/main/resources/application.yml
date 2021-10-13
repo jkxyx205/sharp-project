@@ -10,7 +10,7 @@ spring:
 
 logging:
   level:
-    com.yodean.component.project: DEBUG
+    com.rick.demo: DEBUG
     com.rick.db: DEBUG
 
 dict:

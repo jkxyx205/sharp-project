@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -234,6 +235,15 @@ public class BaseDAOImpl<T> {
     public Optional<T> selectById(Serializable id) {
         List<T> list = selectByParams(this.primaryColumn + "=" + id, this.primaryColumn + " = :id");
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
+    }
+
+    public Map<Serializable, T> selectByIdsAsMap(String ids) {
+        return listToMap(selectByIds(ids));
+    }
+
+    public Map<Serializable, T> selectByIdsAsMap(Collection<?> ids) {
+        List<T> list = selectByIds(ids);
+        return listToMap(list);
     }
 
     /**
@@ -516,6 +526,10 @@ public class BaseDAOImpl<T> {
         // \bid\b\s*,?
         String updateColumnNames = columnNames.replaceAll("(?i)(\\b" + primaryColumn + "\\b\\s*,?)", "").trim();
         return updateColumnNames.endsWith(",") ? updateColumnNames.substring(0, updateColumnNames.length() - 1) : updateColumnNames;
+    }
+
+    private Map<Serializable, T> listToMap(List<T> list) {
+        return list.stream().collect(Collectors.toMap(t-> (this.entityClass == Map.class) ? (Serializable)((Map)t).get(this.primaryColumn) : (Serializable)getPropertyValue(t, this.primaryColumn), v -> v));
     }
 
 }

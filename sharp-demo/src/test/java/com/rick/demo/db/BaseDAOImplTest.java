@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -182,6 +183,18 @@ public class BaseDAOImplTest {
     public void testFindAll() {
         List<Project> list = projectDAO.selectAll();
         System.out.println(list.size());
+    }
+
+    @Test
+    public void testSelectByIdsAsMap() {
+        Map<Serializable, Project> serializableProjectMap1 = projectDAO.selectByIdsAsMap(Lists.newArrayList(479723134929764352L, 479723663504343040L));
+        Map<Serializable, Project> serializableProjectMap2 = projectDAO.selectByIdsAsMap("47972313492976435,47972313492976432");
+        assertThat(serializableProjectMap1.size()).isEqualTo(2);
+        assertThat(serializableProjectMap1.get(479723134929764352L).getSex()).isEqualTo(SexEnum.MALE);
+        assertThat(serializableProjectMap1.get(479723134929764352L).getAddress().getCode()).isEqualTo("001");
+        assertThat(serializableProjectMap1.get(479723134929764352L).getList().get(0).getCode()).isEqualTo("001");
+
+        assertThat(serializableProjectMap2.size()).isEqualTo(0);
     }
 
     public Project createProject() {
