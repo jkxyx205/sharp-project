@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Rick
@@ -79,5 +80,9 @@ public final class JsonUtils {
 
     public static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
         return objectMapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
+    }
+
+    public static Map<String, ?> objectToMap(Object obj) {
+        return objectMapper.convertValue(obj, Map.class);
     }
 }
