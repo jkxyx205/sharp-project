@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -41,7 +42,7 @@ public class FileUploadAutoConfig {
     }
 
     /**
-     * 本地存储
+     * 默认本地存储
      * @param localProperties
      * @return
      */
@@ -52,6 +53,7 @@ public class FileUploadAutoConfig {
     }
 
     @Bean
+    @Primary
     public FileStore fileStore(InputStreamStore inputStreamStore){
         return new FileStore(inputStreamStore);
     }
@@ -81,24 +83,23 @@ public class FileUploadAutoConfig {
 
         return new DocumentServiceImpl(documentDAO, fileStore, fileUploadProperties, imageService);
     }
-
-    @Configuration
-    static class FastDFSConfig {
+//    @Configuration
+//    static class FastDFSConfig {
         // 会先执行fastDFSUploaderHandler，再执行DefaultUploadHandler
 //        @Bean
 //        @Primary
 //        public InputStreamStore fastDFSInputStreamStore() throws IOException, MyException {
 //            return new FastDFSInputStreamStore("fdfs_client.properties");
 //        }
-    }
+//    }
 
-    @Configuration
-    static class OSSConfig {
+//    @Configuration
+//    static class OSSConfig {
  /*       @Bean
         @Primary*/
 //        public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
 //            OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
 //            return new OSSInputStreamStore(ossClient, ossProperties);
 //        }
-    }
+//    }
 }
