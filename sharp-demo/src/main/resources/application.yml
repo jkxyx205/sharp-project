@@ -1,0 +1,32 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 50MB
+  datasource:
+    url: jdbc:mysql://localhost:3306/sharp-demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+    username: root
+    password: jkxyx205
+
+logging:
+  level:
+    com.yodean.component.project: DEBUG
+    com.rick.db: DEBUG
+
+dict:
+  items:
+    - type: user
+      sql: "select username, name from sys_user order by id asc"
+    - type: grade
+      map: {g1: "一年级", g2: "二年级"}
+
+fileupload:
+  tmp: /Users/rick/jkxyx205/tmp/fastdfs/tmp # 下载的临时目录
+  local: # cd /Users/rick/jkxyx205/tmp/fileupload && http-server -p 7892
+    root-path: /Users/rick/jkxyx205/tmp/fileupload
+    server-url: http://localhost:7892/ # 映射到tmp目录
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKeyId: xxx
+    accessKeySecret: xxx
+    bucketName: sharp-fileupload
