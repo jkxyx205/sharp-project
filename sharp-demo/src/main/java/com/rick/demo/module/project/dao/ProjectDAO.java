@@ -17,7 +17,7 @@ public class ProjectDAO extends BaseDAOImpl<Project> {
          * 手动指定
          */
         super("t_project",
-                "title,description,cover_url,owner_id,sex,address,status,list,id,created_by,created_at,updated_by,updated_at,is_deleted",
+                "title,description,cover_url,owner_id,sex,address,status,list,phone_number, id,created_by,created_at,updated_by,updated_at,is_deleted",
                 "id");
     }
 }

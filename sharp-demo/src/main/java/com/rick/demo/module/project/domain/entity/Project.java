@@ -39,4 +39,6 @@ public class Project extends BasePureEntity {
 
     private List<Address> list;
 
+    private PhoneNumber phoneNumber;
+
 }

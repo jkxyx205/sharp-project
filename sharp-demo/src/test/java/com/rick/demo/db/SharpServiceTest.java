@@ -72,8 +72,8 @@ public class SharpServiceTest {
         List<Project> list = gridService.query(sql, params, Project.class);
         list.forEach(System.out::println);
         assertThat(list.size()).isEqualTo(3);
-        assertThat(list.get(0).getSex()).isEqualTo(SexEnum.MALE);
-        assertThat(list.get(0).getStatus()).isEqualTo(UserStatusEnum.LOCKED);
+        assertThat(list.get(0).getSex()).isEqualTo(SexEnum.FEMALE);
+        assertThat(list.get(0).getStatus()).isEqualTo(UserStatusEnum.NORMAL);
     }
 
     @Test
