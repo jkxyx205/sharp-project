@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.config.annotation.ColumnName;
 import com.rick.db.config.annotation.Id;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

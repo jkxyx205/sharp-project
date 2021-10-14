@@ -3,6 +3,7 @@ package com.rick.db.plugin.dao;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.EnumUtils;
 import com.rick.common.util.JsonUtils;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
@@ -78,6 +80,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 插入单条数据
+     *
      * @param t 参数对象
      * @return
      */
@@ -98,6 +101,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 插入单条数据
+     *
      * @param params 参数数组
      * @return
      */
@@ -110,7 +114,7 @@ public class BaseDAOImpl<T> {
      */
     public int[] insert(List<?> paramsList) {
         if (CollectionUtils.isEmpty(paramsList)) {
-            return new int[] {};
+            return new int[]{};
         }
         Class<?> paramClass = paramsList.get(0).getClass();
         if (paramClass == this.entityClass || Map.class.isAssignableFrom(paramClass)) {
@@ -124,7 +128,7 @@ public class BaseDAOImpl<T> {
 
             }
             return SQLUtils.insert(tableName, columnNames, handleAutoFill(params, columnNameList, ColumnFillType.INSERT));
-        } else if(paramClass == Object[].class) {
+        } else if (paramClass == Object[].class) {
             return SQLUtils.insert(tableName, columnNames, handleAutoFill((List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
         }
 
@@ -142,6 +146,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 通过主鍵id批量刪除 eg：ids -> “1,2,3,4”
+     *
      * @param ids
      */
     public int deleteByIds(String ids) {
@@ -150,6 +155,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 通过主鍵id批量刪除 eg：ids -> [1, 2, 3, 4]
+     *
      * @param ids
      */
     public int deleteByIds(Collection<?> ids) {
@@ -158,6 +164,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 根据某个自定义的字段删除
+     *
      * @param deleteColumn
      * @param deleteValues
      * @return
@@ -168,6 +175,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 构造条件和参数删除
+     *
      * @param params
      * @param conditionSQL id IN (?, ?) AND group_id = ?
      * @return
@@ -178,6 +186,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 更新所有字段
+     *
      * @param params
      * @param id
      */
@@ -187,6 +196,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 更新所有字段
+     *
      * @param t
      * @return
      */
@@ -194,7 +204,7 @@ public class BaseDAOImpl<T> {
         Object[] params;
         Serializable id;
         if (this.entityClass == Map.class) {
-            Map map = (Map)t;
+            Map map = (Map) t;
             params = mapToParamsArray(map, this.updateColumnNameList);
             id = (Serializable) map.get(this.primaryColumn);
         } else {
@@ -203,15 +213,16 @@ public class BaseDAOImpl<T> {
         }
         return SQLUtils.update(tableName, this.updateColumnNames,
                 handleAutoFill(params,
-                updateColumnNameList, ColumnFillType.UPDATE),
+                        updateColumnNameList, ColumnFillType.UPDATE),
                 id);
     }
 
     /**
      * 指定更新字段
+     *
      * @param updateColumnNames name, age
-     * @param params {"Rick", 23}
-     * @param id 1
+     * @param params            {"Rick", 23}
+     * @param id                1
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
         return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), id);
@@ -219,9 +230,10 @@ public class BaseDAOImpl<T> {
 
     /**
      * 指定更新字段，构造条件更新
+     *
      * @param updateColumnNames name, age
-     * @param params {"Rick", 23, LocalDateTime.now, 1}
-     * @param conditionSQL created_at > ? AND created_by = ?
+     * @param params            {"Rick", 23, LocalDateTime.now, 1}
+     * @param conditionSQL      created_at > ? AND created_by = ?
      */
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
         return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), conditionSQL);
@@ -229,6 +241,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 通过ID查找
+     *
      * @param id
      * @return
      */
@@ -248,6 +261,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 通过多个ID查找//eg：ids -> “1,2,3,4”
+     *
      * @param ids
      * @return
      */
@@ -266,6 +280,7 @@ public class BaseDAOImpl<T> {
     /**
      * name=23&age=15,13 => name=:name AND age IN(:age)
      * 注意`=`两边的空格问题
+     *
      * @param queryString
      * @return
      */
@@ -310,6 +325,7 @@ public class BaseDAOImpl<T> {
 
     /**
      * 依赖sharpService，可以进行不定条件的查询
+     *
      * @param params
      * @param conditionSQL
      * @return
@@ -507,18 +523,37 @@ public class BaseDAOImpl<T> {
         if (Objects.isNull(value)) {
             return null;
         }
-
+        // 处理BaseDAOImpl特殊类型
         if (Enum.class.isAssignableFrom(value.getClass())) {
             return EnumUtils.getCode((Enum) value);
-        } else if(value.getClass() == Instant.class) {
+        } else if (value.getClass() == Instant.class) {
             return Timestamp.from((Instant) value);
+        } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(value.getClass())) {
+            return toJson(value);
+        } else if (Collection.class.isAssignableFrom(value.getClass())) {
+            Collection<?> coll = (Collection<?>) value;
+            if (coll.size() == 0) {
+                return "[]";
+            } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
+                return toJson(value);
+            }
         }
 
+        // JDBC 支持类型
         int sqlTypeValue = StatementCreatorUtils.javaTypeToSqlParameterType(value.getClass());
+
         if (SqlTypeValue.TYPE_UNKNOWN != sqlTypeValue) {
             return value;
         } else {
             return String.valueOf(value);
+        }
+    }
+
+    private String toJson(Object value) {
+        try {
+            return JsonUtils.toJson(value);
+        } catch (IOException e) {
+            return null;
         }
     }
 
@@ -529,7 +564,7 @@ public class BaseDAOImpl<T> {
     }
 
     private Map<Serializable, T> listToMap(List<T> list) {
-        return list.stream().collect(Collectors.toMap(t-> (this.entityClass == Map.class) ? (Serializable)((Map)t).get(this.primaryColumn) : (Serializable)getPropertyValue(t, this.primaryColumn), v -> v));
+        return list.stream().collect(Collectors.toMap(t -> (this.entityClass == Map.class) ? (Serializable) ((Map) t).get(this.primaryColumn) : (Serializable) getPropertyValue(t, this.primaryColumn), v -> v));
     }
 
 }

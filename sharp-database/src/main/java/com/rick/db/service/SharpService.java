@@ -9,6 +9,7 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -32,6 +33,9 @@ public class SharpService {
 
     @Autowired
     protected AbstractSqlFormatter sqlFormatter;
+
+    @Autowired(required = false)
+    private List<ConverterFactory> converterFactories = Collections.emptyList();
 
     public interface JdbcTemplateCallback<T> {
         List<T> query(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap);
@@ -145,6 +149,11 @@ public class SharpService {
     }
 
     private void customerConversion(DefaultConversionService defaultConversionService) {
+        for (ConverterFactory converterFactory : converterFactories) {
+            defaultConversionService.addConverterFactory(converterFactory);
+        }
+
+        // 内置转换器
         defaultConversionService.addConverterFactory(new CodeToEnumConverterFactory());
         defaultConversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
         defaultConversionService.addConverter(new JsonStringToCollectionConverter());
