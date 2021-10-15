@@ -2,9 +2,8 @@ package com.rick.db.formatter;
 
 import com.rick.db.config.Constants;
 import com.rick.db.dto.PageModel;
-import com.rick.db.util.NamedParameterUtils;
-import com.rick.db.util.ParsedSql;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSqlHelper;
 
 import java.lang.reflect.Array;
 import java.sql.Timestamp;
@@ -86,8 +85,7 @@ public abstract class AbstractSqlFormatter {
 	}
 	
 	public String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap) {
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(srcSql);
-		List<String> names = parsedSql.getParameterNames();
+		List<String> names = ParsedSqlHelper.get(srcSql);
 		
 		if(params == null) {
 			params = Collections.emptyMap();

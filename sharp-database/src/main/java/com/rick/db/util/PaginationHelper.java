@@ -13,6 +13,7 @@ import java.util.Map;
  * @Copyright: 2019 www.yodean.com. All rights reserved.
  */
 public final class PaginationHelper {
+
     /**
      * 当分页较多的时候，希望显示部分分页
      * @param total 总页数

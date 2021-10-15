@@ -6,8 +6,7 @@ import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -23,9 +22,8 @@ import java.util.*;
  * @author rick
  * @date 2018/3/16
  */
+@Slf4j
 public class SharpService {
-
-    private static Logger logger = LoggerFactory.getLogger(SharpService.class);
 
     @Autowired
     @Getter
@@ -51,10 +49,10 @@ public class SharpService {
 
     public <T> List<T> query(String sql, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback) {
         //忽略空值参数，由SharpService处理  否则会报org.springframework.dao.InvalidDataAccessApiUsageException: No value supplied for the SQL parameter
-        SQLFormatter sqlFormatter = getSQLFormatter(sql, params);
+        SqlFormatter sqlFormatter = getSQLFormatter(sql, params);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("SQL=> [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL=> [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
         }
 
         return jdbcTemplateCallback.query(namedJdbcTemplate, sqlFormatter.formatSql, sqlFormatter.paramMap);
@@ -101,9 +99,9 @@ public class SharpService {
     }
 
     public int update(String sql, Map<String, ?> params) {
-        SQLFormatter sqlFormatter = getSQLFormatter(sql, params);
-        if (logger.isDebugEnabled()) {
-            logger.debug("SQL=> [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
+        SqlFormatter sqlFormatter = getSQLFormatter(sql, params);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL=> [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
         }
         return namedJdbcTemplate.update(sqlFormatter.formatSql, sqlFormatter.paramMap);
     }
@@ -142,10 +140,10 @@ public class SharpService {
         return jdbcTemplate.queryForList(sql, paramMap);
     }
 
-    private SQLFormatter getSQLFormatter(String sql, Map<String, ?> params) {
+    private SqlFormatter getSQLFormatter(String sql, Map<String, ?> params) {
         Map<String, Object> paramMap = new HashMap<>();
         String formatSql = sqlFormatter.formatSql(sql, params, paramMap);
-        return new SQLFormatter(formatSql, paramMap);
+        return new SqlFormatter(formatSql, paramMap);
     }
 
     private void customerConversion(DefaultConversionService defaultConversionService) {
@@ -161,7 +159,7 @@ public class SharpService {
 
     @AllArgsConstructor
     @Getter
-    private class SQLFormatter {
+    private class SqlFormatter {
 
         private String formatSql;
 
