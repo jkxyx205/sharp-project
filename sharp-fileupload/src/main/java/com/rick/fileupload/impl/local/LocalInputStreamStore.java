@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * @author Rick
@@ -33,7 +30,12 @@ public class LocalInputStreamStore extends AbstractInputStreamStore {
         }
 
         IOUtils.copy(is, new FileOutputStream(new File(storePath, storeFullName)));
-        return new StoreResponse(groupName, storeFullName,storePath + File.separator + storeFullName , getURL(groupName, storeFullName));
+        return new StoreResponse(groupName, storeFullName, storePath + File.separator + storeFullName, getURL(groupName, storeFullName));
+    }
+
+    @Override
+    public InputStream getInputStream(String groupName, String path) throws IOException {
+        return new FileInputStream(getGroupNamePath(groupName) + File.separator + path);
     }
 
     @Override
@@ -41,12 +43,13 @@ public class LocalInputStreamStore extends AbstractInputStreamStore {
         FileUtils.forceDelete(new File(getGroupNamePath(groupName) + File.separator + path));
     }
 
-    private String getGroupNamePath(String groupName) {
-        return localProperties.getRootPath() + File.separator + groupName;
-    }
-
     @Override
     protected String getServerUrl() {
         return localProperties.getServerUrl();
     }
+
+    private String getGroupNamePath(String groupName) {
+        return localProperties.getRootPath() + File.separator + groupName;
+    }
+
 }

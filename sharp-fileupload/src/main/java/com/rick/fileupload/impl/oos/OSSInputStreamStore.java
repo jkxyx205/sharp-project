@@ -7,7 +7,6 @@ import com.rick.fileupload.core.model.StoreResponse;
 import com.rick.fileupload.impl.oos.property.OSSProperties;
 import lombok.RequiredArgsConstructor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,17 +25,14 @@ public class OSSInputStreamStore extends AbstractInputStreamStore {
     public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
         String path = storeName + "." + extension;
         ossClient.putObject(ossProperties.getBucketName(),
-                groupName + "/" + path,
-                is);
-        return new StoreResponse(groupName, path,groupName + "/" + path ,
-                getURL(groupName, path));
+                groupName + "/" + path, is);
+        return new StoreResponse(groupName, path, groupName + "/" + path, getURL(groupName, path));
     }
 
     @Override
     public void delete(String groupName, String path) throws IOException {
         ossClient.deleteObject(ossProperties.getBucketName(), getFullPath(groupName, path));
     }
-
 
     @Override
     protected String getServerUrl() {

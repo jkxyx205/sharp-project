@@ -22,9 +22,9 @@ import java.util.Properties;
 @Slf4j
 public class FastDFSInputStreamStore extends AbstractInputStreamStore {
 
-
     /**
      * "fdfs_client.properties"
+     *
      * @param propertyFilePath
      * @throws IOException
      * @throws MyException
@@ -41,7 +41,7 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
         StorageClient storageClient = getTrackerClient();
         try {
             String[] uploadResults = storageClient.upload_file(groupName, IOUtils.toByteArray(is), extension, null);
-            return new StoreResponse(uploadResults[0], uploadResults[1], getFullPath(groupName, uploadResults[1]) , getURL(uploadResults[0], uploadResults[1]));
+            return new StoreResponse(uploadResults[0], uploadResults[1], getFullPath(groupName, uploadResults[1]), getURL(uploadResults[0], uploadResults[1]));
         } catch (MyException e) {
             throw new IOException(e);
         }
