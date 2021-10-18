@@ -36,6 +36,10 @@ public final class JsonUtils {
         return writer.toString();
     }
 
+    public static <T> T toObject(InputStream is, Class<T> clazz) throws IOException {
+        return  objectMapper.readValue(is, clazz);
+    }
+
     public static <T> T toObject(String json, Class<T> clazz) throws IOException {
         T t;
         InputStream is = new ByteArrayInputStream(json.getBytes("UTF-8"));
