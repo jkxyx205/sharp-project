@@ -34,15 +34,15 @@ public class SharpConfig {
             @Override
             public Map<String, Object> insertFill() {
                 Map<String, Object> fill = new DefaultColumnAutoFill().insertFill();
-                fill.put("created_by", 0);
-                fill.put("updated_by", 0);
+                fill.put("created_by", 0L);
+                fill.put("updated_by", 0L);
                 return fill;
             }
 
             @Override
             public Map<String, Object> updateFill() {
                 Map<String, Object> fill = new DefaultColumnAutoFill().updateFill();
-                fill.put("updated_by", 0);
+                fill.put("updated_by", 0L);
                 return fill;
             }
         };
