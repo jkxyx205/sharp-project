@@ -1,10 +1,10 @@
 package com.rick.fileupload.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rick.common.util.StringUtils;
 import com.rick.db.config.annotation.Transient;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Rick
@@ -42,11 +42,7 @@ public class FileMeta {
      * @return
      */
     public String getFullName() {
-        if (StringUtils.isBlank(this.getExtension())) {
-            return this.getName();
-        }
-
-        return this.getName() + (StringUtils.isEmpty(this.getExtension()) ? "" : "." + this.getExtension());
+        return StringUtils.fullName(name, extension);
     }
 
     public String getFullPath() {

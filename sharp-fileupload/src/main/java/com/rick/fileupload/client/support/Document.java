@@ -1,5 +1,7 @@
 package com.rick.fileupload.client.support;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.config.annotation.TableName;
 import com.rick.fileupload.core.model.FileMeta;
 import lombok.Data;
@@ -14,6 +16,7 @@ import java.time.Instant;
 @Data
 public class Document extends FileMeta {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     private Instant createdAt;
