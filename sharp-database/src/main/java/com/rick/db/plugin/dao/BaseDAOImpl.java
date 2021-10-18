@@ -62,6 +62,8 @@ public class BaseDAOImpl<T> {
 
     private Map<String, Field> propertyFieldMap;
 
+    private Map<String, String> columnNameToPropertyNameMap;
+
     @Autowired(required = false)
     private ColumnAutoFill columnAutoFill;
 
@@ -89,10 +91,10 @@ public class BaseDAOImpl<T> {
         int index = columnNameList.indexOf(this.primaryColumn);
         if (this.entityClass == Map.class) {
             Map map = (Map) t;
-            params = handleAutoFill(mapToParamsArray(map, this.columnNameList), columnNameList, ColumnFillType.INSERT);
+            params = handleAutoFill(t, mapToParamsArray(map, this.columnNameList), columnNameList, ColumnFillType.INSERT);
             map.put(this.columnNameList, params[index]);
         } else {
-            params = handleAutoFill(instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
+            params = handleAutoFill(t, instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
             setPropertyValue(t, this.primaryColumn, params[index]);
         }
 
@@ -106,7 +108,7 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int insert(Object[] params) {
-        return SQLUtils.insert(tableName, columnNames, handleAutoFill(params, columnNameList, ColumnFillType.INSERT));
+        return SQLUtils.insert(tableName, columnNames, handleAutoFill(null, params, columnNameList, ColumnFillType.INSERT));
     }
 
     /**
@@ -117,9 +119,12 @@ public class BaseDAOImpl<T> {
             return new int[]{};
         }
         Class<?> paramClass = paramsList.get(0).getClass();
+        List<T> instanceList = Lists.newArrayListWithCapacity(paramsList.size());
         if (paramClass == this.entityClass || Map.class.isAssignableFrom(paramClass)) {
             List<Object[]> params = Lists.newArrayListWithCapacity(paramsList.size());
+
             for (Object o : paramsList) {
+                instanceList.add((T) o);
                 if (this.entityClass == Map.class) {
                     params.add(mapToParamsArray((Map) o, this.columnNameList));
                 } else {
@@ -127,9 +132,9 @@ public class BaseDAOImpl<T> {
                 }
 
             }
-            return SQLUtils.insert(tableName, columnNames, handleAutoFill(params, columnNameList, ColumnFillType.INSERT));
+            return SQLUtils.insert(tableName, columnNames, handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
         } else if (paramClass == Object[].class) {
-            return SQLUtils.insert(tableName, columnNames, handleAutoFill((List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
+            return SQLUtils.insert(tableName, columnNames, handleAutoFill(paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
         }
 
         throw new RuntimeException("List不支持的批量操作范型类型，目前仅支持Object[]、entity、Map");
@@ -191,7 +196,7 @@ public class BaseDAOImpl<T> {
      * @param id
      */
     public int update(Object[] params, Serializable id) {
-        return SQLUtils.update(tableName, this.updateColumnNames, handleAutoFill(params, updateColumnNameList, ColumnFillType.UPDATE), id);
+        return SQLUtils.update(tableName, this.updateColumnNames, handleAutoFill(null, params, updateColumnNameList, ColumnFillType.UPDATE), id);
     }
 
     /**
@@ -212,7 +217,7 @@ public class BaseDAOImpl<T> {
             id = (Serializable) getPropertyValue(t, this.primaryColumn);
         }
         return SQLUtils.update(tableName, this.updateColumnNames,
-                handleAutoFill(params,
+                handleAutoFill(t, params,
                         updateColumnNameList, ColumnFillType.UPDATE),
                 id);
     }
@@ -225,7 +230,7 @@ public class BaseDAOImpl<T> {
      * @param id                1
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
-        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), id);
+        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(null, params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), id);
     }
 
     /**
@@ -236,7 +241,7 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL      created_at > ? AND created_by = ?
      */
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
-        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), conditionSQL);
+        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(null, params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), conditionSQL);
     }
 
     /**
@@ -378,6 +383,13 @@ public class BaseDAOImpl<T> {
         this.columnNameList = convertToArray(columnNames);
         this.updateColumnNameList = convertToArray(updateColumnNames);
 
+        if (CollectionUtils.isNotEmpty(propertyList)) {
+            columnNameToPropertyNameMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
+            for (int i = 0; i < columnNameList.size(); i++) {
+                columnNameToPropertyNameMap.put(columnNameList.get(i), propertyList.get(i));
+            }
+        }
+
         initSelectSQL();
         log.info("tableName: {}, columnNames: {}", this.tableName, this.columnNames);
     }
@@ -408,14 +420,14 @@ public class BaseDAOImpl<T> {
         return " = :" + columnName;
     }
 
-    private List<Object[]> handleAutoFill(List<Object[]> paramsList, List<String> columnNameList, ColumnFillType fillType) {
-        for (Object[] params : paramsList) {
-            handleAutoFill(params, columnNameList, fillType);
+    private List<Object[]> handleAutoFill(List<?> list, List<Object[]> paramsList, List<String> columnNameList, ColumnFillType fillType) {
+        for (int i = 0; i < paramsList.size(); i++) {
+            handleAutoFill(list.get(i), paramsList.get(i), columnNameList, fillType);
         }
         return paramsList;
     }
 
-    private Object[] handleAutoFill(Object[] params, List<String> columnNameList, ColumnFillType fillType) {
+    private Object[] handleAutoFill(Object t, Object[] params, List<String> columnNameList, ColumnFillType fillType) {
         if (Objects.nonNull(columnAutoFill)) {
             Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill() : columnAutoFill.updateFill();
 
@@ -424,8 +436,19 @@ public class BaseDAOImpl<T> {
                 Object fillColumnValue = en.getValue();
 
                 int index = columnNameList.indexOf(fillColumnName);
-                if (index > -1) {
+                if (index > -1 && Objects.isNull(params[index])) {
                     params[index] = resolverValue(fillColumnValue);
+
+                    // 将auto值回写到实体中
+                    if (t == null || t == params) {
+                        continue;
+                    }
+                    if (this.entityClass == Map.class) {
+                        Map map = (Map) t;
+                        map.put(fillColumnName, fillColumnValue);
+                    } else {
+                        setPropertyValue((T)t, columnNameToPropertyNameMap.get(fillColumnName), fillColumnValue);
+                    }
                 }
             }
         }
