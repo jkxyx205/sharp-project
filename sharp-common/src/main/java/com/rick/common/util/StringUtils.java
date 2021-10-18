@@ -270,6 +270,14 @@ public final class StringUtils {
         }
     }
 
+    public static String fullName(String name, String extension) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(extension)) {
+            return name;
+        }
+
+        return name +  "." + extension;
+    }
+
     public static boolean isImageType(String extension, String contentType) {
         if (isImageExtension(extension)) {
             return true;
