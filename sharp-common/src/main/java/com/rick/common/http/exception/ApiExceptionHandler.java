@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -83,10 +84,11 @@ public class ApiExceptionHandler {
      * @throws IOException
      * @throws ServletException
      */
-    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
-        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID);
+//        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID);
+        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID.getCode(), ex.getMessage());
     }
 
     /**
@@ -101,12 +103,16 @@ public class ApiExceptionHandler {
     }
 
     private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, ResultCode resultCode) throws ServletException, IOException {
+      return exceptionHandler(request, response, ex, resultCode.getCode(), resultCode.getMsg());
+    }
+
+    private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, int code, String message) throws ServletException, IOException {
         if (log.isErrorEnabled()) {
             this.logStackTrace(ex);
         }
 
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
-            return ResultUtils.exception(resultCode.getCode(), resultCode.getMsg());
+            return ResultUtils.exception(code, message);
         }
 
         request.getRequestDispatcher("/error").forward(request, response);
