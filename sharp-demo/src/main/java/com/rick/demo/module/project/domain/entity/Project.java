@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -35,6 +36,7 @@ public class Project extends BasePureEntity {
 
     private Address address;
 
+    @NotNull
     private UserStatusEnum status;
 
     private List<Address> list;

@@ -6,9 +6,10 @@ import com.rick.common.http.convert.CodeToEnumConverterFactory;
 import com.rick.common.http.exception.ApiExceptionHandler;
 import com.rick.common.http.json.deserializer.EnumJsonDeserializer;
 import com.rick.common.http.util.MessageUtils;
+import com.rick.common.validate.ServiceMethodValidationInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -19,7 +20,8 @@ import javax.annotation.PostConstruct;
  * @createdAt 2021-10-13 12:17:00
  */
 @Configuration
-@ComponentScan(basePackageClasses = {ApiExceptionHandler.class, MessageUtils.class})
+@Import({ApiExceptionHandler.class, MessageUtils.class, ServiceMethodValidationInterceptor.class})
+//@ComponentScan(basePackageClasses = MessageUtils.class)
 @RequiredArgsConstructor
 public class MvcConfig implements WebMvcConfigurer {
 
