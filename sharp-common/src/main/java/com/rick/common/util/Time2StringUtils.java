@@ -29,6 +29,7 @@ public final class Time2StringUtils {
     public static String format(Instant instant) {
         return format(instant, DEFAULT_FORMATTER);
     }
+
     public static String format(Instant instant, DateTimeFormatter formatter) {
         return Objects.isNull(instant) ? null : formatter.format(instant);
     }
