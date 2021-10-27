@@ -220,10 +220,8 @@ public class BaseDAOImpl<T> {
             params = instanceToParamsArray(t, updatePropertyList);
             id = (Serializable) getPropertyValue(t, this.primaryColumn);
         }
-        return SQLUtils.update(tableName, this.updateColumnNames,
-                handleAutoFill(t, params,
-                        updateColumnNameList, ColumnFillType.UPDATE),
-                id);
+
+        return updateById(t, this.updateColumnNames, params, this.updateColumnNameList, id);
     }
 
     /**
@@ -234,7 +232,7 @@ public class BaseDAOImpl<T> {
      * @param id                1
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
-        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(null, params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), id);
+        return updateById(null, updateColumnNames, params, convertToArray(updateColumnNames), id);
     }
 
     /**
@@ -245,7 +243,7 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL      created_at > ? AND created_by = ?
      */
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
-        return SQLUtils.update(tableName, updateColumnNames, handleAutoFill(null, params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), conditionSQL);
+        return update(null, updateColumnNames, params, convertToArray(updateColumnNames), conditionSQL);
     }
 
     /**
@@ -396,20 +394,19 @@ public class BaseDAOImpl<T> {
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
         Map<String, Object> conditionParams;
 
+        String additionCondition = "";
         if (Objects.nonNull(conditionAdvice)) {
             conditionParams = conditionAdvice.getCondition();
             if (MapUtils.isNotEmpty(conditionParams)) {
-                if (StringUtils.isNotBlank(conditionSQL)) {
-                    String additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
-                    conditionSQL += StringUtils.isBlank(additionCondition) ? "" : " AND " + additionCondition;
-                }
+                additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
                 conditionParams.putAll(params);
             }
         } else {
             conditionParams = (Map<String, Object>) params;
         }
 
-        return (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL),
+        return (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL)
+                        + (StringUtils.isBlank(additionCondition) ? "" : " AND " + additionCondition),
                 conditionParams,
                 this.entityClass);
     }
@@ -660,6 +657,45 @@ public class BaseDAOImpl<T> {
 
     private Map<Serializable, T> listToMap(List<T> list) {
         return list.stream().collect(Collectors.toMap(t -> (this.entityClass == Map.class) ? (Serializable) ((Map) t).get(this.primaryColumn) : (Serializable) getPropertyValue(t, this.primaryColumn), v -> v));
+    }
+
+    private int updateById(T t, String updateColumnNames, Object[] params, List<String> updateColumnNameList, Serializable id) {
+        Object[] mergedParams = new Object[params.length + 1];
+        mergedParams[params.length] = id;
+        System.arraycopy(params, 0, mergedParams, 0, params.length);
+        return update(t, updateColumnNames, mergedParams, updateColumnNameList, "id = ?");
+    }
+
+    private int update(T t, String updateColumnNames, Object[] params, List<String> updateColumnNameList, String conditionSQL) {
+        Object[] objects = handleConditionAdvice(handleAutoFill(t, params, updateColumnNameList, ColumnFillType.UPDATE), conditionSQL);
+        return SQLUtils.update(tableName,
+                updateColumnNames,
+                (Object[])objects[0],
+                (String) objects[1]);
+    }
+
+    private Object[] handleConditionAdvice(Object[] params, String conditionSQL) {
+        Object[] mergedParams = params;
+        if (Objects.nonNull(this.conditionAdvice)) {
+            Map<String, Object> conditionParams = conditionAdvice.getCondition();
+
+            if (MapUtils.isNotEmpty(conditionParams)) {
+                String additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
+                if (StringUtils.isNotBlank(additionCondition)) {
+                    additionCondition = SQLUtils.paramsHolderToQuestionHolder(additionCondition);
+                    conditionSQL = StringUtils.isNotBlank(conditionSQL) ? (conditionSQL + " AND " + additionCondition) : additionCondition;
+
+                    mergedParams = new Object[params.length + conditionParams.size()];
+                    System.arraycopy(params, 0, mergedParams, 0, params.length);
+
+                    int i = 0;
+                    for (String key : conditionParams.keySet()) {
+                        mergedParams[params.length + i++] = conditionParams.get(key);
+                    }
+                }
+            }
+        }
+        return new Object[]{mergedParams, conditionSQL};
     }
 
 }

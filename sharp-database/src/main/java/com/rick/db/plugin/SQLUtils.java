@@ -5,6 +5,7 @@ import com.rick.common.util.Assert;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.PageModel;
+import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -320,6 +321,16 @@ public final class SQLUtils {
 
     private static String getUpdateSQL(String tableName, String columnNames, String conditionSQL) {
         return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX), " = ?,") + " = ? WHERE " + conditionSQL;
+    }
+
+    /**
+     * name = :name AND age = : age
+     * name = ? AND age = ?
+     * @param sql
+     * @return
+     */
+    public static String paramsHolderToQuestionHolder(String sql) {
+        return sql.replaceAll(AbstractSqlFormatter.PARAM_REGEX, "?");
     }
 
 }
