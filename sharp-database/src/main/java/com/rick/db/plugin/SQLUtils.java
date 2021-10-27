@@ -1,7 +1,9 @@
 package com.rick.db.plugin;
 
 import com.google.common.collect.Maps;
+import com.rick.common.util.Assert;
 import com.rick.db.config.SharpDatabaseProperties;
+import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.PageModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -79,9 +81,7 @@ public final class SQLUtils {
      * @return
      */
     public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id) {
-        if (Objects.isNull(id)) {
-            throw new RuntimeException("主键不能为null");
-        }
+        Assert.notNull(id, "主键不能为null");
         Object[] mergedParams = new Object[params.length + 1];
         mergedParams[params.length] = id;
         System.arraycopy(params, 0, mergedParams, 0, params.length);
@@ -315,11 +315,11 @@ public final class SQLUtils {
         return String.format("INSERT INTO %s(%s) VALUES(%s)",
                 tableName,
                 columnNames,
-                StringUtils.join(Collections.nCopies(columnNames.split("\\s*,\\s*").length, "?"), ","));
+                StringUtils.join(Collections.nCopies(columnNames.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX).length, "?"), ","));
     }
 
     private static String getUpdateSQL(String tableName, String columnNames, String conditionSQL) {
-        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(",\\s*"), " = ?,") + " = ? WHERE " + conditionSQL;
+        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX), " = ?,") + " = ? WHERE " + conditionSQL;
     }
 
 }

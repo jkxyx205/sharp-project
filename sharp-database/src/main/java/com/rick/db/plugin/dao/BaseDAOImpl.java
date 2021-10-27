@@ -4,15 +4,15 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
-import com.rick.common.util.ClassUtils;
-import com.rick.common.util.EnumUtils;
-import com.rick.common.util.JsonUtils;
-import com.rick.common.util.ReflectUtils;
+import com.rick.common.util.*;
 import com.rick.db.config.Constants;
+import com.rick.db.constant.EntityConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.SharpService;
+import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
@@ -141,7 +141,7 @@ public class BaseDAOImpl<T> {
     }
 
     /**
-     * 通过主鍵id刪除
+     * 通过主键id刪除
      *
      * @param id
      */
@@ -150,7 +150,7 @@ public class BaseDAOImpl<T> {
     }
 
     /**
-     * 通过主鍵id批量刪除 eg：ids -> “1,2,3,4”
+     * 通过主键id批量刪除 eg：ids -> “1,2,3,4”
      *
      * @param ids
      */
@@ -159,7 +159,7 @@ public class BaseDAOImpl<T> {
     }
 
     /**
-     * 通过主鍵id批量刪除 eg：ids -> [1, 2, 3, 4]
+     * 通过主键id批量刪除 eg：ids -> [1, 2, 3, 4]
      *
      * @param ids
      */
@@ -245,15 +245,61 @@ public class BaseDAOImpl<T> {
     }
 
     /**
+     * 通过主键逻辑id刪除
+     *
+     * @param id
+     */
+    public int deleteLogicallyById(Serializable id) {
+        Assert.notNull(id, "主键不能为null");
+        return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.primaryColumn + " = ?");
+    }
+
+    /**
+     * 通过主键id批量逻辑刪除 eg：ids -> “1,2,3,4”
+     *
+     * @param ids
+     */
+    public int deleteLogicallyByIds(String ids) {
+        if (StringUtils.isBlank(ids)) {
+            return 0;
+        }
+        return deleteLogicallyByIds(Arrays.asList(ids.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX)));
+    }
+
+    /**
+     * 通过主键id批量逻辑刪除 eg：ids -> [1, 2, 3, 4]
+     *
+     * @param ids
+     */
+    public int deleteLogicallyByIds(Collection<?> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return 0;
+        }
+
+        Object[] mergedParams = new Object[ids.size() + 1];
+        mergedParams[0] = 1;
+        System.arraycopy(ids.toArray(), 0, mergedParams, 1, ids.size());
+        return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.primaryColumn + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+    }
+
+    /**
      * 通过ID查找
      *
      * @param id
      * @return
      */
     public Optional<T> selectById(Serializable id) {
-        List<T> list = selectByParams(this.primaryColumn + "=" + id, this.primaryColumn + " = :id");
+        Assert.notNull(id, "主键不能为null");
+//        List<T> list = selectByParams(this.primaryColumn + " = " + id, this.primaryColumn + " = :id");
+
+        Map<String, Object> params = Params.builder(1)
+                .pv(this.primaryColumn, id)
+                .build();
+
+        List<T> list = selectByParams(params, this.primaryColumn + " = :id");
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
     }
+
 
     public Map<Serializable, T> selectByIdsAsMap(String ids) {
         return listToMap(selectByIds(ids));
@@ -271,14 +317,12 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public List<T> selectByIds(String ids) {
-        Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
-        params.put("ids", ids);
+        Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, this.primaryColumn + " IN(:ids)");
     }
 
     public List<T> selectByIds(Collection<?> ids) {
-        Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
-        params.put("ids", ids);
+        Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, this.primaryColumn + " IN(:ids)");
     }
 
@@ -457,7 +501,7 @@ public class BaseDAOImpl<T> {
     }
 
     private List<String> convertToArray(String values) {
-        return Arrays.asList(values.split(",\\s*"));
+        return Arrays.asList(values.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
     }
 
     private void initSelectSQL() {
