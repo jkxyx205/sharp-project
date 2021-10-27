@@ -49,7 +49,7 @@ public abstract class AbstractSqlFormatter {
     /**
      * :name
      */
-    private static final String PARAM_REGEX = ":" + LEGAL_PARAM_NAME_REGEX;
+    public static final String PARAM_REGEX = ":" + LEGAL_PARAM_NAME_REGEX;
 
     private static final String IN_PARAM_REGEX = "[(]"+PARAM_REGEX+"[)]";
 
@@ -152,19 +152,22 @@ public abstract class AbstractSqlFormatter {
                 }
 
 				if (set.size() > 0) {
-					StringBuilder sb = new StringBuilder("IN (");
-					int i = 0;
-					for (Object inParam : set) {
+                    StringBuilder sb = new StringBuilder("IN (");
+                    int i = 0;
+                    for (Object inParam : set) {
                         String newProName = name + i;
                         sb.append(":").append(newProName).append(",");
                         formatMap.put(newProName, inParam);
                         i++;
                     }
-					sb.deleteCharAt(sb.length()-1);
-					sb.append(")");
-					sb.toString();
+                    sb.deleteCharAt(sb.length() - 1);
+                    sb.append(")");
+                    sb.toString();
 					srcSql = srcSql.replaceAll("((?i)in)\\s*[(]\\s*:" + h.param + "\\s*[)]", sb.toString());
-				}
+				} else {
+                    srcSql = ignoreAndReturnSQL(srcSql, h);
+                    continue;
+                }
 
 			} else if("LIKE".equalsIgnoreCase(h.operator)) {
 				 srcSql = srcSql.replace(h.full, new StringBuilder("UPPER(").append(h.column).append(") ").append(h.operator).append(contactString(name)).append(" ").append(escapeString()));

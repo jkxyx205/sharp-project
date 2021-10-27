@@ -2,7 +2,6 @@ package com.rick.db.service.support;
 
 import com.google.common.collect.Maps;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +35,7 @@ public class Params {
         }
 
         public Map<String, Object> build() {
-            return Collections.unmodifiableMap(params);
+            return params;
         }
 
     }

@@ -12,6 +12,7 @@ import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
@@ -34,6 +35,9 @@ public class BaseDAOImpl<T> {
 
     @Autowired
     private SharpService sharpService;
+
+    @Autowired(required = false)
+    private ConditionAdvice conditionAdvice;
 
     private String tableName;
 
@@ -146,7 +150,7 @@ public class BaseDAOImpl<T> {
      * @param id
      */
     public int deleteById(Serializable id) {
-        return SQLUtils.delete(tableName, this.primaryColumn, String.valueOf(id));
+        return SQLUtils.delete(tableName, this.primaryColumn, Lists.newArrayList(id));
     }
 
     /**
@@ -373,6 +377,16 @@ public class BaseDAOImpl<T> {
     }
 
     /**
+     * 获取所有
+     *
+     * @return
+     */
+    public List<T> selectAll() {
+//        return (List<T>) sharpService.query(this.selectSQL, null, this.entityClass);
+        return selectByParams(Collections.emptyMap(), null);
+    }
+
+    /**
      * 依赖sharpService，可以进行不定条件的查询
      *
      * @param params
@@ -380,18 +394,28 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
-        return (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL),
-                params,
+        Map<String, Object> conditionParams;
+
+        if (Objects.nonNull(conditionAdvice)) {
+            conditionParams = conditionAdvice.getCondition();
+            if (MapUtils.isNotEmpty(conditionParams)) {
+                if (StringUtils.isNotBlank(conditionSQL)) {
+                    String additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
+                    conditionSQL += StringUtils.isBlank(additionCondition) ? "" : " AND " + additionCondition;
+                }
+                conditionParams.putAll(params);
+            }
+        } else {
+            conditionParams = (Map<String, Object>) params;
+        }
+
+        return (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL),
+                conditionParams,
                 this.entityClass);
     }
 
-    /**
-     * 获取所有
-     *
-     * @return
-     */
-    public List<T> selectAll() {
-        return (List<T>) sharpService.query(this.selectSQL, null, this.entityClass);
+    public String getSelectSQL() {
+        return this.selectSQL;
     }
 
     private void init() {
@@ -438,17 +462,17 @@ public class BaseDAOImpl<T> {
         log.info("tableName: {}, columnNames: {}", this.tableName, this.columnNames);
     }
 
-    private String getConditionSQL(Map<String, ?> params) {
+    public static String getConditionSQL(Collection<String> columnNameList, Map<String, ?> params) {
         StringBuilder sb = new StringBuilder();
         for (String columnName : columnNameList) {
             Object value = params.get(columnName);
             sb.append(columnName).append(decideParamHolder(columnName, value)).append(" AND ");
         }
 
-        return sb.substring(0, sb.length() - 5);
+        return StringUtils.isBlank(sb) ? "" : sb.substring(0, sb.length() - 5);
     }
 
-    private String decideParamHolder(String columnName, Object value) {
+    private static String decideParamHolder(String columnName, Object value) {
         if (Objects.isNull(value)) {
             return " = :" + columnName;
         }
@@ -462,6 +486,10 @@ public class BaseDAOImpl<T> {
         }*/
 
         return " = :" + columnName;
+    }
+
+    private String getConditionSQL(Map<String, ?> params) {
+       return getConditionSQL(this.columnNameList, params);
     }
 
     private List<Object[]> handleAutoFill(List<?> list, List<Object[]> paramsList, List<String> columnNameList, ColumnFillType fillType) {
