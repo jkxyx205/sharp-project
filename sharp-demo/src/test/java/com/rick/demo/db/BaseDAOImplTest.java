@@ -34,7 +34,7 @@ public class BaseDAOImplTest {
 
     @AfterAll
     public static void init() {
-        SQLUtils.deleteNotIn("t_project", "id", Arrays.asList(479723134929764352L, 479723663504343040L, 479723663504343041L));
+        SQLUtils.deleteNotIn("t_project", "id", Arrays.asList(479723134929764352L, 479723663504343040L, 479723663504343041L, 479723663504343042L, 479723663504343043L));
     }
 
     @Order(1)
@@ -216,6 +216,13 @@ public class BaseDAOImplTest {
         assertThat(serializableProjectMap1.get(479723663504343040L).getList().get(0).getCode()).isEqualTo("001");
 
         assertThat(serializableProjectMap2.size()).isEqualTo(0);
+    }
+
+    @Order(20)
+    @Test
+    public void testDeleteLogically() {
+        projectDAO.deleteLogicallyById(479723663504343042L);
+        projectDAO.deleteLogicallyByIds(Lists.newArrayList(479723663504343042L, 479723663504343043L));
     }
 
     public Project createProject() {
