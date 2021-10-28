@@ -1,5 +1,6 @@
 package com.rick.common.http.exception;
 
+import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultCode;
@@ -7,8 +8,11 @@ import com.rick.common.http.model.ResultUtils;
 import com.rick.common.http.util.MessageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,11 +21,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -87,8 +96,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
-//        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID);
-        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID.getCode(), ex.getMessage());
+        if (ex instanceof ConstraintViolationException) {
+            ConstraintViolationException cve = (ConstraintViolationException) ex;
+            return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, formatErrors(cve.getConstraintViolations()));
+        } else if (ex instanceof BindException) {
+            BindException be = (BindException) ex;
+            return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, formatErrors(be.getAllErrors()));
+        }
+        MethodArgumentNotValidException me = (MethodArgumentNotValidException) ex;
+
+        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, formatErrors(me.getAllErrors()));
     }
 
     /**
@@ -103,16 +120,20 @@ public class ApiExceptionHandler {
     }
 
     private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, ResultCode resultCode) throws ServletException, IOException {
-      return exceptionHandler(request, response, ex, resultCode.getCode(), resultCode.getMsg());
+        return exceptionHandler(request, response, ex, resultCode, null);
     }
 
-    private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, int code, String message) throws ServletException, IOException {
+    private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, ResultCode resultCode, Object data) throws ServletException, IOException {
+        return exceptionHandler(request, response, ex, resultCode.getCode(), resultCode.getMsg(), data);
+    }
+
+    private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, int code, String message, Object data) throws ServletException, IOException {
         if (log.isErrorEnabled()) {
             this.logStackTrace(ex);
         }
 
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
-            return ResultUtils.exception(code, message);
+            return ResultUtils.exception(code, message, data);
         }
 
         request.getRequestDispatcher("/error").forward(request, response);
@@ -126,5 +147,27 @@ public class ApiExceptionHandler {
         if (log.isErrorEnabled()) {
             log.error(exception);
         }
+    }
+
+    private List<Map<String, Object>> formatErrors(List<ObjectError> objectErrors) {
+        return objectErrors.stream().map(objectError -> {
+                    FieldError fieldError = (FieldError) objectError;
+                    Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
+                    params.put("field", fieldError.getField());
+                    params.put("message", objectError.getDefaultMessage());
+                    params.put("rejectedValue", ((FieldError) objectError).getRejectedValue());
+                    return params;
+                }
+           ).collect(Collectors.toList());
+    }
+
+    private List<Map<String, Object>> formatErrors(Set<ConstraintViolation<?>> constraintViolationSet) {
+        return constraintViolationSet.stream().map(constraintViolation -> {
+            Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
+            params.put("field", StringUtils.substringAfterLast(constraintViolation.getPropertyPath().toString(), "."));
+            params.put("message", constraintViolation.getMessage());
+            params.put("rejectedValue", constraintViolation.getInvalidValue());
+            return params;
+        }).collect(Collectors.toList());
     }
 }
