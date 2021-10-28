@@ -134,7 +134,6 @@ public class BaseDAOImpl<T> {
                 } else {
                     params.add(instanceToParamsArray((T) o));
                 }
-
             }
             return SQLUtils.insert(tableName, columnNames, handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
         } else if (paramClass == Object[].class) {
@@ -182,6 +181,10 @@ public class BaseDAOImpl<T> {
         return SQLUtils.delete(tableName, deleteColumn, deleteValues);
     }
 
+    public int delete(String deleteColumn, Collection<?> deleteValues) {
+        return SQLUtils.delete(tableName, deleteColumn, deleteValues);
+    }
+
     /**
      * 构造条件和参数删除
      *
@@ -210,6 +213,35 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int update(T t) {
+        Object[] objects = resolverParamsAndId(t);
+        return updateById(t, this.updateColumnNames, (Object[]) objects[0], this.updateColumnNameList, (Serializable) objects[1]);
+    }
+
+    /**
+     * 批量更新
+     * @param collection
+     * @return
+     */
+    public int[] update(Collection<T> collection) {
+        if (CollectionUtils.isEmpty(collection)) {
+            return new int[] {};
+        }
+
+        List<Object[]> paramsList = Lists.newArrayListWithCapacity(collection.size());
+
+        String conditionSQL = null;
+        for (T t : collection) {
+            Object[] resolverParamsAndIdObjects = resolverParamsAndId(t);
+            Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (Serializable) resolverParamsAndIdObjects[1]);
+            Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1]);
+            paramsList.add((Object[]) finalObjects[0]);
+            conditionSQL = (String) finalObjects[1];
+        }
+
+        return SQLUtils.update(this.tableName, this.updateColumnNames, paramsList, conditionSQL);
+    }
+
+    private Object[] resolverParamsAndId(T t) {
         Object[] params;
         Serializable id;
         if (this.entityClass == Map.class) {
@@ -221,18 +253,34 @@ public class BaseDAOImpl<T> {
             id = (Serializable) getPropertyValue(t, this.primaryColumn);
         }
 
-        return updateById(t, this.updateColumnNames, params, this.updateColumnNameList, id);
+        return new Object[] {params, id};
     }
 
     /**
-     * 指定更新字段
+     * 指定更新字段，update_at不会autoFill，需要自己指定
      *
-     * @param updateColumnNames name, age
-     * @param params            {"Rick", 23}
+     * @param updateColumnNames name, age, updated_at
+     * @param params            {"Rick", 23, null}
      * @param id                1
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
         return updateById(null, updateColumnNames, params, convertToArray(updateColumnNames), id);
+    }
+
+    public int[] update(String updateColumnNames, List<Object[]> srcParamsList, Serializable id) {
+        if (CollectionUtils.isEmpty(srcParamsList)) {
+            return new int[] {};
+        }
+
+        List<Object[]> paramsList = Lists.newArrayListWithCapacity(srcParamsList.size());
+        String conditionSQL = null;
+        for (Object[] params : srcParamsList) {
+            Object[] mergeIdParamObjects = mergeIdParam(params, id);
+            Object[] finalObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) mergeIdParamObjects[0], convertToArray(updateColumnNames), ColumnFillType.UPDATE), (String) mergeIdParamObjects[1]);
+            paramsList.add((Object[]) finalObjects[0]);
+            conditionSQL = (String) finalObjects[1];
+        }
+        return SQLUtils.update(tableName, updateColumnNames, paramsList, conditionSQL);
     }
 
     /**
@@ -244,6 +292,20 @@ public class BaseDAOImpl<T> {
      */
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
         return update(null, updateColumnNames, params, convertToArray(updateColumnNames), conditionSQL);
+    }
+
+    public int[] update(String updateColumnNames, List<Object[]> srcParamsList, String conditionSQL) {
+        if (CollectionUtils.isEmpty(srcParamsList)) {
+            return new int[] {};
+        }
+
+        List<Object[]> paramsList = Lists.newArrayListWithCapacity(srcParamsList.size());
+        for (Object[] params : srcParamsList) {
+            Object[] finalObjects = handleConditionAdvice(handleAutoFill(null, params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), conditionSQL);
+            paramsList.add((Object[]) finalObjects[0]);
+            conditionSQL = (String) finalObjects[1];
+        }
+        return SQLUtils.update(tableName, updateColumnNames, paramsList, conditionSQL);
     }
 
     /**
@@ -665,10 +727,8 @@ public class BaseDAOImpl<T> {
     }
 
     private int updateById(T t, String updateColumnNames, Object[] params, List<String> updateColumnNameList, Serializable id) {
-        Object[] mergedParams = new Object[params.length + 1];
-        mergedParams[params.length] = id;
-        System.arraycopy(params, 0, mergedParams, 0, params.length);
-        return update(t, updateColumnNames, mergedParams, updateColumnNameList, "id = ?");
+        Object[] objects = mergeIdParam(params, id);
+        return update(t, updateColumnNames, (Object[]) objects[0], updateColumnNameList, (String) objects[1]);
     }
 
     private int update(T t, String updateColumnNames, Object[] params, List<String> updateColumnNameList, String conditionSQL) {
@@ -679,6 +739,25 @@ public class BaseDAOImpl<T> {
                 (String) objects[1]);
     }
 
+    /**
+     * 将id合并到参数中
+     * @param params
+     * @param id
+     * @return
+     */
+    private Object[] mergeIdParam(Object[] params, Serializable id) {
+        Object[] mergedParams = new Object[params.length + 1];
+        mergedParams[params.length] = id;
+        System.arraycopy(params, 0, mergedParams, 0, params.length);
+        return new Object[] {mergedParams, "id = ?"};
+    }
+
+    /**
+     * 处理条件自动注入
+     * @param params
+     * @param conditionSQL
+     * @return
+     */
     private Object[] handleConditionAdvice(Object[] params, String conditionSQL) {
         Object[] mergedParams = params;
         if (Objects.nonNull(this.conditionAdvice)) {

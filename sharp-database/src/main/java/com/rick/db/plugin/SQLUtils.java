@@ -90,7 +90,7 @@ public final class SQLUtils {
     }
 
     /**
-     *
+     * 根据条件更新
      * @param tableName
      * @param updateColumnNames
      * @param params set和conditionSQL的参数
@@ -99,6 +99,18 @@ public final class SQLUtils {
      */
     public static int update(String tableName, String updateColumnNames, Object[] params, String conditionSQL) {
         return SQLUtils.JDBC_TEMPLATE.update(getUpdateSQL(tableName, updateColumnNames, conditionSQL), params);
+    }
+
+    /**
+     * 根据条件批量更新
+     * @param tableName
+     * @param updateColumnNames
+     * @param paramsList set和conditionSQL的参数
+     * @param conditionSQL
+     * @return
+     */
+    public static int[] update(String tableName, String updateColumnNames, List<Object[]> paramsList, String conditionSQL) {
+        return SQLUtils.JDBC_TEMPLATE.batchUpdate(getUpdateSQL(tableName, updateColumnNames, conditionSQL), paramsList);
     }
 
     /**
