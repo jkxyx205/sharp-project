@@ -2,7 +2,6 @@ package com.rick.demo.db;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.rick.db.plugin.SQLUtils;
 import com.rick.demo.module.project.dao.ProjectDAO2;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
@@ -34,7 +33,7 @@ public class BaseDAOImplTest {
 
     @AfterAll
     public static void init() {
-        SQLUtils.deleteNotIn("t_project", "id", Arrays.asList(479723134929764352L, 479723663504343040L, 479723663504343041L, 479723663504343042L, 479723663504343043L));
+        DataInit.init();
     }
 
     @Order(1)
@@ -221,8 +220,17 @@ public class BaseDAOImplTest {
     @Order(20)
     @Test
     public void testDeleteLogically() {
-        projectDAO.deleteLogicallyById(479723663504343042L);
-        projectDAO.deleteLogicallyByIds(Lists.newArrayList(479723663504343042L, 479723663504343043L));
+        int count1 = projectDAO.deleteLogicallyByIds(Lists.newArrayList(479723663504343042L, 479723663504343043L));
+        int count2 = projectDAO.deleteLogicallyById(479723663504343042L);
+        assertThat(count1).isEqualTo(2);
+        assertThat(count2).isEqualTo(0);
+    }
+
+    @Order(21)
+    @Test
+    public void testFindDeleteLogically() {
+        Optional<Project> project = projectDAO.selectById(479723663504343043L);
+        assertThat(project.isPresent()).isEqualTo(false);
     }
 
     public Project createProject() {

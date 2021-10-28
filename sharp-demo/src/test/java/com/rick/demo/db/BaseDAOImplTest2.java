@@ -2,9 +2,10 @@ package com.rick.demo.db;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.rick.db.plugin.SQLUtils;
+import com.rick.db.constant.EntityConstants;
 import com.rick.demo.module.project.dao.ProjectMapDAO;
 import com.rick.demo.module.project.domain.entity.Address;
+import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import org.junit.jupiter.api.AfterAll;
@@ -26,7 +27,7 @@ public class BaseDAOImplTest2 {
 
     @AfterAll
     public static void init() {
-        SQLUtils.deleteNotIn("t_project", "id", Arrays.asList(479723134929764352L, 479723663504343040L, 479723663504343041L));
+        DataInit.init();
     }
 
     @Test
@@ -179,6 +180,8 @@ public class BaseDAOImplTest2 {
         project.put("status", UserStatusEnum.NORMAL);
         project.put("address", Address.builder().code("001").detail("苏州").build());
         project.put("list", Lists.newArrayList(Address.builder().code("001").detail("苏州").build()));
+        project.put("phone_number", PhoneNumber.builder().code("816").number("18888888888").build());
+        project.put(EntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return project;
     }
 
