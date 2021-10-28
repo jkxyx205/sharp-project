@@ -29,6 +29,7 @@ public class DefaultColumnAutoFill implements ColumnAutoFill {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(2);
         Instant now = Instant.now();
         fillMap.put(EntityConstants.UPDATED_AT_COLUMN_NAME, now);
+        fillMap.put(EntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return fillMap;
     }
 }

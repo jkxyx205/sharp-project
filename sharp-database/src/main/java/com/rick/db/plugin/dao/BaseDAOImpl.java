@@ -359,7 +359,12 @@ public class BaseDAOImpl<T> {
         if (this.entityClass == Map.class) {
             params = (Map) t;
         } else {
-            params = JsonUtils.objectToMap(t);
+//            params = JsonUtils.objectToMap(t);
+            params = Maps.newHashMapWithExpectedSize(updateColumnNameList.size());
+            for (String updateColumnName : updateColumnNameList) {
+                String propertyName = columnNameToPropertyNameMap.get(updateColumnName);
+                params.put(updateColumnName, getPropertyValue(t, propertyName));
+            }
         }
         return selectByParams(params, conditionSQL);
     }
