@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -219,6 +216,24 @@ public class BaseDAOImplTest {
 
     @Order(20)
     @Test
+    public void testBatchUpdate() {
+        List<Project> projects = projectDAO.selectByIds(Arrays.asList(479723663504343043L, 479723663504343042L));
+        projects.forEach(project -> project.setTitle("batch: "+ System.currentTimeMillis()));
+
+        Object[] params = new Object[]{"description: " + System.currentTimeMillis()};
+        List<Object[]> paramsList = new ArrayList<>();
+        paramsList.add(params);
+
+        projectDAO.update(projects);
+        projectDAO.update("description",
+                paramsList,
+                "id IN (479723663504343042, 479723663504343043)");
+//        assertThat(count1.length).isEqualTo(2);
+//        assertThat(count2.length).isEqualTo(2);
+    }
+
+    @Order(21)
+    @Test
     public void testDeleteLogically() {
         int count1 = projectDAO.deleteLogicallyByIds(Lists.newArrayList(479723663504343042L, 479723663504343043L));
         int count2 = projectDAO.deleteLogicallyById(479723663504343042L);
@@ -226,12 +241,14 @@ public class BaseDAOImplTest {
         assertThat(count2).isEqualTo(0);
     }
 
-    @Order(21)
+    @Order(22)
     @Test
     public void testFindDeleteLogically() {
         Optional<Project> project = projectDAO.selectById(479723663504343043L);
         assertThat(project.isPresent()).isEqualTo(false);
     }
+
+
 
     public Project createProject() {
         Project project = new Project();
