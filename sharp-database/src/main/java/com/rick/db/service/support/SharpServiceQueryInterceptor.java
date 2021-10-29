@@ -16,14 +16,14 @@ import java.util.Objects;
  */
 @Aspect
 @Slf4j
-public class SelectInterceptor {
+public class SharpServiceQueryInterceptor {
 
     private static final ThreadLocal<Map<String, Object>> selectContext = ThreadLocal.withInitial(() -> Maps.newHashMap());
 
     @Pointcut("execution(public * com.rick.db.service.SharpService.query(..))")
-    public void baseDAOSelectPointCut(){}
+    public void sharpServiceQuery(){}
 
-    @Around(value = "baseDAOSelectPointCut()")
+    @Around(value = "sharpServiceQuery()")
     public Object selectAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Map<String, Object> map = selectContext.get();
         String key = key(joinPoint);

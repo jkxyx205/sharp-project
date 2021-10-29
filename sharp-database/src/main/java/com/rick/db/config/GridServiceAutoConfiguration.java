@@ -10,7 +10,7 @@ import com.rick.db.plugin.dao.ColumnAutoFill;
 import com.rick.db.plugin.dao.DefaultColumnAutoFill;
 import com.rick.db.plugin.dao.DefaultConditionAdvice;
 import com.rick.db.service.GridService;
-import com.rick.db.service.support.SelectInterceptor;
+import com.rick.db.service.support.SharpServiceQueryInterceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -45,7 +45,7 @@ public class GridServiceAutoConfiguration {
     }
 
     @Configuration
-    @Import({SelectInterceptor.class})
+    @Import({SharpServiceQueryInterceptor.class})
     static class GridServiceConfiguration {
 
         @Bean
