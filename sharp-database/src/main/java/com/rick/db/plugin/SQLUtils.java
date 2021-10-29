@@ -116,8 +116,9 @@ public final class SQLUtils {
 
     /**
      * 指定某字段删除数据
-     * @param deleteValues 23,13
+     *
      * @param tableName t_user
+     * @param deleteValues 23,13
      * @param deleteColumn id
      * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)，如果deleteValues是空，将不会删除任何数据
      */
@@ -145,6 +146,29 @@ public final class SQLUtils {
 
     public static int delete(String tableName, String deleteColumn, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
         return deleteData(tableName, deleteColumn, SQL_PATH_IN, deleteValues, conditionParams, conditionSQL);
+    }
+
+    /**
+     * 级联删除
+     * @param masterTable t_user
+     * @param refColumnName user_id
+     * @param subTables t_article
+     * @return
+     */
+    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> masterTableIds, String ...subTables) {
+        return deleteCascade(masterTable, refColumnName, masterTableIds, null, null, subTables);
+    }
+
+    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> masterTableIds, Object[] conditionParams, String conditionSQL, String ...subTables) {
+        Assert.notNull(masterTable, "主表不能为空");
+        Assert.notNull(refColumnName, "从表外键不能为空");
+        Assert.notNull(masterTableIds, "masterTableIds不能为空");
+        Assert.notNull(subTables, "从表不能为空");
+
+        for (String subTable : subTables) {
+            delete(subTable, refColumnName, masterTableIds, conditionParams, conditionSQL);
+        }
+        return delete(masterTable, EntityConstants.ID_COLUMN_NAME, masterTableIds, conditionParams, conditionSQL);
     }
 
     /**

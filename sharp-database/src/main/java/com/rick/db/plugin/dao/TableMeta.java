@@ -11,6 +11,11 @@ import lombok.Value;
 @ToString
 public class TableMeta {
 
+    /**
+     * 类名，约定优于配置，它的子表的外键用"name_id"表示
+     */
+    private String name;
+
     private String tableName;
 
     /**
@@ -37,4 +42,9 @@ public class TableMeta {
      * id属性名
      */
     private String idColumnName;
+
+    /**
+     * 子表
+     */
+    private String[] subTables;
 }

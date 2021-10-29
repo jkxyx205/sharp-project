@@ -26,8 +26,17 @@ class TableMetaResolver {
     public static TableMeta resolve(Class<?> clazz) {
         TableName tableNameAnnotation = clazz.getAnnotation(TableName.class);
         Converter<String, String> converter = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE);
-        String tableName = Objects.isNull(tableNameAnnotation) ? (TABLE_PREFIX + converter.convert(clazz.getSimpleName()))
-                : tableNameAnnotation.value();
+
+        String name = (TABLE_PREFIX + converter.convert(clazz.getSimpleName()));
+
+        String tableName;
+        String[] subTables = null;
+        if (Objects.nonNull(tableNameAnnotation)) {
+            tableName = tableNameAnnotation.value();
+            subTables = tableNameAnnotation.subTables();
+        } else {
+            tableName = name;
+        }
 
         Field[] fields = ReflectUtils.getAllFields(clazz);
         StringBuilder columnNamesBuilder = new StringBuilder();
@@ -63,7 +72,7 @@ class TableMetaResolver {
         updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
 
         idColumnName = Objects.isNull(idColumnName) ? PRIMARY_COLUMN : idColumnName;
-        return new TableMeta(tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idColumnName);
+        return new TableMeta(name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+                updatePropertiesBuilder.toString(), idColumnName, subTables);
     }
 }
