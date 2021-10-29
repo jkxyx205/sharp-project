@@ -74,10 +74,6 @@ public class GridService extends SharpService {
                 sql2 = sqlFormatter.wrapSordString(sql2, model.getSidx(), model.getSord());
             }
             //end
-            if (log.isDebugEnabled()) {
-                log.debug("SQL=> [{}], args:=> [{}]", sql2, args);
-            }
-
             return jdbcTemplateCallback.query(jdbcTemplate, sql2, args);
         });
 
