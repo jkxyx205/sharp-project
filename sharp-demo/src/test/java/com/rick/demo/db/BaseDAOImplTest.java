@@ -185,6 +185,12 @@ public class BaseDAOImplTest {
     public void testParams2() {
         List<Project> list = projectDAO.selectByParams("title=title&sex=1");
         assertThat(list.size()).isEqualTo(1);
+
+        List<Project> list2 = projectDAO.selectByParams("title=title&sex=1");
+        assertThat(list2.size()).isEqualTo(1);
+
+        List<Project> list3 = projectDAO.selectByParams("title=title&sex=1");
+        assertThat(list3.size()).isEqualTo(1);
     }
 
     @Order(17)
