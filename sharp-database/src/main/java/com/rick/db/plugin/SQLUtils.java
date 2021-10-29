@@ -8,6 +8,7 @@ import com.rick.db.dto.PageModel;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -114,6 +115,65 @@ public final class SQLUtils {
     }
 
     /**
+     * 指定某字段删除数据
+     * @param deleteValues 23,13
+     * @param tableName t_user
+     * @param deleteColumn id
+     * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)，如果deleteValues是空，将不会删除任何数据
+     */
+    public static int delete(String tableName, String deleteColumn, String deleteValues) {
+        return delete(tableName, deleteColumn, deleteValues, null, null);
+    }
+
+    public static int delete(String tableName, String deleteColumn, String deleteValues, Object[] conditionParams, String conditionSQL) {
+        if (StringUtils.isBlank(deleteValues)) {
+            return 0;
+        }
+        return deleteData(tableName, deleteColumn, "IN", Arrays.asList(deleteValues.split(",")), conditionParams, conditionSQL);
+    }
+
+    /**
+     * 指定某字段删除数据
+     * @param deleteValues [23,13]
+     * @param tableName t_user
+     * @param deleteColumn id
+     * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)
+     */
+    public static int delete(String tableName, String deleteColumn, Collection<?> deleteValues) {
+        return delete(tableName, deleteColumn, deleteValues, null, null);
+    }
+
+    public static int delete(String tableName, String deleteColumn, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
+        return deleteData(tableName, deleteColumn, SQL_PATH_IN, deleteValues, conditionParams, conditionSQL);
+    }
+
+    /**
+     * 构造删除条件
+     * @param tableName
+     * @param params
+     * @param conditionSQL
+     * @return
+     */
+    public static int delete(String tableName, Object[] params, String conditionSQL) {
+        return SQLUtils.JDBC_TEMPLATE.update("DELETE FROM " + tableName + " WHERE " + conditionSQL, params);
+    }
+
+    /**
+     * 指定某字段不删除数据，其他的都删除
+     * @param deleteValues ['a', 'b']数量不能大于IN_SIZE = 1000
+     * @param tableName t_product
+     * @param deleteColumn name
+     * 相当于执行SQL：DELETE FROM t_product WHERE not id IN('a', 'b')
+     */
+    public static int deleteNotIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
+        return deleteNotIn(tableName, deleteColumn, deleteValues, null, null);
+    }
+
+    public static int deleteNotIn(String tableName, String deleteColumn, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
+        return deleteData(tableName, deleteColumn, SQL_PATH_NOT_IN, deleteValues, conditionParams, conditionSQL);
+    }
+
+    /**
      * 全量维护关联表关系
      * updateRelationShip("t_user_role", "role_id", "user_id", roleId, userIds)：表示为角色roleId，添加用户userIds
      * @param refTableName 关联表名称 t_user_role
@@ -148,53 +208,6 @@ public final class SQLUtils {
         String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
         List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
         SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
-    }
-
-    /**
-     * 指定某字段删除数据
-     * @param deleteValues 23,13
-     * @param tableName t_user
-     * @param deleteColumn id
-     * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)，如果deleteValues是空，将不会删除任何数据
-     */
-    public static int delete(String tableName, String deleteColumn, String deleteValues) {
-        if (StringUtils.isBlank(deleteValues)) {
-            return 0;
-        }
-        return deleteData(tableName, deleteColumn, "IN", Arrays.asList(deleteValues.split(",")));
-    }
-
-    /**
-     * 指定某字段删除数据
-     * @param deleteValues [23,13]
-     * @param tableName t_user
-     * @param deleteColumn id
-     * 相当于执行SQL：DELETE FROM t_user WHERE id IN(23, 13)
-     */
-    public static int delete(String tableName, String deleteColumn, Collection<?> deleteValues) {
-        return deleteData(tableName, deleteColumn, SQL_PATH_IN, deleteValues);
-    }
-
-    /**
-     * 构造删除条件
-     * @param tableName
-     * @param params
-     * @param conditionSQL
-     * @return
-     */
-    public static int delete(String tableName, Object[] params, String conditionSQL) {
-        return SQLUtils.JDBC_TEMPLATE.update("DELETE FROM " + tableName + " WHERE " + conditionSQL, params);
-    }
-
-    /**
-     * 指定某字段不删除数据，其他的都删除
-     * @param deleteValues ['a', 'b']数量不能大于IN_SIZE = 1000
-     * @param tableName t_product
-     * @param deleteColumn name
-     * 相当于执行SQL：DELETE FROM t_product WHERE not id IN('a', 'b')
-     */
-    public static int deleteNotIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
-        return deleteData(tableName, deleteColumn, SQL_PATH_NOT_IN, deleteValues);
     }
 
     /**
@@ -243,20 +256,20 @@ public final class SQLUtils {
         return "(" + String.join(",", Collections.nCopies(paramSize, "?")) + ")";
     }
 
-    private static int deleteData(String tableName, String deleteColumn, String sqlPatch, Collection<?> deleteValues) {
+    private static int deleteData(String tableName, String deleteColumn, String sqlPatch, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
         if (CollectionUtils.isEmpty(deleteValues)) {
             return 0;
         }
 
         int size = deleteValues.size();
         // 处理单值
-        if (size == 1) {
-            if (SQL_PATH_IN.equals(sqlPatch)) {
-                return delete(tableName, deleteValues.toArray(), deleteColumn + " = ?");
-            } else if (SQL_PATH_NOT_IN.equals(sqlPatch)) {
-                return delete(tableName, deleteValues.toArray(), deleteColumn + " <> ?");
-            }
-        }
+//        if (size == 1) {
+//            if (SQL_PATH_IN.equals(sqlPatch)) {
+//                return delete(tableName, deleteValues.toArray(), deleteColumn + " = ?");
+//            } else if (SQL_PATH_NOT_IN.equals(sqlPatch)) {
+//                return delete(tableName, deleteValues.toArray(), deleteColumn + " <> ?");
+//            }
+//        }
 
         if (SQL_PATH_NOT_IN.equals(sqlPatch) && size > IN_SIZE) {
             throw new RuntimeException("SQL_PATH_NOT_IN in的个数不能超过" + IN_SIZE);
@@ -276,10 +289,20 @@ public final class SQLUtils {
             Object[] currentDeleteValue = Arrays.copyOfRange(valueArray, (i - 1) * IN_SIZE, lastIndex);
             // remove old records
             String inSql = formatInSQLPlaceHolder(currentDeleteValue.length);
-            String deleteSQL = String.format("DELETE FROM " + tableName + " WHERE " + deleteColumn + " " + sqlPatch + "%s", inSql);
-            deletedCount += SQLUtils.JDBC_TEMPLATE.update(deleteSQL, currentDeleteValue);
+            String deleteSQL = String.format("DELETE FROM " + tableName + " WHERE " + deleteColumn + " " + sqlPatch + "%s" + (StringUtils.isBlank(conditionSQL) ? "" : " AND " + conditionSQL), inSql);
+
+            Object[] mergedParams = currentDeleteValue;
+            if (ArrayUtils.isNotEmpty(conditionParams)) {
+                mergedParams = new Object[currentDeleteValue.length + conditionParams.length];
+                System.arraycopy(currentDeleteValue, 0, mergedParams, 0, currentDeleteValue.length);
+                for (int j = 0; j < conditionParams.length; j++) {
+                    mergedParams[currentDeleteValue.length + j] = conditionParams[j];
+                }
+            }
+
+            deletedCount += SQLUtils.JDBC_TEMPLATE.update(deleteSQL, mergedParams);
             if (log.isDebugEnabled()) {
-                log.debug("SQL=> [{}], args:=> [{}]", deleteSQL, currentDeleteValue);
+                log.debug("SQL=> [{}], args:=> [{}]", deleteSQL, mergedParams);
             }
         }
 

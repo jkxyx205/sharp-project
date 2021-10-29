@@ -149,7 +149,7 @@ public class BaseDAOImpl<T> {
      * @param id
      */
     public int deleteById(Serializable id) {
-        return SQLUtils.delete(tableName, this.primaryColumn, Lists.newArrayList(id));
+        return deleteByIds(Lists.newArrayList(id));
     }
 
     /**
@@ -158,7 +158,8 @@ public class BaseDAOImpl<T> {
      * @param ids
      */
     public int deleteByIds(String ids) {
-        return SQLUtils.delete(tableName, this.primaryColumn, ids);
+        Object[] objects = handleConditionAdvice();
+        return SQLUtils.delete(tableName, this.primaryColumn, ids, (Object[]) objects[0], (String) objects[1]);
     }
 
     /**
@@ -167,7 +168,8 @@ public class BaseDAOImpl<T> {
      * @param ids
      */
     public int deleteByIds(Collection<?> ids) {
-        return SQLUtils.delete(tableName, this.primaryColumn, ids);
+        Object[] objects = handleConditionAdvice();
+        return SQLUtils.delete(tableName, this.primaryColumn, ids, (Object[]) objects[0], (String) objects[1]);
     }
 
     /**
@@ -178,11 +180,13 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int delete(String deleteColumn, String deleteValues) {
-        return SQLUtils.delete(tableName, deleteColumn, deleteValues);
+        Object[] objects = handleConditionAdvice();
+        return SQLUtils.delete(tableName, deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
     }
 
     public int delete(String deleteColumn, Collection<?> deleteValues) {
-        return SQLUtils.delete(tableName, deleteColumn, deleteValues);
+        Object[] objects = handleConditionAdvice();
+        return SQLUtils.delete(tableName, deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
     }
 
     /**
@@ -193,7 +197,8 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int delete(Object[] params, String conditionSQL) {
-        return SQLUtils.delete(tableName, params, conditionSQL);
+        Object[] objects = handleConditionAdvice(params, conditionSQL);
+        return SQLUtils.delete(tableName, (Object[]) objects[0], (String) objects[1]);
     }
 
     /**
@@ -203,7 +208,7 @@ public class BaseDAOImpl<T> {
      * @param id
      */
     public int update(Object[] params, Serializable id) {
-        return SQLUtils.update(tableName, this.updateColumnNames, handleAutoFill(null, params, updateColumnNameList, ColumnFillType.UPDATE), id);
+        return updateById(null, this.updateColumnNames, params, this.updateColumnNameList, id);
     }
 
     /**
@@ -265,22 +270,6 @@ public class BaseDAOImpl<T> {
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
         return updateById(null, updateColumnNames, params, convertToArray(updateColumnNames), id);
-    }
-
-    public int[] update(String updateColumnNames, List<Object[]> srcParamsList, Serializable id) {
-        if (CollectionUtils.isEmpty(srcParamsList)) {
-            return new int[] {};
-        }
-
-        List<Object[]> paramsList = Lists.newArrayListWithCapacity(srcParamsList.size());
-        String conditionSQL = null;
-        for (Object[] params : srcParamsList) {
-            Object[] mergeIdParamObjects = mergeIdParam(params, id);
-            Object[] finalObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) mergeIdParamObjects[0], convertToArray(updateColumnNames), ColumnFillType.UPDATE), (String) mergeIdParamObjects[1]);
-            paramsList.add((Object[]) finalObjects[0]);
-            conditionSQL = (String) finalObjects[1];
-        }
-        return SQLUtils.update(tableName, updateColumnNames, paramsList, conditionSQL);
     }
 
     /**
@@ -425,7 +414,7 @@ public class BaseDAOImpl<T> {
             params = Maps.newHashMapWithExpectedSize(updateColumnNameList.size());
             for (String updateColumnName : updateColumnNameList) {
                 String propertyName = columnNameToPropertyNameMap.get(updateColumnName);
-                params.put(updateColumnName, getPropertyValue(t, propertyName));
+                params.put(propertyName, getPropertyValue(t, propertyName));
             }
         }
         return selectByParams(params, conditionSQL);
@@ -465,7 +454,7 @@ public class BaseDAOImpl<T> {
         if (Objects.nonNull(conditionAdvice)) {
             conditionParams = conditionAdvice.getCondition();
             if (MapUtils.isNotEmpty(conditionParams)) {
-                additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
+                additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key) && !isConditionSQLContainsColumnName(conditionSQL, key)).collect(Collectors.toList()), conditionParams);
                 conditionParams.putAll(params);
             }
         } else {
@@ -526,9 +515,9 @@ public class BaseDAOImpl<T> {
         log.info("tableName: {}, columnNames: {}", this.tableName, this.columnNames);
     }
 
-    public static String getConditionSQL(Collection<String> columnNameList, Map<String, ?> params) {
+    public static String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params) {
         StringBuilder sb = new StringBuilder();
-        for (String columnName : columnNameList) {
+        for (String columnName : paramNameList) {
             Object value = params.get(columnName);
             sb.append(columnName).append(decideParamHolder(columnName, value)).append(" AND ");
         }
@@ -752,6 +741,10 @@ public class BaseDAOImpl<T> {
         return new Object[] {mergedParams, "id = ?"};
     }
 
+    private Object[] handleConditionAdvice() {
+        return handleConditionAdvice(new Object[]{}, null);
+    }
+
     /**
      * 处理条件自动注入
      * @param params
@@ -782,4 +775,11 @@ public class BaseDAOImpl<T> {
         return new Object[]{mergedParams, conditionSQL};
     }
 
+    private boolean isConditionSQLContainsColumnName(String conditionSQL, String columnName) {
+        if (StringUtils.isBlank(conditionSQL)) {
+            return false;
+        }
+
+        return conditionSQL.matches(".*((?i)(to_char|NVL)?\\s*([(][^([(]|[)])]*[)])|("+columnName+"))"+ "\\s*" + "(?i)(like|!=|>=|<=|<|>|=|\\s+in|\\s+not\\s+in|regexp).*");
+    }
 }

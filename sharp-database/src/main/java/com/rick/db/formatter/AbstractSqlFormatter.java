@@ -1,5 +1,6 @@
 package com.rick.db.formatter;
 
+import com.rick.common.util.EnumUtils;
 import com.rick.db.config.Constants;
 import com.rick.db.dto.PageModel;
 import org.apache.commons.lang3.StringUtils;
@@ -122,7 +123,9 @@ public abstract class AbstractSqlFormatter {
 				}
 			} else if(param instanceof Instant) {
                 value = Timestamp.from((Instant) param);
-            } else {
+            } else if(Enum.class.isAssignableFrom(param.getClass())) {
+                value = EnumUtils.getCode((Enum) param);
+            }else {
 				value = param;
 			}
 
