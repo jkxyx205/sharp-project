@@ -22,7 +22,7 @@ public abstract class AbstractSqlFormatter {
 
 	private static final int QUERY_IN_MAX_COUNT = 1000;
 
-	private static final String BEFORE_END = "(?<![\\w.]+)";
+	private static final String BEFORE_END = "\\b";
 
 	private static final String AFTER_END = "(?!\\w+)";
 
@@ -220,7 +220,7 @@ public abstract class AbstractSqlFormatter {
 
     public String formatSqlCount(String srcSql) {
 		StringBuilder sb = new  StringBuilder();
-		sb.append("SELECT COUNT(0) FROM (").append(removeOrders(srcSql)).append(") temp");
+		sb.append("SELECT COUNT(*) FROM (").append(removeOrders(srcSql)).append(") temp");
 		return sb.toString();
 	}
 
@@ -363,13 +363,7 @@ public abstract class AbstractSqlFormatter {
      */
     private String right(String sql) {
         sql = rightParentheses(sql);
-        sql = rightUpdate(sql);
         return sql;
-    }
-
-    private String rightUpdate(String sql) {
-        return sql.replaceAll("(?i)set[\\s*,]+", "SET ")
-                .replaceAll("(?i)[,\\s*]+where"," WHERE");
     }
 
     /**
@@ -377,11 +371,21 @@ public abstract class AbstractSqlFormatter {
      *
      * @return
      */
-    private String rightParentheses(String sql) {
-        if (sql.matches("(?s).*\\(\\s*\\).*")) {
-            return rightParentheses(replace(sql, "\\(\\s*\\)"));
+    private String rightParentheses(String srcSql) {
+        if (srcSql.matches("(?s).*\\(\\s*\\).*")) {
+            String condition = "\\(\\s*\\)";
+            String newSQL;
+            if (isOnlyCause(srcSql, condition)) {
+                newSQL = srcSql.replaceAll("(?i)(where)?\\s*" + condition + "", "");
+            } else if (isLastCondition(srcSql, condition)) {
+                newSQL = srcSql.replaceAll("(?i)(and|or)\\s*" + condition + "", "");
+            } else {
+                newSQL = srcSql.replaceAll("(?i)\\s*" + condition + "\\s*(and|or)", "");
+            }
+
+            return rightParentheses(newSQL);
         }
-        return sql;
+        return srcSql;
     }
 
     private boolean isOnlyCause(String sql, String condition) {
@@ -390,19 +394,9 @@ public abstract class AbstractSqlFormatter {
         return !(sql.matches(regexLeft) || sql.matches(regexRight));
     }
 
-    private boolean isLastCause(String sql, String condition) {
+    private boolean isLastCondition(String sql, String condition) {
         String regexLeft = "(?is).*(and|or)(?!\\w+)\\s*" + condition + ".*";
         return sql.matches(regexLeft);
-    }
-
-    private String replace(String srcSql, String condition) {
-        if (isOnlyCause(srcSql, condition)) {
-            return srcSql.replaceAll("(?i)(where)?\\s*" + condition + "", "");
-        } else if (isLastCause(srcSql, condition)) {
-            return srcSql.replaceAll("(?i)(and|or)\\s*" + condition + "", "");
-        } else {
-            return srcSql.replaceAll("(?i)\\s*" + condition + "\\s*(and|or)", "");
-        }
     }
 
     private static final char PREFIX_START =  '$';
@@ -448,9 +442,22 @@ public abstract class AbstractSqlFormatter {
     }
 
     private String ignoreAndReturnSQL(String srcSql, ParamHolder h) {
-        String fullRegex = BEFORE_END + h.full.replace(".", "\\.").replace("(", "\\(").replace(")", "\\)") + AFTER_END;
-        srcSql = replace(srcSql, fullRegex);
-        return srcSql;
-    }
+        String condition = BEFORE_END + h.full.replace(".", "\\.").replace("(", "\\(").replace(")", "\\)") + AFTER_END;
+        String rightRegex = "(?s)((?i)((and|or)\\s+)|(,\\s*))?" + condition;
+        String leftRegex = condition + "(?s)((?i)(\\s+(and|or))|(\\s*,))?";
+        String firstWhereCondition = "(?s).*((?i)where)\\s+" + condition + ".*";
+        String firstSetCondition = "(?s).*((?i)set)\\s+" + condition + ".*";
 
+        if (srcSql.matches(firstSetCondition)) {
+            return srcSql.replaceAll(leftRegex, "");
+        }  else if(srcSql.matches(firstWhereCondition)) {
+            if (isOnlyCause(srcSql, condition)) {
+                return srcSql.replaceAll("(?i)(where)?\\s*" + condition + "", "");
+            }
+
+            return srcSql.replaceAll(leftRegex, "");
+        }
+
+        return  srcSql.replaceAll(rightRegex, "");
+    }
 }

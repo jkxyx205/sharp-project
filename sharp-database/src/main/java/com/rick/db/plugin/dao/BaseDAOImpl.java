@@ -59,7 +59,7 @@ public class BaseDAOImpl<T> {
 
     private Field[] entityFields;
 
-    private String refColumnName;
+    private String subTableRefColumnName;
 
     private Map<String, Field> propertyFieldMap;
 
@@ -174,7 +174,7 @@ public class BaseDAOImpl<T> {
     public int delete(String deleteColumn, Collection<?> deleteValues) {
         Object[] objects = handleConditionAdvice();
         if (hasSubTables()) {
-            return SQLUtils.deleteCascade(tableMeta.getTableName(), refColumnName, deleteValues,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables());
+            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deleteValues,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables());
         }
         return SQLUtils.delete(tableMeta.getTableName(), deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
     }
@@ -187,29 +187,33 @@ public class BaseDAOImpl<T> {
      * @return
      */
     public int delete(Object[] params, String conditionSQL) {
-        Object[] objects = handleConditionAdvice(params, conditionSQL);
+        Object[] objects = handleConditionAdvice(params, conditionSQL, false);
         if (hasSubTables()) {
-            // TODO 没有测试过
-            List<Map<String, Object>> deletedList = sharpService.getNamedJdbcTemplate().getJdbcTemplate().queryForList(getSelectSQL() + " WHERE " + (String) objects[1], (Object[]) objects[0]);
+            List<Map<String, Object>> deletedList = sharpService.getNamedJdbcTemplate().getJdbcTemplate().queryForList(getSelectSQL() + " WHERE " + objects[1], (Object[]) objects[0]);
             Set<?> deletedIds = deletedList.stream().map(r -> r.get(tableMeta.getIdColumnName())).collect(Collectors.toSet());
-            return SQLUtils.deleteCascade(tableMeta.getTableName(), refColumnName, deletedIds,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables());
+            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deletedIds, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables());
         }
         return SQLUtils.delete(tableMeta.getTableName(), (Object[]) objects[0], (String) objects[1]);
     }
 
     /**
      * 通过主键逻辑id刪除
-     * 不会做级联操作
      * @param id
      */
     public int deleteLogicallyById(Serializable id) {
         Assert.notNull(id, "主键不能为null");
+
+        if (hasSubTables()) {
+            for (String subTable : tableMeta.getSubTables()) {
+                update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
+            }
+        }
+
         return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, tableMeta.getIdColumnName() + " = ?");
     }
 
     /**
      * 通过主键id批量逻辑刪除 eg：ids -> “1,2,3,4”
-     * 不会做级联操作
      * @param ids
      */
     public int deleteLogicallyByIds(String ids) {
@@ -221,7 +225,6 @@ public class BaseDAOImpl<T> {
 
     /**
      * 通过主键id批量逻辑刪除 eg：ids -> [1, 2, 3, 4]
-     * 不会做级联操作
      * @param ids
      */
     public int deleteLogicallyByIds(Collection<?> ids) {
@@ -232,6 +235,13 @@ public class BaseDAOImpl<T> {
         Object[] mergedParams = new Object[ids.size() + 1];
         mergedParams[0] = 1;
         System.arraycopy(ids.toArray(), 0, mergedParams, 1, ids.size());
+
+        if (hasSubTables()) {
+            for (String subTable : tableMeta.getSubTables()) {
+                update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+            }
+        }
+
         return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, tableMeta.getIdColumnName() + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
     }
 
@@ -242,7 +252,7 @@ public class BaseDAOImpl<T> {
      * @param id
      */
     public int update(Object[] params, Serializable id) {
-        return updateById(null, tableMeta.getUpdateColumnNames(), params, this.updateColumnNameList, id);
+        return updateById(null, tableMeta.getUpdateColumnNames(), params, id);
     }
 
     /**
@@ -253,7 +263,7 @@ public class BaseDAOImpl<T> {
      */
     public int update(T t) {
         Object[] objects = resolverParamsAndId(t);
-        return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], this.updateColumnNameList, (Serializable) objects[1]);
+        return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Serializable) objects[1]);
     }
 
     /**
@@ -272,27 +282,12 @@ public class BaseDAOImpl<T> {
         for (T t : collection) {
             Object[] resolverParamsAndIdObjects = resolverParamsAndId(t);
             Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (Serializable) resolverParamsAndIdObjects[1]);
-            Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1]);
+            Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
             conditionSQL = (String) finalObjects[1];
         }
 
         return SQLUtils.update(tableMeta.getTableName(), tableMeta.getUpdateColumnNames(), paramsList, conditionSQL);
-    }
-
-    private Object[] resolverParamsAndId(T t) {
-        Object[] params;
-        Serializable id;
-        if (isMapClass()) {
-            Map map = (Map) t;
-            params = mapToParamsArray(map, this.updateColumnNameList);
-            id = (Serializable) map.get(tableMeta.getIdColumnName());
-        } else {
-            params = instanceToParamsArray(t, updatePropertyList);
-            id = (Serializable) getPropertyValue(t, tableMeta.getIdColumnName());
-        }
-
-        return new Object[] {params, id};
     }
 
     /**
@@ -303,7 +298,7 @@ public class BaseDAOImpl<T> {
      * @param id                1
      */
     public int update(String updateColumnNames, Object[] params, Serializable id) {
-        return updateById(null, updateColumnNames, params, convertToArray(updateColumnNames), id);
+        return updateById(null, updateColumnNames, params, id);
     }
 
     /**
@@ -314,7 +309,7 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL      created_at > ? AND created_by = ?
      */
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
-        return update(null, updateColumnNames, params, convertToArray(updateColumnNames), conditionSQL);
+        return update(null, updateColumnNames, params, conditionSQL);
     }
 
     public int[] update(String updateColumnNames, List<Object[]> srcParamsList, String conditionSQL) {
@@ -324,11 +319,51 @@ public class BaseDAOImpl<T> {
 
         List<Object[]> paramsList = Lists.newArrayListWithCapacity(srcParamsList.size());
         for (Object[] params : srcParamsList) {
-            Object[] finalObjects = handleConditionAdvice(handleAutoFill(null, params, convertToArray(updateColumnNames), ColumnFillType.UPDATE), conditionSQL);
-            paramsList.add((Object[]) finalObjects[0]);
-            conditionSQL = (String) finalObjects[1];
+            Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
+            Object[] conditionAdviceObject = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToArray((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
+            paramsList.add((Object[]) conditionAdviceObject[0]);
+            conditionSQL = (String) conditionAdviceObject[1];
+            updateColumnNames = (String) updateAutoObjects[1];
         }
         return SQLUtils.update(tableMeta.getTableName(), updateColumnNames, paramsList, conditionSQL);
+    }
+
+    /**
+     * 动态查询
+     * @param updateColumnNames name,age, user_name
+     * @param params Map<String, Object> {name = rick, age = 5, user_name = Jim, id = 5}
+     * @param conditionSQL id = :id
+     * @return
+     */
+    public int update(String updateColumnNames, Map<String, Object> params, String conditionSQL) {
+        Assert.hasText(updateColumnNames, "updateColumnNames不能为空");
+        Assert.hasText(conditionSQL, "conditionSQL不能为空");
+        return sharpService.update(getParamsUpdateSQL(updateColumnNames, params, conditionSQL), params);
+    }
+
+    private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
+        List<String> updateColumnList = convertToArray(updateColumnNames);
+        Object[] params = new Object[updateColumnList.size()];
+        Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
+        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToArray((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, true);
+
+        List<String> newUpdateColumnList = convertToArray((String) updateAutoObjects[1]);
+        Object[] newParams = (Object[]) conditionAdviceObjects[0];
+        StringBuilder updateColumnNameBuilder = new StringBuilder();
+        int i = 0;
+        for (String updateColumnName : newUpdateColumnList) {
+            updateColumnNameBuilder.append(updateColumnName).append(" = :").append(updateColumnName).append(",");
+            Object newParam = newParams[i++];
+            if (Objects.isNull(paramsMap.get(updateColumnName))) {
+                paramsMap.put(updateColumnName, newParam);
+            }
+        }
+        updateColumnNameBuilder.deleteCharAt(updateColumnNameBuilder.length() - 1);
+
+        String newConditionSQL = (String)conditionAdviceObjects[1];
+
+        String updateSQL = "UPDATE " + tableMeta.getTableName() + " SET " + updateColumnNameBuilder + " WHERE " + newConditionSQL;
+        return updateSQL;
     }
 
     /**
@@ -348,7 +383,6 @@ public class BaseDAOImpl<T> {
         List<T> list = selectByParams(params, tableMeta.getIdColumnName() + " = :id");
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
     }
-
 
     public Map<Serializable, T> selectByIdsAsMap(String ids) {
         return listToMap(selectByIds(ids));
@@ -463,13 +497,18 @@ public class BaseDAOImpl<T> {
     }
 
     public void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName) {
-        Map<Long, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", masterData.stream().map(row -> row.get(EntityConstants.ID_COLUMN_NAME)).toArray()).build(),
-                refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> (Long)getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
+        Map<Long, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(EntityConstants.ID_COLUMN_NAME)).collect(Collectors.toSet()));
 
         for (Map<String, Object> row : masterData) {
             List<T> subTableList = refColumnNameMap.get(row.get(EntityConstants.ID_COLUMN_NAME));
             row.put(property, CollectionUtils.isEmpty(subTableList) ? Collections.emptyList() : subTableList);
         }
+    }
+
+    public Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
+        Map<Long, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
+                refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> (Long)getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
+        return refColumnNameMap;
     }
 
     public String getSelectSQL() {
@@ -492,7 +531,7 @@ public class BaseDAOImpl<T> {
                 this.entityClass = Map.class;
             } else {
                 TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
-                this.refColumnName = tableMeta.getName() + "_" + EntityConstants.ID_COLUMN_NAME;
+                this.subTableRefColumnName = tableMeta.getName() + "_" + EntityConstants.ID_COLUMN_NAME;
                 this.propertyList = convertToArray(tableMeta.getProperties());
                 this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
                 this.entityFields = ReflectUtils.getAllFields(this.entityClass);
@@ -732,17 +771,19 @@ public class BaseDAOImpl<T> {
         return list.stream().collect(Collectors.toMap(t -> (isMapClass()) ? (Serializable) ((Map) t).get(tableMeta.getIdColumnName()) : (Serializable) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
     }
 
-    private int updateById(T t, String updateColumnNames, Object[] params, List<String> updateColumnNameList, Serializable id) {
+    private int updateById(T t, String updateColumnNames, Object[] params, Serializable id) {
         Object[] objects = mergeIdParam(params, id);
-        return update(t, updateColumnNames, (Object[]) objects[0], updateColumnNameList, (String) objects[1]);
+        return update(t, updateColumnNames, (Object[]) objects[0], (String) objects[1]);
     }
 
-    private int update(T t, String updateColumnNames, Object[] params, List<String> updateColumnNameList, String conditionSQL) {
-        Object[] objects = handleConditionAdvice(handleAutoFill(t, params, updateColumnNameList, ColumnFillType.UPDATE), conditionSQL);
-        return SQLUtils.update(tableMeta.getTableName(),
-                updateColumnNames,
-                (Object[])objects[0],
-                (String) objects[1]);
+    private int update(T t, String updateColumnNames, Object[] params, String conditionSQL) {
+        return update(tableMeta.getTableName(), t, updateColumnNames, params, conditionSQL);
+    }
+
+    private int update(String tableName, T t, String updateColumnNames, Object[] params, String conditionSQL) {
+        Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
+        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) updateAutoObjects[0], convertToArray((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
+        return SQLUtils.update(tableName, (String) updateAutoObjects[1], (Object[])conditionAdviceObjects[0], (String) conditionAdviceObjects[1]);
     }
 
     /**
@@ -759,7 +800,7 @@ public class BaseDAOImpl<T> {
     }
 
     private Object[] handleConditionAdvice() {
-        return handleConditionAdvice(new Object[]{}, null);
+        return handleConditionAdvice(new Object[]{}, null, false);
     }
 
     /**
@@ -768,7 +809,7 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL
      * @return
      */
-    private Object[] handleConditionAdvice(Object[] params, String conditionSQL) {
+    private Object[] handleConditionAdvice(Object[] params, String conditionSQL, boolean isParamHolder) {
         Object[] mergedParams = params;
         if (Objects.nonNull(this.conditionAdvice)) {
             Map<String, Object> conditionParams = conditionAdvice.getCondition();
@@ -776,7 +817,10 @@ public class BaseDAOImpl<T> {
             if (MapUtils.isNotEmpty(conditionParams)) {
                 String additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
                 if (StringUtils.isNotBlank(additionCondition)) {
-                    additionCondition = SQLUtils.paramsHolderToQuestionHolder(additionCondition);
+                    if (!isParamHolder) {
+                        additionCondition = SQLUtils.paramsHolderToQuestionHolder(additionCondition);
+                    }
+
                     conditionSQL = StringUtils.isNotBlank(conditionSQL) ? (conditionSQL + " AND " + additionCondition) : additionCondition;
 
                     mergedParams = new Object[params.length + conditionParams.size()];
@@ -798,5 +842,42 @@ public class BaseDAOImpl<T> {
         }
 
         return conditionSQL.matches(".*((?i)(to_char|NVL)?\\s*([(][^([(]|[)])]*[)])|("+columnName+"))"+ "\\s*" + "(?i)(like|!=|>=|<=|<|>|=|\\s+in|\\s+not\\s+in|regexp).*");
+    }
+
+    private Object[] resolverParamsAndId(T t) {
+        Object[] params;
+        Serializable id;
+        if (isMapClass()) {
+            Map map = (Map) t;
+            params = mapToParamsArray(map, this.updateColumnNameList);
+            id = (Serializable) map.get(tableMeta.getIdColumnName());
+        } else {
+            params = instanceToParamsArray(t, updatePropertyList);
+            id = (Serializable) getPropertyValue(t, tableMeta.getIdColumnName());
+        }
+
+        return new Object[] {params, id};
+    }
+
+    private Object[] handleUpdateAutoFill(String updateColumnNames, Object[] params) {
+        Object mergedParams = params;
+        if (Objects.nonNull(columnAutoFill)) {
+            Map<String, Object> fill = columnAutoFill.updateFill();
+            List<String> updateColumnNameList = convertToArray(updateColumnNames);
+
+            int size = 0;
+            for (String fillColumnName : fill.keySet()) {
+                if (!updateColumnNameList.contains(fillColumnName) && tableMeta.getUpdateColumnNames().contains(fillColumnName)) {
+                    updateColumnNames = fillColumnName + "," + updateColumnNames;
+                    size++;
+                }
+            }
+
+            mergedParams = new Object[params.length + size];
+            System.arraycopy(params, 0, mergedParams, size, params.length);
+
+        }
+
+        return new Object[] {mergedParams, updateColumnNames};
     }
 }

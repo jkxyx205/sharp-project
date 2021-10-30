@@ -159,16 +159,16 @@ public final class SQLUtils {
         return deleteCascade(masterTable, refColumnName, masterTableIds, null, null, subTables);
     }
 
-    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> masterTableIds, Object[] conditionParams, String conditionSQL, String ...subTables) {
+    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> deletedIds, Object[] conditionParams, String conditionSQL, String ...subTables) {
         Assert.notNull(masterTable, "主表不能为空");
         Assert.notNull(refColumnName, "从表外键不能为空");
-        Assert.notNull(masterTableIds, "masterTableIds不能为空");
+        Assert.notNull(deletedIds, "masterTableIds不能为空");
         Assert.notNull(subTables, "从表不能为空");
 
         for (String subTable : subTables) {
-            delete(subTable, refColumnName, masterTableIds, conditionParams, conditionSQL);
+            delete(subTable, refColumnName, deletedIds);
         }
-        return delete(masterTable, EntityConstants.ID_COLUMN_NAME, masterTableIds, conditionParams, conditionSQL);
+        return delete(masterTable, EntityConstants.ID_COLUMN_NAME, deletedIds, conditionParams, conditionSQL);
     }
 
     /**
