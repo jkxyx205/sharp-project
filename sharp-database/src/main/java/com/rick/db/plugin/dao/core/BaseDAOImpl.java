@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
@@ -89,6 +90,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
+    @Transactional
     public int insert(T t) {
         Object[] params;
         int index = columnNameList.indexOf(tableMeta.getIdColumnName());
@@ -121,6 +123,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * 批量插入数据
      */
     @Override
+    @Transactional
     public int[] insert(List<?> paramsList) {
         if (CollectionUtils.isEmpty(paramsList)) {
             return new int[]{};
@@ -154,6 +157,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id
      */
     @Override
+    @Transactional
     public int deleteById(Serializable id) {
         return deleteByIds(Lists.newArrayList(id));
     }
@@ -164,6 +168,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
+    @Transactional
     public int deleteByIds(String ids) {
         return deleteByIds(Arrays.asList(ids.split(",")));
     }
@@ -174,6 +179,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
+    @Transactional
     public int deleteByIds(Collection<?> ids) {
         return delete(tableMeta.getIdColumnName(), ids);
     }
@@ -186,11 +192,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
+    @Transactional
     public int delete(String deleteColumn, String deleteValues) {
         return delete(deleteColumn, Arrays.asList(deleteValues.split(",")));
     }
 
     @Override
+    @Transactional
     public int delete(String deleteColumn, Collection<?> deleteValues) {
         Object[] objects = handleConditionAdvice();
         if (hasSubTables()) {
@@ -207,6 +215,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
+    @Transactional
     public int delete(Object[] params, String conditionSQL) {
         Object[] objects = handleConditionAdvice(params, conditionSQL, false);
         if (hasSubTables()) {
@@ -222,6 +231,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id
      */
     @Override
+    @Transactional
     public int deleteLogicallyById(Serializable id) {
         Assert.notNull(id, "主键不能为null");
 
@@ -239,6 +249,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
+    @Transactional
     public int deleteLogicallyByIds(String ids) {
         if (StringUtils.isBlank(ids)) {
             return 0;
@@ -251,6 +262,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
+    @Transactional
     public int deleteLogicallyByIds(Collection<?> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return 0;
@@ -406,7 +418,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     public Optional<T> selectById(Serializable id) {
         Assert.notNull(id, "主键不能为null");
-//        List<T> list = selectByParams(tableMeta.getIdColumnName() + " = " + id, tableMeta.getIdColumnName() + " = :id");
 
         Map<String, Object> params = Params.builder(1)
                 .pv(tableMeta.getIdColumnName(), id)
@@ -538,7 +549,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 conditionParams,
                 this.entityClass);
         cascadeSelect(list);
-        // inject
         return list;
     }
 
