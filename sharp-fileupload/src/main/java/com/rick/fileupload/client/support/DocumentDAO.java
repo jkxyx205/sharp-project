@@ -1,6 +1,6 @@
 package com.rick.fileupload.client.support;
 
-import com.rick.db.plugin.dao.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.BaseDAOImpl;
 
 /**
  * @author Rick

@@ -1,8 +1,9 @@
-package com.rick.demo.module.project.domain.entity;
+package com.rick.demo.module.project.domain.entity.group;
 
 import com.rick.db.dto.BasePureEntity;
-import com.rick.db.plugin.dao.annotation.OneToMany;
 import com.rick.db.plugin.dao.annotation.TableName;
+import com.rick.demo.module.project.domain.entity.Address;
+import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @Setter
-@TableName(value = "t_project1", subTables = {"t_project_detail1"})
+@TableName(value = "t_project2", subTables = {"t_project_detail2"})
 @NoArgsConstructor
 public class Project extends BasePureEntity {
 
@@ -43,8 +44,5 @@ public class Project extends BasePureEntity {
     private List<Address> list;
 
     private PhoneNumber phoneNumber;
-
-    @OneToMany(subTable = "t_project_detail1", reverseColumnName = "project")
-    private List<ProjectDetail> projectDetailList;
 
 }

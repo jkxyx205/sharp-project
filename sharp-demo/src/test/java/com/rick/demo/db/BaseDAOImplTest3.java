@@ -3,12 +3,10 @@ package com.rick.demo.db;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.db.service.support.Params;
-import com.rick.demo.module.project.dao.ProjectDAO;
-import com.rick.demo.module.project.dao.ProjectDetailDAO;
+import com.rick.demo.module.project.dao.ProjectDAO2;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
-import com.rick.demo.module.project.domain.entity.Project;
-import com.rick.demo.module.project.domain.entity.ProjectDetail;
+import com.rick.demo.module.project.domain.entity.group.Project;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import org.junit.jupiter.api.*;
@@ -23,43 +21,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BaseDAOImplTest {
+public class BaseDAOImplTest3 {
 
     @Autowired
-    private ProjectDAO projectDAO;
-
-    @Autowired
-    private ProjectDetailDAO projectDetailDAO;
+    private ProjectDAO2 projectDAO;
 
     @AfterAll
     public static void init() {
         DataInit.init();
-    }
-
-    @Order(0)
-    @Test
-    public void testSaveProjectCascade() {
-        Project project = createProject();
-        project.setTitle("项目标题-testSaveProjectCascade");
-        project.setProjectDetailList(Lists.newArrayList(ProjectDetail.builder().title("google").build()));
-        projectDAO.insert(project);
-        assertThat(project.getId()).isNotNull();
-        assertThat(project.getProjectDetailList().get(0).getId()).isNotNull();
-    }
-
-    @Order(0)
-    @Test
-    public void testSaveProjectCascadeBatch() {
-        Project project1 = createProject();
-        project1.setTitle("项目标题-testSaveProjectCascade-1");
-        project1.setProjectDetailList(Lists.newArrayList(ProjectDetail.builder().title("facebook-2").build()));
-
-        Project project2 = createProject();
-        project2.setTitle("项目标题-testSaveProjectCascade-2");
-        project2.setProjectDetailList(Lists.newArrayList(ProjectDetail.builder().title("facebook-2").build()));
-
-        projectDAO.insert(Lists.newArrayList(project1, project2));
-        assertThat(project1.getProjectDetailList().get(0).getId()).isNotNull();
     }
 
     @Order(1)
@@ -77,10 +46,10 @@ public class BaseDAOImplTest {
         Project project1 = createProject();
         project1.setTitle("项目标题-batch1");
 
-        Project project2 = createProject();
-        project2.setTitle("项目标题-batch2");
+        Project project = createProject();
+        project.setTitle("项目标题-batch2");
 
-        projectDAO.insert(Lists.newArrayList(project1, project2));
+        projectDAO.insert(Lists.newArrayList(project1, project));
     }
 
     @Order(3)
@@ -267,32 +236,6 @@ public class BaseDAOImplTest {
 
     @Order(21)
     @Test
-    public void testCascadeSelect() {
-        List<Project> projectList = projectDAO.selectByIds(Arrays.asList(479723663504343042L, 479723663504343043L));
-        List<Project> projectList2 = projectDAO.selectByIds(Arrays.asList(479723663504343042L, 479723663504343043L));
-        List<ProjectDetail> projectDetail = projectDetailDAO.selectByIds(Arrays.asList(1, 2));
-
-        assertThat(projectList.get(0).getProjectDetailList().get(0).getTitle()).isEqualTo("11");
-        assertThat(projectList2.get(1).getProjectDetailList().get(0).getTitle()).isEqualTo("22");
-        assertThat(projectDetail.get(0).getProject().getTitle()).startsWith("batch: ");
-        assertThat(projectDetail.get(1).getProject().getTitle()).startsWith("batch: ");
-    }
-
-    @Order(22)
-    @Test
-    public void testCascadeSelect2() {
-        ProjectDetail projectDetail1 = projectDetailDAO.selectById(1).get();
-        ProjectDetail projectDetail2 = projectDetailDAO.selectById(2).get();
-
-        assertThat(projectDetail1.getProject().getTitle()).startsWith("batch: ");
-        assertThat(projectDetail1.getProject().getTitle()).startsWith("batch: ");
-        assertThat(projectDetail1.getTitle()).isEqualTo("11");
-        assertThat(projectDetail2.getTitle()).isEqualTo("22");
-    }
-
-
-    @Order(23)
-    @Test
     public void testDeleteLogically() {
         int count1 = projectDAO.deleteLogicallyByIds(Lists.newArrayList(479723663504343042L, 479723663504343043L));
         int count2 = projectDAO.deleteLogicallyById(479723663504343042L);
@@ -300,20 +243,20 @@ public class BaseDAOImplTest {
         assertThat(count2).isEqualTo(0);
     }
 
-    @Order(24)
+    @Order(22)
     @Test
     public void testFindDeleteLogically() {
         Optional<Project> project = projectDAO.selectById(479723663504343043L);
         assertThat(project.isPresent()).isEqualTo(false);
     }
 
-    @Order(25)
+    @Order(23)
     @Test
     public void testDeleteByConditionCascade() {
         projectDAO.delete(new Object[] { "kill"}, "title = ?");
     }
 
-    @Order(26)
+    @Order(24)
     @Test
     public void testUpdateMap() {
         int count = projectDAO.update(" owner_id , sex, description",
@@ -325,6 +268,7 @@ public class BaseDAOImplTest {
         assertThat(count).isEqualTo(1);
         assertThat(projectDAO.selectByParams("description=new-description222").size()).isEqualTo(1);
     }
+
 
     public Project createProject() {
         Project project = new Project();

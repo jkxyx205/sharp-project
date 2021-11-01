@@ -1,7 +1,7 @@
 package com.rick.demo.module.project.dao;
 
 
-import com.rick.db.plugin.dao.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.BaseDAOImpl;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public class ProjectMapDAO extends BaseDAOImpl {
 
     public ProjectMapDAO() {
-        super("t_project",
+        super("t_project3",
                 "title,description,cover_url,owner_id,sex,address,status,list,id,created_by,created_at,updated_by,updated_at,is_deleted",
                 "id");
     }

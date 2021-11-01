@@ -2,7 +2,7 @@ package com.rick.fileupload.client.support;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.rick.db.config.annotation.TableName;
+import com.rick.db.plugin.dao.annotation.TableName;
 import com.rick.fileupload.core.model.FileMeta;
 import lombok.Data;
 

@@ -3,8 +3,8 @@ package com.rick.demo.config;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.rick.common.validate.ValidatorHelper;
-import com.rick.db.plugin.dao.ColumnAutoFill;
-import com.rick.db.plugin.dao.DefaultColumnAutoFill;
+import com.rick.db.plugin.dao.support.ColumnAutoFill;
+import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.impl.fastdfs.FastDFSInputStreamStore;
 import com.rick.fileupload.impl.oos.OSSInputStreamStore;
@@ -36,6 +36,7 @@ public class SharpConfig {
                 Map<String, Object> fill = new DefaultColumnAutoFill().insertFill();
                 fill.put("created_by", 0L);
                 fill.put("updated_by", 0L);
+                fill.put("group_id", 99L);
                 return fill;
             }
 

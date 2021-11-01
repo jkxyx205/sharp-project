@@ -1,8 +1,8 @@
 package com.rick.demo.module.project.dao;
 
 
-import com.rick.db.plugin.dao.BaseDAOImpl;
-import com.rick.demo.module.project.domain.entity.Project;
+import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.demo.module.project.domain.entity.group.Project;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,4 +11,13 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ProjectDAO2 extends BaseDAOImpl<Project> {
+
+    public ProjectDAO2() {
+        /**
+         * 手动指定
+         */
+        super("t_project2",
+                "title,description,cover_url,owner_id,sex,address,status,list,phone_number, id,created_by,created_at,updated_by,updated_at,is_deleted",
+                "id");
+    }
 }

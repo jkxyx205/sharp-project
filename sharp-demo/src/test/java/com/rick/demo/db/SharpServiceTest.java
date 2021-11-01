@@ -31,7 +31,7 @@ public class SharpServiceTest {
     public void testListAsMap() {
         // language=SQL
         String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
-                "FROM t_project\n" +
+                "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
                 "  AND created_at > :createTime\n" +
@@ -59,7 +59,7 @@ public class SharpServiceTest {
     public void testListAsClass() {
         // language=SQL
         String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
-                "FROM t_project\n" +
+                "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
                 "  AND created_at > :createTime\n" +
@@ -80,7 +80,7 @@ public class SharpServiceTest {
     public void testListAsCustom() {
         // language=SQL
         String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
-                "FROM t_project\n" +
+                "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
                 "  AND created_at > :createTime\n" +
@@ -108,7 +108,7 @@ public class SharpServiceTest {
     public void testKeyValue() {
         // language=SQL
         String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
-                "FROM t_project\n" +
+                "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
                 "  AND created_at > :createTime\n" +
@@ -126,7 +126,7 @@ public class SharpServiceTest {
     public void testQueryObject() {
         // language=SQL
         String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
-                "FROM t_project\n" +
+                "FROM t_project1\n" +
                 "WHERE id = :id\n" +
                 "  AND title LIKE :title\n" +
                 "  AND created_at > :createTime\n" +
@@ -147,7 +147,7 @@ public class SharpServiceTest {
     public void testQueryBean() {
         // language=SQL
         String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
-                "FROM t_project\n" +
+                "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
                 "  AND created_at > :createTime\n" +
@@ -168,7 +168,7 @@ public class SharpServiceTest {
     @Transactional(rollbackFor = Exception.class)
     public void testUpdate() {
         // language=SQL
-        String sql = "UPDATE t_project SET title = :title, description = :description, is_deleted = :deleted\n" +
+        String sql = "UPDATE t_project1 SET title = :title, description = :description, is_deleted = :deleted\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND created_at > :createdTime\n" +
                 "AND created_by = ${createdBy}";
