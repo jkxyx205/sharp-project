@@ -1,4 +1,4 @@
-package com.rick.db.config.annotation;
+package com.rick.db.plugin.dao.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * @author Rick
  * @createdAt 2021-09-27 09:19:00
  */
-@Target({ElementType.METHOD, ElementType.FIELD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Transient {
 }

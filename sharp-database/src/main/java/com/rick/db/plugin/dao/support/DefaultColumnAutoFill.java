@@ -1,4 +1,4 @@
-package com.rick.db.plugin.dao;
+package com.rick.db.plugin.dao.support;
 
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;

@@ -1,4 +1,4 @@
-package com.rick.db.plugin.dao;
+package com.rick.db.plugin.dao.core;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -7,17 +7,20 @@ import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.*;
 import com.rick.db.config.Constants;
 import com.rick.db.constant.EntityConstants;
+import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.SQLUtils;
+import com.rick.db.plugin.dao.support.ColumnAutoFill;
+import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -32,7 +35,7 @@ import java.util.stream.Collectors;
  * @createdAt 2021-09-23 16:41:00
  */
 @Slf4j
-public class BaseDAOImpl<T> {
+public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Autowired
     private SharpService sharpService;
@@ -69,8 +72,13 @@ public class BaseDAOImpl<T> {
         this.init();
     }
 
+    public BaseDAOImpl(Class<?> entityClass) {
+        this.entityClass = entityClass;
+        this.init();
+    }
+
     public BaseDAOImpl(String tableName, String columnNames, String primaryColumn) {
-        this.tableMeta = new TableMeta(null, tableName, columnNames, null, resolveUpdateColumnNames(columnNames, primaryColumn), null, primaryColumn, null);
+        this.tableMeta = new TableMeta("", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap());
         this.init();
     }
 
@@ -80,6 +88,7 @@ public class BaseDAOImpl<T> {
      * @param t 参数对象
      * @return
      */
+    @Override
     public int insert(T t) {
         Object[] params;
         int index = columnNameList.indexOf(tableMeta.getIdColumnName());
@@ -92,7 +101,9 @@ public class BaseDAOImpl<T> {
             setPropertyValue(t, tableMeta.getIdColumnName(), params[index]);
         }
 
-        return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), params);
+        int count  = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), params);
+        cascadeInsert(t);
+        return count;
     }
 
     /**
@@ -101,6 +112,7 @@ public class BaseDAOImpl<T> {
      * @param params 参数数组
      * @return
      */
+    @Override
     public int insert(Object[] params) {
         return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(null, params, columnNameList, ColumnFillType.INSERT));
     }
@@ -108,6 +120,7 @@ public class BaseDAOImpl<T> {
     /**
      * 批量插入数据
      */
+    @Override
     public int[] insert(List<?> paramsList) {
         if (CollectionUtils.isEmpty(paramsList)) {
             return new int[]{};
@@ -125,7 +138,9 @@ public class BaseDAOImpl<T> {
                     params.add(instanceToParamsArray((T) o));
                 }
             }
-            return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
+            int[] count = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
+            cascadeInsert(instanceList);
+            return count;
         } else if (paramClass == Object[].class) {
             return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
         }
@@ -138,6 +153,7 @@ public class BaseDAOImpl<T> {
      *
      * @param id
      */
+    @Override
     public int deleteById(Serializable id) {
         return deleteByIds(Lists.newArrayList(id));
     }
@@ -147,6 +163,7 @@ public class BaseDAOImpl<T> {
      *
      * @param ids
      */
+    @Override
     public int deleteByIds(String ids) {
         return deleteByIds(Arrays.asList(ids.split(",")));
     }
@@ -156,6 +173,7 @@ public class BaseDAOImpl<T> {
      *
      * @param ids
      */
+    @Override
     public int deleteByIds(Collection<?> ids) {
         return delete(tableMeta.getIdColumnName(), ids);
     }
@@ -167,14 +185,16 @@ public class BaseDAOImpl<T> {
      * @param deleteValues
      * @return
      */
+    @Override
     public int delete(String deleteColumn, String deleteValues) {
         return delete(deleteColumn, Arrays.asList(deleteValues.split(",")));
     }
 
+    @Override
     public int delete(String deleteColumn, Collection<?> deleteValues) {
         Object[] objects = handleConditionAdvice();
         if (hasSubTables()) {
-            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deleteValues,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables());
+            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deleteValues,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
         }
         return SQLUtils.delete(tableMeta.getTableName(), deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
     }
@@ -186,12 +206,13 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL id IN (?, ?) AND group_id = ?
      * @return
      */
+    @Override
     public int delete(Object[] params, String conditionSQL) {
         Object[] objects = handleConditionAdvice(params, conditionSQL, false);
         if (hasSubTables()) {
             List<Map<String, Object>> deletedList = sharpService.getNamedJdbcTemplate().getJdbcTemplate().queryForList(getSelectSQL() + " WHERE " + objects[1], (Object[]) objects[0]);
             Set<?> deletedIds = deletedList.stream().map(r -> r.get(tableMeta.getIdColumnName())).collect(Collectors.toSet());
-            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deletedIds, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables());
+            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deletedIds, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
         }
         return SQLUtils.delete(tableMeta.getTableName(), (Object[]) objects[0], (String) objects[1]);
     }
@@ -200,6 +221,7 @@ public class BaseDAOImpl<T> {
      * 通过主键逻辑id刪除
      * @param id
      */
+    @Override
     public int deleteLogicallyById(Serializable id) {
         Assert.notNull(id, "主键不能为null");
 
@@ -216,6 +238,7 @@ public class BaseDAOImpl<T> {
      * 通过主键id批量逻辑刪除 eg：ids -> “1,2,3,4”
      * @param ids
      */
+    @Override
     public int deleteLogicallyByIds(String ids) {
         if (StringUtils.isBlank(ids)) {
             return 0;
@@ -227,6 +250,7 @@ public class BaseDAOImpl<T> {
      * 通过主键id批量逻辑刪除 eg：ids -> [1, 2, 3, 4]
      * @param ids
      */
+    @Override
     public int deleteLogicallyByIds(Collection<?> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return 0;
@@ -251,6 +275,7 @@ public class BaseDAOImpl<T> {
      * @param params
      * @param id
      */
+    @Override
     public int update(Object[] params, Serializable id) {
         return updateById(null, tableMeta.getUpdateColumnNames(), params, id);
     }
@@ -261,6 +286,7 @@ public class BaseDAOImpl<T> {
      * @param t
      * @return
      */
+    @Override
     public int update(T t) {
         Object[] objects = resolverParamsAndId(t);
         return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Serializable) objects[1]);
@@ -271,6 +297,7 @@ public class BaseDAOImpl<T> {
      * @param collection
      * @return
      */
+    @Override
     public int[] update(Collection<T> collection) {
         if (CollectionUtils.isEmpty(collection)) {
             return new int[] {};
@@ -297,6 +324,7 @@ public class BaseDAOImpl<T> {
      * @param params            {"Rick", 23, null}
      * @param id                1
      */
+    @Override
     public int update(String updateColumnNames, Object[] params, Serializable id) {
         return updateById(null, updateColumnNames, params, id);
     }
@@ -308,10 +336,12 @@ public class BaseDAOImpl<T> {
      * @param params            {"Rick", 23, LocalDateTime.now, 1}
      * @param conditionSQL      created_at > ? AND created_by = ?
      */
+    @Override
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
         return update(null, updateColumnNames, params, conditionSQL);
     }
 
+    @Override
     public int[] update(String updateColumnNames, List<Object[]> srcParamsList, String conditionSQL) {
         if (CollectionUtils.isEmpty(srcParamsList)) {
             return new int[] {};
@@ -335,6 +365,7 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL id = :id
      * @return
      */
+    @Override
     public int update(String updateColumnNames, Map<String, Object> params, String conditionSQL) {
         Assert.hasText(updateColumnNames, "updateColumnNames不能为空");
         Assert.hasText(conditionSQL, "conditionSQL不能为空");
@@ -372,6 +403,7 @@ public class BaseDAOImpl<T> {
      * @param id
      * @return
      */
+    @Override
     public Optional<T> selectById(Serializable id) {
         Assert.notNull(id, "主键不能为null");
 //        List<T> list = selectByParams(tableMeta.getIdColumnName() + " = " + id, tableMeta.getIdColumnName() + " = :id");
@@ -384,10 +416,12 @@ public class BaseDAOImpl<T> {
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
     }
 
+    @Override
     public Map<Serializable, T> selectByIdsAsMap(String ids) {
         return listToMap(selectByIds(ids));
     }
 
+    @Override
     public Map<Serializable, T> selectByIdsAsMap(Collection<?> ids) {
         List<T> list = selectByIds(ids);
         return listToMap(list);
@@ -399,11 +433,13 @@ public class BaseDAOImpl<T> {
      * @param ids
      * @return
      */
+    @Override
     public List<T> selectByIds(String ids) {
         Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, tableMeta.getIdColumnName() + " IN(:ids)");
     }
 
+    @Override
     public List<T> selectByIds(Collection<?> ids) {
         Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, tableMeta.getIdColumnName() + " IN(:ids)");
@@ -416,10 +452,12 @@ public class BaseDAOImpl<T> {
      * @param queryString
      * @return
      */
+    @Override
     public List<T> selectByParams(String queryString) {
         return selectByParams(queryString, null);
     }
 
+    @Override
     public List<T> selectByParams(String queryString, String conditionSQL) {
         final Map<String, String> map = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryString);
         return selectByParams(map, conditionSQL);
@@ -431,10 +469,12 @@ public class BaseDAOImpl<T> {
      * @param
      * @return
      */
+    @Override
     public List<T> selectByParams(T t) {
         return selectByParams(t, null);
     }
 
+    @Override
     public List<T> selectByParams(T t, String conditionSQL) {
         Map params;
         if (isMapClass()) {
@@ -456,6 +496,7 @@ public class BaseDAOImpl<T> {
      * @param
      * @return
      */
+    @Override
     public List<T> selectByParams(Map<String, ?> params) {
         return selectByParams(params, null);
     }
@@ -465,6 +506,7 @@ public class BaseDAOImpl<T> {
      *
      * @return
      */
+    @Override
     public List<T> selectAll() {
         return selectByParams(Collections.emptyMap(), null);
     }
@@ -476,6 +518,7 @@ public class BaseDAOImpl<T> {
      * @param conditionSQL
      * @return
      */
+    @Override
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
         Map<String, Object> conditionParams;
 
@@ -490,12 +533,16 @@ public class BaseDAOImpl<T> {
             conditionParams = (Map<String, Object>) params;
         }
 
-        return (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL)
+        List<T> list = (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL)
                         + (StringUtils.isBlank(additionCondition) ? "" : " AND " + additionCondition),
                 conditionParams,
                 this.entityClass);
+        cascadeSelect(list);
+        // inject
+        return list;
     }
 
+    @Override
     public void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName) {
         Map<Long, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(EntityConstants.ID_COLUMN_NAME)).collect(Collectors.toSet()));
 
@@ -505,28 +552,47 @@ public class BaseDAOImpl<T> {
         }
     }
 
+    @Override
     public Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
         Map<Long, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
-                refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> (Long)getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
+                refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> {
+
+            Object propertyValue = getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
+            if (propertyValue instanceof Long) {
+                return (Long)propertyValue;
+            }
+
+            return (Long)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), EntityConstants.ID_COLUMN_NAME));
+
+        }));
         return refColumnNameMap;
     }
 
+    @Override
     public String getSelectSQL() {
         return this.selectSQL;
     }
 
+    @Override
+    public String getTableName() {
+        return tableMeta.getTableName();
+    }
+    @Override
     public boolean isMapClass() {
         return this.entityClass == Map.class;
     }
 
+    @Override
     public boolean hasSubTables() {
-        return ArrayUtils.isNotEmpty(tableMeta.getSubTables());
+        return !tableMeta.getSubTables().isEmpty();
     }
 
     private void init() {
         Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
-        if (Objects.nonNull(actualTypeArgument)) {
-            this.entityClass = actualTypeArgument[0];
+        this.entityClass = Objects.nonNull(this.entityClass) ? this.entityClass
+                : (Objects.nonNull(actualTypeArgument) ? actualTypeArgument[0] : null);
+
+        if (Objects.nonNull(this.entityClass)) {
             if (Map.class.isAssignableFrom(this.entityClass)) {
                 this.entityClass = Map.class;
             } else {
@@ -542,7 +608,7 @@ public class BaseDAOImpl<T> {
                 }
 
                 if (Objects.nonNull(this.tableMeta)) {
-                    this.tableMeta = new TableMeta(tableMeta.getName(), this.tableMeta.getName(), this.tableMeta.getColumnNames(), null, this.tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables());
+                    this.tableMeta = new TableMeta(tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationMap(), tableMeta.getManyToOneAnnotationMap());
                 } else {
                     this.tableMeta = tableMeta;
                 }
@@ -658,27 +724,32 @@ public class BaseDAOImpl<T> {
         this.selectSQL = selectSQLBuilder.toString();
     }
 
-    private Object getPropertyValue(T t, String propertyName) {
+    private Object getPropertyValue(Object t, String propertyName) {
+        Field field = propertyFieldMap.get(propertyName);
+        return getPropertyValue(t, field);
+    }
+
+    private Object getPropertyValue(Object t, Field field) {
         try {
-            Field field = propertyFieldMap.get(propertyName);
             field.setAccessible(true);
-            if (field.getName().equals(propertyName)) {
-                return field.get(t);
-            }
+            return field.get(t);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
-    private void setPropertyValue(T t, String propertyName, Object propertyValue) {
+    private void setPropertyValue(Object t, String propertyName, Object propertyValue) {
+        Field field = propertyFieldMap.get(propertyName);
+        if (field.getName().equals(propertyName)) {
+            setPropertyValue(t, field, propertyValue);
+            return;
+        }
+    }
+
+    private void setPropertyValue(Object t, Field field, Object propertyValue) {
         try {
-            Field field = propertyFieldMap.get(propertyName);
             field.setAccessible(true);
-            if (field.getName().equals(propertyName)) {
-                field.set(t, propertyValue);
-            }
+            field.set(t, propertyValue);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -694,15 +765,9 @@ public class BaseDAOImpl<T> {
 
     private Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
-        try {
-            for (int i = 0; i < this.entityFields.length; i++) {
-                Field field = this.entityFields[i];
-                field.setAccessible(true);
-                Object param = resolverValue(this.entityFields[i], t);
-                params[i] = param;
-            }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        for (int i = 0; i < params.length; i++) {
+            Object param = resolverValue(getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
+            params[i] = param;
         }
         return params;
     }
@@ -741,6 +806,8 @@ public class BaseDAOImpl<T> {
             } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
                 return toJson(value);
             }
+        } else if (BasePureEntity.class.isAssignableFrom(value.getClass())) {
+            return getIdValue(value);
         }
 
         // JDBC 支持类型
@@ -880,4 +947,93 @@ public class BaseDAOImpl<T> {
 
         return new Object[] {mergedParams, updateColumnNames};
     }
+
+    private void cascadeSelect(List<T> list) {
+        // OneToMany
+        for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
+            if (isInternalCall()) {
+                return;
+            }
+            TableMeta.OneToManyProperty oneToManyProperty = oneToManyPropertyEntry.getValue();
+            String targetTable = oneToManyProperty.getOneToMany().subTable();
+
+            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+
+            Set<Serializable> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
+            Map<Serializable, List<?>> subTableData = subTableBaseDAO.groupByColumnName(subTableRefColumnName, refIds);
+
+            for (T t : list) {
+                Object data = subTableData.get(getIdValue(t));
+                setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
+            }
+        }
+
+        // ManyToOne
+        for (Map.Entry<String, TableMeta.ManyToOneProperty> manyToOnePropertyEntry : tableMeta.getManyToOneAnnotationMap().entrySet()) {
+            if (isInternalCall()) {
+                return;
+            }
+            String targetTable = manyToOnePropertyEntry.getKey();
+            BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
+
+            String refColumnName = manyToOnePropertyEntry.getValue().getOneToMany().value();
+
+            Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName)))).collect(Collectors.toSet());
+            List<?> parentList = parentTableDAO.selectByIds(refIds);
+            Map<Serializable, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
+            for (T t : list) {
+                Object data = parentIdMap.get(getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
+                setPropertyValue(t, manyToOnePropertyEntry.getValue().getField(), Objects.isNull(data) ? null : data);
+            }
+
+        }
+    }
+
+    private void cascadeInsert(List<T> instanceList) {
+        for (T t : instanceList) {
+            cascadeInsert(t);
+        }
+    }
+
+    private void cascadeInsert(T t) {
+        // 只处理OneToMany的情况
+        // OneToMany
+        for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
+            TableMeta.OneToManyProperty oneToManyProperty = oneToManyPropertyEntry.getValue();
+            String targetTable = oneToManyProperty.getOneToMany().subTable();
+
+            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+
+            List<?> subDataList = (List<?>) getPropertyValue(t, oneToManyProperty.getField());
+            if (CollectionUtils.isEmpty(subDataList)) {
+                return;
+            }
+
+            for (Object subData : subDataList) {
+                 setPropertyValue(subData, ReflectionUtils.findField(subData.getClass(), oneToManyPropertyEntry.getValue().getOneToMany().reverseColumnName()), t);
+            }
+
+            subTableBaseDAO.insert(subDataList);
+        }
+    }
+
+    private Serializable getIdValue(Object o) {
+        return (Long)getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
+    }
+
+    private boolean isInternalCall() {
+        StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+        int callIndex = 2;
+
+        for (int j = callIndex + 1; j < stacks.length; j++) {
+            if (stacks[j].getClassName().equals(stacks[callIndex].getClassName()) &&
+                    stacks[j].getMethodName().equals(stacks[callIndex].getMethodName())
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

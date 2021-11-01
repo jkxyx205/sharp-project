@@ -1,4 +1,4 @@
-package com.rick.db.plugin.dao;
+package com.rick.db.plugin.dao.support;
 
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.service.support.Params;

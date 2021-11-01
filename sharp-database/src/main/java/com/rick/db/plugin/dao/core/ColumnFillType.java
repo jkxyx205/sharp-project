@@ -1,4 +1,4 @@
-package com.rick.db.plugin.dao;
+package com.rick.db.plugin.dao.core;
 
 /**
  * @author Rick

@@ -46,13 +46,6 @@ public class SharpServiceQueryInterceptor {
                 hashBuilder.append("null").append(":");
                 continue;
             }
-//            if (arg instanceof Map) {
-//                Map<String, ?> params =  (Map<String, ?>) arg;
-//                List<String> keys = params.keySet().stream().sorted().collect(Collectors.toList());
-//                for (String key : keys) {
-//                    hashBuilder.append(key.hashCode()).append(":").append(params.get(key)).append(":");
-//                }
-//            }
 
             hashBuilder.append(arg.hashCode()).append(":");
         }

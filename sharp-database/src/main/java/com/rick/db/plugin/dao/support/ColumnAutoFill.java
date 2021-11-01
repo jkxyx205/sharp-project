@@ -1,4 +1,4 @@
-package com.rick.db.plugin.dao;
+package com.rick.db.plugin.dao.support;
 
 import java.util.Map;
 

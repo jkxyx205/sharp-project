@@ -6,11 +6,14 @@ import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
 import com.rick.db.plugin.GridUtils;
 import com.rick.db.plugin.SQLUtils;
-import com.rick.db.plugin.dao.ColumnAutoFill;
-import com.rick.db.plugin.dao.DefaultColumnAutoFill;
-import com.rick.db.plugin.dao.DefaultConditionAdvice;
+import com.rick.db.plugin.dao.core.BaseDAO;
+import com.rick.db.plugin.dao.core.BaseDAOManager;
+import com.rick.db.plugin.dao.support.ColumnAutoFill;
+import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
+import com.rick.db.plugin.dao.support.DefaultConditionAdvice;
 import com.rick.db.service.GridService;
 import com.rick.db.service.support.SharpServiceQueryInterceptor;
+import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -25,6 +28,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -57,6 +61,11 @@ public class GridServiceAutoConfiguration {
             return new MysqlSqlFormatter();
         }
 
+    }
+
+    @Configuration
+    static class BaseDAOConfiguration {
+
         @Bean
         public GridService gridService() {
             return new GridService();
@@ -74,6 +83,12 @@ public class GridServiceAutoConfiguration {
             return new DefaultConditionAdvice();
         }
 
+        @Bean
+        public BaseDAOManager baseDAOManager(List<BaseDAO> baseDAOList) {
+            BaseDAOManager baseDAOManager = new BaseDAOManager();
+            BaseDAOManager.setBaseDAOList(baseDAOList);
+            return baseDAOManager;
+        }
     }
 
     @Configuration
@@ -92,11 +107,14 @@ public class GridServiceAutoConfiguration {
 
     @Configuration
     @ConditionalOnClass(org.apache.ibatis.session.SqlSessionFactory.class)
+    @RequiredArgsConstructor
     static class MappedSharpServiceConfiguration {
+
+        private final SqlSessionFactory sqlSessionFactory;
 
         @Bean
         @Order
-        public MappedSharpService getMappedSharpService(SqlSessionFactory sqlSessionFactory, GridService gridService) {
+        public MappedSharpService getMappedSharpService(GridService gridService) {
             MappedSharpService mappedSharpService = new MappedSharpService(sqlSessionFactory, gridService);
             return mappedSharpService;
         }

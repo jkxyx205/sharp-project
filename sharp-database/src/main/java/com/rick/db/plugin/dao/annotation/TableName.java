@@ -1,4 +1,4 @@
-package com.rick.db.config.annotation;
+package com.rick.db.plugin.dao.annotation;
 
 import java.lang.annotation.*;
 
