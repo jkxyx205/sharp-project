@@ -20,6 +20,7 @@ public class BaseDAOManager {
 
     public static void setBaseDAOList(List<BaseDAO> baseDAOList) {
         if (!hasAutowired) {
+            baseDAOList = Objects.isNull(baseDAOList) ? Collections.emptyList() : baseDAOList;
             BaseDAOManager.baseDAOList = Collections.unmodifiableList(baseDAOList);
             BaseDAOManager.baseDAOMap = Objects.nonNull(baseDAOList) ? Collections.unmodifiableMap(BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getTableName(), v -> v))) : null;
             BaseDAOManager.hasAutowired = true;

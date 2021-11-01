@@ -84,7 +84,7 @@ public class GridServiceAutoConfiguration {
         }
 
         @Bean
-        public BaseDAOManager baseDAOManager(List<BaseDAO> baseDAOList) {
+        public BaseDAOManager baseDAOManager(@Autowired(required = false) List<BaseDAO> baseDAOList) {
             BaseDAOManager baseDAOManager = new BaseDAOManager();
             BaseDAOManager.setBaseDAOList(baseDAOList);
             return baseDAOManager;

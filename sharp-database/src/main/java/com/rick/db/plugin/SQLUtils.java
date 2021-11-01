@@ -166,7 +166,7 @@ public final class SQLUtils {
         Assert.notNull(subTables, "从表不能为空");
 
         for (String subTable : subTables) {
-            delete(subTable, refColumnName, deletedIds);
+            delete(subTable, refColumnName, deletedIds, conditionParams, conditionSQL);
         }
         return delete(masterTable, EntityConstants.ID_COLUMN_NAME, deletedIds, conditionParams, conditionSQL);
     }
