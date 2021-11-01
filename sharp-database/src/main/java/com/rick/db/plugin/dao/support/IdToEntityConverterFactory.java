@@ -29,13 +29,9 @@ final public class IdToEntityConverterFactory implements ConverterFactory<Long, 
                 T t = (T) targetType.newInstance();
                 t.setId(id);
                 return t;
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                return null;
             }
-            return null;
-//            return (T) T.builder().id(id).build();
         }
     }
 }
