@@ -179,6 +179,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return deleteByIds(Arrays.asList(ids.split(",")));
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteByIds(Serializable ...ids) {
+        return deleteByIds(Arrays.asList(ids));
+    }
+
     /**
      * 通过主键id批量刪除 eg：ids -> [1, 2, 3, 4]
      *
@@ -560,7 +566,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName) {
-        Map<Long, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(EntityConstants.ID_COLUMN_NAME)).collect(Collectors.toSet()));
+        Map<Serializable, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(EntityConstants.ID_COLUMN_NAME)).collect(Collectors.toSet()));
 
         for (Map<String, Object> row : masterData) {
             List<T> subTableList = refColumnNameMap.get(row.get(EntityConstants.ID_COLUMN_NAME));
@@ -569,16 +575,16 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     @Override
-    public Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
-        Map<Long, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
+    public Map<Serializable, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
+        Map<Serializable, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
                 refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> {
 
             Object propertyValue = getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
-            if (propertyValue instanceof Long) {
-                return (Long)propertyValue;
+            if (propertyValue instanceof Serializable) {
+                return (Serializable)propertyValue;
             }
 
-            return (Long)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), EntityConstants.ID_COLUMN_NAME));
+            return (Serializable)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), EntityConstants.ID_COLUMN_NAME));
 
         }));
         return refColumnNameMap;
@@ -1026,7 +1032,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             for (Object subData : subDataList) {
-                 setPropertyValue(subData, ReflectionUtils.findField(subData.getClass(), oneToManyPropertyEntry.getValue().getOneToMany().reverseColumnName()), t);
+                 setPropertyValue(subData, ReflectionUtils.findField(subData.getClass(), oneToManyPropertyEntry.getValue().getOneToMany().reversePropertyName()), t);
             }
 
             subTableBaseDAO.insert(subDataList);
@@ -1034,7 +1040,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private Serializable getIdValue(Object o) {
-        return (Long)getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
+        return (Serializable)getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
     }
 
     private boolean isInternalCall() {

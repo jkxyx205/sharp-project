@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 /**
@@ -26,15 +27,15 @@ public class BasePureEntity {
 
     @Id
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long id;
+    private Serializable id;
 
     @ColumnName(updatable = false)
-    private Long createdBy;
+    private Serializable createdBy;
 
     @ColumnName(updatable = false)
     private Instant createdAt;
 
-    private Long updatedBy;
+    private Serializable updatedBy;
 
     private Instant updatedAt;
 

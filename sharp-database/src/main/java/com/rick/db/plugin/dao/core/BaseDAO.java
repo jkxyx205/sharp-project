@@ -21,6 +21,8 @@ public interface BaseDAO<T> {
 
     int deleteByIds(String ids);
 
+    int deleteByIds(Serializable ...ids);
+
     int deleteByIds(Collection<?> ids);
 
     int delete(String deleteColumn, String deleteValues);
@@ -75,7 +77,7 @@ public interface BaseDAO<T> {
 
     void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName);
 
-    Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
+    Map<Serializable, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
 
     String getSelectSQL();
 

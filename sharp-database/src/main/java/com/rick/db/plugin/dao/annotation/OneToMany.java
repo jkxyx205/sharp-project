@@ -14,5 +14,5 @@ public @interface OneToMany {
 
     String subTable();
 
-    String reverseColumnName() default "";
+    String reversePropertyName() default "";
 }
