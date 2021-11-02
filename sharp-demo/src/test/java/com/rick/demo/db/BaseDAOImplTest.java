@@ -11,10 +11,12 @@ import com.rick.demo.module.project.domain.entity.Project;
 import com.rick.demo.module.project.domain.entity.ProjectDetail;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.validation.ConstraintViolationException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -81,6 +83,16 @@ public class BaseDAOImplTest {
         project2.setTitle("项目标题-batch2");
 
         projectDAO.insert(Lists.newArrayList(project1, project2));
+    }
+
+    @Order(2)
+    @Test
+    public void testSaveProjectValidator() {
+        Project project = createProject();
+        project.setTitle("");
+        Assertions.assertThatThrownBy(() -> {
+            projectDAO.insert(project);
+        }).isInstanceOf(ConstraintViolationException.class);
     }
 
     @Order(3)
