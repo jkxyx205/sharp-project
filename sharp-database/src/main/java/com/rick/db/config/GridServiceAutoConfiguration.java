@@ -1,5 +1,6 @@
 package com.rick.db.config;
 
+import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
 import com.rick.db.formatter.OracleSqlFormatter;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 
 import javax.sql.DataSource;
+import javax.validation.Validator;
 import java.util.List;
 
 /**
@@ -61,15 +63,15 @@ public class GridServiceAutoConfiguration {
             return new MysqlSqlFormatter();
         }
 
-    }
-
-    @Configuration
-    static class BaseDAOConfiguration {
-
         @Bean
         public GridService gridService() {
             return new GridService();
         }
+
+    }
+
+    @Configuration
+    static class BaseDAOConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
@@ -88,6 +90,12 @@ public class GridServiceAutoConfiguration {
             BaseDAOManager baseDAOManager = new BaseDAOManager();
             BaseDAOManager.setBaseDAOList(baseDAOList);
             return baseDAOManager;
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public ValidatorHelper validatorHelper(Validator validator) {
+            return new ValidatorHelper(validator);
         }
     }
 

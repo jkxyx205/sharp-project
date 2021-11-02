@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.*;
+import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.BasePureEntity;
@@ -46,6 +47,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Autowired(required = false)
     private ColumnAutoFill columnAutoFill;
+
+    @Autowired
+    private ValidatorHelper validatorHelper;
 
     private TableMeta tableMeta;
 
@@ -90,8 +94,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int insert(T t) {
+        validatorHelper.validate(t);
         Object[] params;
         int index = columnNameList.indexOf(tableMeta.getIdColumnName());
         if (isMapClass()) {
@@ -123,7 +128,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * 批量插入数据
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int[] insert(List<?> paramsList) {
         if (CollectionUtils.isEmpty(paramsList)) {
             return new int[]{};
@@ -138,6 +143,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 if (isMapClass()) {
                     params.add(mapToParamsArray((Map) o, this.columnNameList));
                 } else {
+                    validatorHelper.validate(o);
                     params.add(instanceToParamsArray((T) o));
                 }
             }
@@ -157,7 +163,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteById(Serializable id) {
         return deleteByIds(Lists.newArrayList(id));
     }
@@ -168,7 +174,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByIds(String ids) {
         return deleteByIds(Arrays.asList(ids.split(",")));
     }
@@ -179,7 +185,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByIds(Collection<?> ids) {
         return delete(tableMeta.getIdColumnName(), ids);
     }
@@ -192,13 +198,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int delete(String deleteColumn, String deleteValues) {
         return delete(deleteColumn, Arrays.asList(deleteValues.split(",")));
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int delete(String deleteColumn, Collection<?> deleteValues) {
         Object[] objects = handleConditionAdvice();
         if (hasSubTables()) {
@@ -215,7 +221,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int delete(Object[] params, String conditionSQL) {
         Object[] objects = handleConditionAdvice(params, conditionSQL, false);
         if (hasSubTables()) {
@@ -231,7 +237,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyById(Serializable id) {
         Assert.notNull(id, "主键不能为null");
 
@@ -249,7 +255,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(String ids) {
         if (StringUtils.isBlank(ids)) {
             return 0;
@@ -262,7 +268,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param ids
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(Collection<?> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return 0;
