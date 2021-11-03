@@ -55,9 +55,13 @@ public interface BaseDAO<T> {
 
     Map<Serializable, T> selectByIdsAsMap(String ids);
 
+    Map<Serializable, T> selectByIdsAsMap(Serializable ...ids);
+
     Map<Serializable, T> selectByIdsAsMap(Collection<?> ids);
 
     List<T> selectByIds(String ids);
+
+    List<T> selectByIds(Serializable ...ids);
 
     List<T> selectByIds(Collection<?> ids);
 
@@ -83,8 +87,6 @@ public interface BaseDAO<T> {
 
     String getTableName();
 
-    boolean isMapClass();
-
-    boolean hasSubTables();
+    Class getEntity();
 
 }

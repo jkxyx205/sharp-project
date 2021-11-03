@@ -17,15 +17,20 @@ import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -69,7 +74,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private String subTableRefColumnName;
 
-    private Map<String, Field> propertyFieldMap;
+    private Map<String, PropertyDescriptor> propertyDescriptorMap;
 
     private Map<String, String> columnNameToPropertyNameMap;
 
@@ -121,6 +126,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public int insert(Object[] params) {
+        Assert.notEmpty(params, "参数不能为空");
         return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(null, params, columnNameList, ColumnFillType.INSERT));
     }
 
@@ -165,6 +171,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteById(Serializable id) {
+        Assert.notNull(id, "id不能为空");
         return deleteByIds(Lists.newArrayList(id));
     }
 
@@ -176,12 +183,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteByIds(String ids) {
+        Assert.hasText(ids, "id不能为空");
         return deleteByIds(Arrays.asList(ids.split(",")));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteByIds(Serializable ...ids) {
+        Assert.notEmpty(ids, "id不能为空");
         return deleteByIds(Arrays.asList(ids));
     }
 
@@ -206,12 +215,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(String deleteColumn, String deleteValues) {
+        Assert.hasText(deleteValues, "deleteValues不能为空");
         return delete(deleteColumn, Arrays.asList(deleteValues.split(",")));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(String deleteColumn, Collection<?> deleteValues) {
+        Assert.hasText(deleteColumn, "deleteColumn不能为空");
         Object[] objects = handleConditionAdvice();
         if (hasSubTables()) {
             return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deleteValues,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
@@ -245,7 +256,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyById(Serializable id) {
-        Assert.notNull(id, "主键不能为null");
+        Assert.notNull(id, "id不能为空");
 
         if (hasSubTables()) {
             for (String subTable : tableMeta.getSubTables()) {
@@ -263,9 +274,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(String ids) {
-        if (StringUtils.isBlank(ids)) {
-            return 0;
-        }
+        Assert.hasText(ids, "id不能为空");
         return deleteLogicallyByIds(Arrays.asList(ids.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX)));
     }
 
@@ -276,9 +285,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(Collection<?> ids) {
-        if (CollectionUtils.isEmpty(ids)) {
-            return 0;
-        }
+        Assert.notEmpty(ids, "id不能为空");
 
         Object[] mergedParams = new Object[ids.size() + 1];
         mergedParams[0] = 1;
@@ -312,6 +319,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public int update(T t) {
+        validatorHelper.validate(t);
         Object[] objects = resolverParamsAndId(t);
         return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Serializable) objects[1]);
     }
@@ -396,31 +404,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return sharpService.update(getParamsUpdateSQL(updateColumnNames, params, conditionSQL), params);
     }
 
-    private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
-        List<String> updateColumnList = convertToArray(updateColumnNames);
-        Object[] params = new Object[updateColumnList.size()];
-        Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
-        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToArray((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, true);
-
-        List<String> newUpdateColumnList = convertToArray((String) updateAutoObjects[1]);
-        Object[] newParams = (Object[]) conditionAdviceObjects[0];
-        StringBuilder updateColumnNameBuilder = new StringBuilder();
-        int i = 0;
-        for (String updateColumnName : newUpdateColumnList) {
-            updateColumnNameBuilder.append(updateColumnName).append(" = :").append(updateColumnName).append(",");
-            Object newParam = newParams[i++];
-            if (Objects.isNull(paramsMap.get(updateColumnName))) {
-                paramsMap.put(updateColumnName, newParam);
-            }
-        }
-        updateColumnNameBuilder.deleteCharAt(updateColumnNameBuilder.length() - 1);
-
-        String newConditionSQL = (String)conditionAdviceObjects[1];
-
-        String updateSQL = "UPDATE " + tableMeta.getTableName() + " SET " + updateColumnNameBuilder + " WHERE " + newConditionSQL;
-        return updateSQL;
-    }
-
     /**
      * 通过ID查找
      *
@@ -445,6 +428,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     @Override
+    public Map<Serializable, T> selectByIdsAsMap(Serializable ...ids) {
+        return listToMap(selectByIds(ids));
+    }
+
+    @Override
     public Map<Serializable, T> selectByIdsAsMap(Collection<?> ids) {
         List<T> list = selectByIds(ids);
         return listToMap(list);
@@ -458,14 +446,20 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public List<T> selectByIds(String ids) {
-        Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
-        return selectByParams(params, tableMeta.getIdColumnName() + " IN(:ids)");
+        Assert.hasText(ids, "id不能为空");
+        return selectByIdsWithSpecifiedValue(ids);
+    }
+
+    @Override
+    public List<T> selectByIds(Serializable ...ids) {
+        Assert.notEmpty(ids, "id不能为空");
+        return selectByIdsWithSpecifiedValue(ids);
     }
 
     @Override
     public List<T> selectByIds(Collection<?> ids) {
-        Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
-        return selectByParams(params, tableMeta.getIdColumnName() + " IN(:ids)");
+        Assert.notEmpty(ids, "id不能为空");
+        return selectByIdsWithSpecifiedValue(ids);
     }
 
     /**
@@ -556,8 +550,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             conditionParams = (Map<String, Object>) params;
         }
 
-        List<T> list = (List<T>) sharpService.query(this.selectSQL + " WHERE " + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL)
-                        + (StringUtils.isBlank(additionCondition) ? "" : " AND " + additionCondition),
+        List<T> list = (List<T>) sharpService.query(this.selectSQL + " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL),
                 conditionParams,
                 this.entityClass);
         cascadeSelect(list);
@@ -599,13 +592,16 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     public String getTableName() {
         return tableMeta.getTableName();
     }
+
     @Override
-    public boolean isMapClass() {
+    public Class getEntity() {
+        return entityClass;
+    }
+    private boolean isMapClass() {
         return this.entityClass == Map.class;
     }
 
-    @Override
-    public boolean hasSubTables() {
+    private boolean hasSubTables() {
         return !tableMeta.getSubTables().isEmpty();
     }
 
@@ -624,9 +620,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
                 this.entityFields = ReflectUtils.getAllFields(this.entityClass);
 
-                propertyFieldMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
+                propertyDescriptorMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
                 for (Field entityField : this.entityFields) {
-                    propertyFieldMap.put(entityField.getName(), entityField);
+                    try {
+                        propertyDescriptorMap.put(entityField.getName(), new PropertyDescriptor(entityField.getName(), this.entityClass));
+                    } catch (IntrospectionException e) {
+                        throw new BeanInitializationException(tableMeta.getTableName() + "初始化异常", e);
+                    }
                 }
 
                 if (Objects.nonNull(this.tableMeta)) {
@@ -746,34 +746,36 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         this.selectSQL = selectSQLBuilder.toString();
     }
 
-    private Object getPropertyValue(Object t, String propertyName) {
-        Field field = propertyFieldMap.get(propertyName);
-        return getPropertyValue(t, field);
-    }
-
     private Object getPropertyValue(Object t, Field field) {
-        try {
-            field.setAccessible(true);
-            return field.get(t);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return getPropertyValue(t, field.getName());
     }
 
-    private void setPropertyValue(Object t, String propertyName, Object propertyValue) {
-        Field field = propertyFieldMap.get(propertyName);
-        if (field.getName().equals(propertyName)) {
-            setPropertyValue(t, field, propertyValue);
-            return;
+    private Object getPropertyValue(Object t, String propertyName) {
+        try {
+            if (entityClass == t.getClass()) {
+                return propertyDescriptorMap.get(propertyName).getReadMethod().invoke(t);
+            } else {
+                return BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getReadMethod().invoke(t);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
+        setPropertyValue(t, field.getName(), propertyValue);
+    }
+
+    private void setPropertyValue(Object t, String propertyName, Object propertyValue) {
         try {
-            field.setAccessible(true);
-            field.set(t, propertyValue);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            if (entityClass == t.getClass()) {
+                propertyDescriptorMap.get(propertyName).getWriteMethod().invoke(t, propertyValue);
+            } else {
+                BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getWriteMethod().invoke(t, propertyValue);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -825,11 +827,25 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             Collection<?> coll = (Collection<?>) value;
             if (coll.size() == 0) {
                 return "[]";
-            } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
+            } else {
                 return toJson(value);
-            }
+            }/*else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
+                return toJson(value);
+            }*/
         } else if (BasePureEntity.class.isAssignableFrom(value.getClass())) {
             return getIdValue(value);
+        } else if (value.getClass().isArray()) {
+            int length = Array.getLength(value);
+            if (length == 0) {
+                return null;
+            }
+            StringBuilder values = new StringBuilder();
+            for (int i = 0; i < length; i ++) {
+                Object o = Array.get(value, i);
+                values.append(o).append(",");
+            }
+
+            return values.deleteCharAt(values.length() - 1);
         }
 
         // JDBC 支持类型
@@ -861,6 +877,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private int updateById(T t, String updateColumnNames, Object[] params, Serializable id) {
+        Assert.notNull(id, "id不能为空");
         Object[] objects = mergeIdParam(params, id);
         return update(t, updateColumnNames, (Object[]) objects[0], (String) objects[1]);
     }
@@ -882,9 +899,15 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     private Object[] mergeIdParam(Object[] params, Serializable id) {
-        Object[] mergedParams = new Object[params.length + 1];
-        mergedParams[params.length] = id;
-        System.arraycopy(params, 0, mergedParams, 0, params.length);
+        Object[] mergedParams;
+        if (ArrayUtils.isEmpty(params)) {
+            mergedParams = new Object[] {id};
+        } else {
+            mergedParams = new Object[params.length + 1];
+            mergedParams[params.length] = id;
+            System.arraycopy(params, 0, mergedParams, 0, params.length);
+        }
+
         return new Object[] {mergedParams, "id = ?"};
     }
 
@@ -1056,6 +1079,36 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         return false;
+    }
+
+    private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
+        List<String> updateColumnList = convertToArray(updateColumnNames);
+        Object[] params = new Object[updateColumnList.size()];
+        Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
+        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToArray((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, true);
+
+        List<String> newUpdateColumnList = convertToArray((String) updateAutoObjects[1]);
+        Object[] newParams = (Object[]) conditionAdviceObjects[0];
+        StringBuilder updateColumnNameBuilder = new StringBuilder();
+        int i = 0;
+        for (String updateColumnName : newUpdateColumnList) {
+            updateColumnNameBuilder.append(updateColumnName).append(" = :").append(updateColumnName).append(",");
+            Object newParam = newParams[i++];
+            if (Objects.isNull(paramsMap.get(updateColumnName))) {
+                paramsMap.put(updateColumnName, newParam);
+            }
+        }
+        updateColumnNameBuilder.deleteCharAt(updateColumnNameBuilder.length() - 1);
+
+        String newConditionSQL = (String)conditionAdviceObjects[1];
+
+        String updateSQL = "UPDATE " + tableMeta.getTableName() + " SET " + updateColumnNameBuilder + " WHERE " + newConditionSQL;
+        return updateSQL;
+    }
+
+    private List<T> selectByIdsWithSpecifiedValue(Object ids) {
+        Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
+        return selectByParams(params, tableMeta.getIdColumnName() + " IN(:ids)");
     }
 
 }

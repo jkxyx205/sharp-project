@@ -4,20 +4,18 @@ import com.rick.db.dto.BasePureEntity;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
-import java.io.Serializable;
-
 /**
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */
-final public class IdToEntityConverterFactory implements ConverterFactory<Serializable, BasePureEntity> {
+final public class IdToEntityConverterFactory implements ConverterFactory<Long, BasePureEntity> {
 
     @Override
-    public <T extends BasePureEntity> Converter<Serializable, T> getConverter(Class<T> targetType) {
+    public <T extends BasePureEntity> Converter<Long, T> getConverter(Class<T> targetType) {
         return new IdToEntityConverterFactory.IdToEntity(targetType);
     }
 
-    private static class IdToEntity<T extends BasePureEntity> implements Converter<Serializable, T> {
+    private static class IdToEntity<T extends BasePureEntity> implements Converter<Long, T> {
 
         private Class<?> targetType;
 
@@ -26,7 +24,7 @@ final public class IdToEntityConverterFactory implements ConverterFactory<Serial
         }
 
         @Override
-        public T convert(Serializable id) {
+        public T convert(Long id) {
             try {
                 T t = (T) targetType.newInstance();
                 t.setId(id);
