@@ -502,6 +502,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             for (String updateColumnName : updateColumnNameList) {
                 String propertyName = columnNameToPropertyNameMap.get(updateColumnName);
                 params.put(propertyName, getPropertyValue(t, propertyName));
+                params.put(updateColumnName, getPropertyValue(t, propertyName));
             }
         }
         return selectByParams(params, conditionSQL);
@@ -538,19 +539,21 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
         Map<String, Object> conditionParams;
-
+        String finalConditionSQL = (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL);
         String additionCondition = "";
         if (Objects.nonNull(conditionAdvice)) {
             conditionParams = conditionAdvice.getCondition();
             if (MapUtils.isNotEmpty(conditionParams)) {
-                additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key) && !isConditionSQLContainsColumnName(conditionSQL, key)).collect(Collectors.toList()), conditionParams);
+                additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key) && !isConditionSQLContainsColumnName(finalConditionSQL, key)).collect(Collectors.toList()), conditionParams);
                 conditionParams.putAll(params);
+            } else {
+                conditionParams = (Map<String, Object>) params;
             }
         } else {
             conditionParams = (Map<String, Object>) params;
         }
 
-        List<T> list = (List<T>) sharpService.query(this.selectSQL + " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + (Objects.isNull(conditionSQL) ? getConditionSQL(conditionParams) : conditionSQL),
+        List<T> list = (List<T>) sharpService.query(this.selectSQL + " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + finalConditionSQL,
                 conditionParams,
                 this.entityClass);
         cascadeSelect(list);
@@ -659,7 +662,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         log.debug("tableName: {}, tableMeta.getColumnNames(): {}", tableMeta.getTableName(), tableMeta.getColumnNames());
     }
 
-    private static String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params) {
+    private String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params) {
         StringBuilder sb = new StringBuilder();
         for (String columnName : paramNameList) {
             Object value = params.get(columnName);
@@ -669,10 +672,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return StringUtils.isBlank(sb) ? "" : sb.substring(0, sb.length() - 5);
     }
 
-    private static String decideParamHolder(String columnName, Object value) {
+    private String decideParamHolder(String columnName, Object value) {
         if (Objects.isNull(value)) {
             return " = :" + columnName;
         }
+
         if (value instanceof Iterable
                 || value.getClass().isArray()
                 || (value.getClass() == String.class && ((String) value).split(Constants.PARAM_IN_SEPARATOR).length > 1)) {
