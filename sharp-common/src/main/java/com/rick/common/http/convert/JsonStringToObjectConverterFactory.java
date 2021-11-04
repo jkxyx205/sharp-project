@@ -18,13 +18,13 @@ final public class JsonStringToObjectConverterFactory implements ConverterFactor
 
     @Override
     public <T extends JsonStringToObjectConverterFactory.JsonValue> Converter<String, T> getConverter(Class<T> targetType) {
-        return new StringToJson(targetType);
+        return new StringToObject(targetType);
     }
 
-    private static class StringToJson<T> implements Converter<String, T> {
+    private static class StringToObject<T> implements Converter<String, T> {
         private final Class<T> clazz;
 
-        StringToJson(Class<T> clazz) {
+        StringToObject(Class<T> clazz) {
             this.clazz = clazz;
         }
 

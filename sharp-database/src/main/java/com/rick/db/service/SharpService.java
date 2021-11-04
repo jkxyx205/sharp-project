@@ -1,9 +1,6 @@
 package com.rick.db.service;
 
-import com.rick.common.http.convert.CodeToEnumConverterFactory;
-import com.rick.common.http.convert.JsonStringToCollectionConverter;
-import com.rick.common.http.convert.JsonStringToListMapConverter;
-import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
+import com.rick.common.http.convert.*;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
 import lombok.AllArgsConstructor;
@@ -156,6 +153,7 @@ public class SharpService {
         // 内置转换器
         defaultConversionService.addConverterFactory(new CodeToEnumConverterFactory());
         defaultConversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
+        defaultConversionService.addConverterFactory(new JsonStringToMapConverterFactory());
         defaultConversionService.addConverter(new JsonStringToCollectionConverter());
         defaultConversionService.addConverter(new JsonStringToListMapConverter());
         defaultConversionService.addConverterFactory(new IdToEntityConverterFactory());

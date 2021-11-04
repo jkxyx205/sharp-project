@@ -27,6 +27,7 @@ public class FormatSQLTest {
         String s8 = "select * from a where ((hello=:keyword))";
         String s9 = "select * from a where ((hello=:keyword and c = :h)) and ((abc = :a) or (a =1))";
         String s10 = "update sm_user set a = :a, sm.age=:ageq where sm_user.name = :name and age=:age";
+        String s11 = "select * from a where name = :name2 AND hello=:keyword and hello like :keyword and age = 5";
 
         OracleSqlFormatter oracleSqlFormatter = new OracleSqlFormatter();
 
@@ -36,15 +37,18 @@ public class FormatSQLTest {
         params.put("a", "hello");
         params.put("ageq", "hello222");
         params.put("name", "hello222");
-        System.out.println(oracleSqlFormatter.formatSql(s1, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s2, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s3, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s4, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s5, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s6, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s7, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s8, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s9, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s10, params, returnMap));
+        params.put("keyword", "hello222");
+
+//        System.out.println(oracleSqlFormatter.formatSql(s1, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s2, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s3, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s4, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s5, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s6, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s7, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s8, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s9, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s10, params, returnMap));
+        System.out.println(oracleSqlFormatter.formatSql(s11, params, returnMap));
     }
 }

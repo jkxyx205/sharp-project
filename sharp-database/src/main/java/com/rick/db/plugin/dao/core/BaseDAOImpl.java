@@ -836,6 +836,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }/*else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
                 return toJson(value);
             }*/
+        } else if (Map.class.isAssignableFrom(value.getClass())) {
+            Map<String, ?> map = (Map<String, ?>)value;
+            if (map.size() == 0) {
+                return "{}";
+            } else {
+                return toJson(value);
+            }
         } else if (BasePureEntity.class.isAssignableFrom(value.getClass())) {
             return getIdValue(value);
         } else if (value.getClass().isArray()) {
