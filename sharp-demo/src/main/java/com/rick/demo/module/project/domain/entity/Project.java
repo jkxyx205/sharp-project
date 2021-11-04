@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author rick
@@ -46,5 +47,7 @@ public class Project extends BasePureEntity {
 
     @OneToMany(subTable = "t_project_detail1", reversePropertyName = "project")
     private List<ProjectDetail> projectDetailList;
+
+    private Map<String, Object> map;
 
 }

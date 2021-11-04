@@ -98,31 +98,31 @@ public class BaseDAOImplTest {
     @Order(3)
     @Test
     public void testSaveParams() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,created_by,created_at,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,map,id,created_by,created_at,updated_by,updated_at,is_deleted
         projectDAO.insert(new Object[] {
-                "title-params", "description", "http://", 1, "0", "{}", "LOCKED", "[]","816-18898876654", null, null, null, null, null, null
+                "title-params", "description", "http://", 1, "0", "{}", "LOCKED", "[]","816-18898876654","{}", null, null, null, null, null, null
         });
     }
 
     @Order(4)
     @Test
     public void testMapSaveParams() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,created_by,created_at,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,map,id,created_by,created_at,updated_by,updated_at,is_deleted
         projectDAO.insert(new Object[] {
-                "title-map", "description", "http://", 1, "1", "{}", "LOCKED", "[]","232-17787823",null, null, null, null, null, null
+                "title-map", "description", "http://", 1, "1", "{}", "LOCKED", "[]","232-17787823","{}",null, null, null, null, null, null
         });
     }
 
     @Order(5)
     @Test
     public void testSaveParamsBatch() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,created_by,created_at,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,map,id,created_by,created_at,updated_by,updated_at,is_deleted
         List<Object[]> paramsList = Lists.newArrayList(
                 new Object[]{
-                        "title-save-params-batch-1", "description", "http://", 1, "1", "{}", "LOCKED", "[]","23-233223223",null, null, null, null, null, null
+                        "title-save-params-batch-1", "description", "http://", 1, "1", "{}", "LOCKED", "[]","23-233223223","{}",null, null, null, null, null, null
                 },
                 new Object[]{
-                        "title-save-params-batch-2", "description", "http://", 1, "1", "{}", "LOCKED", "[]","231-232332", null, null, null, null, null, null
+                        "title-save-params-batch-2", "description", "http://", 1, "1", "{}", "LOCKED", "[]","231-232332","{}", null, null, null, null, null, null
                 });
         projectDAO.insert(paramsList);
     }
@@ -148,9 +148,9 @@ public class BaseDAOImplTest {
     @Order(9)
     @Test
     public void testUpdate() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,map,updated_by,updated_at,is_deleted
         int count = projectDAO.update(new Object[]{
-                "title-update", "description", "http://", 1, "1", "{}", "LOCKED", "[{\"code\":\"001\",\"detail\":\"苏州\"}]", "2311-223323", null, null, false
+                "title-update", "description", "http://", 1, "1", "{}", "LOCKED", "[{\"code\":\"001\",\"detail\":\"苏州\"}]", "2311-223323","{\"name\": \"Rick\"}", null, null, false
         }, 479723134929764352L);
 
         assertThat(count).isEqualTo(1);
@@ -196,6 +196,7 @@ public class BaseDAOImplTest {
         assertThat(project.getAddress().getCode()).isEqualTo("001");
         assertThat(project.getList().get(0).getCode()).isEqualTo("001");
         assertThat(project.getPhoneNumber().getNumber()).isEqualTo("18888888888");
+        assertThat(project.getMap().get("hello")).isEqualTo("world");
 
         Optional<Project> optional2 = projectDAO.selectById(0);
         assertThat(optional2.isPresent()).isFalse();
@@ -350,6 +351,7 @@ public class BaseDAOImplTest {
         project.setList(Lists.newArrayList(Address.builder().code("001").detail("苏州").build()));
         project.setPhoneNumber(PhoneNumber.builder().code("816").number("18888888888").build());
         project.setDeleted(false);
+        project.setMap(Params.builder().pv("hello", "world").build());
         return project;
     }
 
