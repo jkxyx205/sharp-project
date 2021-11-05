@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Form自定义表单</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .col-form-label.required:after {
+            content: '*';
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding-top: 56px;" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}">
+        <form class="needs-validation" th:action="'/form/demo/' + ${formBO.getActionUrl()}" method="post" th:id="'form_' + ${formBO.form.id}" th:name="'form_' + ${formBO.form.id}" novalidate>
+            <h2 class="mb-5" th:text="${formBO.form.name}"></h2>
+<!--            th:with="isRequired = ${#lists.contains(p.configurer.validatorList, required)}"-->
+            <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.validatorProperies.get('Required.required') eq null ? false : p.validatorProperies.get('Required.required')}">
+                <label th:for="${p.name}" class="col-sm-2 col-form-label" th:classappend="${isRequired ? 'required' : ''}" th:text="${p.configurer.label}"></label>
+                <div class="col-sm-10">
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXT}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperies.get('Length.max')}"
+                           th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).NUMBER_TEXT}" type="number" class="form-control" min="0" th:id="${p.name}" th:name="${p.name}" th:max="${p.validatorProperies.get('Size.max')}" th:min="${p.validatorProperies.get('Size.min')}"
+                           th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).MOBILE}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" maxlength="11"
+                           th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+
+                    <textarea th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXTAREA}" type="number" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperies.get('Length.max')}"
+                              th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" th:text="${p.value}"></textarea>
+
+                    <select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
+                           th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+                        <option th:each="option : ${p.configurer.options}" th:value="${option}" th:text="${option}" th:selected="${option eq p.value}"></option>
+                    </select>
+
+                    <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX}" th:each="option : ${p.configurer.options}">
+                        <input class="form-check-input" type="checkbox" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}" th:abbr="${p.configurer.options.length eq 1 && isRequired ? 'required':''}"
+                               th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+                        <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
+                        <th:block th:if="${p.configurer.options.length eq 1}">
+                            <!--前端验证所有验证信息-->
+                            <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
+                                 th:text="${v.message}"></div>
+                            <!--后端验证的错误信息-->
+<!--                            <div class="invalid-feedback" th:if="${errors eq null ? false : (#maps.containsKey(errors, p.name) ? true : false)}" th:text="${errors.get(p.name).defaultMessage}"></div>-->
+                        </th:block>
+                    </div>
+
+                    <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).RADIO}" th:each="option : ${p.configurer.options}">
+                        <input class="form-check-input" type="radio" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}"
+                               th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+                        <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
+                    </div>
+
+                    <table class="table"
+                           th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TABLE}">
+                        <thead>
+                        <tr>
+                            <th th:each="label : ${p.configurer.getAdditionalInfo().get('labels')}" th:text="${label}"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="row : ${p.value}">
+                            <td th:each="col: ${row}" th:text="${col}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <th:block th:if="${p.configurer.cpnType ne T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX}">
+                        <!--前端验证所有验证信息-->
+                        <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
+                             th:text="${v.message}"></div>
+                        <!--后端验证的错误信息-->
+<!--                        <div class="invalid-feedback" th:if="${errors eq null ? false : (#maps.containsKey(errors, p.name) ? true : false)}" th:text="${errors.get(p.name).defaultMessage}"></div>-->
+                    </th:block>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="save()">ajax保存</button>
+            <button type="submit" class="btn btn-primary">form保存</button>
+        </form>
+    </div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script th:src="@{/jquery.form2json.js}"></script>
+<script th:inline="javascript">
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var form = document.querySelectorAll('.needs-validation')[0]
+
+    // 先执行前端验证，再执行后端验证
+    // form.addEventListener('submit', function (event) {
+    //     if (!valid()) {
+    //         event.preventDefault()
+    //         event.stopPropagation()
+    //     }
+    // }, false)
+
+
+    /*<![CDATA[*/
+    function save() {
+        if (!valid()) {
+            return
+        }
+
+        var formData = $('form').form2json({
+            multiValSelector: '[type=checkbox]'
+        });
+        console.log(formData)
+
+        $.ajax ({
+            url: "/form/" + "[(${formBO.actionUrl})]",
+            type: "[(${formBO.method})]",
+            data: JSON.stringify(formData),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            complete: function(data){
+                if (!data.responseJSON.success) {
+                    console.log(data.responseJSON.data)
+                    var errorList = []
+                    data.responseJSON.data.forEach(function (error) {
+                        errorList.push(error.message)
+                        errorList.push("\r\n");
+                    })
+                    alert(errorList.join(""))
+                } else {
+                    alert('保存成功')
+                }
+            }
+        });
+    }
+    /*]]>*/
+
+    function valid() {
+        var validity = form.checkValidity()
+        form.classList.add('was-validated')
+        return validity;
+    }
+
+</script>
+</html>

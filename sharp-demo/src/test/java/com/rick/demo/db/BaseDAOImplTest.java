@@ -224,7 +224,7 @@ public class BaseDAOImplTest {
 
     @Order(16)
     @Test
-    public void testParams2() {
+    public void testParamsCache() {
         List<Project> list = projectDAO.selectByParams("title=title&sex=1");
         assertThat(list.size()).isEqualTo(1);
 

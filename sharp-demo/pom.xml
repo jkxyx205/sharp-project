@@ -36,7 +36,10 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -62,6 +65,11 @@
         <dependency>
             <groupId>com.rick.fileupload</groupId>
             <artifactId>sharp-fileupload</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rick.formflow</groupId>
+            <artifactId>sharp-formflow</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- sharp-component end -->
