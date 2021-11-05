@@ -13,9 +13,13 @@ import java.util.Optional;
 public interface BaseDAO<T> {
     int insert(T t);
 
+    int insertOrUpdate(T t);
+
     int insert(Object[] params);
 
-    int[] insert(List<?> paramsList);
+    int[] insert(Collection<?> paramsList);
+
+    int[] insertOrUpdate(Collection<T> entities);
 
     int deleteById(Serializable id);
 
@@ -41,7 +45,7 @@ public interface BaseDAO<T> {
 
     int update(T t);
 
-    int[] update(Collection<T> collection);
+    int[] update(Collection<T> entities);
 
     int update(String updateColumnNames, Object[] params, Serializable id);
 

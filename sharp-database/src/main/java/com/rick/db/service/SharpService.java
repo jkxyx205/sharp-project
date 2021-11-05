@@ -156,6 +156,7 @@ public class SharpService {
         defaultConversionService.addConverterFactory(new JsonStringToMapConverterFactory());
         defaultConversionService.addConverter(new JsonStringToCollectionConverter());
         defaultConversionService.addConverter(new JsonStringToListMapConverter());
+        defaultConversionService.addConverter(new JsonStringToSetMapConverter());
         defaultConversionService.addConverterFactory(new IdToEntityConverterFactory());
     }
 

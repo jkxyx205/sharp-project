@@ -92,6 +92,25 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         this.init();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int insertOrUpdate(T t) {
+        if (Objects.isNull(getIdValue(t))) {
+            return insert(t);
+        } else {
+            return update(t);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int[] insertOrUpdate(Collection<T> entities) {
+        int[] updateCount = update(entities.stream().filter(t -> Objects.nonNull(getIdValue(t))).collect(Collectors.toList()));
+        int[] insertCount = insert(entities.stream().filter(t -> Objects.isNull(getIdValue(t))).collect(Collectors.toList()));
+
+        return ArrayUtils.addAll(insertCount, updateCount);
+    }
+
     /**
      * 插入单条数据
      *
@@ -135,11 +154,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int[] insert(List<?> paramsList) {
+    public int[] insert(Collection<?> paramsList) {
         if (CollectionUtils.isEmpty(paramsList)) {
             return new int[]{};
         }
-        Class<?> paramClass = paramsList.get(0).getClass();
+        Class<?> paramClass = paramsList.iterator().next().getClass();
         List<T> instanceList = Lists.newArrayListWithCapacity(paramsList.size());
         if (paramClass == this.entityClass || Map.class.isAssignableFrom(paramClass)) {
             List<Object[]> params = Lists.newArrayListWithCapacity(paramsList.size());
@@ -157,7 +176,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             cascadeInsert(instanceList);
             return count;
         } else if (paramClass == Object[].class) {
-            return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
+            return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill((List<?>) paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
         }
 
         throw new RuntimeException("List不支持的批量操作范型类型，目前仅支持Object[]、entity、Map");
@@ -720,7 +739,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                         Map map = (Map) t;
                         map.put(fillColumnName, fillColumnValue);
                     } else {
-                        setPropertyValue((T)t, columnNameToPropertyNameMap.get(fillColumnName), fillColumnValue);
+                        setPropertyValue(t, columnNameToPropertyNameMap.get(fillColumnName), fillColumnValue);
                     }
                 }
             }
