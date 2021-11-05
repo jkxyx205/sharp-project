@@ -2,6 +2,7 @@ package com.rick.common.util;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ArrayUtils;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -30,7 +31,11 @@ public class ClassUtils {
                 int length = actualTypeArguments.length;
                  classes = new Class<?>[length];
                 for (int i = 0; i < actualTypeArguments.length; i++) {
-                    classes[i] = (Class<?>) actualTypeArguments[i];
+                    if (actualTypeArguments[i] instanceof ParameterizedTypeImpl) {
+                        classes[i] = ((ParameterizedTypeImpl)actualTypeArguments[i]).getRawType();
+                    } else {
+                        classes[i] = (Class<?>) actualTypeArguments[i];
+                    }
                 }
             }
         }

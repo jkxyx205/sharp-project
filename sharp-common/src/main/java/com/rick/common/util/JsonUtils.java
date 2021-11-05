@@ -10,9 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Rick
@@ -60,6 +58,11 @@ public final class JsonUtils {
 
     public static <T> List<T> toList(String json, Class<T> clazz) throws IOException {
         JavaType javaType = getCollectionType(ArrayList.class, clazz);
+        return objectMapper.readValue(json, javaType);
+    }
+
+    public static <T> Set<T> toSet(String json, Class<T> clazz) throws IOException {
+        JavaType javaType = getCollectionType(HashSet.class, clazz);
         return objectMapper.readValue(json, javaType);
     }
 

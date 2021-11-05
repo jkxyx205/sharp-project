@@ -1,14 +1,12 @@
 package com.rick.common.http;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -67,6 +65,9 @@ public final class HttpServletRequestUtils {
         return request.getRemoteAddr();
     }
 
+    public static Map<String, Object> getParameterMap(HttpServletRequest request) {
+        return getParameterMap(request, false);
+    }
 
     /**
      * 将参数放到map中，数组value用,分隔
@@ -74,9 +75,9 @@ public final class HttpServletRequestUtils {
      * @param skipBlink 忽略空白
      * @return
      */
-    public static Map<String, String> getParameterMap(HttpServletRequest request, boolean skipBlink) {
+    public static Map<String, Object> getParameterMap(HttpServletRequest request, boolean skipBlink) {
         Enumeration<String> en = request.getParameterNames();
-        Map<String, String> map = new HashMap<>(request.getParameterMap().size());
+        Map<String, Object> map = new HashMap<>(request.getParameterMap().size());
 
         while (en.hasMoreElements()) {
             String name = en.nextElement();
@@ -87,18 +88,20 @@ public final class HttpServletRequestUtils {
 
             if (Objects.nonNull(values)) {
                 if (values.length > 1) {
-                    StringBuilder sb = new StringBuilder();
+                    List<String> array = Lists.newArrayListWithExpectedSize(values.length);
                     for (String value : values) {
-                        if (skipBlink && StringUtils.isBlank(value))
+                        if (skipBlink && StringUtils.isBlank(value)) {
                             continue;
-                        sb.append(value).append(",");
+                        }
+                        array.add(value);
                     }
-                    sb.deleteCharAt(sb.length() - 1);
-                    map.put(name, sb.toString());
+
+                    map.put(name, array);
                 } else {
                     String value = values[0];
-                    if (skipBlink && StringUtils.isBlank(value))
+                    if (skipBlink && StringUtils.isBlank(value)) {
                         continue;
+                    }
                     map.put(name, value);
                 }
             }
@@ -108,7 +111,7 @@ public final class HttpServletRequestUtils {
     }
 
     public static Map<String, ?> getParameterMap(HttpServletRequest request, Map<String, ?> extendParams) {
-        Map<String, String> requestParams = HttpServletRequestUtils.getParameterMap(request);
+        Map<String, Object> requestParams = HttpServletRequestUtils.getParameterMap(request);
         Map mergeParams = requestParams;
 
         if (MapUtils.isNotEmpty(extendParams)) {
@@ -117,10 +120,6 @@ public final class HttpServletRequestUtils {
             mergeParams.putAll(extendParams);
         }
         return mergeParams;
-    }
-
-    public static Map<String, String> getParameterMap(HttpServletRequest request) {
-        return getParameterMap(request, false);
     }
 
 }

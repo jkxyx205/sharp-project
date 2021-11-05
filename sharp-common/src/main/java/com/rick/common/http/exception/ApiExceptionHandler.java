@@ -93,8 +93,7 @@ public class ApiExceptionHandler {
      * @throws IOException
      * @throws ServletException
      */
-    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class})
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class, IllegalArgumentException.class})
     public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
         if (ex instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) ex;
@@ -102,6 +101,8 @@ public class ApiExceptionHandler {
         } else if (ex instanceof BindException) {
             BindException be = (BindException) ex;
             return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, formatErrors(be.getAllErrors()));
+        } else if (ex instanceof IllegalArgumentException) {
+            return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, ex.getMessage());
         }
         MethodArgumentNotValidException me = (MethodArgumentNotValidException) ex;
 
