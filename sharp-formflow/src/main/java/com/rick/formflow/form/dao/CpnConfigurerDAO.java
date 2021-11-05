@@ -1,0 +1,85 @@
+package com.rick.formflow.form.dao;
+
+import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.formflow.form.cpn.core.CpnConfigurer;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.stereotype.Repository;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+
+/**
+ * @author Rick
+ * @createdAt 2021-11-03 11:22:00
+ */
+
+@Repository
+public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer> {
+
+    @Override
+    public List<CpnConfigurer> selectByParams(Map<String, ?> params, String conditionSQL) {
+        List<CpnConfigurer> cpnConfigurers = super.selectByParams(params, conditionSQL);
+        for (CpnConfigurer cpnConfigurer : cpnConfigurers) {
+            decodeOptions(cpnConfigurer.getOptions());
+        }
+        return cpnConfigurers;
+    }
+
+    @Override
+    public int update(CpnConfigurer configurer) {
+        encodeOptions(configurer.getOptions());
+        return super.update(configurer);
+    }
+
+    @Override
+    public int[] update(Collection<CpnConfigurer> collection) {
+        for (Object cpnConfigurer : collection) {
+            encodeOptions(((CpnConfigurer)cpnConfigurer).getOptions());
+        }
+        return super.update(collection);
+    }
+
+    @Override
+    public int insert(CpnConfigurer configurer) {
+        encodeOptions(configurer.getOptions());
+        return super.insert(configurer);
+    }
+
+    @Override
+    public int[] insert(Collection<?> paramsList) {
+        for (Object cpnConfigurer : paramsList) {
+            encodeOptions(((CpnConfigurer)cpnConfigurer).getOptions());
+        }
+
+        return super.insert(paramsList);
+    }
+
+    private void encodeOptions(String[] options) {
+        if (ArrayUtils.isNotEmpty(options)) {
+            try {
+                for (int i = 0; i < options.length; i++) {
+                    options[i] = URLEncoder.encode(options[i], "utf-8");
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void decodeOptions(String[] options) {
+        if (ArrayUtils.isNotEmpty(options)) {
+            try {
+                for (int i = 0; i < options.length; i++) {
+                    options[i] = URLDecoder.decode(options[i], "utf-8");
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
