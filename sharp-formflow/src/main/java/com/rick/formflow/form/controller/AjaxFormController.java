@@ -16,9 +16,9 @@ import java.util.Map;
  * @createdAt 2021-11-03 18:04:00
  */
 @RestController
-@RequestMapping("form")
+@RequestMapping("form/ajax")
 @RequiredArgsConstructor
-public class BasicFormController {
+public class AjaxFormController {
 
     private final FormService formService;
 

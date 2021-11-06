@@ -16,6 +16,8 @@ public enum ValidatorTypeEnum {
     INTEGER_NUM("IntegerNum"),
     REQUIRED("Required"),
     SIZE("Size"),
+    DATE("Date"),
+    EMAIL("Email"),
     MOBILE("Mobile");
 
     @JsonValue

@@ -85,11 +85,15 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
     public void check(String[] options) {}
 
     @Override
-    public Set<ValidatorTypeEnum> supports() {
+    public Set<ValidatorTypeEnum> validatorSupports() {
         Set<ValidatorTypeEnum> supportSet = Sets.newHashSet();
         supportSet.add(ValidatorTypeEnum.REQUIRED);
 
-        Set<ValidatorTypeEnum> validators = internalSupports();
+        for (Validator cpnValidator : cpnValidators()) {
+            supportSet.add(cpnValidator.getValidatorType());
+        }
+
+        Set<ValidatorTypeEnum> validators = internalValidatorSupports();
         if (CollectionUtils.isNotEmpty(validators)) {
             supportSet.addAll(validators);
         }
@@ -99,12 +103,12 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
 
     @Override
     public boolean hasValidator(Validator validator) {
-        return supports().contains(validator.getValidatorType());
+        return validatorSupports().contains(validator.getValidatorType());
     }
 
     protected void internalValid(String value, String[] options) {};
 
-    protected Set<ValidatorTypeEnum> internalSupports() {return null;};
+    protected Set<ValidatorTypeEnum> internalValidatorSupports() {return null;};
 
     @Override
     public void afterPropertiesSet() {

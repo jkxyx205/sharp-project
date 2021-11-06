@@ -21,7 +21,7 @@ public class TextArea extends AbstractCpn<String> {
     }
 
     @Override
-    protected Set<ValidatorTypeEnum> internalSupports() {
+    protected Set<ValidatorTypeEnum> internalValidatorSupports() {
         return Sets.newHashSet(ValidatorTypeEnum.LENGTH);
     };
 

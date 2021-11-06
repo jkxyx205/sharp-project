@@ -4,9 +4,8 @@ import com.rick.formflow.form.valid.core.AbstractValidator;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * @author Rick
@@ -15,11 +14,13 @@ import java.util.Objects;
 @Setter
 @Getter
 @Component
-public class IntegerNumber extends AbstractValidator<Integer> {
+public class StringIntegerNumber extends AbstractValidator<String> {
+
+    private static final String INTEGER_REGEX = "\\d+";
 
     @Override
-    public void valid(Integer value) {
-        if (Objects.nonNull(value) && value < 0) {
+    public void valid(String value) {
+        if (StringUtils.isNotBlank(value) && !value.matches(INTEGER_REGEX)) {
             throw new IllegalArgumentException(getMessage());
         }
     }
@@ -31,7 +32,7 @@ public class IntegerNumber extends AbstractValidator<Integer> {
 
     @Override
     public String getMessage() {
-        return "数字必须大于等于0";
+        return "不正确的数字格式";
     }
 
 }

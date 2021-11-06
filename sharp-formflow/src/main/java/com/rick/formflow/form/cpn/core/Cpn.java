@@ -24,7 +24,7 @@ public interface Cpn<T> {
 
     void check(String[] options);
 
-    Set<ValidatorTypeEnum> supports();
+    Set<ValidatorTypeEnum> validatorSupports();
 
     boolean hasValidator(Validator validator);
 

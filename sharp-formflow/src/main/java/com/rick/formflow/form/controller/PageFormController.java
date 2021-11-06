@@ -1,4 +1,4 @@
-package com.rick.demo.module.form.controller;
+package com.rick.formflow.form.controller;
 
 import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
@@ -25,14 +25,14 @@ import java.util.stream.Collectors;
  * @createdAt 2021-11-04 17:00:00
  */
 @Controller
-@RequestMapping("form/demo")
+@RequestMapping("form/page")
 @RequiredArgsConstructor
-public class FormController {
+public class PageFormController {
 
     private final FormService formService;
 
     /**
-     * http://localhost:8080/form/demo/487677232379494400/487684156282011648
+     * http://localhost:8080/form/487677232379494400/487684156282011648
      * @return
      */
     @GetMapping({"{formId}", "{formId}/{instanceId}"})

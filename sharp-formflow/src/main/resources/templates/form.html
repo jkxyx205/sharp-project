@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="container" style="padding-top: 56px;" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}">
-        <form class="needs-validation" th:action="'/form/demo/' + ${formBO.getActionUrl()}" method="post" th:id="'form_' + ${formBO.form.id}" th:name="'form_' + ${formBO.form.id}" novalidate>
+        <form class="needs-validation" th:action="'/form/page/' + ${formBO.getActionUrl()}" method="post" th:id="'form_' + ${formBO.form.id}" th:name="'form_' + ${formBO.form.id}" novalidate>
             <h2 class="mb-5" th:text="${formBO.form.name}"></h2>
 <!--            th:with="isRequired = ${#lists.contains(p.configurer.validatorList, required)}"-->
             <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.validatorProperies.get('Required.required') eq null ? false : p.validatorProperies.get('Required.required')}">
@@ -35,6 +35,23 @@
                            th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
                         <option th:each="option : ${p.configurer.options}" th:value="${option}" th:text="${option}" th:selected="${option eq p.value}"></option>
                     </select>
+
+                    <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">
+                        <input type="file" class="form-control" th:id="${p.name}" th:name="${p.name}"
+                           th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" multiple>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" th:each="f : ${p.value}" th:text="${f}"></li>
+                        </ul>
+                        <!--前端验证所有验证信息-->
+                        <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
+                             th:text="${v.message}"></div>
+                    </div>
+
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).EMAIL}" type="email" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperies.get('Length.max')}"
+                           th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
+
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).DATE}" type="date" class="form-control" th:id="${p.name}" th:name="${p.name}"
+                           th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
                     <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX}" th:each="option : ${p.configurer.options}">
                         <input class="form-check-input" type="checkbox" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}" th:abbr="${p.configurer.options.length eq 1 && isRequired ? 'required':''}"
@@ -69,7 +86,8 @@
                         </tbody>
                     </table>
 
-                    <th:block th:if="${p.configurer.cpnType ne T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX}">
+                    <th:block th:if="${p.configurer.cpnType ne T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX &&
+                    p.configurer.cpnType ne T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">
                         <!--前端验证所有验证信息-->
                         <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
                              th:text="${v.message}"></div>
@@ -110,7 +128,7 @@
         console.log(formData)
 
         $.ajax ({
-            url: "/form/" + "[(${formBO.actionUrl})]",
+            url: "/form/ajax" + "[(${formBO.actionUrl})]",
             type: "[(${formBO.method})]",
             data: JSON.stringify(formData),
             dataType: "json",

@@ -5,7 +5,6 @@ import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +17,11 @@ import java.util.Objects;
  */
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
 @Getter
 @Component
 public class Required extends AbstractValidator<Object> {
 
-    private boolean required;
+    private boolean required = true;
 
     @Override
     public void valid(Object o) {

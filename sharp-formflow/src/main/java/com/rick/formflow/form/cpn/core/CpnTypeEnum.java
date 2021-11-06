@@ -19,6 +19,9 @@ public enum CpnTypeEnum {
     NUMBER_TEXT("数字"),
     CHECKBOX("多选"),
     MOBILE("手机号"),
+    FILE("文件"),
+    EMAIL("邮箱"),
+    DATE("日期"),
     TABLE("表格");
 
     @JsonValue
