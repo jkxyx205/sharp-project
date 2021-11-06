@@ -36,7 +36,7 @@ public class PageFormController {
      * @return
      */
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
-    public String gotoFormPage(@PathVariable Long formId, @PathVariable Long instanceId, Model model) {
+    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) {
         FormBO formBO = getFormBO(formId, instanceId);
 
         model.addAttribute("formBO", formBO);
@@ -46,7 +46,7 @@ public class PageFormController {
     }
 
     @PostMapping( {"{formId}/{instanceId}", "{formId}"})
-    public String saveOrUpdate(HttpServletRequest request, @PathVariable Long formId, @PathVariable Long instanceId, Model model) {
+    public String saveOrUpdate(HttpServletRequest request, @PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) {
         Map<String, Object> values = HttpServletRequestUtils.getParameterMap(request);
         try {
             if (Objects.nonNull(instanceId)) {
