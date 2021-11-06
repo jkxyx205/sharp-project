@@ -36,6 +36,7 @@ public class FormTest {
 
     private static Long[] configIds = new Long[] {487671506907070464L, 487671506907070465L,487671506907070466L,487671506907070468L,
             487671506907070470L,487671506907070469L,487671506907070471L,487671506907070473L,
+            487671506907070474L,487671506907070475L,487671506907070476L,
             487671506907070467L};
 
     @AfterAll
@@ -77,7 +78,13 @@ public class FormTest {
                 .pv("NUqlBwLPfW", "足球")
                 .pv("xYfeMutDQK", list)
                 .pv("checkbox", Arrays.asList("足球", "篮球"))
-                .pv("bz", "备注")
+                .pv("agree", "同意")
+                .pv("textarea", "简介")
+                .pv("radio", "男")
+                .pv("mobile", "18898987765")
+                .pv("file", Arrays.asList("https://xhope.top/", "https://xhope.top/"))
+                .pv("email", "jkxyx205@163.com")
+                .pv("date", "1990-12-23")
                 .build());
 //        System.out.println(JsonUtils.toJson(form));
     }

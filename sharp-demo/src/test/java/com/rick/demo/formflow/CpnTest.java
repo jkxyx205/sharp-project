@@ -73,7 +73,7 @@ public class CpnTest {
                 .validatorList(selectValidatorList)
                 .build();
 
-        // 单选
+        // 多选
         Set<Validator> checkboxValidatorList = Sets.newHashSetWithExpectedSize(1);
         selectValidatorList.add(new Required(true));
         CpnConfigurer cpnConfigurerCheckbox = CpnConfigurer.builder()
