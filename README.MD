@@ -55,3 +55,11 @@ sharp:
 * [https://xhope.top/?p=1286](https://xhope.top/?p=1286)
 * [https://xhope.top/?p=1288](https://xhope.top/?p=1288)
 * [https://xhope.top/?p=1297](https://xhope.top/?p=1297)
+
+# sharp-formflow
+`sharp-formflow` 自定义表单顾名思义就是由用户定义表单，由用户觉定标签和组件，决定要填写什么格式的数据。目前支持的控件有：文本、长文本、单选、多选、日期、时间、文件、Email、手机号等。
+
+
+更多用法：
+
+* [https://xhope.top/?p=1280](https://xhope.top/?p=1544)
