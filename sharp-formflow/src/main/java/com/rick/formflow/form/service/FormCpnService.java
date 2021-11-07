@@ -2,9 +2,11 @@ package com.rick.formflow.form.service;
 
 import com.google.common.collect.Lists;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
+import com.rick.formflow.form.cpn.core.Form;
 import com.rick.formflow.form.cpn.core.FormCpn;
 import com.rick.formflow.form.dao.CpnConfigurerDAO;
 import com.rick.formflow.form.dao.FormCpnDAO;
+import com.rick.formflow.form.dao.FormDAO;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -29,6 +31,14 @@ public class FormCpnService {
     private final FormCpnDAO formCpnDAO;
 
     private final CpnConfigurerDAO cpnConfigurerDAO;
+
+    private final FormDAO formDAO;
+
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdateByConfigurer(Form form, Collection<CpnConfigurer> configurerList) {
+        formDAO.insertOrUpdate(form);
+        saveOrUpdateByConfigurer(form.getId(), configurerList);
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public void saveOrUpdateByConfigIds(Long formId, Long ...configIds) {

@@ -25,18 +25,22 @@ public class CpnConfigurerService {
 
     private final CpnManager cpnManager;
 
-    public CpnConfigurer save(CpnConfigurer configurer) {
-        checkIfAvailable(configurer);
-        cpnConfigurerDAO.insert(configurer);
-        return configurer;
+    public int[] saveOrUpdate(List<CpnConfigurer> configurers) {
+        return cpnConfigurerDAO.insertOrUpdate(configurers);
     }
 
-    public int[] save(List<CpnConfigurer> configurers) {
-        for (CpnConfigurer configurer : configurers) {
-            checkIfAvailable(configurer);
-        }
-        return cpnConfigurerDAO.insert(configurers);
-    }
+//    public CpnConfigurer save(CpnConfigurer configurer) {
+//        checkIfAvailable(configurer);
+//        cpnConfigurerDAO.insert(configurer);
+//        return configurer;
+//    }
+
+//    public int[] save(List<CpnConfigurer> configurers) {
+//        for (CpnConfigurer configurer : configurers) {
+//            checkIfAvailable(configurer);
+//        }
+//        return cpnConfigurerDAO.insert(configurers);
+//    }
 
     public CpnConfigurer findById(Long id) {
         CpnConfigurer cpnConfigurer = cpnConfigurerDAO.selectById(id).get();

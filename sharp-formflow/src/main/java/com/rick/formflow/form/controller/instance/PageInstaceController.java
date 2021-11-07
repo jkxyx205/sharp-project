@@ -1,4 +1,4 @@
-package com.rick.formflow.form.controller;
+package com.rick.formflow.form.controller.instance;
 
 import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
  * @createdAt 2021-11-04 17:00:00
  */
 @Controller
-@RequestMapping("form/page")
+@RequestMapping("forms/page")
 @RequiredArgsConstructor
-public class PageFormController {
+public class PageInstaceController {
 
     private final FormService formService;
 

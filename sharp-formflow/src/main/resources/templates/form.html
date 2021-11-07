@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="container" style="padding-top: 56px;" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}">
-        <form class="needs-validation" th:action="'/form/page/' + ${formBO.getActionUrl()}" method="post" th:id="'form_' + ${formBO.form.id}" th:name="'form_' + ${formBO.form.id}" novalidate>
+        <form class="needs-validation" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="'form_' + ${formBO.form.id}" th:name="'form_' + ${formBO.form.id}" novalidate>
             <h2 class="mb-5" th:text="${formBO.form.name}"></h2>
 <!--            th:with="isRequired = ${#lists.contains(p.configurer.validatorList, required)}"-->
             <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.validatorProperies.get('Required.required') eq null ? false : p.validatorProperies.get('Required.required')}">
@@ -107,7 +107,7 @@
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var form = document.querySelectorAll('.needs-validation')[0]
 
-    // 先执行前端验证，再执行后端验证
+    // TODO 先执行前端验证，再执行后端验证
     // form.addEventListener('submit', function (event) {
     //     if (!valid()) {
     //         event.preventDefault()
@@ -128,7 +128,7 @@
         console.log(formData)
 
         $.ajax ({
-            url: "/form/ajax" + "[(${formBO.actionUrl})]",
+            url: "/forms/ajax" + "[(${formBO.actionUrl})]",
             type: "[(${formBO.method})]",
             data: JSON.stringify(formData),
             dataType: "json",

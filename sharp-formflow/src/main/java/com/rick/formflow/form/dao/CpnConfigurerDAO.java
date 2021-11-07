@@ -38,9 +38,7 @@ public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer> {
 
     @Override
     public int[] update(Collection<CpnConfigurer> collection) {
-        for (Object cpnConfigurer : collection) {
-            encodeOptions(((CpnConfigurer)cpnConfigurer).getOptions());
-        }
+        encodeCollectionOptions(collection);
         return super.update(collection);
     }
 
@@ -52,11 +50,19 @@ public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer> {
 
     @Override
     public int[] insert(Collection<?> paramsList) {
-        for (Object cpnConfigurer : paramsList) {
+        encodeCollectionOptions((Collection<CpnConfigurer>) paramsList);
+        return super.insert(paramsList);
+    }
+
+    @Override
+    public int[] insertOrUpdate(Collection<CpnConfigurer> entities) {
+        return super.insertOrUpdate(entities);
+    }
+
+    private void encodeCollectionOptions(Collection<CpnConfigurer> entities) {
+        for (Object cpnConfigurer : entities) {
             encodeOptions(((CpnConfigurer)cpnConfigurer).getOptions());
         }
-
-        return super.insert(paramsList);
     }
 
     private void encodeOptions(String[] options) {

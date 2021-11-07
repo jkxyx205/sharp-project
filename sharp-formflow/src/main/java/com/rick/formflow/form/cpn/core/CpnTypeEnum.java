@@ -13,7 +13,6 @@ import lombok.Getter;
 public enum CpnTypeEnum {
     TEXT("短文本"),
     TEXTAREA("长文本"),
-    DATE_TEXT("日期文本"),
     SELECT("选项"),
     RADIO("单选"),
     NUMBER_TEXT("数字"),

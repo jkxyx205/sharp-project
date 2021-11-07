@@ -42,8 +42,9 @@ public class FormService {
 
     private final FormCpnValueDAO formCpnValueDAO;
 
-    private final CpnManager cpnManager;
+    private final FormAdvice formAdvice;
 
+    private final CpnManager cpnManager;
 
     public Form save(Form form) {
         formDAO.insert(form);
@@ -121,6 +122,12 @@ public class FormService {
         }
 
         formCpnValueDAO.insert(FormCpnValueList);
+        values.put("formId", formId);
+        values.put("instanceId", instanceId);
+        // postHandler mongoDB 文档存储
+        if (Objects.nonNull(formAdvice)) {
+            formAdvice.afterInstanceSave(formId, instanceId, values);
+        }
     }
 
     public int delete(Long instanceId) {

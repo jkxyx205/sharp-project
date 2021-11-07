@@ -1,4 +1,4 @@
-package com.rick.formflow.form.controller;
+package com.rick.formflow.form.controller.instance;
 
 
 import com.rick.common.http.model.Result;
@@ -16,9 +16,9 @@ import java.util.Map;
  * @createdAt 2021-11-03 18:04:00
  */
 @RestController
-@RequestMapping("form/ajax")
+@RequestMapping("forms/ajax")
 @RequiredArgsConstructor
-public class AjaxFormController {
+public class AjaxInstanceController {
 
     private final FormService formService;
 
