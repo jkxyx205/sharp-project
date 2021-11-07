@@ -33,7 +33,7 @@ public class CpnTest {
      */
     @Test
     public void testAddCpnConfigurer() {
-        cpnConfigurerService.save(createCpnConfigurerList());
+        cpnConfigurerService.saveOrUpdate(createCpnConfigurerList());
     }
 
     public List<CpnConfigurer> createCpnConfigurerList() {
