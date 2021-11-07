@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -93,7 +92,7 @@ public class ApiExceptionHandler {
      * @throws IOException
      * @throws ServletException
      */
-    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class, IllegalArgumentException.class})
+    @ExceptionHandler({BindException.class, ConstraintViolationException.class, IllegalArgumentException.class})
     public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
         if (ex instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) ex;
@@ -104,9 +103,8 @@ public class ApiExceptionHandler {
         } else if (ex instanceof IllegalArgumentException) {
             return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, ex.getMessage());
         }
-        MethodArgumentNotValidException me = (MethodArgumentNotValidException) ex;
 
-        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, formatErrors(me.getAllErrors()));
+        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID);
     }
 
     /**
