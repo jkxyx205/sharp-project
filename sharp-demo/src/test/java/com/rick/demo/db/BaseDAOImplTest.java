@@ -339,6 +339,22 @@ public class BaseDAOImplTest {
         assertThat(projectDAO.selectByParams("description=new-description222").size()).isEqualTo(1);
     }
 
+    @Order(27)
+    @Test
+    public void testCountAndExists() {
+        long count = projectDAO.countByParams(Params.builder(1).pv("title", "title").build(), "title = :title");
+        long count2 = projectDAO.countByParams(Params.builder(1).pv("title", "title1").build(), "title = :title");
+        assertThat(count).isEqualTo(1);
+        assertThat(count2).isEqualTo(0);
+
+
+        boolean e1 = projectDAO.existsByParams(Params.builder(1).pv("title", "title").build(), "title like :title");
+        boolean e2 = projectDAO.existsByParams(Params.builder(1).pv("title", "title1").build(), "title = :title");
+        assertThat(e1).isEqualTo(true);
+        assertThat(e2).isEqualTo(false);
+
+    }
+
     public Project createProject() {
         Project project = new Project();
         project.setTitle("项目标题 " + System.currentTimeMillis());

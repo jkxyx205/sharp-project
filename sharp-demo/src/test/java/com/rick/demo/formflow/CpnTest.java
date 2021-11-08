@@ -68,7 +68,7 @@ public class CpnTest {
                 .cpnType(CpnTypeEnum.SELECT)
                 .label("兴趣爱好(单选)")
                 .placeholder("请输入兴趣爱好")
-                .options(new String[] {"足球", "篮球","乒乓球","足球"})
+                .options(new String[] {"足球", "篮球","乒乓球","羽毛球"})
                 .defaultValue("足球")
                 .validatorList(selectValidatorList)
                 .build();
@@ -80,7 +80,7 @@ public class CpnTest {
                 .cpnType(CpnTypeEnum.CHECKBOX)
                 .label("兴趣爱好(多选)")
                 .placeholder("请输入兴趣爱好")
-                .options(new String[] {"足球", "篮球","乒乓球","足球"})
+                .options(new String[] {"足球", "篮球","乒乓球","羽毛球"})
                 .defaultValue("[\"足球\", \"篮球\"]")
                 .validatorList(checkboxValidatorList)
                 .build();
