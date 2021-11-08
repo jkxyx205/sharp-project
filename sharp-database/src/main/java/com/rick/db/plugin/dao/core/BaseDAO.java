@@ -81,6 +81,10 @@ public interface BaseDAO<T> {
 
     List<T> selectAll();
 
+    long countByParams(Map<String, ?> params, String conditionSQL);
+
+    boolean existsByParams(Map<String, ?> params, String conditionSQL);
+
     List<T> selectByParams(Map<String, ?> params, String conditionSQL);
 
     void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName);

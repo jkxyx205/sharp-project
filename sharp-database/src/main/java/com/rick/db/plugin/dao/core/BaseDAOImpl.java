@@ -7,6 +7,7 @@ import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.*;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.SQLUtils;
@@ -37,6 +38,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.rick.db.config.Constants.DB_MYSQL;
+
 /**
  * @author Rick
  * @createdAt 2021-09-23 16:41:00
@@ -55,6 +58,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Autowired
     private ValidatorHelper validatorHelper;
+
+    @Autowired
+    private SharpDatabaseProperties sharpDatabaseProperties;
 
     private TableMeta tableMeta;
 
@@ -461,7 +467,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * 通过多个ID查找//eg：ids -> “1,2,3,4”
      *
      * @param ids
-     * @return
+     * @returndeleteById
      */
     @Override
     public List<T> selectByIds(String ids) {
@@ -548,6 +554,25 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return selectByParams(Collections.emptyMap(), null);
     }
 
+    @Override
+    public long countByParams(Map<String, ?> params, String conditionSQL) {
+        return (Long) selectByParams(params, "SELECT count(*) FROM " + getTableName(), conditionSQL, srcSQL -> srcSQL, Long.class).get(0);
+    }
+
+    @Override
+    public boolean existsByParams(Map<String, ?> params, String conditionSQL) {
+        if (sharpDatabaseProperties.getType().equals(DB_MYSQL)) {
+            return selectByParams(params, "SELECT 1 FROM " + getTableName(), conditionSQL, srcSQL -> srcSQL + " LIMIT 1", Long.class).size() > 0 ? true : false;
+        } else {
+            return countByParams(params, conditionSQL) > 1;
+        }
+    }
+
+    @Override
+    public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
+        return selectByParams(params, selectSQL, conditionSQL, srcSQL -> srcSQL, entityClass);
+    }
+
     /**
      * 依赖sharpService，可以进行不定条件的查询
      *
@@ -555,8 +580,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param conditionSQL
      * @return
      */
-    @Override
-    public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
+    private List<T> selectByParams(Map<String, ?> params, String selectSQL, String conditionSQL, SqlHandler sqlHandler, Class<?> clazz) {
         Map<String, Object> conditionParams;
         String finalConditionSQL = (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL);
         String additionCondition = "";
@@ -572,10 +596,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             conditionParams = (Map<String, Object>) params;
         }
 
-        List<T> list = (List<T>) sharpService.query(this.selectSQL + " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + finalConditionSQL,
+        List<T> list = (List<T>) sharpService.query(sqlHandler.handlerSQl(selectSQL + " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + finalConditionSQL),
                 conditionParams,
-                this.entityClass);
-        cascadeSelect(list);
+                clazz);
+        if (clazz == entityClass) {
+            cascadeSelect(list);
+        }
         return list;
     }
 
@@ -1139,6 +1165,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     private List<T> selectByIdsWithSpecifiedValue(Object ids) {
         Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, tableMeta.getIdColumnName() + " IN(:ids)");
+    }
+
+    private interface SqlHandler {
+        String handlerSQl(String srcSQL);
     }
 
 }
