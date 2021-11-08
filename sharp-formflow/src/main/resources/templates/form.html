@@ -37,14 +37,19 @@
                     </select>
 
                     <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">
-                        <input type="file" class="form-control" th:id="${p.name}" th:name="${p.name}"
-                           th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" multiple>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item" th:each="f : ${p.value}" th:text="${f}"></li>
-                        </ul>
+                        <input type="file" class="form-control" th:id="${p.name} + '_file'" th:name="${p.name} + '_file'" th:onchange="ajaxFileUpload([[${p.name}+ '_file']], [[${p.name}]])"
+                           th:placeholder="${p.configurer.placeholder}" multiple>
+                        <input type="text" style="display:none;" th:name="${p.name}" th:id="${p.name}" th:value="${p.value ne null ? T(com.rick.common.util.JsonUtils).toJson(p.value) : ''}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
                         <!--前端验证所有验证信息-->
                         <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
                              th:text="${v.message}"></div>
+                            <ul class="list-group list-group-flush">
+                                <th:block th:if="${p.value ne null}">
+                                <li class="list-group-item" th:each="f : ${p.value}">
+                                    <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link" th:onclick="deleteAttachment([[${p.name}]], [[${f.id}]], this)">删除</button>
+                                </li>
+                                </th:block>
+                            </ul>
                     </div>
 
                     <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).EMAIL}" type="email" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperies.get('Length.max')}"
@@ -54,7 +59,7 @@
                            th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
                     <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX}" th:each="option : ${p.configurer.options}">
-                        <input class="form-check-input" type="checkbox" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}" th:abbr="${p.configurer.options.length eq 1 && isRequired ? 'required':''}"
+                        <input class="form-check-input" type="checkbox" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}" th:required="${p.configurer.options.length eq 1 && isRequired}"
                                th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
                         <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
                         <th:block th:if="${p.configurer.options.length eq 1}">
@@ -103,17 +108,18 @@
 </body>
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script th:src="@{/jquery.form2json.js}"></script>
+<script th:src="@{/ajaxfileupload.js}"></script>
 <script th:inline="javascript">
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var form = document.querySelectorAll('.needs-validation')[0]
 
     // TODO 先执行前端验证，再执行后端验证
-    // form.addEventListener('submit', function (event) {
-    //     if (!valid()) {
-    //         event.preventDefault()
-    //         event.stopPropagation()
-    //     }
-    // }, false)
+    form.addEventListener('submit', function (event) {
+        if (!valid()) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+    }, false)
 
 
     /*<![CDATA[*/
@@ -154,6 +160,56 @@
         var validity = form.checkValidity()
         form.classList.add('was-validated')
         return validity;
+    }
+
+    function ajaxFileUpload(fileElementId, fileHidden) {
+        console.log(fileElementId)
+        $.ajaxFileUpload
+        (
+            {
+                url: '/documents/upload?name=' + fileElementId, //用于文件上传的服务器端请求地址
+                secureuri: false, //是否需要安全协议，一般设置为false
+                fileElementId: fileElementId, //文件上传域的ID
+                dataType: 'json', //返回值类型 一般设置为json
+                success: function (data, status)  //服务器成功响应处理函数
+                {
+                    var jsonString = $('#' + fileHidden).val()
+                    if(!jsonString) {
+                        jsonString = '[]'
+                    }
+
+                    var json = JSON.parse(jsonString);
+                    $("#" + fileElementId).next("input[type=text]").val(JSON.stringify(json.concat(data.data)))
+
+                    data.data.forEach(function (attachment) {
+                        $('#' + fileElementId).siblings('ul').append("<li class=\"list-group-item\">\n" +
+                            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link\" onclick=\"deleteAttachment('"+fileElementId+"', "+attachment.id+", this)\">删除</button>\n" +
+                        "</li>")
+                    })
+
+                },
+                error: function (data, status, e)//服务器响应失败处理函数
+                {
+                    alert(e);
+                }
+            }
+        )
+        return false;
+    }
+
+    function deleteAttachment(fileHidden, attachmentId, obj) {
+        var jsonString = $('#' + fileHidden).val()
+        if(jsonString) {
+            var json = JSON.parse(jsonString);
+            var filteredJson = json.filter(function (m) {
+                return m.id !== attachmentId;
+            })
+
+            $('#' + fileHidden).val(JSON.stringify(filteredJson))
+        }
+
+        $(obj).parent().remove()
+
     }
 
 </script>
