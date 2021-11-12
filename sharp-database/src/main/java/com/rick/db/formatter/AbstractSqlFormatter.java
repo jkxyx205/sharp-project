@@ -34,7 +34,7 @@ public abstract class AbstractSqlFormatter {
 	/**
 	 * 逻辑操作符
 	 */
-	private static final String OPERATOR_REGEX = "(?i)(like|!=|>=|<=|<|>|=|\\s+in|\\s+not\\s+in|regexp)";
+	private static final String OPERATOR_REGEX = "(?i)(like|<>|!=|>=|<=|<|>|=|\\s+in|\\s+not\\s+in|regexp)";
 
     /**
      * 合法的变量名称

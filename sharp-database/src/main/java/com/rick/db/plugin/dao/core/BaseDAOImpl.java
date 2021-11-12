@@ -983,7 +983,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             Map<String, Object> conditionParams = conditionAdvice.getCondition();
 
             if (MapUtils.isNotEmpty(conditionParams)) {
-                String additionCondition = getConditionSQL(conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList()), conditionParams);
+                Collection<String> filteredConditionParams = conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList());
+
+                String additionCondition = getConditionSQL(filteredConditionParams, conditionParams);
                 if (StringUtils.isNotBlank(additionCondition)) {
                     if (!isParamHolder) {
                         additionCondition = SQLUtils.paramsHolderToQuestionHolder(additionCondition);
@@ -991,11 +993,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
                     conditionSQL = StringUtils.isNotBlank(conditionSQL) ? (conditionSQL + " AND " + additionCondition) : additionCondition;
 
-                    mergedParams = new Object[params.length + conditionParams.size()];
+                    mergedParams = new Object[params.length + filteredConditionParams.size()];
                     System.arraycopy(params, 0, mergedParams, 0, params.length);
 
                     int i = 0;
-                    for (String key : conditionParams.keySet()) {
+                    for (String key : filteredConditionParams) {
                         mergedParams[params.length + i++] = conditionParams.get(key);
                     }
                 }
