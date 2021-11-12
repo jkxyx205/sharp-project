@@ -125,9 +125,7 @@ public class FormService {
         values.put("formId", formId);
         values.put("instanceId", instanceId);
         // postHandler mongoDB 文档存储
-        if (Objects.nonNull(formAdvice)) {
-            formAdvice.afterInstanceSave(formId, instanceId, values);
-        }
+        formAdvice.afterInstanceSave(formId, instanceId, values);
     }
 
     public int delete(Long instanceId) {

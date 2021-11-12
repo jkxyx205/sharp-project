@@ -16,11 +16,13 @@ public enum CpnTypeEnum {
     SELECT("选项"),
     RADIO("单选"),
     NUMBER_TEXT("数字"),
+    CURRENCY("金额"),
     CHECKBOX("多选"),
     MOBILE("手机号"),
     FILE("文件"),
     EMAIL("邮箱"),
     DATE("日期"),
+    TIME("时间"),
     TABLE("表格");
 
     @JsonValue

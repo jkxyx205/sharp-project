@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
-public class DateRegex extends AbstractValidator<String> {
+public class DecimalRegex extends AbstractValidator<String> {
 
-    private static final String regex = "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$";
+    private static final String regex = "^[+-]?([0-9]+\\.?[0-9]*|\\.[0-9]+)$";
 
     @Override
     public void valid(String value) {
@@ -29,12 +29,12 @@ public class DateRegex extends AbstractValidator<String> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.MOBILE;
+        return ValidatorTypeEnum.DECIMAL;
     }
 
     @Override
     public String getMessage() {
-        return String.format("时间格式不正确") ;
+        return String.format("数字格式不正确") ;
     }
 
 }

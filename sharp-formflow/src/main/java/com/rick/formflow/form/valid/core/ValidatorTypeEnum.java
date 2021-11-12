@@ -18,7 +18,8 @@ public enum ValidatorTypeEnum {
     SIZE("Size"),
     DATE("Date"),
     EMAIL("Email"),
-    MOBILE("Mobile");
+    MOBILE("Mobile"),
+    DECIMAL("Decimal");
 
     @JsonValue
     public String getCode() {

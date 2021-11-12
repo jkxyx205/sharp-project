@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
-public class DateRegex extends AbstractValidator<String> {
+public class TimeRegex extends AbstractValidator<String> {
 
-    private static final String regex = "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$";
+    private static final String regex = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$";
 
     @Override
     public void valid(String value) {

@@ -5,7 +5,6 @@ import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -24,10 +23,10 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2021-11-04 17:00:00
  */
-@Controller
+//@Controller
 @RequestMapping("forms/page")
 @RequiredArgsConstructor
-public class PageInstaceController {
+public class PageInstanceController {
 
     private final FormService formService;
 
@@ -60,17 +59,13 @@ public class PageInstaceController {
             FormBO formBO = getFormBO(formId, instanceId);
             model.addAttribute("formBO", formBO);
             // 填充表单数据
-            fillFormData(formBO.getPropertyList(), values);
+            for (FormBO.Property property : formBO.getPropertyList()) {
+                property.setValue(values.get(property.getName()));
+            }
 
             model.addAttribute("model", getDataModel(formBO.getPropertyList()));
         }
         return "form";
-    }
-
-    private void fillFormData(List<FormBO.Property> propertyList, Map<String, Object> values) {
-        for (FormBO.Property property : propertyList) {
-            property.setValue(values.get(property.getName()));
-        }
     }
 
     private FormBO getFormBO(Long formId, Long instanceId) {
