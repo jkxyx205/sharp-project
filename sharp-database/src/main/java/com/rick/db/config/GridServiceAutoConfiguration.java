@@ -18,9 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +49,6 @@ public class GridServiceAutoConfiguration {
     }
 
     @Configuration
-    @Import({SharpServiceQueryInterceptor.class})
     static class GridServiceConfiguration {
 
         @Bean
@@ -69,6 +66,10 @@ public class GridServiceAutoConfiguration {
         }
 
     }
+
+    @ConditionalOnProperty(prefix = "sharp.database", name = "select-cache")
+    @Import({SharpServiceQueryInterceptor.class})
+    static class GridServiceCacheConfiguration {}
 
     @Configuration
     static class BaseDAOConfiguration {
@@ -94,6 +95,7 @@ public class GridServiceAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
+        @ConditionalOnBean(Validator.class)
         public ValidatorHelper validatorHelper(Validator validator) {
             return new ValidatorHelper(validator);
         }

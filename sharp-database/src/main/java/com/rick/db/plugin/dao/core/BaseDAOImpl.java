@@ -56,7 +56,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Autowired(required = false)
     private ColumnAutoFill columnAutoFill;
 
-    @Autowired
+    @Autowired(required = false)
     private ValidatorHelper validatorHelper;
 
     @Autowired
@@ -126,7 +126,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insert(T t) {
-        validatorHelper.validate(t);
+        if (Objects.nonNull(validatorHelper)) {
+            validatorHelper.validate(t);
+        }
+
         Object[] params;
         int index = columnNameList.indexOf(tableMeta.getIdColumnName());
         if (isMapClass()) {
@@ -174,7 +177,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 if (isMapClass()) {
                     params.add(mapToParamsArray((Map) o, this.columnNameList));
                 } else {
-                    validatorHelper.validate(o);
+                    if (Objects.nonNull(validatorHelper)) {
+                        validatorHelper.validate(o);
+                    }
                     params.add(instanceToParamsArray((T) o));
                 }
             }
@@ -344,7 +349,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public int update(T t) {
-        validatorHelper.validate(t);
+        if (Objects.nonNull(validatorHelper)) {
+            validatorHelper.validate(t);
+        }
+
         Object[] objects = resolverParamsAndId(t);
         return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Serializable) objects[1]);
     }

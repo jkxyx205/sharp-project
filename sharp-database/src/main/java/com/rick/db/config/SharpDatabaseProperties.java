@@ -19,4 +19,6 @@ public class SharpDatabaseProperties {
 
     private String type = "mysql";
 
+    private boolean selectCache = false;
+
 }
