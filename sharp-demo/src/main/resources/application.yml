@@ -13,6 +13,10 @@ logging:
     com.rick.demo: DEBUG
     com.rick.db: DEBUG
 
+#sharp:
+#  database:
+#    select-cache: true
+
 dict:
   items:
     - type: user
