@@ -531,11 +531,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             params = (Map) t;
         } else {
 //            params = JsonUtils.objectToMap(t);
-            params = Maps.newHashMapWithExpectedSize(updateColumnNameList.size());
-            for (String updateColumnName : updateColumnNameList) {
-                String propertyName = columnNameToPropertyNameMap.get(updateColumnName);
-                params.put(propertyName, getPropertyValue(t, propertyName));
-                params.put(updateColumnName, getPropertyValue(t, propertyName));
+            params = Maps.newHashMapWithExpectedSize(columnNameList.size());
+            for (String columnName : columnNameList) {
+                String propertyName = columnNameToPropertyNameMap.get(columnName);
+                Object propertyValue = getPropertyValue(t, propertyName);
+                if (Objects.nonNull(propertyValue)) {
+                    params.put(propertyName, propertyValue);
+                    params.put(columnName, propertyValue);
+                }
             }
         }
         return selectByParams(params, conditionSQL);

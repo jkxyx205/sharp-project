@@ -1,6 +1,5 @@
 package com.rick.db.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.constant.EntityConstants;
@@ -39,7 +38,6 @@ public class BasePureEntity {
     private Instant updatedAt;
 
     @ColumnName(EntityConstants.LOGIC_DELETE_COLUMN_NAME)
-    @JsonIgnore
     private Boolean deleted;
 
     @Override
