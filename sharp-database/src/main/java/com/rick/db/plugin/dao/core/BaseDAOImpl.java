@@ -722,7 +722,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         StringBuilder sb = new StringBuilder();
         for (String columnName : paramNameList) {
             Object value = params.get(columnName);
-            sb.append(columnName).append(decideParamHolder(columnName, value)).append(" AND ");
+            sb.append(columnName).append(decideParamHolder(columnName, value)).append(" AND ")
+                    // 属性作为参数
+                .append(columnName).append(decideParamHolder(columnNameToPropertyNameMap.get(columnName), value)).append(" AND ");
         }
 
         return StringUtils.isBlank(sb) ? "" : sb.substring(0, sb.length() - 5);
