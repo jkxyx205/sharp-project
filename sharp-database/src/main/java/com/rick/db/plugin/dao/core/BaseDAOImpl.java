@@ -812,7 +812,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private Object getPropertyValue(Object t, String propertyName) {
         try {
-            if (entityClass == t.getClass()) {
+            if (this.entityClass.isAssignableFrom(t.getClass())) {
                 return propertyDescriptorMap.get(propertyName).getReadMethod().invoke(t);
             } else {
                 return BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getReadMethod().invoke(t);
@@ -829,7 +829,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private void setPropertyValue(Object t, String propertyName, Object propertyValue) {
         try {
-            if (entityClass == t.getClass()) {
+            if (this.entityClass.isAssignableFrom(t.getClass())) {
                 propertyDescriptorMap.get(propertyName).getWriteMethod().invoke(t, propertyValue);
             } else {
                 BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getWriteMethod().invoke(t, propertyValue);
