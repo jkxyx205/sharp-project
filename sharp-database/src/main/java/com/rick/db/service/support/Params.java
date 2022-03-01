@@ -34,6 +34,11 @@ public class Params {
             return this;
         }
 
+        public ParamsBuilder pvAll(Map<String, Object> map) {
+            params.putAll(map);
+            return this;
+        }
+
         public Map<String, Object> build() {
             return params;
         }
