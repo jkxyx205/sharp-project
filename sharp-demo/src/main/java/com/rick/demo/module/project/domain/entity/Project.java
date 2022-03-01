@@ -1,8 +1,9 @@
 package com.rick.demo.module.project.domain.entity;
 
 import com.rick.db.dto.BasePureEntity;
+import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.OneToMany;
-import com.rick.db.plugin.dao.annotation.TableName;
+import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import lombok.Getter;
@@ -21,11 +22,12 @@ import java.util.Map;
 @SuperBuilder
 @Getter
 @Setter
-@TableName(value = "t_project1", subTables = {"t_project_detail1"})
+@Table(value = "t_project1", subTables = {"t_project_detail1"}, comment = "任务")
 @NoArgsConstructor
 public class Project extends BasePureEntity {
 
     @NotBlank(message = "项目名称不能为空")
+    @Column(comment="项目名称", nullable = true)
     private String title;
 
     private String description;

@@ -1,7 +1,7 @@
 package com.rick.demo.module.project.domain.entity.group;
 
 import com.rick.db.dto.BasePureEntity;
-import com.rick.db.plugin.dao.annotation.TableName;
+import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.enums.SexEnum;
@@ -21,7 +21,7 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @Setter
-@TableName(value = "t_project2", subTables = {"t_project_detail2"})
+@Table(value = "t_project2", subTables = {"t_project_detail2"})
 @NoArgsConstructor
 public class Project extends BasePureEntity {
 

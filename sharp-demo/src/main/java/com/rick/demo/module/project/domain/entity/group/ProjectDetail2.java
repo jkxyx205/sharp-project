@@ -1,7 +1,7 @@
 package com.rick.demo.module.project.domain.entity.group;
 
 import com.rick.db.dto.BasePureEntity;
-import com.rick.db.plugin.dao.annotation.TableName;
+import com.rick.db.plugin.dao.annotation.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 @SuperBuilder
 @Getter
 @Setter
-@TableName("t_project_detail2")
+@Table("t_project_detail2")
 @NoArgsConstructor
 public class ProjectDetail2 extends BasePureEntity {
 
