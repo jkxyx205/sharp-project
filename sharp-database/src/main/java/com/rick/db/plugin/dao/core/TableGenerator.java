@@ -1,6 +1,7 @@
 package com.rick.db.plugin.dao.core;
 
 import com.rick.db.constant.EntityConstants;
+import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +88,8 @@ public class TableGenerator {
             return "time";
         } else if (type == Map.class || type == List.class) {
             return "text";
+        } else if(BasePureEntity.class.isAssignableFrom(type)) {
+            return "bigint";
         }
 
         return "varchar(32)";

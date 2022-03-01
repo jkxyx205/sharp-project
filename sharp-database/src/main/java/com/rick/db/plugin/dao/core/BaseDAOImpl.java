@@ -536,6 +536,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 String propertyName = columnNameToPropertyNameMap.get(columnName);
                 Object propertyValue = getPropertyValue(t, propertyName);
                 if (Objects.nonNull(propertyValue)) {
+                    if (propertyValue instanceof BasePureEntity) {
+                        propertyValue = getIdValue(propertyValue);
+                    }
+
                     params.put(propertyName, propertyValue);
                     params.put(columnName, propertyValue);
                 }
@@ -1063,6 +1067,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private void cascadeSelect(List<T> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+
         // OneToMany
         for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
             if (isInternalCall()) {
