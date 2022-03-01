@@ -1,7 +1,7 @@
 package com.rick.formflow.form.cpn.core;
 
 import com.rick.db.dto.BasePureEntity;
-import com.rick.db.plugin.dao.annotation.TableName;
+import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@TableName(value = "sys_form_cpn_value")
+@Table(value = "sys_form_cpn_value")
 public class FormCpnValue extends BasePureEntity {
 
     @NotNull

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
 import com.rick.db.dto.BasePureEntity;
-import com.rick.db.plugin.dao.annotation.ColumnName;
-import com.rick.db.plugin.dao.annotation.TableName;
+import com.rick.db.plugin.dao.annotation.Column;
+import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.dao.annotation.Transient;
 import com.rick.formflow.form.valid.core.Validator;
 import com.rick.formflow.form.valid.core.ValidatorManager;
@@ -32,13 +32,13 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@TableName(value = "sys_form_configurer")
+@Table(value = "sys_form_configurer")
 public class CpnConfigurer extends BasePureEntity {
 
     @NotBlank
     private String label;
 
-    @ColumnName("type")
+    @Column("type")
     @NotNull
     private CpnTypeEnum cpnType;
 
@@ -49,16 +49,16 @@ public class CpnConfigurer extends BasePureEntity {
     /**
      * 手动装配validatorsMap到validatorList
      */
-    @ColumnName("validators")
+    @Column("validators")
     private Set<Map<String, ?>> validators;
 
-    @ColumnName("options")
+    @Column("options")
     private String[] options;
 
-    @ColumnName("default_value")
+    @Column("default_value")
     private String defaultValue;
 
-    @ColumnName("placeholder")
+    @Column("placeholder")
     private String placeholder;
 
     private Map<String, Object> additionalInfo;
