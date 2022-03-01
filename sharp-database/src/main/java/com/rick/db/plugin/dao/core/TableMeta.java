@@ -1,7 +1,9 @@
 package com.rick.db.plugin.dao.core;
 
+import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.OneToMany;
+import com.rick.db.plugin.dao.annotation.Table;
 import lombok.ToString;
 import lombok.Value;
 
@@ -16,6 +18,8 @@ import java.util.Set;
 @Value
 @ToString
 class TableMeta {
+
+    private Table table;
 
     /**
      * 类名，约定优于配置，它的子表的外键用"name_id"表示
@@ -57,6 +61,10 @@ class TableMeta {
     private Map<String, OneToManyProperty> oneToManyAnnotationMap;
 
     private Map<String, ManyToOneProperty> manyToOneAnnotationMap;
+
+    private Map<String, Field> columnNameFieldMap;
+
+    private Map<String, Column> columnNameMap;
 
     @Value
     public static class OneToManyProperty {

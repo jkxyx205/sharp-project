@@ -28,16 +28,16 @@ class TableMetaResolver {
     private static final String PRIMARY_COLUMN = "id";
 
     public static TableMeta resolve(Class<?> clazz) {
-        TableName tableNameAnnotation = clazz.getAnnotation(TableName.class);
+        Table tableAnnotation = clazz.getAnnotation(Table.class);
         Converter<String, String> converter = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE);
 
         String name = (TABLE_PREFIX + converter.convert(clazz.getSimpleName()));
 
         String tableName;
         Set<String> subTables = Sets.newHashSet();
-        if (Objects.nonNull(tableNameAnnotation)) {
-            tableName = tableNameAnnotation.value();
-            subTables.addAll(Arrays.asList(tableNameAnnotation.subTables()));
+        if (Objects.nonNull(tableAnnotation)) {
+            tableName = tableAnnotation.value();
+            subTables.addAll(Arrays.asList(tableAnnotation.subTables()));
         } else {
             tableName = name;
         }
@@ -49,6 +49,8 @@ class TableMetaResolver {
         StringBuilder updatePropertiesBuilder = new StringBuilder();
         Map<String, TableMeta.OneToManyProperty> oneToManyAnnotationMap = Maps.newHashMap();
         Map<String, TableMeta.ManyToOneProperty> manyToOneAnnotationMap = Maps.newHashMap();
+        Map<String, Field> columnNameFieldMap = Maps.newHashMap();
+        Map<String, Column> columnNameMap = Maps.newHashMap();
 
         String idColumnName = null;
         for (Field field : fields) {
@@ -72,8 +74,11 @@ class TableMetaResolver {
                 idColumnName = field.getName();
             }
 
-            ColumnName annotation = AnnotatedElementUtils.getMergedAnnotation(field, ColumnName.class);
+            Column annotation = AnnotatedElementUtils.getMergedAnnotation(field, Column.class);
             String columnName = Objects.nonNull(annotation) && StringUtils.isNotBlank(annotation.value()) ? annotation.value() : converter.convert(field.getName());
+            columnNameFieldMap.put(columnName, field);
+            columnNameMap.put(columnName, annotation);
+
             propertiesBuilder.append(field.getName()).append(",");
             columnNamesBuilder.append(columnName).append(",");
 
@@ -90,7 +95,8 @@ class TableMetaResolver {
         updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
 
         idColumnName = Objects.isNull(idColumnName) ? PRIMARY_COLUMN : idColumnName;
-        return new TableMeta(name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationMap, manyToOneAnnotationMap);
+        return new TableMeta(tableAnnotation, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+                updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationMap, manyToOneAnnotationMap
+                , columnNameFieldMap, columnNameMap);
     }
 }

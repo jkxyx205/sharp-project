@@ -11,10 +11,10 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-@ColumnName
+@Column
 public @interface ManyToOne {
 
-    @AliasFor(annotation = ColumnName.class)
+    @AliasFor(annotation = Column.class)
     String value() default "";
 
     String parentTable();

@@ -9,6 +9,7 @@ import com.rick.db.plugin.GridUtils;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.core.BaseDAO;
 import com.rick.db.plugin.dao.core.BaseDAOManager;
+import com.rick.db.plugin.dao.core.TableGenerator;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
 import com.rick.db.plugin.dao.support.DefaultConditionAdvice;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import javax.validation.Validator;
@@ -127,6 +129,15 @@ public class GridServiceAutoConfiguration {
         public MappedSharpService getMappedSharpService(GridService gridService) {
             MappedSharpService mappedSharpService = new MappedSharpService(sqlSessionFactory, gridService);
             return mappedSharpService;
+        }
+    }
+
+    @Configuration
+    static class TableGeneratorConfiguration {
+
+        @Bean
+        public TableGenerator initTableGenerator(JdbcTemplate jdbcTemplate) {
+            return new TableGenerator(jdbcTemplate);
         }
     }
 

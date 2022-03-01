@@ -10,9 +10,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Inherited
-public @interface ColumnName {
+public @interface Column {
 
     String value() default "";
 
     boolean updatable() default true;
+
+    boolean nullable() default false;
+
+    String comment() default  "";
 }

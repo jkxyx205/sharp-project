@@ -94,7 +94,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     public BaseDAOImpl(String tableName, String columnNames, String primaryColumn) {
-        this.tableMeta = new TableMeta("", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap());
+        this.tableMeta = new TableMeta(null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
         this.init();
     }
 
@@ -689,7 +689,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 }
 
                 if (Objects.nonNull(this.tableMeta)) {
-                    this.tableMeta = new TableMeta(tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationMap(), tableMeta.getManyToOneAnnotationMap());
+                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationMap(), tableMeta.getManyToOneAnnotationMap(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
                 } else {
                     this.tableMeta = tableMeta;
                 }

@@ -3,7 +3,7 @@ package com.rick.db.dto;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.constant.EntityConstants;
-import com.rick.db.plugin.dao.annotation.ColumnName;
+import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,17 +27,17 @@ public class BasePureEntity {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
-    @ColumnName(updatable = false)
+    @Column(updatable = false)
     private Long createdBy;
 
-    @ColumnName(updatable = false)
+    @Column(updatable = false)
     private Instant createdAt;
 
     private Long updatedBy;
 
     private Instant updatedAt;
 
-    @ColumnName(EntityConstants.LOGIC_DELETE_COLUMN_NAME)
+    @Column(EntityConstants.LOGIC_DELETE_COLUMN_NAME)
     private Boolean deleted;
 
     @Override
