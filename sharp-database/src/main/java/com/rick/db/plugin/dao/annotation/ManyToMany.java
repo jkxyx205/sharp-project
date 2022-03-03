@@ -10,11 +10,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 @Transient
-public @interface OneToMany {
+public @interface ManyToMany {
 
-    String subTable();
+    String thirdPartyTable();
 
-    String reversePropertyName() default "";
+    String referenceTable();
 
-    boolean cascadeSaveOrUpdate() default false;
+    String referenceColumnName() default "";
+
+    String columnDefinition() default "";
 }

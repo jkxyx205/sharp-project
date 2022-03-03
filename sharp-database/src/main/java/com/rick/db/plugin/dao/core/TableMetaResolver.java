@@ -49,6 +49,7 @@ class TableMetaResolver {
         StringBuilder updatePropertiesBuilder = new StringBuilder();
         Map<String, TableMeta.OneToManyProperty> oneToManyAnnotationMap = Maps.newHashMap();
         Map<String, TableMeta.ManyToOneProperty> manyToOneAnnotationMap = Maps.newHashMap();
+        Map<String, TableMeta.ManyToManyProperty> manyToManyAnnotationMap = Maps.newHashMap();
         Map<String, Field> columnNameFieldMap = Maps.newHashMap();
         Map<String, Column> columnNameMap = Maps.newHashMap();
 
@@ -63,6 +64,12 @@ class TableMetaResolver {
             ManyToOne manyToOneAnnotation = field.getAnnotation(ManyToOne.class);
             if (manyToOneAnnotation != null) {
                 manyToOneAnnotationMap.put(manyToOneAnnotation.parentTable(), new TableMeta.ManyToOneProperty(manyToOneAnnotation, field));
+            }
+
+            ManyToMany manyToManyAnnotation = field.getAnnotation(ManyToMany.class);
+            if (manyToManyAnnotation != null) {
+                subTables.add(manyToManyAnnotation.thirdPartyTable());
+                manyToManyAnnotationMap.put(manyToManyAnnotation.thirdPartyTable(), new TableMeta.ManyToManyProperty(manyToManyAnnotation, field));
             }
 
             if (AnnotatedElementUtils.hasAnnotation(field, Transient.class)) {
@@ -96,7 +103,7 @@ class TableMetaResolver {
 
         idColumnName = Objects.isNull(idColumnName) ? PRIMARY_COLUMN : idColumnName;
         return new TableMeta(tableAnnotation, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationMap, manyToOneAnnotationMap
+                updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationMap, manyToOneAnnotationMap, manyToManyAnnotationMap
                 , columnNameFieldMap, columnNameMap);
     }
 }

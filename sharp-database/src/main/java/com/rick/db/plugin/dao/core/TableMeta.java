@@ -1,9 +1,6 @@
 package com.rick.db.plugin.dao.core;
 
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.ManyToOne;
-import com.rick.db.plugin.dao.annotation.OneToMany;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.plugin.dao.annotation.*;
 import lombok.ToString;
 import lombok.Value;
 
@@ -62,6 +59,8 @@ class TableMeta {
 
     private Map<String, ManyToOneProperty> manyToOneAnnotationMap;
 
+    private Map<String, ManyToManyProperty> manyToManyAnnotationMap;
+
     private Map<String, Field> columnNameFieldMap;
 
     private Map<String, Column> columnNameMap;
@@ -78,6 +77,14 @@ class TableMeta {
     public static class ManyToOneProperty {
 
         private ManyToOne oneToMany;
+
+        private Field field;
+    }
+
+    @Value
+    public static class ManyToManyProperty {
+
+        private ManyToMany manyToMany;
 
         private Field field;
     }
