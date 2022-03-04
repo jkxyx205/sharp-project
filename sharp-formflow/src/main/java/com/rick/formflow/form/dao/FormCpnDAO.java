@@ -1,9 +1,9 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.common.util.Assert;
 import com.rick.db.plugin.dao.core.BaseDAOImpl;
 import com.rick.formflow.form.cpn.core.FormCpn;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.List;

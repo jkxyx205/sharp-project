@@ -1,7 +1,6 @@
 package com.rick.db.plugin;
 
 import com.google.common.collect.Maps;
-import com.rick.common.util.Assert;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.PageModel;
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.*;

@@ -4,7 +4,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
-import com.rick.common.util.*;
+import com.rick.common.util.ClassUtils;
+import com.rick.common.util.EnumUtils;
+import com.rick.common.util.JsonUtils;
+import com.rick.common.util.ReflectUtils;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
 import com.rick.db.config.SharpDatabaseProperties;
@@ -26,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 import java.beans.IntrospectionException;
@@ -385,7 +389,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     /**
-     * 指定更新字段，update_at不会autoFill，需要自己指定
+     * 指定更新字段
      *
      * @param updateColumnNames name, age, updated_at
      * @param params            {"Rick", 23, null}
