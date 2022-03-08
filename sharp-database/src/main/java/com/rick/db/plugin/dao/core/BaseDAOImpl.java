@@ -380,6 +380,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         List<String> updateColumnNames = convertToArray(tableMeta.getUpdateColumnNames());
         int size = updateColumnNames.size();
 
+        params = ArrayUtils.isEmpty(params) ? new Object[] {} : params;
+
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
             mergedParams[i] = resolverValue(getPropertyValue(t, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));

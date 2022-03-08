@@ -355,6 +355,17 @@ public class BaseDAOImplTest {
 
     }
 
+    @Order(27)
+    @Test
+    public void testUpdateByCondition() {
+        Project project = createProject();
+        project.setTitle("title-entity-update");
+        project.setId(479723134929764352L);
+
+        long count = projectDAO.update(project, null, "id = 1 AND is_deleted = 1");
+        assertThat(count).isEqualTo(0);
+    }
+
     public Project createProject() {
         Project project = new Project();
         project.setTitle("项目标题 " + System.currentTimeMillis());
