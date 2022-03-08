@@ -99,7 +99,11 @@ public final class SQLUtils {
      * @return
      */
     public static int update(String tableName, String updateColumnNames, Object[] params, String conditionSQL) {
-        return SQLUtils.JDBC_TEMPLATE.update(getUpdateSQL(tableName, updateColumnNames, conditionSQL), params);
+        String updateSQL = getUpdateSQL(tableName, updateColumnNames, conditionSQL);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL=> [{}], args:=> [{}]", updateSQL, params);
+        }
+        return SQLUtils.JDBC_TEMPLATE.update(updateSQL, params);
     }
 
     /**

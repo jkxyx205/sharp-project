@@ -364,6 +364,35 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     /**
+     * @param t
+     * @param params   where语句后面的参数
+     * @param conditionSQL
+     * @return
+     */
+    @Override
+    public int update(T t, Object[] params, String conditionSQL) {
+        if (Objects.nonNull(validatorHelper)) {
+            validatorHelper.validate(t);
+        }
+
+        cascadeInsertOrUpdate(t);
+
+        List<String> updateColumnNames = convertToArray(tableMeta.getUpdateColumnNames());
+        int size = updateColumnNames.size();
+
+        Object[] mergedParams = new Object[size + params.length];
+        for (int i = 0; i < size; i++) {
+            mergedParams[i] = getPropertyValue(t, columnNameToPropertyNameMap.get(updateColumnNames.get(i)));
+            if (mergedParams[i] instanceof BasePureEntity) {
+                mergedParams[i] = getIdValue(mergedParams[i]);
+            }
+
+        }
+        System.arraycopy(params, 0, mergedParams, size, params.length);
+        return update(t, tableMeta.getUpdateColumnNames(), mergedParams, conditionSQL);
+    }
+
+    /**
      * 批量更新
      * @param collection
      * @return
@@ -392,7 +421,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * 指定更新字段
      *
      * @param updateColumnNames name, age, updated_at
-     * @param params            {"Rick", 23, null}
+     * @param params            update && where 语句后面的参数 {"Rick", 23, null}
      * @param id                1
      */
     @Override

@@ -45,6 +45,8 @@ public interface BaseDAO<T> {
 
     int update(T t);
 
+    int update(T t, Object[] params, String conditionSQL);
+
     int[] update(Collection<T> entities);
 
     int update(String updateColumnNames, Object[] params, Serializable id);

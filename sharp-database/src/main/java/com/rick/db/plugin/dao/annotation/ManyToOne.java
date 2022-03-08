@@ -19,4 +19,6 @@ public @interface ManyToOne {
 
     String parentTable();
 
+    String comment() default  "";
+
 }
