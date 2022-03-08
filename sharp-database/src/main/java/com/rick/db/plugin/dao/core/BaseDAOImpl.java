@@ -382,12 +382,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
-            mergedParams[i] = getPropertyValue(t, columnNameToPropertyNameMap.get(updateColumnNames.get(i)));
-            if (mergedParams[i] instanceof BasePureEntity) {
-                mergedParams[i] = getIdValue(mergedParams[i]);
-            }
-
+            mergedParams[i] = resolverValue(getPropertyValue(t, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));
         }
+
         System.arraycopy(params, 0, mergedParams, size, params.length);
         return update(t, tableMeta.getUpdateColumnNames(), mergedParams, conditionSQL);
     }
