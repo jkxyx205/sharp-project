@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -1107,14 +1108,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         // OneToMany
         for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
-            if (isInternalCall()) {
-                return;
-            }
             TableMeta.OneToManyProperty oneToManyProperty = oneToManyPropertyEntry.getValue();
             String targetTable = oneToManyProperty.getOneToMany().subTable();
 
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
-
+            if (isDaoCalled(subTableBaseDAO)) {
+                continue;
+            }
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
             Map<Serializable, List<?>> subTableData = subTableBaseDAO.groupByColumnName(subTableRefColumnName, refIds);
 
@@ -1126,12 +1126,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         // ManyToOne
         for (Map.Entry<String, TableMeta.ManyToOneProperty> manyToOnePropertyEntry : tableMeta.getManyToOneAnnotationMap().entrySet()) {
-            if (isInternalCall()) {
-                return;
-            }
             String targetTable = manyToOnePropertyEntry.getKey();
             BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
 
+            if (isDaoCalled(parentTableDAO)) {
+                continue;
+            }
             String refColumnName = manyToOnePropertyEntry.getValue().getOneToMany().value();
 
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName)))).collect(Collectors.toSet());
@@ -1202,24 +1202,34 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
-
             List<?> subDataList = (List<?>) getPropertyValue(t, oneToManyProperty.getField());
+            Object refId = getIdValue(t);
+            String refColumnName = oneToManyProperty.getOneToMany().joinValue();
+
+            Class subClass = ((Class) ((ParameterizedType) oneToManyProperty.getField().getGenericType()).getActualTypeArguments()[0]);
+            Field reverseField = ReflectionUtils.findField(subClass, oneToManyPropertyEntry.getValue().getOneToMany().reversePropertyName());
+
+            if (StringUtils.isBlank(refColumnName)) {
+                ManyToOne manyToOneAnnotation = reverseField.getAnnotation(ManyToOne.class);
+                refColumnName = manyToOneAnnotation.value();
+            }
+
             if (CollectionUtils.isEmpty(subDataList)) {
+                // 删除所有
+                SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
                 return;
             }
 
-            Field reverseField = ReflectionUtils.findField(subDataList.get(0).getClass(), oneToManyPropertyEntry.getValue().getOneToMany().reversePropertyName());
             for (Object subData : subDataList) {
                  setPropertyValue(subData, reverseField, t);
             }
 
-            // 先删除
-            ManyToOne manyToOneAnnotation = reverseField.getAnnotation(ManyToOne.class);
+            // 删除 除id之外的其他记录
             SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), "id",
                     subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet())
-            , new Object[] {getIdValue(t)} , manyToOneAnnotation.value() + " = ?");
+                    , new Object[] {refId} , refColumnName + " = ?");
+
 
             // 再插入或更新
             subTableBaseDAO.insertOrUpdate(subDataList);
@@ -1253,14 +1263,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return (Serializable) getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
     }
 
-    private boolean isInternalCall() {
+    private boolean isDaoCalled(BaseDAO baseDAO) {
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-        int callIndex = 2;
 
-        for (int j = callIndex + 1; j < stacks.length; j++) {
-            if (stacks[j].getClassName().equals(stacks[callIndex].getClassName()) &&
-                    stacks[j].getMethodName().equals(stacks[callIndex].getMethodName())
-            ) {
+        for (int j = 1; j < stacks.length; j++) {
+            if (baseDAO.getClass().getName().equals(stacks[j].getClassName())) {
                 return true;
             }
         }

@@ -17,4 +17,6 @@ public @interface OneToMany {
     String reversePropertyName() default "";
 
     boolean cascadeSaveOrUpdate() default false;
+
+    String joinValue() default "";
 }

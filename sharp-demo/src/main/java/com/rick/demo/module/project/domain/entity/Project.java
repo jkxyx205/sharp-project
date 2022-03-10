@@ -47,7 +47,7 @@ public class Project extends BasePureEntity {
 
     private PhoneNumber phoneNumber;
 
-    @OneToMany(subTable = "t_project_detail1", reversePropertyName = "project", cascadeSaveOrUpdate = true)
+    @OneToMany(subTable = "t_project_detail1", reversePropertyName = "project", cascadeSaveOrUpdate = true, joinValue = "project_id")
     private List<ProjectDetail> projectDetailList;
 
     private Map<String, Object> map;
