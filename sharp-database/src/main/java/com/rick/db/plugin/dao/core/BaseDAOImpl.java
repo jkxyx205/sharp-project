@@ -1134,7 +1134,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
             String refColumnName = manyToOnePropertyEntry.getValue().getOneToMany().value();
 
-            Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName)))).collect(Collectors.toSet());
+            Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(refIds)) {
+                continue;
+            }
+
             List<?> parentList = parentTableDAO.selectByIds(refIds);
             Map<Serializable, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
             for (T t : list) {
@@ -1260,6 +1266,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private Serializable getIdValue(Object o) {
+        if (Objects.isNull(o)) {
+            return null;
+        }
         return (Serializable) getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
     }
 

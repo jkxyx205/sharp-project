@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -80,6 +81,8 @@ public class TableGenerator {
             return "varchar(16)";
         } else if (type == Boolean.class) {
             return "bit";
+        } else if (type == BigDecimal.class) {
+            return "decimal(10,4)";
         } else if (type == Instant.class || type == LocalDateTime.class) {
             return "datetime";
         } else if (type == LocalDate.class) {
