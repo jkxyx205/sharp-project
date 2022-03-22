@@ -29,7 +29,7 @@ public abstract class AbstractSqlFormatter {
 	/**
 	 * 合法名字：数字字母下划线
 	 */
-	private static final String COLUMN_REGEX = "((?i)(to_char|NVL)?\\s*([(][^([(]|[)])]*[)])|[a-zA-Z0-9'[.]_[-]]+)";
+	private static final String COLUMN_REGEX = "((?i)(to_char|NVL)?\\s*([(][^([(]|[)])]*[)])|[a-zA-Z0-9'[.]_[-]]+)(\\s*->\\s*'\\$.[a-zA-Z]+\\w*')?";
 
 	/**
 	 * 逻辑操作符
@@ -253,7 +253,7 @@ public abstract class AbstractSqlFormatter {
 
     private List<ParamHolder> splitParam(String sql, Pattern fullPattern, Pattern paramPattern) {
         Matcher mat = fullPattern.matcher(sql);
-        List<ParamHolder> paramList = new ArrayList<ParamHolder>();
+        List<ParamHolder> paramList = new ArrayList<>();
         while (mat.find()) {
             paramList.add(getParamHolder(mat, paramPattern));
         }
@@ -442,7 +442,7 @@ public abstract class AbstractSqlFormatter {
     }
 
     private String ignoreAndReturnSQL(String srcSql, ParamHolder h) {
-        String condition = BEFORE_END + h.full.replace(".", "\\.").replace("(", "\\(").replace(")", "\\)") + AFTER_END;
+        String condition = BEFORE_END + h.full.replace(".", "\\.").replace("(", "\\(").replace(")", "\\)").replace("$", "\\$") + AFTER_END;
         String rightRegex = "(?s)((?i)((and|or)\\s+)|(,\\s*))?" + condition;
         String leftRegex = condition + "(?s)((?i)(\\s+(and|or))|(\\s*,))?";
         String firstWhereCondition = "(?s).*((?i)where)\\s+" + condition + ".*";
@@ -457,6 +457,7 @@ public abstract class AbstractSqlFormatter {
 
             return srcSql.replaceAll(leftRegex, "");
         }
+
 
         return  srcSql.replaceAll(rightRegex, "");
     }
