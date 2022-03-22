@@ -35,6 +35,8 @@ public interface BaseDAO<T> {
 
     int delete(Object[] params, String conditionSQL);
 
+    int delete(Map<String, Object> params, String conditionSQL);
+
     int deleteLogicallyById(Serializable id);
 
     int deleteLogicallyByIds(String ids);

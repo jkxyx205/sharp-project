@@ -285,6 +285,22 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return SQLUtils.delete(tableMeta.getTableName(), (Object[]) objects[0], (String) objects[1]);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int delete(Map<String, Object> params, String conditionSQL) {
+        if (hasSubTables()) {
+            List<T> deletedList = selectByParams(params, conditionSQL);
+            Set<?> deletedIds = deletedList.stream().map(r -> getIdValue(r)).collect(Collectors.toSet());
+
+            for (String subTable : tableMeta.getSubTables()) {
+                SQLUtils.delete(subTable, subTableRefColumnName, deletedIds);
+            }
+        }
+
+        int count = sharpService.update("DELETE FROM " + getTableName() + " WHERE " + conditionSQL, params);
+        return count;
+    }
+
     /**
      * 通过主键逻辑id刪除
      * @param id
@@ -460,7 +476,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     /**
      * 动态查询
-     * @param updateColumnNames name,age, user_name
+     * @param updateColumnNames name, age, user_name
      * @param params Map<String, Object> {name = rick, age = 5, user_name = Jim, id = 5}
      * @param conditionSQL id = :id
      * @return
