@@ -1,7 +1,6 @@
 package com.rick.demo.db;
 
 import com.rick.db.plugin.dao.core.TableGenerator;
-import com.rick.demo.module.project.domain.entity.group.Task;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,8 +18,8 @@ public class TableGeneratorTest {
 
     @Test
     public void createTable() {
-        jdbcTemplate.execute("DROP TABLE t_task");
-        tableGenerator.createTable(Task.class);
+//        jdbcTemplate.execute("DROP TABLE t_task");
+//        tableGenerator.createTable(Task.class);
     }
 
 }

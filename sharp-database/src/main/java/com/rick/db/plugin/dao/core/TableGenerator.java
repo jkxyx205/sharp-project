@@ -1,5 +1,6 @@
 package com.rick.db.plugin.dao.core;
 
+import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.dao.annotation.Column;
@@ -89,8 +90,9 @@ public class TableGenerator {
             return "date";
         } else if (type == LocalTime.class) {
             return "time";
-        } else if (type == Map.class || type == List.class) {
-            return "text";
+        } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type)) {
+//            return "text";
+            return "json";
         } else if(BasePureEntity.class.isAssignableFrom(type)) {
             return "bigint";
         }

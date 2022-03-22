@@ -139,6 +139,16 @@ public class BaseDAOImplTest {
         projectDAO.delete(new Object[] {479722488834981888L, 479722488839176192L}, "id in(?, ?)");
     }
 
+    @Order(7)
+    @Test
+    public void testDeleteByCondition2() {
+        Project project = createProject();
+        project.setTitle("xx-tom");
+        projectDAO.insert(project);
+        int delete = projectDAO.delete(Params.builder(1).pv("title", "Tom").build(), "title LIKE :title");
+        assertThat(delete).isEqualTo(1);
+    }
+
     @Order(8)
     @Test
     public void testDeleteByIds() {
