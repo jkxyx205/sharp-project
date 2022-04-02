@@ -14,6 +14,7 @@ import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.SQLUtils;
+import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
@@ -312,7 +313,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         if (hasSubTables()) {
             for (String subTable : tableMeta.getSubTables()) {
-                update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
+                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationMap().values().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
+                if (thirdPartyTableCollect.contains(subTable)) {
+                    SQLUtils.delete(subTable, subTableRefColumnName, Arrays.asList(id));
+                } else {
+                    update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
+                }
             }
         }
 
@@ -345,7 +351,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         if (hasSubTables()) {
             for (String subTable : tableMeta.getSubTables()) {
-                update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationMap().values().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
+                if (thirdPartyTableCollect.contains(subTable)) {
+                    SQLUtils.delete(subTable, subTableRefColumnName, ids);
+                } else {
+                    update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+                }
             }
         }
 

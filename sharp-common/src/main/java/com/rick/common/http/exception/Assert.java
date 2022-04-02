@@ -26,6 +26,12 @@ public interface Assert {
         throw new BizException(new ExceptionResult<String>(getCode(), String.format(getMsg(), params)));
     }
 
+    static void isNull(Object obj, String name) {
+        if (Objects.nonNull(obj)) {
+            throw new BizException(new ExceptionResult<String>(400, String.format("%s需要为空", new String[]{name})));
+        }
+    }
+
     static void notNull(Object obj, String name) {
         if (Objects.isNull(obj)) {
             throw new BizException(new ExceptionResult<String>(400, String.format("%s不能为空", new String[]{name})));
