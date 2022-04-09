@@ -14,9 +14,9 @@ public @interface OneToMany {
 
     String subTable();
 
-    String reversePropertyName() default "";
+    String reversePropertyName();
 
     boolean cascadeSaveOrUpdate() default false;
 
-    String joinValue() default "";
+    String joinValue();
 }

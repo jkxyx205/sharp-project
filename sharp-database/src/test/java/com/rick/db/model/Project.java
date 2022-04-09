@@ -29,8 +29,7 @@ public class Project extends BasePureEntity {
 
     private Long ownerId;
 
-
-    @OneToMany(subTable = "t_project_detail")
+    @OneToMany(subTable = "t_project_detail", reversePropertyName = "project", joinValue = "project_id")
     private List<ProjectDetail> projectDetailList;
 
 }

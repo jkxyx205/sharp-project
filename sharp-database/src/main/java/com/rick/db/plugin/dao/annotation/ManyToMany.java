@@ -16,7 +16,7 @@ public @interface ManyToMany {
 
     String referenceTable();
 
-    String referenceColumnName() default "";
+    String referenceColumnName();
 
-    String columnDefinition() default "";
+    String columnDefinition();
 }

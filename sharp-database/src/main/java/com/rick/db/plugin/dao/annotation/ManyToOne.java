@@ -19,6 +19,8 @@ public @interface ManyToOne {
 
     String parentTable();
 
+    boolean cascadeSaveOrUpdate() default false;
+
     String comment() default  "";
 
 }

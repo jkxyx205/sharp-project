@@ -76,7 +76,7 @@ class TableMeta {
     @Value
     public static class ManyToOneProperty {
 
-        private ManyToOne oneToMany;
+        private ManyToOne manyToOne;
 
         private Field field;
     }

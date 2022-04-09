@@ -386,8 +386,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             validatorHelper.validate(t);
         }
 
-        Object[] objects = resolverParamsAndId(t);
         cascadeInsertOrUpdate(t);
+        Object[] objects = resolverParamsAndId(t);
         return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Serializable) objects[1]);
     }
 
@@ -1159,7 +1159,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             if (isDaoCalled(parentTableDAO)) {
                 continue;
             }
-            String refColumnName = manyToOnePropertyEntry.getValue().getOneToMany().value();
+            String refColumnName = manyToOnePropertyEntry.getValue().getManyToOne().value();
 
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
@@ -1225,7 +1225,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private void cascadeInsertOrUpdate(T t) {
-        // 只处理OneToMany的情况,级联更新或插入
         // OneToMany
         for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
             TableMeta.OneToManyProperty oneToManyProperty = oneToManyPropertyEntry.getValue();
@@ -1266,6 +1265,23 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             // 再插入或更新
             subTableBaseDAO.insertOrUpdate(subDataList);
+        }
+
+        // ManyToOne
+        for (Map.Entry<String, TableMeta.ManyToOneProperty> manyToOnePropertyEntry : tableMeta.getManyToOneAnnotationMap().entrySet()) {
+            TableMeta.ManyToOneProperty manyToOneProperty = manyToOnePropertyEntry.getValue();
+
+            if (!manyToOneProperty.getManyToOne().cascadeSaveOrUpdate()) {
+                continue;
+            }
+
+            String targetTable = manyToOneProperty.getManyToOne().parentTable();
+            BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+            Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
+            if (Objects.nonNull(targetObject)) {
+                parentTableBaseDAO.insertOrUpdate(targetObject);
+                update(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
+            }
         }
 
         // ManyToMany 更新中间表
