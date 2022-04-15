@@ -1,14 +1,14 @@
 package com.rick.db.service.support;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Rick
@@ -18,15 +18,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SharpServiceQueryInterceptor {
 
-    private Cache<String, Object> cache = CacheBuilder.newBuilder()
-            // 设置缓存的最大容量
-            .maximumSize(100)
-            // 设置缓存在写入一分钟后失效
-            .expireAfterWrite(1, TimeUnit.SECONDS)
-            // 设置并发级别为10
-            .concurrencyLevel(10)
-//            .recordStats() // 开启缓存统计
-            .build();
+    private ThreadLocal<Map<String, Object>> threadLocalContainer = ThreadLocal.withInitial(() -> new HashMap<>());
+
 
     @Pointcut("execution(public * com.rick.db.service.SharpService.query(..))")
     public void sharpServiceQuery(){}
@@ -34,13 +27,17 @@ public class SharpServiceQueryInterceptor {
     @Around(value = "sharpServiceQuery()")
     public Object selectAround(ProceedingJoinPoint joinPoint) throws Throwable {
         String key = key(joinPoint);
-        return cache.get(key, () -> {
-            try {
-                return joinPoint.proceed();
-            } catch (Throwable throwable) {
-                throw new Exception(throwable);
-            }
-        });
+        Object threadValue = get(key);
+
+        if (log.isDebugEnabled() && Objects.nonNull(threadValue)) {
+            log.debug("Get value from threadLocal");
+        }
+
+        if (Objects.isNull(threadValue)) {
+            threadValue = joinPoint.proceed();
+            add(key, threadValue);
+        }
+        return threadValue;
     }
 
     private String key(ProceedingJoinPoint joinPoint) {
@@ -56,6 +53,14 @@ public class SharpServiceQueryInterceptor {
         }
 
         return joinPoint.getTarget().toString() + joinPoint.getSignature() + hashBuilder;
+    }
+
+    private void add(String key, Object value) {
+        threadLocalContainer.get().put(key, value);
+    }
+
+    private Object get(String key) {
+        return threadLocalContainer.get().get(key);
     }
 
 }

@@ -19,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
 
-    private final D d;
+    protected final D baseDAO;
 
     /**
      * 保存或更新
@@ -42,7 +42,7 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @return
      */
     public E save(@Valid E e) {
-        d.insert(e);
+        baseDAO.insert(e);
         return e;
     }
 
@@ -52,7 +52,7 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      */
     public E update(@Valid E e) {
         Assert.notNull(getFieldValue(e, "id"), "id");
-        int count = d.update(e);
+        int count = baseDAO.update(e);
         if (count == 0) {
             Assert.notExists("更新失败，数据");
         }
@@ -65,7 +65,7 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @return
      */
     public int deleteById(Long id) {
-        return d.deleteLogicallyById(id);
+        return baseDAO.deleteLogicallyById(id);
     }
 
     /**
@@ -74,7 +74,7 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @return
      */
     public Optional<E> findById(Long id) {
-        return d.selectById(id);
+        return baseDAO.selectById(id);
     }
 
     /**
@@ -83,7 +83,7 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @return
      */
     public List<E> findAll() {
-        return d.selectAll();
+        return baseDAO.selectAll();
     }
 
     private Object getFieldValue(E e, String fieldName) {

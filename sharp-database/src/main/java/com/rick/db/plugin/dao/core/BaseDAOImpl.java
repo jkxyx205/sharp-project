@@ -864,7 +864,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         int columnSize = this.columnNameList.size();
         StringBuilder selectSQLBuilder = new StringBuilder("SELECT ");
         for (int i = 0; i < columnSize; i++) {
-            selectSQLBuilder.append(this.columnNameList.get(i))
+            selectSQLBuilder.append(this.getTableName() + "." + this.columnNameList.get(i))
                     .append(" AS \"").append(this.propertyList.get(i)).append("\",");
         }
         selectSQLBuilder.deleteCharAt(selectSQLBuilder.length() - 1).append(" FROM ").append(tableMeta.getTableName());
@@ -1139,9 +1139,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String targetTable = oneToManyProperty.getOneToMany().subTable();
 
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
-            if (isDaoCalled(subTableBaseDAO)) {
+
+            String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue();
+            if (BaseDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
+            BaseDAOThreadLocalValue.add(storeKey);
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
             Map<Serializable, List<?>> subTableData = subTableBaseDAO.groupByColumnName(subTableRefColumnName, refIds);
 
@@ -1156,10 +1159,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String targetTable = manyToOnePropertyEntry.getKey();
             BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
 
-            if (isDaoCalled(parentTableDAO)) {
+            String refColumnName = manyToOnePropertyEntry.getValue().getManyToOne().value();
+            String storeKey = getTableName() + ":" + refColumnName;
+            if (BaseDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-            String refColumnName = manyToOnePropertyEntry.getValue().getManyToOne().value();
+
+            BaseDAOThreadLocalValue.add(storeKey);
 
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
@@ -1169,6 +1175,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             List<?> parentList = parentTableDAO.selectByIds(refIds);
+
             Map<Serializable, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
             for (T t : list) {
                 Object data = parentIdMap.get(getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
@@ -1313,18 +1320,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             return null;
         }
         return (Serializable) getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
-    }
-
-    private boolean isDaoCalled(BaseDAO baseDAO) {
-        StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-
-        for (int j = 1; j < stacks.length; j++) {
-            if (baseDAO.getClass().getName().equals(stacks[j].getClassName())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
