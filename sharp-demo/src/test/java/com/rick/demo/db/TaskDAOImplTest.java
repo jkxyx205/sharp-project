@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.rick.db.service.support.Params;
 import com.rick.demo.module.project.dao.TaskDAO;
 import com.rick.demo.module.project.domain.entity.Address;
+import com.rick.demo.module.project.domain.entity.Dept;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.entity.group.Task;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +48,10 @@ public class TaskDAOImplTest {
         .phoneNumber(PhoneNumber.builder().code("816").number("18888888888").build())
         .deleted(false)
         .map(Params.builder().pv("hello", "world").build())
+                .listMap(Arrays.asList(Params.builder().pv("hello", "world").build()))
+                .numList(Arrays.asList(1,2))
+                .strList(Arrays.asList("hello", "world"))
+                .dept(new Dept(1L, "Rick.Xu", 0L))
                 .build());
     }
 

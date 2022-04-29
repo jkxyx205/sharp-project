@@ -26,4 +26,9 @@ public class Dept {
      * 父部门ID。
      */
     private Long parentId;
+
+    @Override
+    public String toString() {
+        return "id="+id+"&name="+name+"&parentId="+parentId+"";
+    }
 }

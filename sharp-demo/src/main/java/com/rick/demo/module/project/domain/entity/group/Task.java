@@ -4,6 +4,7 @@ import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.demo.module.project.domain.entity.Address;
+import com.rick.demo.module.project.domain.entity.Dept;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import lombok.Getter;
@@ -50,5 +51,18 @@ public class Task extends BasePureEntity {
     private PhoneNumber phoneNumber;
 
     private Map<String, Object> map;
+
+    private List<Map<String, Object>> listMap;
+
+    private List<Integer> numList;
+
+    private List<String> strList;
+
+    /**
+     * 没有实现JsonStringToObjectConverterFactory.JsonValue
+     * 重写 toString()，可以持久到数据库， 不能反序列化，需要定义转换器 DeptConverterFactory
+     *
+     */
+    private Dept dept;
 
 }
