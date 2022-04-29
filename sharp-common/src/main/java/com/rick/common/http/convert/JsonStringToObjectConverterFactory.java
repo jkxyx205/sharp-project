@@ -8,6 +8,8 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import java.io.IOException;
 
 /**
+ * 对象必须实现 JsonStringToObjectConverterFactory.JsonValue
+ * string(json) => Object(JsonValue)
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */

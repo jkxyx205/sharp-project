@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * string(json) => Map
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */

@@ -43,6 +43,12 @@ public interface BaseDAO<T> {
 
     int deleteLogicallyByIds(Collection<?> ids);
 
+    /**
+     * 性能不好，慎用
+     * @return
+     */
+    int deleteAll();
+
     int update(Object[] params, Serializable id);
 
     int update(T t);

@@ -152,10 +152,10 @@ public class SharpService {
 
         // 内置转换器
         defaultConversionService.addConverterFactory(new CodeToEnumConverterFactory());
+        defaultConversionService.addConverter(new JsonStringToListMapConverter());
         defaultConversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
         defaultConversionService.addConverterFactory(new JsonStringToMapConverterFactory());
         defaultConversionService.addConverter(new JsonStringToCollectionConverter());
-        defaultConversionService.addConverter(new JsonStringToListMapConverter());
         defaultConversionService.addConverter(new JsonStringToSetMapConverter());
         defaultConversionService.addConverterFactory(new IdToEntityConverterFactory());
     }

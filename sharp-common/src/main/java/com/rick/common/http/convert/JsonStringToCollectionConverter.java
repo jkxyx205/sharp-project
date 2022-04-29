@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * 处理范型转换利用TypeDescriptor获取范型信息
- *
+ * String(json) => Collection
  * @author Rick
  * @createdAt 2021-10-12 22:36:00
  */
@@ -27,8 +27,7 @@ public class JsonStringToCollectionConverter implements ConditionalGenericConver
         }
 
         return sourceType.getType() == String.class
-                && Collection.class.isAssignableFrom(targetType.getType())
-                && JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(targetType.getResolvableType().getGeneric(new int[]{0}).resolve());
+                && Collection.class.isAssignableFrom(targetType.getType());
     }
 
     @Override

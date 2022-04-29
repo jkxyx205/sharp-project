@@ -363,6 +363,16 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, tableMeta.getIdColumnName() + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
     }
 
+    @Override
+    public int deleteAll() {
+        List<T> list = selectAll();
+        if (CollectionUtils.isNotEmpty(list)) {
+           return deleteByIds(list.stream().map(s -> getIdValue(s)).collect(Collectors.toSet()));
+        }
+
+        return 0;
+    }
+
     /**
      * 更新所有字段
      *

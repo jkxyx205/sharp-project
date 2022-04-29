@@ -5,6 +5,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
+ * code => enum
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */

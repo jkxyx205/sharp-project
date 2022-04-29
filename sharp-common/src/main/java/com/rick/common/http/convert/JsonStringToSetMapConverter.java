@@ -14,7 +14,7 @@ import java.util.Set;
 
 /**
  * 处理范型转换利用TypeDescriptor获取范型信息
- *
+ * string(json) => Set<Map>
  * @author Rick
  * @createdAt 2021-10-12 22:36:00
  */
