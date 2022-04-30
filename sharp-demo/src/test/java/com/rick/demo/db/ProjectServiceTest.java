@@ -3,9 +3,12 @@ package com.rick.demo.db;
 import com.google.common.collect.Lists;
 import com.rick.common.http.exception.BizException;
 import com.rick.db.service.support.Params;
+import com.rick.demo.module.project.dao.ProjectDAO;
+import com.rick.demo.module.project.dao.ProjectDetailDAO;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.entity.Project;
+import com.rick.demo.module.project.domain.entity.ProjectDetail;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import com.rick.demo.module.project.service.ProjectService;
@@ -17,6 +20,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +36,12 @@ public class ProjectServiceTest {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ProjectDAO projectDAO;
+
+    @Autowired
+    private ProjectDetailDAO projectDetailDAO;
 
     private static Long id = System.currentTimeMillis();
 
@@ -76,15 +87,68 @@ public class ProjectServiceTest {
     @Order(4)
     @Test
     public void testFindById() {
-        Optional<Project> optional = projectService.findById(id);
-        assertThat(optional.get().getSex() == SexEnum.FEMALE).isEqualTo(true);
+        Optional<Project> project1 = projectDAO.selectById(479723663504343043L);
+        Optional<Project> project2 = projectDAO.selectById(479723663504343042L);
+        assertThat(project1.get().getProjectDetailList()).isNotNull();
+        assertThat(project2.get().getProjectDetailList()).isNotNull();
     }
 
     @Order(5)
     @Test
+    public void testFindById2() {
+        List<Project> projects = projectDAO.selectByIds(479723663504343043L, 479723663504343042L);
+        assertThat(projects.get(0).getProjectDetailList()).isNotNull();
+        assertThat(projects.get(1).getProjectDetailList()).isNotNull();
+    }
+
+    @Order(6)
+    @Test
+    public void testFindById3() {
+        Optional<Project> projects = projectDAO.selectById(id);
+        assertThat(projects.get().getProjectDetailList()).isNotNull();
+    }
+
+    @Order(7)
+    @Test
+    public void testFindById4() {
+        Optional<Project> optional = projectService.findById(id);
+        assertThat(optional.get().getSex() == SexEnum.FEMALE).isEqualTo(true);
+    }
+
+    @Order(8)
+    @Test
+    public void findByIdWithoutCascade() {
+        Optional<Project> optional = projectService.findByIdWithoutCascade(479723663504343042L);
+        assertThat(optional.get().getProjectDetailList()).isNull();
+    }
+
+    @Order(9)
+    @Test
     public void testDeleteById() {
         int count = projectService.deleteById(id);
         assertThat(count).isEqualTo(1);
+    }
+
+    @Order(10)
+    @Test
+    public void findAllWithoutCascade() {
+        List<Project> list = projectService.findAllWithoutCascade();
+        assertThat(list.size()).isGreaterThan(0);
+        assertThat(list.get(0).getProjectDetailList()).isNull();
+    }
+
+    @Order(11)
+    @Test
+    public void findAll() {
+        List<Project> list = projectService.findAll();
+        assertThat(list.size()).isGreaterThan(0);
+        assertThat(list.get(0).getProjectDetailList()).isNotNull();
+    }
+
+    @Order(12)
+    @Test
+    public void findProjectDetail() {
+        assertThat(projectDetailDAO.selectById(1).get().getProject()).isNotNull();
     }
 
     public Project createProject() {
@@ -100,6 +164,10 @@ public class ProjectServiceTest {
         project.setPhoneNumber(PhoneNumber.builder().code("816").number("18888888888").build());
         project.setDeleted(false);
         project.setMap(Params.builder().pv("hello", "world").build());
+
+        project.setProjectDetailList(Arrays.asList(ProjectDetail.builder()
+                .title("add...")
+                .build()));
         return project;
     }
 }

@@ -22,4 +22,7 @@ public class BaseDAOThreadLocalValue {
         return threadLocalContainer.get().remove(ignoreMapping);
     }
 
+    public static void remove() {
+        threadLocalContainer.remove();;
+    }
 }

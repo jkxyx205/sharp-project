@@ -687,6 +687,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 clazz);
         if (clazz == entityClass) {
             cascadeSelect(list);
+//            BaseDAOThreadLocalValue.remove();
         }
         return list;
     }
@@ -1137,6 +1138,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return new Object[] {mergedParams, updateColumnNames};
     }
 
+    /**
+     * // TODO
+     * 同一个线程如果多次调用 findById(1) findById(2) 那么可能？？只有第一次能够获取级联数据。
+     * 如果需要两个级联数据，使用findByIds(1, 2)代替
+     * @param list
+     */
     private void cascadeSelect(List<T> list) {
         if (CollectionUtils.isEmpty(list)) {
             return;
@@ -1271,15 +1278,19 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 return;
             }
 
+            Set<Serializable> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(deletedIds)) {
+                // 删除所有
+                SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
+            } else {
+                // 删除 除id之外的其他记录
+                SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), "id",
+                        deletedIds, new Object[] {refId} , refColumnName + " = ?");
+            }
+
             for (Object subData : subDataList) {
                  setPropertyValue(subData, reverseField, t);
             }
-
-            // 删除 除id之外的其他记录
-            SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), "id",
-                    subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet())
-                    , new Object[] {refId} , refColumnName + " = ?");
-
 
             // 再插入或更新
             subTableBaseDAO.insertOrUpdate(subDataList);
