@@ -5,6 +5,7 @@ import lombok.ToString;
 import lombok.Value;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,11 +56,12 @@ class TableMeta {
      */
     private Set<String> subTables;
 
-    private Map<String, OneToManyProperty> oneToManyAnnotationMap;
 
-    private Map<String, ManyToOneProperty> manyToOneAnnotationMap;
+    private List<OneToManyProperty> oneToManyAnnotationList;
 
-    private Map<String, ManyToManyProperty> manyToManyAnnotationMap;
+    private List<ManyToOneProperty> manyToOneAnnotationList;
+
+    private List<ManyToManyProperty> manyToManyAnnotationList;
 
     private Map<String, Field> columnNameFieldMap;
 

@@ -2,6 +2,7 @@ package com.rick.db.plugin.dao.core;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Converter;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.rick.common.util.ReflectUtils;
@@ -11,10 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Rick
@@ -47,9 +45,13 @@ class TableMetaResolver {
         StringBuilder updateColumnNamesBuilder = new StringBuilder();
         StringBuilder propertiesBuilder = new StringBuilder();
         StringBuilder updatePropertiesBuilder = new StringBuilder();
-        Map<String, TableMeta.OneToManyProperty> oneToManyAnnotationMap = Maps.newHashMap();
-        Map<String, TableMeta.ManyToOneProperty> manyToOneAnnotationMap = Maps.newHashMap();
-        Map<String, TableMeta.ManyToManyProperty> manyToManyAnnotationMap = Maps.newHashMap();
+
+        List<TableMeta.OneToManyProperty> oneToManyAnnotationList = Lists.newArrayList();
+
+        List<TableMeta.ManyToOneProperty> manyToOneAnnotationList = Lists.newArrayList();
+
+        List<TableMeta.ManyToManyProperty> manyToManyAnnotationList = Lists.newArrayList();
+
         Map<String, Field> columnNameFieldMap = Maps.newHashMap();
         Map<String, Column> columnNameMap = Maps.newHashMap();
 
@@ -58,18 +60,18 @@ class TableMetaResolver {
             OneToMany oneToManyAnnotation = field.getAnnotation(OneToMany.class);
             if (oneToManyAnnotation != null) {
                 subTables.add(oneToManyAnnotation.subTable());
-                oneToManyAnnotationMap.put(oneToManyAnnotation.subTable(), new TableMeta.OneToManyProperty(oneToManyAnnotation, field));
+                oneToManyAnnotationList.add(new TableMeta.OneToManyProperty(oneToManyAnnotation, field));
             }
 
             ManyToOne manyToOneAnnotation = field.getAnnotation(ManyToOne.class);
             if (manyToOneAnnotation != null) {
-                manyToOneAnnotationMap.put(manyToOneAnnotation.parentTable(), new TableMeta.ManyToOneProperty(manyToOneAnnotation, field));
+                manyToOneAnnotationList.add(new TableMeta.ManyToOneProperty(manyToOneAnnotation, field));
             }
 
             ManyToMany manyToManyAnnotation = field.getAnnotation(ManyToMany.class);
             if (manyToManyAnnotation != null) {
                 subTables.add(manyToManyAnnotation.thirdPartyTable());
-                manyToManyAnnotationMap.put(manyToManyAnnotation.thirdPartyTable(), new TableMeta.ManyToManyProperty(manyToManyAnnotation, field));
+                manyToManyAnnotationList.add(new TableMeta.ManyToManyProperty(manyToManyAnnotation, field));
             }
 
             if (AnnotatedElementUtils.hasAnnotation(field, Transient.class)) {
@@ -103,7 +105,7 @@ class TableMetaResolver {
 
         idColumnName = Objects.isNull(idColumnName) ? PRIMARY_COLUMN : idColumnName;
         return new TableMeta(tableAnnotation, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationMap, manyToOneAnnotationMap, manyToManyAnnotationMap
+                updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, columnNameMap);
     }
 }

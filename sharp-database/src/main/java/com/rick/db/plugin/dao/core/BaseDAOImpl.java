@@ -15,7 +15,6 @@ import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
-import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
@@ -101,7 +100,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     public BaseDAOImpl(String tableName, String columnNames, String primaryColumn) {
-        this.tableMeta = new TableMeta(null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
+        this.tableMeta = new TableMeta(null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
         this.init();
     }
 
@@ -313,7 +312,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         if (hasSubTables()) {
             for (String subTable : tableMeta.getSubTables()) {
-                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationMap().values().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
+                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationList().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
                 if (thirdPartyTableCollect.contains(subTable)) {
                     SQLUtils.delete(subTable, subTableRefColumnName, Arrays.asList(id));
                 } else {
@@ -351,7 +350,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         if (hasSubTables()) {
             for (String subTable : tableMeta.getSubTables()) {
-                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationMap().values().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
+                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationList().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
                 if (thirdPartyTableCollect.contains(subTable)) {
                     SQLUtils.delete(subTable, subTableRefColumnName, ids);
                 } else {
@@ -765,7 +764,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 }
 
                 if (Objects.nonNull(this.tableMeta)) {
-                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationMap(), tableMeta.getManyToOneAnnotationMap(), tableMeta.getManyToManyAnnotationMap(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
+                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
                 } else {
                     this.tableMeta = tableMeta;
                 }
@@ -1144,8 +1143,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         // OneToMany
-        for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
-            TableMeta.OneToManyProperty oneToManyProperty = oneToManyPropertyEntry.getValue();
+        for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
             String targetTable = oneToManyProperty.getOneToMany().subTable();
 
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
@@ -1165,12 +1163,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         // ManyToOne
-        for (Map.Entry<String, TableMeta.ManyToOneProperty> manyToOnePropertyEntry : tableMeta.getManyToOneAnnotationMap().entrySet()) {
-            String targetTable = manyToOnePropertyEntry.getKey();
+        for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
+            String targetTable = manyToOneProperty.getManyToOne().parentTable();
             BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
 
-            String refColumnName = manyToOnePropertyEntry.getValue().getManyToOne().value();
+            String refColumnName = manyToOneProperty.getManyToOne().value();
             String storeKey = getTableName() + ":" + refColumnName;
+
             if (BaseDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
@@ -1189,14 +1188,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             Map<Serializable, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
             for (T t : list) {
                 Object data = parentIdMap.get(getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
-                setPropertyValue(t, manyToOnePropertyEntry.getValue().getField(), Objects.isNull(data) ? null : data);
+                setPropertyValue(t, manyToOneProperty.getField(), Objects.isNull(data) ? null : data);
             }
         }
 
         // ManyToMany
-        for (Map.Entry<String, TableMeta.ManyToManyProperty> manyToManyPropertyEntry : tableMeta.getManyToManyAnnotationMap().entrySet()) {
-            TableMeta.ManyToManyProperty manyToManyProperty = manyToManyPropertyEntry.getValue();
-
+        for (TableMeta.ManyToManyProperty manyToManyProperty : tableMeta.getManyToManyAnnotationList()) {
             Set<Serializable> columnIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
 
             String columnDefinition = manyToManyProperty.getManyToMany().columnDefinition();
@@ -1243,8 +1240,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private void cascadeInsertOrUpdate(T t) {
         // OneToMany
-        for (Map.Entry<String, TableMeta.OneToManyProperty> oneToManyPropertyEntry : tableMeta.getOneToManyAnnotationMap().entrySet()) {
-            TableMeta.OneToManyProperty oneToManyProperty = oneToManyPropertyEntry.getValue();
+        for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
+
 
             if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate()) {
                 continue;
@@ -1257,12 +1254,16 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String refColumnName = oneToManyProperty.getOneToMany().joinValue();
 
             Class subClass = ((Class) ((ParameterizedType) oneToManyProperty.getField().getGenericType()).getActualTypeArguments()[0]);
-            Field reverseField = ReflectionUtils.findField(subClass, oneToManyPropertyEntry.getValue().getOneToMany().reversePropertyName());
 
-            if (StringUtils.isBlank(refColumnName)) {
-                ManyToOne manyToOneAnnotation = reverseField.getAnnotation(ManyToOne.class);
-                refColumnName = manyToOneAnnotation.value();
+            Field reverseField = ReflectionUtils.findField(subClass, oneToManyProperty.getOneToMany().reversePropertyName());
+
+            if (Objects.isNull(reverseField)) {
+                throw new IllegalArgumentException("reversePropertyName must be set");
             }
+//            if (StringUtils.isBlank(refColumnName) && Objects.nonNull(reverseField)) {
+//                ManyToOne manyToOneAnnotation = reverseField.getAnnotation(ManyToOne.class);
+//                refColumnName = manyToOneAnnotation.value();
+//            }
 
             if (CollectionUtils.isEmpty(subDataList)) {
                 // 删除所有
@@ -1285,9 +1286,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         // ManyToOne
-        for (Map.Entry<String, TableMeta.ManyToOneProperty> manyToOnePropertyEntry : tableMeta.getManyToOneAnnotationMap().entrySet()) {
-            TableMeta.ManyToOneProperty manyToOneProperty = manyToOnePropertyEntry.getValue();
-
+        for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
             if (!manyToOneProperty.getManyToOne().cascadeSaveOrUpdate()) {
                 continue;
             }
@@ -1307,8 +1306,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private void updateManyToManyReferenceTable(T t) {
         // ManyToMany
-        for (Map.Entry<String, TableMeta.ManyToManyProperty> manyToManyPropertyEntry : tableMeta.getManyToManyAnnotationMap().entrySet()) {
-            TableMeta.ManyToManyProperty manyToManyProperty = manyToManyPropertyEntry.getValue();
+        for (TableMeta.ManyToManyProperty manyToManyProperty : tableMeta.getManyToManyAnnotationList()) {
             String referenceTable = manyToManyProperty.getManyToMany().thirdPartyTable();
 
             List<?> refDataList = (List<?>) getPropertyValue(t, manyToManyProperty.getField());

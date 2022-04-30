@@ -14,7 +14,11 @@ public @interface OneToMany {
 
     String subTable();
 
-    String reversePropertyName();
+    /**
+     * 级联操作的时候需要该值
+     * @return
+     */
+    String reversePropertyName() default "";
 
     boolean cascadeSaveOrUpdate() default false;
 
