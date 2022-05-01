@@ -516,7 +516,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public Optional<T> selectById(Serializable id) {
-        Assert.notNull(id, "主键不能为null");
+        if (Objects.isNull(id)) {
+            log.warn("id is null");
+            return Optional.empty();
+        }
 
         Map<String, Object> params = Params.builder(1)
                 .pv(tableMeta.getIdColumnName(), id)
@@ -550,19 +553,28 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public List<T> selectByIds(String ids) {
-        Assert.hasText(ids, "id不能为空");
+        if (StringUtils.isBlank(ids)) {
+            log.warn("ids is null");
+            return Collections.emptyList();
+        }
         return selectByIdsWithSpecifiedValue(ids);
     }
 
     @Override
     public List<T> selectByIds(Serializable ...ids) {
-        Assert.notEmpty(ids, "id不能为空");
+        if (ArrayUtils.isEmpty(ids)) {
+            log.warn("ids is null");
+            return Collections.emptyList();
+        }
         return selectByIdsWithSpecifiedValue(ids);
     }
 
     @Override
     public List<T> selectByIds(Collection<?> ids) {
-        Assert.notEmpty(ids, "id不能为空");
+        if (CollectionUtils.isEmpty(ids)) {
+            log.warn("ids is null");
+            return Collections.emptyList();
+        }
         return selectByIdsWithSpecifiedValue(ids);
     }
 
