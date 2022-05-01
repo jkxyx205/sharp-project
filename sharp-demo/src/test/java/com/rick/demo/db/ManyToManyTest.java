@@ -26,8 +26,8 @@ public class ManyToManyTest {
 
     @AfterAll
     public static void init() {
-        SQLUtils.deleteNotIn("t_person", "id", Arrays.asList(530864959987572736L, 530865367078330368L));
-        SQLUtils.deleteNotIn("t_person_role", "person_id", Arrays.asList(530864959987572736L, 530865367078330368L));
+        SQLUtils.deleteNotIn("t_person", "id", Arrays.asList(552098712424472576L, 552100575806939136L));
+        SQLUtils.deleteNotIn("t_person_role", "person_id", Arrays.asList(552098712424472576L, 552100575806939136L));
     }
 
     @Test
@@ -48,8 +48,8 @@ public class ManyToManyTest {
     @Test
     public void testUpdate() {
         Person person = Person.builder()
-                .id(530865367078330368L)
-                .name("Tom")
+                .id(552098712365752321L)
+                .name("admin")
                 .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()
 //                        , Role.builder().id(530861443353075713L).build()
                         , Role.builder().id(530861443353075714L).build())
@@ -61,13 +61,13 @@ public class ManyToManyTest {
 
     @Test
     public void testSelect() {
-        Optional<Person> personOptional = personDAO.selectById(530864959987572736L);
+        Optional<Person> personOptional = personDAO.selectById(552100575806939136L);
         Person person = personOptional.get();
         assertThat(person.getRoleList().get(0).getName()).isEqualTo("admin");
     }
 
     @Test
     public void testDelete() {
-        personDAO.deleteById(530865367078330368L);
+        personDAO.deleteById(552098712365752321L);
     }
 }

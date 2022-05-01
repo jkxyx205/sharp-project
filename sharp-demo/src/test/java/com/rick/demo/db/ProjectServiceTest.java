@@ -103,6 +103,21 @@ public class ProjectServiceTest {
 
     @Order(6)
     @Test
+    public void testFindById4() {
+        Optional<Project> optional = projectService.findById(id);
+        assertThat(optional.get().getSex() == SexEnum.FEMALE).isEqualTo(true);
+    }
+
+    @Order(6)
+    @Test
+    public void findAllWithoutCascade() {
+        List<Project> list = projectService.findAllWithoutCascade();
+        assertThat(list.size()).isGreaterThan(0);
+        assertThat(list.get(0).getProjectDetailList()).isNull();
+    }
+
+    @Order(7)
+    @Test
     public void testFindById3() {
         Optional<Project> projects = projectDAO.selectById(id);
         assertThat(projects.get().getProjectDetailList()).isNotNull();
@@ -110,9 +125,10 @@ public class ProjectServiceTest {
 
     @Order(7)
     @Test
-    public void testFindById4() {
-        Optional<Project> optional = projectService.findById(id);
-        assertThat(optional.get().getSex() == SexEnum.FEMALE).isEqualTo(true);
+    public void findAll() {
+        List<Project> list = projectService.findAll();
+        assertThat(list.size()).isGreaterThan(0);
+        assertThat(list.get(0).getProjectDetailList()).isNotNull();
     }
 
     @Order(8)
@@ -129,21 +145,6 @@ public class ProjectServiceTest {
         assertThat(count).isEqualTo(1);
     }
 
-    @Order(10)
-    @Test
-    public void findAllWithoutCascade() {
-        List<Project> list = projectService.findAllWithoutCascade();
-        assertThat(list.size()).isGreaterThan(0);
-        assertThat(list.get(0).getProjectDetailList()).isNull();
-    }
-
-    @Order(11)
-    @Test
-    public void findAll() {
-        List<Project> list = projectService.findAll();
-        assertThat(list.size()).isGreaterThan(0);
-        assertThat(list.get(0).getProjectDetailList()).isNotNull();
-    }
 
     @Order(12)
     @Test

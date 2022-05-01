@@ -20,6 +20,10 @@ public class TableGeneratorTest {
     public void createTable() {
 //        jdbcTemplate.execute("DROP TABLE t_task");
 //        tableGenerator.createTable(Task.class);
+
+//        tableGenerator.createTable(Person.class);
+//        tableGenerator.createTable(Role.class);
+//        tableGenerator.createTable(IdCard.class);
     }
 
 }

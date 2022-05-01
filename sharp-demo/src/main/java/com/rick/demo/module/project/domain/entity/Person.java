@@ -2,6 +2,7 @@ package com.rick.demo.module.project.domain.entity;
 
 import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
+import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,5 +28,8 @@ public class Person extends BasePureEntity {
 
     @ManyToMany(thirdPartyTable = "t_person_role", referenceColumnName = "role_id", columnDefinition = "person_id", referenceTable = "t_role")
     private List<Role> roleList;
+
+    @ManyToOne(parentTable = "t_person_id_card", value = "id_card_id", cascadeSaveOrUpdate = true)
+    private IdCard idCard;
 
 }
