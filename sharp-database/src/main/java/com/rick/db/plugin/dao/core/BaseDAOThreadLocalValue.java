@@ -2,8 +2,8 @@ package com.rick.db.plugin.dao.core;
 
 import lombok.experimental.UtilityClass;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Rick
@@ -12,7 +12,7 @@ import java.util.Set;
 @UtilityClass
 public class BaseDAOThreadLocalValue {
 
-    private static ThreadLocal<Set<String>> threadLocalContainer = ThreadLocal.withInitial(() -> new HashSet<>());
+    private static ThreadLocal<Set<String>> threadLocalContainer = ThreadLocal.withInitial(() -> new CopyOnWriteArraySet<>());
 
     public static void add(String ignoreMapping) {
         threadLocalContainer.get().add(ignoreMapping);
@@ -22,7 +22,12 @@ public class BaseDAOThreadLocalValue {
         return threadLocalContainer.get().remove(ignoreMapping);
     }
 
-    public static void remove() {
-        threadLocalContainer.remove();
+    public static void removeByTableName(String tableName) {
+        for (String ignoreMapping : threadLocalContainer.get()) {
+            if (ignoreMapping.startsWith(tableName)) {
+                remove(ignoreMapping);
+            }
+        }
     }
+
 }

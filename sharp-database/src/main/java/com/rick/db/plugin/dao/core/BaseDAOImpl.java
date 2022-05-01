@@ -687,7 +687,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 clazz);
         if (clazz == entityClass) {
             cascadeSelect(list);
-            BaseDAOThreadLocalValue.remove();
+            BaseDAOThreadLocalValue.removeByTableName(getTableName());
         }
         return list;
     }
@@ -1138,28 +1138,23 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return new Object[] {mergedParams, updateColumnNames};
     }
 
-    /**
-     * // TODO
-     * 同一个线程如果多次调用 findById(1) findById(2) 那么可能？？只有第一次能够获取级联数据。
-     * 如果需要两个级联数据，使用findByIds(1, 2)代替
-     * @param list
-     */
     private void cascadeSelect(List<T> list) {
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
 
-        // OneToMany
+        //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
-            String targetTable = oneToManyProperty.getOneToMany().subTable();
-
-            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
-
             String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue();
             if (BaseDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
             BaseDAOThreadLocalValue.add(storeKey);
+
+            String targetTable = oneToManyProperty.getOneToMany().subTable();
+            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+
+
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
             Map<Serializable, List<?>> subTableData = subTableBaseDAO.groupByColumnName(subTableRefColumnName, refIds);
 
@@ -1173,20 +1168,20 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             }
         }
+        //endregion
 
-        // ManyToOne
+        //region ManyToOne
         for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
-            String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
-
             String refColumnName = manyToOneProperty.getManyToOne().value();
             String storeKey = getTableName() + ":" + refColumnName;
 
             if (BaseDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-
             BaseDAOThreadLocalValue.add(storeKey);
+
+            String targetTable = manyToOneProperty.getManyToOne().parentTable();
+            BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
 
             Set<Serializable> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
@@ -1203,14 +1198,25 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 setPropertyValue(t, manyToOneProperty.getField(), Objects.isNull(data) ? null : data);
             }
         }
+        //endregion
 
-        // ManyToMany
+        //region ManyToMany
         for (TableMeta.ManyToManyProperty manyToManyProperty : tableMeta.getManyToManyAnnotationList()) {
+            String referenceColumnName = manyToManyProperty.getManyToMany().referenceColumnName();
+            String columnDefinition = manyToManyProperty.getManyToMany().columnDefinition();
+            String storeKey1 = getTableName() + ":" + referenceColumnName;
+            String storeKey2 = getTableName() + ":" + columnDefinition;
+
+            if (BaseDAOThreadLocalValue.remove(storeKey1) || BaseDAOThreadLocalValue.remove(storeKey2)) {
+                continue;
+            }
+
+            BaseDAOThreadLocalValue.add(storeKey1);
+            BaseDAOThreadLocalValue.add(storeKey2);
+
             Set<Serializable> columnIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
 
-            String columnDefinition = manyToManyProperty.getManyToMany().columnDefinition();
             String thirdPartyTable = manyToManyProperty.getManyToMany().thirdPartyTable();
-            String referenceColumnName = manyToManyProperty.getManyToMany().referenceColumnName();
             String referenceTable = manyToManyProperty.getManyToMany().referenceTable();
 
             BaseDAO referenceTableDAO =  BaseDAOManager.baseDAOMap.get(referenceTable);
@@ -1242,6 +1248,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 setPropertyValue(t, manyToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
             }
         }
+        //endregion
     }
 
     private void cascadeInsertOrUpdate(List<T> instanceList) {
@@ -1330,9 +1337,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             List<?> refDataList = (List<?>) getPropertyValue(t, manyToManyProperty.getField());
 
-            List<Serializable> refIdsValue = Lists.newArrayListWithExpectedSize(refDataList.size());
-            for (Object o : refDataList) {
-                refIdsValue.add(getIdValue(o));
+            List<Serializable> refIdsValue = null;
+            if (CollectionUtils.isNotEmpty(refDataList)) {
+                refIdsValue = Lists.newArrayListWithExpectedSize(refDataList.size());
+                for (Object o : refDataList) {
+                    refIdsValue.add(getIdValue(o));
+                }
             }
 
             // 更新中间表
