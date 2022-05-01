@@ -51,6 +51,7 @@ public class ApiExceptionHandler {
      * @return
      */
     @ExceptionHandler(BizException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, BizException ex) throws IOException, ServletException {
         Result result = ex.getResult();
         // resolve i18n
@@ -93,6 +94,7 @@ public class ApiExceptionHandler {
      * @throws ServletException
      */
     @ExceptionHandler({BindException.class, ConstraintViolationException.class, IllegalArgumentException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
         if (ex instanceof ConstraintViolationException) {
             ConstraintViolationException cve = (ConstraintViolationException) ex;
@@ -113,7 +115,7 @@ public class ApiExceptionHandler {
      * @return
      */
     @ExceptionHandler(Exception.class)
-    @ResponseStatus
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result elseExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
         return exceptionHandler(request, response, ex, ResultCode.FAIL);
     }
