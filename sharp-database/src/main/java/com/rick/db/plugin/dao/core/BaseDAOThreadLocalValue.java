@@ -23,6 +23,6 @@ public class BaseDAOThreadLocalValue {
     }
 
     public static void remove() {
-        threadLocalContainer.remove();;
+        threadLocalContainer.remove();
     }
 }

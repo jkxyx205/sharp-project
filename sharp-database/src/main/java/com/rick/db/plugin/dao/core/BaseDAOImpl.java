@@ -687,7 +687,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 clazz);
         if (clazz == entityClass) {
             cascadeSelect(list);
-//            BaseDAOThreadLocalValue.remove();
+            BaseDAOThreadLocalValue.remove();
         }
         return list;
     }
@@ -1165,7 +1165,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             for (T t : list) {
                 Object data = subTableData.get(getIdValue(t));
-                setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
+                if (oneToManyProperty.getOneToMany().oneToOne()) {
+                    setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? null : ((Collection)data).iterator().next());
+                } else {
+                    setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
+                }
+
             }
         }
 
@@ -1248,29 +1253,32 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     private void cascadeInsertOrUpdate(T t) {
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
-
-
             if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate()) {
                 continue;
             }
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
-            List<?> subDataList = (List<?>) getPropertyValue(t, oneToManyProperty.getField());
+
+            List<?> subDataList;
+            Class subClass;
+            if (oneToManyProperty.getOneToMany().oneToOne()) {
+                Object propertyValue = getPropertyValue(t, oneToManyProperty.getField());
+                subDataList = propertyValue == null ? Collections.emptyList() : Arrays.asList(propertyValue);
+                subClass = oneToManyProperty.getField().getType();
+            } else {
+                subDataList = (List<?>) getPropertyValue(t, oneToManyProperty.getField());
+                subClass = ((Class) ((ParameterizedType) oneToManyProperty.getField().getGenericType()).getActualTypeArguments()[0]);
+            }
+
             Object refId = getIdValue(t);
             String refColumnName = oneToManyProperty.getOneToMany().joinValue();
-
-            Class subClass = ((Class) ((ParameterizedType) oneToManyProperty.getField().getGenericType()).getActualTypeArguments()[0]);
 
             Field reverseField = ReflectionUtils.findField(subClass, oneToManyProperty.getOneToMany().reversePropertyName());
 
             if (Objects.isNull(reverseField)) {
                 throw new IllegalArgumentException("reversePropertyName must be set");
             }
-//            if (StringUtils.isBlank(refColumnName) && Objects.nonNull(reverseField)) {
-//                ManyToOne manyToOneAnnotation = reverseField.getAnnotation(ManyToOne.class);
-//                refColumnName = manyToOneAnnotation.value();
-//            }
 
             if (CollectionUtils.isEmpty(subDataList)) {
                 // 删除所有

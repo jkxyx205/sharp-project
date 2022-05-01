@@ -23,4 +23,6 @@ public @interface OneToMany {
     boolean cascadeSaveOrUpdate() default false;
 
     String joinValue();
+
+    boolean oneToOne() default false;
 }
