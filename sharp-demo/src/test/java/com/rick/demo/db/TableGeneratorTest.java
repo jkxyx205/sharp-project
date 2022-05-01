@@ -21,9 +21,10 @@ public class TableGeneratorTest {
 //        jdbcTemplate.execute("DROP TABLE t_task");
 //        tableGenerator.createTable(Task.class);
 
-//        tableGenerator.createTable(Person.class);
-//        tableGenerator.createTable(Role.class);
-//        tableGenerator.createTable(IdCard.class);
+//        tableGenerator.createTable(School.class);
+//        tableGenerator.createTable(Teacher.class);
+//        tableGenerator.createTable(Student.class);
+//        tableGenerator.createTable(SchoolLicense.class);
     }
 
 }
