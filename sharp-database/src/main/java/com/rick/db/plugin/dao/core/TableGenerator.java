@@ -4,8 +4,10 @@ import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.db.constant.EntityConstants;
 import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.dao.annotation.Column;
+import com.rick.db.plugin.dao.annotation.ManyToMany;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -15,10 +17,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 根据实体类创建表
@@ -31,8 +30,14 @@ public class TableGenerator {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private ThreadLocal<Set<String>> tableNameCreatedContainer = ThreadLocal.withInitial(() -> new HashSet<>());
+
     public void createTable(Class<?> clazz) {
         TableMeta tableMeta = TableMetaResolver.resolve(clazz);
+        if (tableNameCreatedContainer.get().contains(tableMeta.getTableName())) {
+            return;
+        }
+
         StringBuilder createTableSql = new StringBuilder("create table ");
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
@@ -40,7 +45,6 @@ public class TableGenerator {
 
         List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
 
-        ;
         for (String columnName : columnNames) {
             if (EntityConstants.ID_COLUMN_NAME.equals(columnName)) {
                 continue;
@@ -68,7 +72,31 @@ public class TableGenerator {
             createTableSql.append(" comment '"+tableMeta.getTable().comment()+"'");
         }
         log.info(createTableSql.toString());
+
+        createManyToManyTable(tableMeta.getManyToManyAnnotationList());
+
         jdbcTemplate.execute(createTableSql.toString());
+        tableNameCreatedContainer.get().add(tableMeta.getTableName());
+    }
+
+    private void createManyToManyTable(List<TableMeta.ManyToManyProperty> manyToManyPropertyList) {
+        if (CollectionUtils.isNotEmpty(manyToManyPropertyList)) {
+            for (TableMeta.ManyToManyProperty manyToManyProperty : manyToManyPropertyList) {
+                ManyToMany manyToMany = manyToManyProperty.getManyToMany();
+                if (tableNameCreatedContainer.get().contains(manyToMany.thirdPartyTable())) {
+                    continue;
+                }
+                jdbcTemplate.execute("create table "+manyToMany.thirdPartyTable()+"" +
+                        "                        ("+manyToMany.columnDefinition()+" bigint not null,\n" +
+                        "                        "+manyToMany.referenceColumnName()+" bigint not null,\n" +
+                        "                        is_deleted bit default b'0' not null,\n" +
+                        "                        constraint "+manyToMany.thirdPartyTable()+"_pk\n" +
+                        "                unique ("+manyToMany.columnDefinition()+", "+manyToMany.referenceColumnName()+")\n" +
+                        "                )");
+
+                tableNameCreatedContainer.get().add(manyToMany.thirdPartyTable());
+            }
+        }
     }
 
     private String determineSqlType(Class<?> type) {
