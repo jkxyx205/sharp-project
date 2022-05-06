@@ -107,4 +107,6 @@ public interface BaseDAO<T> {
 
     Class getEntity();
 
+    Map<String, Object> entityToMap(T t);
+
 }

@@ -5,10 +5,14 @@ import com.rick.db.dto.BasePureEntity;
 import com.rick.db.plugin.dao.core.BaseDAO;
 import com.rick.db.service.support.Params;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 
 import javax.validation.Valid;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -17,6 +21,7 @@ import java.util.*;
  * @createdAt 2022-04-09 10:10:00
  */
 @RequiredArgsConstructor
+@Slf4j
 public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
 
     protected final D baseDAO;
@@ -29,14 +34,13 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @param e
      * @return
      */
-    public E saveOrUpdate(@Valid E e) {
+    public boolean saveOrUpdate(@Valid E e) {
         Long id = (Long) getFieldValue(e, "id");
         if (Objects.isNull(id)) {
-            save(e);
+            return save(e);
         } else {
-            update(e);
+            return update(e);
         }
-        return e;
     }
 
     /**
@@ -44,37 +48,46 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @param e
      * @return
      */
-    public E save(@Valid E e) {
-        baseDAO.insert(e);
-        return e;
+    public boolean save(@Valid E e) {
+        return baseDAO.insert(e) > 0;
     }
 
-    public Collection<E> saveAll(Collection<E> collection) {
-        baseDAO.insert(collection);
-        return collection;
+    public boolean saveAll(@Valid Collection<E> collection) {
+        final int[] insertCount = baseDAO.insert(collection);
+        return insertCount.length == collection.size();
     }
 
     /**
      * 更新
      * @param e
      */
-    public E update(@Valid E e) {
-        Assert.notNull(getFieldValue(e, "id"), "id");
+    public boolean update(@Valid E e) {
+        Assert.notNull(getFieldValue(e, "id"), "id cannot be null");
         int count = baseDAO.update(e);
         if (count == 0) {
-            Assert.notExists("更新失败，数据");
+            log.warn("更新数据行数为0");
         }
-        return e;
+        return count > 0;
     }
 
     /**
-     * 根据id删除
+     * 根据id物理删除
      * @param id
      * @return
      */
-    public int deleteById(Long id) {
-        return baseDAO.deleteLogicallyById(id);
+    public boolean deleteById(Long id) {
+        return baseDAO.deleteById(id) > 0;
     }
+
+    /**
+     * 根据id逻辑删除
+     * @param id
+     * @return
+     */
+    public boolean deleteLogicallyById(Long id) {
+        return baseDAO.deleteLogicallyById(id) > 0;
+    }
+
 
     /**
      * 根据id查询
@@ -93,7 +106,7 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
     public Optional<E> findByIdWithoutCascade(Long id) {
         List<E> list = findByConditionWithoutCascade(Params.builder(1)
                 .pv("id", id)
-                .build(), " WHERE id = :id");
+                .build(), "id = :id");
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
     }
 
@@ -112,8 +125,43 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
      * @return
      */
     public List<E> findAllWithoutCascade() {
-        List<E> list = findByConditionWithoutCascade(null, "");
+        List<E> list = findByConditionWithoutCascade(Collections.emptyMap(), "");
         return list;
+    }
+
+    public List<E> findByConditionWithoutCascade(Map<String, ?> params, String condition) {
+        List<E> list = service.query(baseDAO.getSelectSQL() + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition),
+                params,
+                baseDAO.getEntity());
+
+        return list;
+    }
+
+    public List<E> findByConditionWithoutCascade(E e, String condition) {
+        return findByConditionWithoutCascade(baseDAO.entityToMap(e), condition);
+    }
+
+    public boolean exists(Map<String, ?> params, String conditionSQL) {
+        return baseDAO.existsByParams(params, conditionSQL);
+    }
+
+    public boolean exists(E e, String conditionSQL) {
+        return exists(baseDAO.entityToMap(e), conditionSQL);
+    }
+
+    public void checkId(Serializable id) {
+        Assert.notNull(id, "id cannot be null");
+        if (!exists(Params.builder(1).pv("id", id).build(), "id = :id")) {
+            Assert.notExists("id = " + id + " not exists");
+        }
+    }
+
+    public void checkIds(Collection<Serializable> ids) {
+        Assert.state(CollectionUtils.isNotEmpty(ids), "ids cannot be empty");
+        long count = baseDAO.countByParams(Params.builder(1).pv("ids", ids).build(), "id in (:ids)");
+        if (count != ids.size()) {
+            Assert.notExists("ids = " + ids + " not all exist");
+        }
     }
 
     private Object getFieldValue(E e, String fieldName) {
@@ -122,11 +170,4 @@ public class BaseServiceImpl <D extends BaseDAO, E extends BasePureEntity> {
         return value;
     }
 
-    private List<E> findByConditionWithoutCascade(Map<String, Object> params, String condition) {
-        List<E> list = service.query(baseDAO.getSelectSQL() + condition,
-                params,
-                baseDAO.getEntity());
-
-        return list;
-    }
 }

@@ -17,6 +17,9 @@ public @interface ManyToOne {
     @AliasFor(annotation = Column.class)
     String value() default "";
 
+    @AliasFor(annotation = Column.class)
+    boolean updatable() default true;
+
     String parentTable();
 
     boolean cascadeSaveOrUpdate() default false;

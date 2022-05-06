@@ -267,7 +267,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     /**
-     * 构造条件和参数删除
+     * 构造条件和参数删除。注意占位符用？
      *
      * @param params
      * @param conditionSQL id IN (?, ?) AND group_id = ?
@@ -614,19 +614,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             params = (Map) t;
         } else {
 //            params = JsonUtils.objectToMap(t);
-            params = Maps.newHashMapWithExpectedSize(columnNameList.size());
-            for (String columnName : columnNameList) {
-                String propertyName = columnNameToPropertyNameMap.get(columnName);
-                Object propertyValue = getPropertyValue(t, propertyName);
-                if (Objects.nonNull(propertyValue)) {
-                    if (propertyValue instanceof BasePureEntity) {
-                        propertyValue = getIdValue(propertyValue);
-                    }
-
-                    params.put(propertyName, propertyValue);
-                    params.put(columnName, propertyValue);
-                }
-            }
+            params = entityToMap(t);
         }
         return selectByParams(params, conditionSQL);
     }
@@ -738,6 +726,25 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     public String getTableName() {
         return tableMeta.getTableName();
+    }
+
+    @Override
+    public Map<String, Object> entityToMap(T t) {
+        Map<String, Object> params;
+        params = Maps.newHashMapWithExpectedSize(columnNameList.size());
+        for (String columnName : columnNameList) {
+            String propertyName = columnNameToPropertyNameMap.get(columnName);
+            Object propertyValue = getPropertyValue(t, propertyName);
+            if (Objects.nonNull(propertyValue)) {
+                if (propertyValue instanceof BasePureEntity) {
+                    propertyValue = getIdValue(propertyValue);
+                }
+
+                params.put(propertyName, propertyValue);
+                params.put(columnName, propertyValue);
+            }
+        }
+        return params;
     }
 
     @Override
