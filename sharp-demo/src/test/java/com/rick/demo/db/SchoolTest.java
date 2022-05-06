@@ -1,7 +1,6 @@
 package com.rick.demo.db;
 
 import com.google.common.collect.Sets;
-import com.rick.common.util.JsonUtils;
 import com.rick.db.service.support.Params;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.school.dao.SchoolDAO;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -67,11 +65,7 @@ public class SchoolTest {
     public void testSchoolFindById() {
         Optional<School> option = schoolDAO.selectById(552173736070144000L);
         School school = option.get();
-        try {
-            System.out.println(JsonUtils.toJson(school));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         checkSchool(school);
         checkSchoolLicense(school.getSchoolLicense());
         checkStudent(school.getStudentList().get(0));

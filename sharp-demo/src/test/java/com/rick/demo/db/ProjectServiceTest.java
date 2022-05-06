@@ -12,7 +12,6 @@ import com.rick.demo.module.project.domain.entity.ProjectDetail;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import com.rick.demo.module.project.service.ProjectService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Rick
@@ -60,10 +60,8 @@ public class ProjectServiceTest {
         Project project = createProject();
         project.setId(-1L);
         project.setTitle("updateValue");
-
-        Assertions.assertThatThrownBy(() -> {
-            projectService.update(project);
-        }).isInstanceOf(BizException.class);
+        projectService.update(project);
+        assertThat(projectService.update(project)).isEqualTo(false);
     }
 
 
@@ -73,7 +71,7 @@ public class ProjectServiceTest {
         Project project = createProject();
         project.setId(id);
         project.setTitle("updateValue");
-        projectService.update(project);
+        assertThat(projectService.update(project)).isEqualTo(true);
     }
 
     @Order(3)
@@ -141,8 +139,8 @@ public class ProjectServiceTest {
     @Order(9)
     @Test
     public void testDeleteById() {
-        int count = projectService.deleteById(id);
-        assertThat(count).isEqualTo(1);
+        boolean deleted = projectService.deleteById(id);
+        assertThat(deleted).isEqualTo(true);
     }
 
 
@@ -150,6 +148,30 @@ public class ProjectServiceTest {
     @Test
     public void findProjectDetail() {
         assertThat(projectDetailDAO.selectById(1).get().getProject()).isNotNull();
+    }
+
+    @Order(13)
+    @Test
+    public void checkId() {
+        projectService.checkId(479723663504343043L);
+    }
+
+    @Order(14)
+    @Test
+    public void checkId2() {
+        assertThrows(BizException.class, ()-> projectService.checkId(4797236635043430411L));
+    }
+
+    @Order(15)
+    @Test
+    public void checkIds() {
+        projectService.checkIds(Arrays.asList(479723663504343043L));
+    }
+
+    @Order(16)
+    @Test
+    public void checkIds2() {
+        assertThrows(BizException.class, ()-> projectService.checkIds(Arrays.asList(479723663504343043L, 12L)));
     }
 
     public Project createProject() {
