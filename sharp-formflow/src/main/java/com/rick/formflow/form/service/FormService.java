@@ -18,7 +18,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.annotation.Validated;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +57,7 @@ public class FormService {
     public FormBO getFormBOByIdAndInstanceId(Long formId, Long instanceId) {
         Form form = formDAO.selectById(formId).get();
         List<FormCpn> formCpnList = formCpnDAO.listByFormId(formId);
-        Map<Serializable, CpnConfigurer> configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
+        Map<Long, CpnConfigurer> configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
 
         List<FormBO.Property> propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 

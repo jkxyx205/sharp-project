@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,7 +51,7 @@ public class FormCpnService {
             configurerList = Collections.emptyList();
         } else {
             configurerList = Lists.newArrayListWithExpectedSize(configIds.size());
-            Map<Serializable, CpnConfigurer> configIdsMap = cpnConfigurerDAO.selectByIdsAsMap(configIds);
+            Map<Long, CpnConfigurer> configIdsMap = cpnConfigurerDAO.selectByIdsAsMap(configIds);
             for (Long configId : configIds) {
                 configurerList.add(configIdsMap.get(configId));
             }

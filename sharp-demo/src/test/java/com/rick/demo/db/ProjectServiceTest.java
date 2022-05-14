@@ -147,7 +147,7 @@ public class ProjectServiceTest {
     @Order(12)
     @Test
     public void findProjectDetail() {
-        assertThat(projectDetailDAO.selectById(1).get().getProject()).isNotNull();
+        assertThat(projectDetailDAO.selectById(1L).get().getProject()).isNotNull();
     }
 
     @Order(13)

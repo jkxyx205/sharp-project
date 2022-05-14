@@ -13,7 +13,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.Serializable;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -154,7 +153,7 @@ public class BaseDAOImplTest3 {
         assertThat(project.getList().get(0).getCode()).isEqualTo("001");
         assertThat(project.getPhoneNumber().getNumber()).isEqualTo("18888888888");
 
-        Optional<Project> optional2 = projectDAO.selectById(0);
+        Optional<Project> optional2 = projectDAO.selectById(0L);
         assertThat(optional2.isPresent()).isFalse();
     }
 
@@ -208,8 +207,8 @@ public class BaseDAOImplTest3 {
     @Order(19)
     @Test
     public void testSelectByIdsAsMap() {
-        Map<Serializable, Project> serializableProjectMap1 = projectDAO.selectByIdsAsMap(Lists.newArrayList(479723134929764352L, 479723663504343040L));
-        Map<Serializable, Project> serializableProjectMap2 = projectDAO.selectByIdsAsMap("47972313492976435,47972313492976432");
+        Map<Long, Project> serializableProjectMap1 = projectDAO.selectByIdsAsMap(Lists.newArrayList(479723134929764352L, 479723663504343040L));
+        Map<Long, Project> serializableProjectMap2 = projectDAO.selectByIdsAsMap("47972313492976435,47972313492976432");
         assertThat(serializableProjectMap1.size()).isEqualTo(2);
         assertThat(serializableProjectMap1.get(479723134929764352L).getSex()).isEqualTo(SexEnum.FEMALE);
         assertThat(serializableProjectMap1.get(479723663504343040L).getAddress().getCode()).isEqualTo("001");
