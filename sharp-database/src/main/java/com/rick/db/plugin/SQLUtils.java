@@ -285,11 +285,7 @@ public final class SQLUtils {
     }
 
     private static int deleteData(String tableName, String deleteColumn, String sqlPatch, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
-        if (CollectionUtils.isEmpty(deleteValues)) {
-            log.warn("删除的值为空");
-            return 0;
-        }
-
+        Assert.notEmpty(deleteValues, "deleteValues cannot be null");
         int size = deleteValues.size();
         // 处理单值
 //        if (size == 1) {

@@ -80,6 +80,10 @@ public interface BaseDAO<T> {
 
     Optional<Long> selectIdByParams(T t, String conditionSQL);
 
+    List<Long> selectIdsByParams(T t, String conditionSQL);
+
+    List<Long> selectIdsByParams(Map<String, ?> params, String conditionSQL);
+
     List<T> selectByParams(String queryString);
 
     List<T> selectByParams(String queryString, String conditionSQL);
@@ -97,6 +101,10 @@ public interface BaseDAO<T> {
     boolean existsByParams(Map<String, ?> params, String conditionSQL);
 
     List<T> selectByParams(Map<String, ?> params, String conditionSQL);
+
+    <E> List<E> selectByParams(Map<String, ?> params, String selectSQL, String conditionSQL, Class<E> clazz);
+
+    <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL);
 
     void checkId(Long id);
 
