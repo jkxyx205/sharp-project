@@ -84,7 +84,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private Class<?> entityClass;
 
-    private String selectSQL;
+    private String fullColumnNames;
 
     private Field[] entityFields;
 
@@ -529,7 +529,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 .build();
 
         List<T> list = selectByParams(params, tableMeta.getIdColumnName() + " = :id");
-        return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
+        return expectedAsOptional(list);
     }
 
     @Override
@@ -636,13 +636,13 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public long countByParams(Map<String, ?> params, String conditionSQL) {
-        return (Long) selectByParams(params, "SELECT count(*) FROM " + getTableName(), conditionSQL, srcSQL -> srcSQL, Long.class).get(0);
+        return (Long) selectByParams(params, "count(*)", conditionSQL, srcSQL -> srcSQL, Long.class).get(0);
     }
 
     @Override
     public boolean existsByParams(Map<String, ?> params, String conditionSQL) {
         if (sharpDatabaseProperties.getType().equals(DB_MYSQL)) {
-            return selectByParams(params, "SELECT 1 FROM " + getTableName(), conditionSQL, srcSQL -> srcSQL + " LIMIT 1", Long.class).size() > 0 ? true : false;
+            return selectByParams(params, "1", conditionSQL, srcSQL -> srcSQL + " LIMIT 1", Long.class).size() > 0 ? true : false;
         } else {
             return countByParams(params, conditionSQL) > 1;
         }
@@ -650,7 +650,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
-        return (List<T>) selectByParams(params, selectSQL, conditionSQL, srcSQL -> srcSQL, entityClass);
+        return (List<T>) selectByParams(params, fullColumnNames, conditionSQL, srcSQL -> srcSQL, entityClass);
     }
 
 
@@ -662,11 +662,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public Optional<Long> selectIdByParams(T t, String conditionSQL) {
-        List<Long> ids = selectByParams(entityToMap(t), "SELECT id FROM " + getTableName(), conditionSQL, sql -> sql, Long.class);
-        if (ids.size() > 0) {
-            throw new IncorrectResultSizeDataAccessException(1, ids.size());
-        }
-        return CollectionUtils.isEmpty(ids) ? Optional.empty() : Optional.of(ids.get(0));
+        List<Long> ids = selectByParams(entityToMap(t), "id", conditionSQL, sql -> sql, Long.class);
+        return expectedAsOptional(ids);
     }
 
     @Override
@@ -676,7 +673,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public List<Long> selectIdsByParams(Map<String, ?> params, String conditionSQL) {
-        return selectByParams(params, "SELECT id FROM " + getTableName(), conditionSQL, sql -> sql, Long.class);
+        return selectByParams(params, "id", conditionSQL, sql -> sql, Long.class);
     }
 
     @Override
@@ -688,7 +685,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     public void checkId(Long id, Map<String, Object> conditionParams, String condition) {
         com.rick.common.http.exception.Assert.notNull(id, "id cannot be null");
         if (!existsByParams(Params.builder(1 + conditionParams.size()).pv("id", id).pvAll(conditionParams).build(), "id = :id" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
-            throw new BizException(ResultUtils.exception(404, "id不存在", new Long[]{id}));
+            throw new BizException(ResultUtils.exception(404, "id=" + id + " +不存在", id));
         }
     }
 
@@ -703,25 +700,24 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         List<Long> idsInDB = sharpService.query("SELECT id FROM " + getTableName() + " WHERE id in (:ids)" + (StringUtils.isBlank(condition) ? "" : " AND " + condition), Params.builder(1 + conditionParams.size()).pv("ids", ids).pvAll(conditionParams).build(), Long.class);
         SetUtils.SetView<Long> difference = SetUtils.difference(Sets.newHashSet(ids), Sets.newHashSet(idsInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
-            throw new BizException(ResultUtils.exception(404, "编号不存在", difference.toArray()));
+            throw new BizException(ResultUtils.exception(404, "id=" + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
         }
     }
 
     @Override
-    public <E> List<E> selectByParams(Map<String, ?> params, String selectSQL, String conditionSQL, Class<E> clazz) {
-        return selectByParams(params, selectSQL, conditionSQL, src -> src, clazz);
+    public <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, Class<E> clazz) {
+        return selectByParams(params, columnNames, conditionSQL, src -> src, clazz);
     }
 
     /**
-     * id,name
      * @param params
-     * @param columnNames id,name
+     * @param columnNames 比如 id,name。id作key，name作value
      * @param conditionSQL
      * @return
      */
     @Override
     public <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL) {
-        Object[] executeCondition = getExecuteCondition(params, "SELECT " + columnNames + " FROM " + getTableName(), conditionSQL, sql -> sql);
+        Object[] executeCondition = getExecuteCondition(params, columnNames, conditionSQL, sql -> sql);
         return sharpService.queryForKeyValue((String) executeCondition[0], (Map)executeCondition[1]);
     }
 
@@ -732,8 +728,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param conditionSQL
      * @return
      */
-    private <E> List<E> selectByParams(Map<String, ?> params, String selectSQL, String conditionSQL, SqlHandler sqlHandler, Class<E> clazz) {
-        Object[] executeCondition = getExecuteCondition(params, selectSQL, conditionSQL, sqlHandler);
+    private <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler, Class<E> clazz) {
+        Object[] executeCondition = getExecuteCondition(params, columnNames, conditionSQL, sqlHandler);
 
         List<E> list = sharpService.query((String) executeCondition[0], (Map)executeCondition[1], clazz);
         if (clazz == entityClass) {
@@ -746,12 +742,16 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     /**
      * 获取最终执行的参数，可以使用sharpService执行
      * @param params
-     * @param selectSQL
+     * @param columnNames
      * @param conditionSQL
      * @param sqlHandler
      * @return
      */
-    private Object[] getExecuteCondition(Map<String, ?> params, String selectSQL, String conditionSQL, SqlHandler sqlHandler) {
+    private Object[] getExecuteCondition(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler) {
+        if (MapUtils.isEmpty(params)) {
+            params = Collections.emptyMap();
+        }
+
         Map<String, Object> conditionParams;
         String finalConditionSQL = (Objects.isNull(conditionSQL) ? getConditionSQL(params) : conditionSQL);
         String additionCondition = "";
@@ -767,7 +767,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             conditionParams = (Map<String, Object>) params;
         }
 
-        return new Object[] {sqlHandler.handlerSQl(selectSQL + " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + finalConditionSQL), conditionParams};
+        return new Object[] {sqlHandler.handlerSQl("SELECT " + columnNames + " FROM " + getTableName() +  " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + finalConditionSQL), conditionParams};
     }
 
     @Override
@@ -798,7 +798,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public String getSelectSQL() {
-        return this.selectSQL;
+        return "SELECT "+fullColumnNames+" FROM " + getTableName();
     }
 
     @Override
@@ -829,6 +829,20 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     public Class getEntity() {
         return entityClass;
     }
+
+    @Override
+    public <E> Optional<E> expectedAsOptional(List<E> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return Optional.empty();
+        }
+
+        if (list.size() > 1) {
+            throw new IncorrectResultSizeDataAccessException(1, list.size());
+        }
+
+        return Optional.of(list.get(0));
+    }
+
     private boolean isMapClass() {
         return this.entityClass == Map.class;
     }
@@ -886,7 +900,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
         }
 
-        initSelectSQL();
+        initFullColumnNames();
 
         log.debug("tableName: {}, tableMeta.getColumnNames(): {}", tableMeta.getTableName(), tableMeta.getColumnNames());
     }
@@ -962,21 +976,21 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return Arrays.asList(values.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
     }
 
-    private void initSelectSQL() {
+    private void initFullColumnNames() {
         if (CollectionUtils.isEmpty(this.propertyList)) {
-            this.selectSQL = "SELECT " + tableMeta.getColumnNames() + " FROM " + tableMeta.getTableName();
+            this.fullColumnNames = tableMeta.getColumnNames();
             return;
         }
 
         int columnSize = this.columnNameList.size();
-        StringBuilder selectSQLBuilder = new StringBuilder("SELECT ");
+        StringBuilder selectSQLBuilder = new StringBuilder();
         for (int i = 0; i < columnSize; i++) {
             selectSQLBuilder.append(this.getTableName() + "." + this.columnNameList.get(i))
                     .append(" AS \"").append(this.propertyList.get(i)).append("\",");
         }
-        selectSQLBuilder.deleteCharAt(selectSQLBuilder.length() - 1).append(" FROM ").append(tableMeta.getTableName());
+        selectSQLBuilder.deleteCharAt(selectSQLBuilder.length() - 1);
 
-        this.selectSQL = selectSQLBuilder.toString();
+        this.fullColumnNames = selectSQLBuilder.toString();
     }
 
     private Object getPropertyValue(Object t, Field field) {
@@ -1351,7 +1365,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     private void cascadeInsertOrUpdate(List<T> instanceList) {
         for (T t : instanceList) {
             cascadeInsertOrUpdate(t, false);
-            BaseDAOThreadLocalValue.removeByTableName("InsertOrUpdate:" + getTableName());
         }
     }
 

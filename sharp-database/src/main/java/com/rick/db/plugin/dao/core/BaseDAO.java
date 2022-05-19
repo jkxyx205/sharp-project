@@ -126,4 +126,12 @@ public interface BaseDAO<T> {
 
     Map<String, Object> entityToMap(T t);
 
+    /**
+     * 记录超过1个会抛出异常
+     * @param list
+     * @param <E>
+     * @return
+     */
+    <E> Optional<E> expectedAsOptional(List<E> list);
+
 }
