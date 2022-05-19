@@ -375,6 +375,13 @@ public class BaseDAOImplTest {
         assertThat(count).isEqualTo(0);
     }
 
+    @Order(27)
+    @Test
+    public void testSelectByParamsAsMap() {
+        Map<Long, String> map = projectDAO.selectByParamsAsMap(null, "id, title", null);
+        assertThat(true).isEqualTo(map.size() > 0);
+    }
+
     public Project createProject() {
         Project project = new Project();
         project.setTitle("项目标题 " + System.currentTimeMillis());
