@@ -102,23 +102,35 @@ public interface BaseDAO<T> {
 
     List<T> selectByParams(Map<String, ?> params, String conditionSQL);
 
-    <E> List<E> selectByParams(Map<String, ?> params, String selectSQL, String conditionSQL, Class<E> clazz);
+    <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, Class<E> clazz);
+
+    List<T> selectByParamsWithoutCascade(T t);
+
+    List<T> selectByParamsWithoutCascade(T t, String conditionSQL);
+
+    List<T> selectByParamsWithoutCascade(Map<String, ?> params);
+
+    List<T> selectByParamsWithoutCascade(Map<String, ?> params, String conditionSQL);
+
+    List<T> selectByParamsWithoutCascade(Map<String, ?> params, String columnNames, String conditionSQL);
 
     <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL);
 
     void checkId(Long id);
 
-    void checkId(Long id, Map<String, Object> conditionParams, String condition);
+    void checkId(Long id, Map<String, Object> params, String condition);
 
     void checkIds(Collection<Long> ids);
 
-    void checkIds(Collection<Long> ids, Map<String, Object> conditionParams, String condition);
+    void checkIds(Collection<Long> ids, Map<String, Object> params, String condition);
 
     void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName);
 
     Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
 
     String getSelectSQL();
+
+    String getFullColumnNames();
 
     String getTableName();
 
