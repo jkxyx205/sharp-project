@@ -39,6 +39,7 @@ final public class JsonStringToObjectConverterFactory implements ConverterFactor
             try {
                 return JsonUtils.toObject(source, clazz);
             } catch (IOException e) {
+                e.printStackTrace();
                 return null;
             }
         }

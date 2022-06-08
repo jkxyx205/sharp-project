@@ -45,6 +45,7 @@ public class JsonStringToSetMapConverter implements ConditionalGenericConverter 
         try {
             return JsonUtils.toSet(source.toString(), Map.class);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }

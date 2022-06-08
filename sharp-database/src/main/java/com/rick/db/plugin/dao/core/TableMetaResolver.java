@@ -5,7 +5,6 @@ import com.google.common.base.Converter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.rick.common.util.ReflectUtils;
 import com.rick.db.plugin.dao.annotation.*;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +12,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -40,7 +40,7 @@ class TableMetaResolver {
             tableName = name;
         }
 
-        Field[] fields = ReflectUtils.getAllFields(clazz);
+        Field[] fields = getAllFields(clazz);
         StringBuilder columnNamesBuilder = new StringBuilder();
         StringBuilder updateColumnNamesBuilder = new StringBuilder();
         StringBuilder propertiesBuilder = new StringBuilder();
@@ -107,5 +107,19 @@ class TableMetaResolver {
         return new TableMeta(tableAnnotation, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
                 updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, columnNameMap);
+    }
+
+    private Field[] getAllFields(Class<?> clazz) {
+        List<Field> list = new ArrayList();
+        while (Objects.nonNull(clazz)) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                if (!list.stream().map(Field::getName).collect(Collectors.toSet()).contains(field.getName())) {
+                    list.add(field);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return list.toArray(new Field[] {});
     }
 }
