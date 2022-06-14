@@ -25,6 +25,10 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Teacher.class);
 //        tableGenerator.createTable(Student.class);
 //        tableGenerator.createTable(SchoolLicense.class);
+
+//        tableGenerator.createTable(Worker.class);
+//        tableGenerator.createTable(Farmer.class);
+//        tableGenerator.createTable(Material.class);
     }
 
 }

@@ -19,6 +19,8 @@ class TableMeta {
 
     private Table table;
 
+    private Id id;
+
     /**
      * 类名，约定优于配置，它的子表的外键用"name_id"表示
      */

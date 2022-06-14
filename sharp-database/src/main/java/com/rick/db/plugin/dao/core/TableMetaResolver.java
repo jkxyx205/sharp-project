@@ -27,6 +27,7 @@ class TableMetaResolver {
 
     public static TableMeta resolve(Class<?> clazz) {
         Table tableAnnotation = clazz.getAnnotation(Table.class);
+        Id id = null;
         Converter<String, String> converter = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE);
 
         String name = (TABLE_PREFIX + converter.convert(clazz.getSimpleName()));
@@ -78,9 +79,11 @@ class TableMetaResolver {
                 continue;
             }
 
-            Id id = field.getAnnotation(Id.class);
-            if (Objects.nonNull(id)) {
-                idColumnName = field.getName();
+            if (id == null) {
+                id = field.getAnnotation(Id.class);
+                if (Objects.nonNull(id)) {
+                    idColumnName = field.getName();
+                }
             }
 
             Column annotation = AnnotatedElementUtils.getMergedAnnotation(field, Column.class);
@@ -91,7 +94,7 @@ class TableMetaResolver {
             propertiesBuilder.append(field.getName()).append(",");
             columnNamesBuilder.append(columnName).append(",");
 
-            boolean isUpdatableColumn = (Objects.isNull(annotation) || annotation.updatable()) && Objects.isNull(id);
+            boolean isUpdatableColumn = (Objects.isNull(annotation) || annotation.updatable()) && Objects.isNull(field.getAnnotation(Id.class));
             if (isUpdatableColumn) {
                 updateColumnNamesBuilder.append(columnName).append(",");
                 updatePropertiesBuilder.append(field.getName()).append(",");
@@ -104,7 +107,7 @@ class TableMetaResolver {
         updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
 
         idColumnName = Objects.isNull(idColumnName) ? PRIMARY_COLUMN : idColumnName;
-        return new TableMeta(tableAnnotation, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+        return new TableMeta(tableAnnotation, id, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
                 updatePropertiesBuilder.toString(), idColumnName, subTables, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, columnNameMap);
     }

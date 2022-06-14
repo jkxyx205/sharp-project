@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity.group;
 
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.demo.module.project.domain.entity.Address;
@@ -26,7 +26,7 @@ import java.util.Map;
 @Setter
 @Table(value = "t_task", comment = "任务表")
 @NoArgsConstructor
-public class Task extends BasePureEntity {
+public class Task extends BaseEntity {
 
     @Column(nullable = true, comment = "任务名称")
     private String taskName;

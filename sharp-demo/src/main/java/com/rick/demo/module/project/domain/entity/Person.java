@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Table;
@@ -22,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("t_person")
-public class Person extends BasePureEntity {
+public class Person extends BaseEntity {
 
     private String name;
 

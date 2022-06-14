@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity.group;
 
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
@@ -23,7 +23,7 @@ import java.util.List;
 @Setter
 @Table(value = "t_project2", subTables = {"t_project_detail2"})
 @NoArgsConstructor
-public class Project extends BasePureEntity {
+public class Project extends BaseEntity {
 
     @NotBlank(message = "项目名称不能为空")
     private String title;

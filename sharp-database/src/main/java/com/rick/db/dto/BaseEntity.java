@@ -21,7 +21,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BasePureEntity {
+public class BaseEntity {
 
     @Id
     @JsonSerialize(using = ToStringSerializer.class)
@@ -44,8 +44,8 @@ public class BasePureEntity {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        if (obj instanceof BasePureEntity) {
-            BasePureEntity dataEntity = (BasePureEntity)obj ;
+        if (obj instanceof BaseEntity) {
+            BaseEntity dataEntity = (BaseEntity)obj ;
             if (dataEntity.id != null && dataEntity.id.equals(id))
                 return true;
         }

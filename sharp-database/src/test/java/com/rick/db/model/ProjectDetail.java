@@ -1,6 +1,6 @@
 package com.rick.db.model;
 
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @Table("t_project_detail")
 @NoArgsConstructor
-public class ProjectDetail extends BasePureEntity {
+public class ProjectDetail extends BaseEntity {
 
     private String title;
 

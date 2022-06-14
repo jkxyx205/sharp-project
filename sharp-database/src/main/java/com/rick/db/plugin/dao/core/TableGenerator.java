@@ -2,8 +2,9 @@ package com.rick.db.plugin.dao.core;
 
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.db.constant.EntityConstants;
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
+import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class TableGenerator {
         StringBuilder createTableSql = new StringBuilder("create table ");
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
-                .append("id bigint not null comment '主键' primary key,");
+                .append(""+(tableMeta.getId().strategy() == Id.GenerationType.ASSIGN ? "id varchar(32)" : "id bigint")+" not null"+ (tableMeta.getId().strategy() == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
         List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
 
@@ -121,7 +122,7 @@ public class TableGenerator {
         } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type)) {
 //            return "text";
             return "json";
-        } else if(BasePureEntity.class.isAssignableFrom(type)) {
+        } else if(BaseEntity.class.isAssignableFrom(type)) {
             return "bigint";
         }
 

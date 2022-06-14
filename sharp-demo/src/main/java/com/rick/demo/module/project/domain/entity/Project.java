@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.OneToMany;
 import com.rick.db.plugin.dao.annotation.Table;
@@ -24,7 +24,7 @@ import java.util.Map;
 @Setter
 @Table(value = "t_project1", subTables = {"t_project_detail1"}, comment = "任务")
 @NoArgsConstructor
-public class Project extends BasePureEntity {
+public class Project extends BaseEntity {
 
     @NotBlank(message = "项目名称不能为空")
     @Column(comment="项目名称", nullable = true)

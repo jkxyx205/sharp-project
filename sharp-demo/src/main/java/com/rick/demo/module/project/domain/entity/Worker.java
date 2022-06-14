@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.BaseEntityWithIdentity;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,16 +10,15 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * @author Rick
- * @createdAt 2022-03-03 19:26:00
+ * @createdAt 2022-06-15 00:52:00
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Table("t_role")
-public class Role extends BaseEntity {
+@Table(value = "t_worker", comment = "工人")
+public class Worker extends BaseEntityWithIdentity {
 
     private String name;
-
 }

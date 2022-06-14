@@ -1,7 +1,7 @@
 package com.rick.demo.module.school.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.*;
 import com.rick.demo.module.project.domain.entity.Address;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_school", comment = "学校")
-public class School extends BasePureEntity {
+public class School extends BaseEntity {
 
     @Column(comment = "学校名称")
     private String name;

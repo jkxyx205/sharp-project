@@ -3,7 +3,7 @@ package com.rick.formflow.form.cpn.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.dao.annotation.Transient;
@@ -33,7 +33,7 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_form_configurer")
-public class CpnConfigurer extends BasePureEntity {
+public class CpnConfigurer extends BaseEntity {
 
     @NotBlank
     private String label;

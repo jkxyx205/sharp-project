@@ -10,16 +10,15 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * @author Rick
- * @createdAt 2022-03-03 19:26:00
+ * @createdAt 2022-06-15 00:52:00
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Table("t_role")
-public class Role extends BaseEntity {
+@Table(value = "t_farmer", comment = "农民")
+public class Farmer extends BaseEntity {
 
     private String name;
-
 }

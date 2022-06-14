@@ -4,7 +4,7 @@ PROJECTS=(
 sharp-dependencies
 sharp-common
 sharp-database
-#sharp-formflow
+#sharp-formflowgit
 #sharp-fileupload
 #sharp-meta
 sharp-excel

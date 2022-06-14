@@ -1,7 +1,7 @@
 package com.rick.db.service;
 
 import com.rick.common.http.exception.Assert;
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.core.BaseDAO;
 import com.rick.db.service.support.Params;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.*;
  */
 @RequiredArgsConstructor
 @Slf4j
-public class BaseServiceImpl<D extends BaseDAO, E extends BasePureEntity> {
+public class BaseServiceImpl<D extends BaseDAO, E extends BaseEntity> {
 
     protected final D baseDAO;
 

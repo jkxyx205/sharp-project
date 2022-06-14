@@ -7,16 +7,16 @@ import com.google.common.collect.Sets;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
-import com.rick.common.util.ClassUtils;
-import com.rick.common.util.EnumUtils;
-import com.rick.common.util.JsonUtils;
-import com.rick.common.util.ReflectUtils;
+import com.rick.common.util.*;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.EntityConstants;
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.BaseEntityWithAssign;
+import com.rick.db.dto.BaseEntityWithIdentity;
 import com.rick.db.plugin.SQLUtils;
+import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
@@ -49,6 +49,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.rick.db.config.Constants.DB_MYSQL;
+import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
 
 /**
  * @author Rick
@@ -104,7 +105,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     public BaseDAOImpl(String tableName, String columnNames, String primaryColumn) {
-        this.tableMeta = new TableMeta(null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+        this.tableMeta = new TableMeta(null, null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
         this.init();
     }
 
@@ -846,7 +847,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String propertyName = columnNameToPropertyNameMap.get(columnName);
             Object propertyValue = getPropertyValue(t, propertyName);
             if (Objects.nonNull(propertyValue)) {
-                if (propertyValue instanceof BasePureEntity) {
+                if (propertyValue instanceof BaseEntity || propertyValue instanceof BaseEntityWithIdentity || propertyValue instanceof BaseEntityWithAssign) {
                     propertyValue = getIdValue(propertyValue);
                 }
 
@@ -908,7 +909,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 }
 
                 if (Objects.nonNull(this.tableMeta)) {
-                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
+                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getId(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
                 } else {
                     this.tableMeta = tableMeta;
                 }
@@ -977,7 +978,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private Object[] handleAutoFill(Object t, Object[] params, List<String> columnNameList, ColumnFillType fillType) {
         if (Objects.nonNull(columnAutoFill)) {
-            Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill() : columnAutoFill.updateFill();
+            Id.GenerationType strategy;
+            if (tableMeta.getId() == null) {
+                strategy = SEQUENCE;
+            } else {
+                strategy = tableMeta.getId().strategy();
+            }
+            Long id = strategy == SEQUENCE ? IdGenerator.getSequenceId() : null;
+            Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill(id) : columnAutoFill.updateFill();
 
             for (Map.Entry<String, Object> en : fill.entrySet()) {
                 String fillColumnName = en.getKey();
@@ -1118,7 +1126,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             } else {
                 return toJson(value);
             }
-        } else if (BasePureEntity.class.isAssignableFrom(value.getClass())) {
+        } else if (BaseEntity.class.isAssignableFrom(value.getClass())
+        || BaseEntityWithAssign.class.isAssignableFrom(value.getClass())
+        || BaseEntityWithIdentity.class.isAssignableFrom(value.getClass())) {
             return getIdValue(value);
         } else if (value.getClass().isArray()) {
             int length = Array.getLength(value);

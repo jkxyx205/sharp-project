@@ -32,8 +32,8 @@ public class SharpConfig {
     public ColumnAutoFill fill() {
         return new ColumnAutoFill() {
             @Override
-            public Map<String, Object> insertFill() {
-                Map<String, Object> fill = new DefaultColumnAutoFill().insertFill();
+            public Map<String, Object> insertFill(Long id) {
+                Map<String, Object> fill = new DefaultColumnAutoFill().insertFill(id);
                 fill.put("created_by", 0L);
                 fill.put("updated_by", 0L);
                 fill.put("group_id", 99L);

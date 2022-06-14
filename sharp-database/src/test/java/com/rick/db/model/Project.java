@@ -1,6 +1,6 @@
 package com.rick.db.model;
 
-import com.rick.db.dto.BasePureEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.OneToMany;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.Getter;
@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @Table(value = "t_project", subTables = {"t_project_detail"})
 @NoArgsConstructor
-public class Project extends BasePureEntity {
+public class Project extends BaseEntity {
 
 
     private String title;
