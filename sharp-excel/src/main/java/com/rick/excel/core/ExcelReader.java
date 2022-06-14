@@ -36,7 +36,12 @@ public class ExcelReader {
 			sheet = wb.getSheetAt(sheetIndex);
 	        // 得到总行数
 	        int rowNum = sheet.getLastRowNum();
-	        row = sheet.getRow(0);
+//	        row = sheet.getRow(0);
+	        row = sheet.getRow(sheet.getFirstRowNum());
+	        if (row == null) {
+	        	break;
+			}
+
 	        String sheetName = sheet.getSheetName();
 	        int colNum = row.getPhysicalNumberOfCells();
 	        // 正文
@@ -66,6 +71,10 @@ public class ExcelReader {
      * @return
      */
     private static Object getCellValue(XSSFCell cell) {
+    	if (cell == null) {
+    		return null;
+		}
+
 		switch (cell.getCellType()) {
 			case NUMERIC: {
 				if (DateUtil.isCellDateFormatted(cell)) { // 日期

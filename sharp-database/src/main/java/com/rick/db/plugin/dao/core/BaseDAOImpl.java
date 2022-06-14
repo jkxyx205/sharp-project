@@ -287,7 +287,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             if (CollectionUtils.isEmpty(deletedIds)) {
                 return 0;
             }
-            SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deletedIds, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
+            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deletedIds, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
         }
 
         return SQLUtils.delete(tableMeta.getTableName(), (Object[]) objects[0], (String) objects[1]);
