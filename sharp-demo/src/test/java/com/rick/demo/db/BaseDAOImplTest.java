@@ -39,17 +39,6 @@ public class BaseDAOImplTest {
 
     @Order(0)
     @Test
-    public void testSaveProjectCascade() {
-        Project project = createProject();
-        project.setTitle("项目标题-testSaveProjectCascade");
-        project.setProjectDetailList(Lists.newArrayList(ProjectDetail.builder().title("google").build()));
-        projectDAO.insert(project);
-        assertThat(project.getId()).isNotNull();
-        assertThat(project.getProjectDetailList().get(0).getId()).isNotNull();
-    }
-
-    @Order(0)
-    @Test
     public void testSaveProjectCascadeBatch() {
         Project project1 = createProject();
         project1.setTitle("项目标题-testSaveProjectCascade-1");
@@ -61,6 +50,17 @@ public class BaseDAOImplTest {
 
         projectDAO.insert(Lists.newArrayList(project1, project2));
         assertThat(project1.getProjectDetailList().get(0).getId()).isNotNull();
+    }
+
+    @Order(1)
+    @Test
+    public void testSaveProjectCascade() {
+        Project project = createProject();
+        project.setTitle("项目标题-testSaveProjectCascade");
+        project.setProjectDetailList(Lists.newArrayList(ProjectDetail.builder().title("google").build()));
+        projectDAO.insert(project);
+        assertThat(project.getId()).isNotNull();
+        assertThat(project.getProjectDetailList().get(0).getId()).isNotNull();
     }
 
     @Order(1)

@@ -4,11 +4,11 @@ PROJECTS=(
 sharp-dependencies
 sharp-common
 sharp-database
-#sharp-formflowgit
+#sharp-formflow
 #sharp-fileupload
 #sharp-meta
-sharp-excel
-sharp-sms
+#sharp-excel
+#sharp-sms
 #sharp-security
 )
 
