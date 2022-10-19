@@ -44,7 +44,7 @@ public final class HttpServletResponseUtils {
 
     public static OutputStream getOutputStream(HttpServletRequest request, HttpServletResponse response, String fileName, String type) throws IOException {
         String _fileName = fileName.replaceAll("[/:*?\"<>[|]]", "");
-
+        String encodeFileName = java.net.URLEncoder.encode(_fileName,StandardCharsets.UTF_8.name());
         String browserType = request.getHeader("User-Agent").toLowerCase();
 
         if(browserType.indexOf("firefox") > -1) { //FF
@@ -61,6 +61,7 @@ public final class HttpServletResponseUtils {
 
         response.reset();// 清空输出流
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setHeader("filename", encodeFileName);
         response.setHeader("Content-disposition", ""+type+"; filename="+_fileName+"");// 设定输出文件头
         response.setContentType(StringUtils.getContentType(_fileName));// 定义输出类型
         OutputStream os = response.getOutputStream(); // 取得输出流Files

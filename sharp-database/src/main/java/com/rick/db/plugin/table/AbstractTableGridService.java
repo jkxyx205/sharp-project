@@ -1,6 +1,7 @@
 package com.rick.db.plugin.table;
 
 import com.rick.common.http.HttpServletRequestUtils;
+import com.rick.common.http.exception.Assert;
 import com.rick.db.dto.Grid;
 import com.rick.db.plugin.GridUtils;
 
@@ -27,16 +28,17 @@ public abstract class AbstractTableGridService {
         return GridUtils.list(getListSQL(), HttpServletRequestUtils.getParameterMap(request, extendParams), getCountSQL());
     }
 
-    public List<BigDecimal> summary(Map<String, ?> params) {
-        return GridUtils.numericObject(getSummarySQL(), params);
-    }
-
     public List<BigDecimal> summary(HttpServletRequest request) {
         return summary(request, null);
     }
 
     public List<BigDecimal> summary(HttpServletRequest request, Map<String, ?> extendParams) {
-        return GridUtils.numericObject(getSummarySQL(), HttpServletRequestUtils.getParameterMap(request, extendParams));
+        return summary(HttpServletRequestUtils.getParameterMap(request, extendParams));
+    }
+
+    public List<BigDecimal> summary(Map<String, ?> params) {
+        Assert.notNull(getSummarySQL(), "getSummarySQL need overwrite");
+        return GridUtils.numericObject(getSummarySQL(), params);
     }
 
     /**

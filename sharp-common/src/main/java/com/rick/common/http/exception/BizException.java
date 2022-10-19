@@ -26,6 +26,7 @@ public class BizException extends RuntimeException {
 
     public BizException(Result result, Object[] params) {
         super(String.format(result.getMsg(), params));
+        result.setMsg(getMessage());
         this.result = result;
         this.params = params;
     }
@@ -37,6 +38,8 @@ public class BizException extends RuntimeException {
 
     public BizException(Result result, Object[] params, Throwable t) {
         super(String.format(result.getMsg(), params), t);
+        result.setMsg(getMessage());
         this.params = params;
+        this.result = result;
     }
 }

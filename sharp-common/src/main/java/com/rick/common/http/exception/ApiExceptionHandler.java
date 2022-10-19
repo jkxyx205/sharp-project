@@ -51,7 +51,6 @@ public class ApiExceptionHandler {
      * @return
      */
     @ExceptionHandler(BizException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, BizException ex) throws IOException, ServletException {
         Result result = ex.getResult();
         // resolve i18n

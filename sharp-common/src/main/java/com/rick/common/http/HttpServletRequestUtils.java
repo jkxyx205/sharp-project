@@ -19,7 +19,7 @@ import java.util.*;
  */
 public final class HttpServletRequestUtils {
 
-    public static final String X_REQUESTED_WIDTH = "X-Requested-With";
+    public static final String X_REQUESTED_WITH = "X-Requested-With";
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
     private static final String[] IP_HEADER_CANDIDATES = {
@@ -47,7 +47,7 @@ public final class HttpServletRequestUtils {
      *     
      */
     public static boolean isAjaxRequest(HttpServletRequest request) {
-        String xr = request.getHeader(X_REQUESTED_WIDTH);
+        String xr = request.getHeader(X_REQUESTED_WITH);
         return (xr != null && XML_HTTP_REQUEST.equalsIgnoreCase(xr));
     }
 

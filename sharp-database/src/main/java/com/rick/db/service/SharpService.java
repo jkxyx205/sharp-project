@@ -97,6 +97,16 @@ public class SharpService {
         return handleResult(list);
     }
 
+    /**
+     * 根据查询sql获取count
+     * @param querySql
+     * @param params
+     * @return
+     */
+    public long queryCountFromQuerySql(String querySql, Map<String, ?> params) {
+        return query(sqlFormatter.formatSqlCount(querySql), params, Long.class).get(0);
+    }
+
     public int update(String sql, Map<String, ?> params) {
         SqlFormatter sqlFormatter = getSQLFormatter(sql, params);
         if (log.isDebugEnabled()) {
