@@ -1051,6 +1051,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
+        if (field.getType() == Long.class && propertyValue instanceof BaseEntity) {
+            propertyValue = this.getIdValue(propertyValue);
+        }
+
         setPropertyValue(t, field.getName(), propertyValue);
     }
 

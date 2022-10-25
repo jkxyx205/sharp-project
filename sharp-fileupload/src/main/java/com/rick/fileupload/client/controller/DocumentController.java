@@ -29,6 +29,8 @@ public class DocumentController {
 
     private static final String UPLOAD_NAME = "file";
 
+    private static final String UPLOAD_GROUP_NAME = "upload";
+
     private final DocumentService documentService;
 
     /**
@@ -47,7 +49,7 @@ public class DocumentController {
      */
     @PostMapping("/upload")
     public Result<List<?>> fileUpload(MultipartHttpServletRequest multipartRequest) throws IOException {
-        return ResultUtils.success(documentService.store(FileMetaUtils.parse(multipartRequest, UPLOAD_NAME), "upload"));
+        return ResultUtils.success(documentService.store(FileMetaUtils.parse(multipartRequest, UPLOAD_NAME), UPLOAD_GROUP_NAME));
     }
 
     /**
@@ -57,7 +59,7 @@ public class DocumentController {
      */
     @PostMapping("/upload2")
     public Result<List<?>> fileUpload2(@RequestParam(UPLOAD_NAME) List<MultipartFile> fileList) throws IOException {
-        return ResultUtils.success(documentService.store(FileMetaUtils.parse(fileList), "upload"));
+        return ResultUtils.success(documentService.store(FileMetaUtils.parse(fileList), UPLOAD_GROUP_NAME));
     }
 
     /**
@@ -67,7 +69,7 @@ public class DocumentController {
      */
     @PostMapping("/upload3")
     public Result<List<?>> fileUpload3(@RequestBody List<FileMeta> fileMetaList) throws IOException {
-        return ResultUtils.success(documentService.store(fileMetaList, "upload"));
+        return ResultUtils.success(documentService.store(fileMetaList, UPLOAD_GROUP_NAME));
     }
 
     /**
