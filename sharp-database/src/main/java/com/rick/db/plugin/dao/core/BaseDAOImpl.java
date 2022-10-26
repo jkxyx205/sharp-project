@@ -1455,20 +1455,22 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 throw new IllegalArgumentException("reversePropertyName must be set");
             }
 
-            if (CollectionUtils.isEmpty(subDataList)) {
-                // 删除所有
-                SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
-                return;
-            }
+            if (oneToManyProperty.getOneToMany().cascadeDelete()) { // 级联删除
+                if (CollectionUtils.isEmpty(subDataList)) {
+                    // 删除所有
+                    SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
+                    return;
+                }
 
-            Set<Long> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
-            if (CollectionUtils.isEmpty(deletedIds)) {
-                // 删除所有
-                SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
-            } else {
-                // 删除 除id之外的其他记录
-                SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), "id",
-                        deletedIds, new Object[] {refId} , refColumnName + " = ?");
+                Set<Long> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
+                if (CollectionUtils.isEmpty(deletedIds)) {
+                    // 删除所有
+                    SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
+                } else {
+                    // 删除 除id之外的其他记录
+                    SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), "id",
+                            deletedIds, new Object[] {refId} , refColumnName + " = ?");
+                }
             }
 
             for (Object subData : subDataList) {
