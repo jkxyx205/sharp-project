@@ -1313,7 +1313,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
 
             Set<Long> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
-            Map<Long, List<?>> subTableData = subTableBaseDAO.groupByColumnName(subTableRefColumnName, refIds);
+            Map<Long, List<?>> subTableData = subTableBaseDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
 
             for (T t : list) {
                 Object data = subTableData.get(getIdValue(t));
