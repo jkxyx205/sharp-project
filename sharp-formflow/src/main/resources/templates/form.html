@@ -134,7 +134,7 @@
         console.log(formData)
 
         $.ajax ({
-            url: "/forms/ajax" + "[(${formBO.actionUrl})]",
+            url: "/forms/ajax/" + "[(${formBO.actionUrl})]",
             type: "[(${formBO.method})]",
             data: JSON.stringify(formData),
             dataType: "json",

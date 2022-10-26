@@ -5,6 +5,7 @@ import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2021-11-04 17:00:00
  */
-//@Controller
+@Controller
 @RequestMapping("forms/page")
 @RequiredArgsConstructor
 public class PageInstanceController {
