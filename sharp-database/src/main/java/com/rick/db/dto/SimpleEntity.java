@@ -2,16 +2,12 @@ package com.rick.db.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.rick.db.constant.BaseEntityConstants;
-import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.time.Instant;
 
 /**
  * @author Rick
@@ -21,31 +17,18 @@ import java.time.Instant;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BaseEntityWithAssign {
+public class SimpleEntity {
 
-    @Id(strategy = Id.GenerationType.ASSIGN)
+    @Id
     @JsonSerialize(using = ToStringSerializer.class)
-    private String id;
-
-    @Column(updatable = false)
-    private Long createdBy;
-
-    @Column(updatable = false)
-    private Instant createdAt;
-
-    private Long updatedBy;
-
-    private Instant updatedAt;
-
-    @Column(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME)
-    private Boolean deleted;
+    private Long id;
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        if (obj instanceof BaseEntityWithAssign) {
-            BaseEntityWithAssign dataEntity = (BaseEntityWithAssign)obj ;
+        if (obj instanceof SimpleEntity) {
+            SimpleEntity dataEntity = (SimpleEntity)obj ;
             if (dataEntity.id != null && dataEntity.id.equals(id))
                 return true;
         }

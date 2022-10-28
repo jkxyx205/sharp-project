@@ -2,7 +2,7 @@ package com.rick.demo.db;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.rick.db.constant.EntityConstants;
+import com.rick.db.constant.BaseEntityConstants;
 import com.rick.demo.module.project.dao.ProjectMapDAO;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
@@ -181,7 +181,7 @@ public class BaseDAOImplTest2 {
         project.put("address", Address.builder().code("001").detail("苏州").build());
         project.put("list", Lists.newArrayList(Address.builder().code("001").detail("苏州").build()));
         project.put("phone_number", PhoneNumber.builder().code("816").number("18888888888").build());
-        project.put(EntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
+        project.put(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return project;
     }
 

@@ -2,7 +2,7 @@ package com.rick.db.plugin;
 
 import com.google.common.collect.Maps;
 import com.rick.db.config.SharpDatabaseProperties;
-import com.rick.db.constant.EntityConstants;
+import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.dto.PageModel;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -184,7 +184,7 @@ public final class SQLUtils {
         for (String subTable : subTables) {
             delete(subTable, refColumnName, deleteValues);
         }
-        return delete(masterTable, EntityConstants.ID_COLUMN_NAME, deleteValues, conditionParams, conditionSQL);
+        return delete(masterTable, BaseEntityConstants.ID_COLUMN_NAME, deleteValues, conditionParams, conditionSQL);
     }
 
     /**
@@ -388,11 +388,11 @@ public final class SQLUtils {
         return String.format("INSERT INTO %s(%s) VALUES(%s)",
                 tableName,
                 columnNames,
-                StringUtils.join(Collections.nCopies(columnNames.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX).length, "?"), ","));
+                StringUtils.join(Collections.nCopies(columnNames.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX).length, "?"), ","));
     }
 
     private static String getUpdateSQL(String tableName, String columnNames, String conditionSQL) {
-        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX), " = ?,") + " = ? WHERE " + conditionSQL;
+        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX), " = ?,") + " = ? WHERE " + conditionSQL;
     }
 
     /**

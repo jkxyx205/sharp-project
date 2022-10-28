@@ -11,10 +11,7 @@ import com.rick.common.util.*;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
 import com.rick.db.config.SharpDatabaseProperties;
-import com.rick.db.constant.EntityConstants;
-import com.rick.db.dto.BaseEntity;
-import com.rick.db.dto.BaseEntityWithAssign;
-import com.rick.db.dto.BaseEntityWithIdentity;
+import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
@@ -107,7 +104,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     public BaseDAOImpl(String tableName, String columnNames, String primaryColumn) {
-        this.tableMeta = new TableMeta(null, null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+        this.tableMeta = new TableMeta(null, null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, primaryColumn, Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
         this.init();
     }
 
@@ -156,6 +153,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         int count  = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), params);
         cascadeInsertOrUpdate(t);
+        BaseDAOThreadLocalValue.removeAll();
         return count;
     }
 
@@ -268,7 +266,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         Assert.hasText(deleteColumn, "deleteColumn不能为空");
         Object[] objects = handleConditionAdvice();
         if (hasSubTables()) {
-            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deleteValues,  (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
+            return SQLUtils.deleteCascade(tableMeta.getTableName(), subTableRefColumnName, deleteValues, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
         }
         return SQLUtils.delete(tableMeta.getTableName(), deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
     }
@@ -326,12 +324,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 if (thirdPartyTableCollect.contains(subTable)) {
                     SQLUtils.delete(subTable, subTableRefColumnName, Arrays.asList(id));
                 } else {
-                    update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
+                    update(subTable, null, BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
                 }
             }
         }
 
-        return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, tableMeta.getIdColumnName() + " = ?");
+        return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, tableMeta.getIdColumnName() + " = ?");
     }
 
     /**
@@ -342,7 +340,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(String ids) {
         Assert.hasText(ids, "id不能为空");
-        return deleteLogicallyByIds(Arrays.asList(ids.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX)));
+        return deleteLogicallyByIds(Arrays.asList(ids.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX)));
     }
 
     /**
@@ -364,12 +362,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 if (thirdPartyTableCollect.contains(subTable)) {
                     SQLUtils.delete(subTable, subTableRefColumnName, ids);
                 } else {
-                    update(subTable, null, EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+                    update(subTable, null, BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
                 }
             }
         }
 
-        return update(EntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, tableMeta.getIdColumnName() + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+        return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, tableMeta.getIdColumnName() + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
     }
 
     @Override
@@ -406,6 +404,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         cascadeInsertOrUpdate(t);
+        BaseDAOThreadLocalValue.removeAll();
         Object[] objects = resolverParamsAndId(t);
         return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Long) objects[1]);
     }
@@ -423,7 +422,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         cascadeInsertOrUpdate(t);
-
+        BaseDAOThreadLocalValue.removeAll();
         List<String> updateColumnNames = convertToArray(tableMeta.getUpdateColumnNames());
         int size = updateColumnNames.size();
 
@@ -460,6 +459,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             conditionSQL = (String) finalObjects[1];
             cascadeInsertOrUpdate(t);
         }
+
+        BaseDAOThreadLocalValue.removeAll();
         return SQLUtils.update(tableMeta.getTableName(), tableMeta.getUpdateColumnNames(), paramsList, conditionSQL);
     }
 
@@ -802,10 +803,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName) {
-        Map<Long, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(EntityConstants.ID_COLUMN_NAME)).collect(Collectors.toSet()));
+        Map<Long, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(tableMeta.getIdPropertyName())).collect(Collectors.toSet()));
 
         for (Map<String, Object> row : masterData) {
-            List<T> subTableList = refColumnNameMap.get(row.get(EntityConstants.ID_COLUMN_NAME));
+            List<T> subTableList = refColumnNameMap.get(row.get(tableMeta.getIdPropertyName()));
             row.put(property, CollectionUtils.isEmpty(subTableList) ? Collections.emptyList() : subTableList);
         }
     }
@@ -820,7 +821,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 return (Long)propertyValue;
             }
 
-            return (Long)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), EntityConstants.ID_COLUMN_NAME));
+            return (Long)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), tableMeta.getIdPropertyName()));
 
         }));
         return refColumnNameMap;
@@ -849,7 +850,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String propertyName = columnNameToPropertyNameMap.get(columnName);
             Object propertyValue = getPropertyValue(t, propertyName);
             if (Objects.nonNull(propertyValue)) {
-                if (propertyValue instanceof BaseEntity || propertyValue instanceof BaseEntityWithIdentity || propertyValue instanceof BaseEntityWithAssign) {
+                if (isEntity(propertyValue.getClass())) {
                     propertyValue = getIdValue(propertyValue);
                 }
 
@@ -896,7 +897,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 this.entityClass = Map.class;
             } else {
                 TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
-                this.subTableRefColumnName = tableMeta.getName() + "_" + EntityConstants.ID_COLUMN_NAME;
+                this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdPropertyName();
                 this.propertyList = convertToArray(tableMeta.getProperties());
                 this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
                 this.entityFields = ReflectUtils.getAllFields(this.entityClass);
@@ -911,7 +912,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 }
 
                 if (Objects.nonNull(this.tableMeta)) {
-                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getId(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
+                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getId(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), this.tableMeta.getIdPropertyName(),tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
                 } else {
                     this.tableMeta = tableMeta;
                 }
@@ -989,7 +990,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 strategy = tableMeta.getId().strategy();
             }
             Long id = strategy == SEQUENCE ? IdGenerator.getSequenceId() : null;
-            Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill(id) : columnAutoFill.updateFill();
+            Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill(tableMeta.getIdPropertyName(), id) : columnAutoFill.updateFill();
 
             for (Map.Entry<String, Object> en : fill.entrySet()) {
                 String fillColumnName = en.getKey();
@@ -1017,7 +1018,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private List<String> convertToArray(String values) {
-        return Arrays.asList(values.split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
+        return Arrays.asList(values.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
     }
 
     private void initFullColumnNames() {
@@ -1049,13 +1050,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 return BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getReadMethod().invoke(t);
             }
         } catch (Exception e) {
+            log.error("Cannot get ["+propertyName+"] value, may you lost " + t.getClass().getSimpleName() + "DAO or lost ["+propertyName+"] property for class ["+t.getClass().getSimpleName()+"]");
             e.printStackTrace();
         }
         return null;
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
-        if (field.getType() == Long.class && propertyValue instanceof BaseEntity) {
+        if (field.getType() == Long.class && propertyValue != null && isEntity(propertyValue.getClass())) {
             propertyValue = this.getIdValue(propertyValue);
         }
 
@@ -1134,10 +1136,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             } else {
                 return toJson(value);
             }
-        } else if (BaseEntity.class.isAssignableFrom(value.getClass())
-        || BaseEntityWithAssign.class.isAssignableFrom(value.getClass())
-        || BaseEntityWithIdentity.class.isAssignableFrom(value.getClass())) {
-            return getIdValue(value);
         } else if (value.getClass().isArray()) {
             int length = Array.getLength(value);
             if (length == 0) {
@@ -1150,6 +1148,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             return values.deleteCharAt(values.length() - 1);
+        } else if (isEntity(value.getClass())){ // 实体对象
+            return getIdValue(value);
         }
 
         // JDBC 支持类型
@@ -1314,7 +1314,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
-
+            if (subTableBaseDAO == null) {
+                throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
+            }
 
             Set<Long> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
             Map<Long, List<?>> subTableData = subTableBaseDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
@@ -1414,27 +1416,24 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private void cascadeInsertOrUpdate(List<T> instanceList) {
         for (T t : instanceList) {
-            cascadeInsertOrUpdate(t, false);
+            cascadeInsertOrUpdate(t);
         }
+        BaseDAOThreadLocalValue.removeAll();
     }
 
     private void cascadeInsertOrUpdate(T t) {
-        cascadeInsertOrUpdate(t, true);
-    }
-
-    private void cascadeInsertOrUpdate(T t, boolean sync) {
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
             if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate()) {
                 continue;
             }
-            if (sync) {
-                String storeKey = "InsertOrUpdate:" + oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue();
-                if (BaseDAOThreadLocalValue.remove(storeKey)) {
-                    continue;
-                }
-                BaseDAOThreadLocalValue.add(storeKey);
+
+            String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue() + ":InsertOrUpdate";
+            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+                continue;
             }
+            BaseDAOThreadLocalValue.add(storeKey);
+
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -1490,15 +1489,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             if (!manyToOneProperty.getManyToOne().cascadeSaveOrUpdate()) {
                 continue;
             }
-            if (sync) {
-                String refColumnName = manyToOneProperty.getManyToOne().value();
-                String storeKey = "InsertOrUpdate:" + getTableName() + ":" + refColumnName;
 
-                if (BaseDAOThreadLocalValue.remove(storeKey)) {
-                    continue;
-                }
-                BaseDAOThreadLocalValue.add(storeKey);
+            String refColumnName = manyToOneProperty.getManyToOne().value();
+            String storeKey =  getTableName() + ":" + refColumnName + ":InsertOrUpdate:";
+
+            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+                continue;
             }
+            BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
             BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -1539,7 +1537,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         if (Objects.isNull(o)) {
             return null;
         }
-        return (Long) getPropertyValue(o, EntityConstants.ID_COLUMN_NAME);
+        return (Long) getPropertyValue(o, tableMeta.getIdPropertyName());
     }
 
     private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
@@ -1565,6 +1563,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         String updateSQL = "UPDATE " + tableMeta.getTableName() + " SET " + updateColumnNameBuilder + " WHERE " + newConditionSQL;
         return updateSQL;
+    }
+
+    private boolean isEntity(Class clazz) {
+        return BaseDAOManager.entitiesClass.contains(clazz);
     }
 
     private List<T> selectByIdsWithSpecifiedValue(Object ids) {

@@ -1,7 +1,7 @@
 package com.rick.db.plugin.dao.support;
 
 import com.google.common.collect.Maps;
-import com.rick.db.constant.EntityConstants;
+import com.rick.db.constant.BaseEntityConstants;
 
 import java.time.Instant;
 import java.util.Map;
@@ -13,13 +13,13 @@ import java.util.Map;
 public class DefaultColumnAutoFill implements ColumnAutoFill {
 
     @Override
-    public Map<String, Object> insertFill(Long id) {
+    public Map<String, Object> insertFill(String idPropertyName, Long id) {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(4);
         Instant now = Instant.now();
-        fillMap.put(EntityConstants.ID_COLUMN_NAME, id);
-        fillMap.put(EntityConstants.CREATED_AT_COLUMN_NAME, now);
-        fillMap.put(EntityConstants.UPDATED_AT_COLUMN_NAME, now);
-        fillMap.put(EntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
+        fillMap.put(idPropertyName, id);
+        fillMap.put(BaseEntityConstants.CREATED_AT_COLUMN_NAME, now);
+        fillMap.put(BaseEntityConstants.UPDATED_AT_COLUMN_NAME, now);
+        fillMap.put(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return fillMap;
     }
 
@@ -27,8 +27,8 @@ public class DefaultColumnAutoFill implements ColumnAutoFill {
     public Map<String, Object> updateFill() {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(2);
         Instant now = Instant.now();
-        fillMap.put(EntityConstants.UPDATED_AT_COLUMN_NAME, now);
-        fillMap.put(EntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
+        fillMap.put(BaseEntityConstants.UPDATED_AT_COLUMN_NAME, now);
+        fillMap.put(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return fillMap;
     }
 }

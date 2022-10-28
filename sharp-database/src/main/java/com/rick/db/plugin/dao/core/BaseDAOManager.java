@@ -7,10 +7,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +23,8 @@ public class BaseDAOManager {
     public static Map<Class, BaseDAO> baseDAOEntityMap;
 
     public static Map<Class, Map<String, PropertyDescriptor>> entityPropertyDescriptorMap;
+
+    public static Set<Class> entitiesClass = new HashSet<>();
 
     private static boolean hasAutowired = false;
 
@@ -52,6 +51,7 @@ public class BaseDAOManager {
                 }
 
                 entityPropertyDescriptorMap.put(baseDAO.getEntity(), propertyDescriptorMap);
+                entitiesClass.add(baseDAO.getEntity());
             }
 
             BaseDAOManager.hasAutowired = true;

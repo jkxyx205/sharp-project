@@ -23,6 +23,10 @@ public class BaseDAOThreadLocalValue {
         return threadLocalContainer.get().remove(ignoreMapping);
     }
 
+    public static void removeAll() {
+        threadLocalContainer.remove();
+    }
+
     public static void removeByTableName(String tableName) {
         Iterator<String> iterator = threadLocalContainer.get().iterator();
         while (iterator.hasNext()) {

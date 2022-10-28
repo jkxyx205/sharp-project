@@ -1,7 +1,7 @@
 package com.rick.db.plugin.dao.core;
 
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
-import com.rick.db.constant.EntityConstants;
+import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
@@ -40,14 +40,22 @@ public class TableGenerator {
         }
 
         StringBuilder createTableSql = new StringBuilder("create table ");
+
+        Id.GenerationType strategy;
+        if (tableMeta.getId() == null) {
+            strategy = Id.GenerationType.SEQUENCE;
+        } else {
+            strategy =  tableMeta.getId().strategy();
+        }
+
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
-                .append(""+(tableMeta.getId().strategy() == Id.GenerationType.ASSIGN ? "id varchar(32)" : "id bigint")+" not null"+ (tableMeta.getId().strategy() == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
+                .append(""+(strategy == Id.GenerationType.ASSIGN ? "id varchar(32)" : "id bigint")+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
-        List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(EntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
+        List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
 
         for (String columnName : columnNames) {
-            if (EntityConstants.ID_COLUMN_NAME.equals(columnName)) {
+            if (tableMeta.getIdPropertyName().equals(columnName)) {
                 continue;
             }
 

@@ -1,6 +1,6 @@
 package com.rick.db.plugin.dao.support;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.SimpleEntity;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
@@ -8,18 +8,18 @@ import org.springframework.core.convert.converter.ConverterFactory;
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */
-final public class IdToEntityConverterFactory implements ConverterFactory<Object, BaseEntity> {
+final public class IdToEntityConverterFactory implements ConverterFactory<Object, SimpleEntity> {
 
     @Override
-    public <T extends BaseEntity> Converter<Object, T> getConverter(Class<T> targetType) {
+    public <T extends SimpleEntity> Converter<Object, T> getConverter(Class<T> targetType) {
         return new IdToEntityConverterFactory.IdToEntity(targetType);
     }
 
-    private static class IdToEntity<T extends BaseEntity> implements Converter<Object, T> {
+    private static class IdToEntity<T extends SimpleEntity> implements Converter<Object, T> {
 
         private Class<?> targetType;
 
-        public <T extends BaseEntity> IdToEntity(Class<T> targetType) {
+        public <T extends SimpleEntity> IdToEntity(Class<T> targetType) {
             this.targetType = targetType;
         }
 

@@ -11,7 +11,7 @@ public interface ColumnAutoFill {
      * 将填充的字段返回
      * @return
      */
-    Map<String, Object> insertFill(Long id);
+    Map<String, Object> insertFill(String idPropertyName, Long id);
 
     /**
      * 将填充的字段返回

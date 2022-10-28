@@ -13,7 +13,7 @@ public class ProjectMapDAO extends BaseDAOImpl {
 
     public ProjectMapDAO() {
         super("t_project3",
-                "title,description,cover_url,owner_id,sex,address,status,list,id,created_by,created_at,updated_by,updated_at,is_deleted",
+                "title,description,cover_url,owner_id,sex,address,status,list,created_by,created_at,updated_by,updated_at,is_deleted,id",
                 "id");
     }
 }

@@ -1,7 +1,6 @@
 package com.rick.common.http.json.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -13,13 +12,59 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
+ * 自定义枚举解析器替换默认的枚举：枚举要遵循固定的格式：
+ * <p>
+ *     <b>1. name作为code</b>
+ *     <blockquote><pre>
+ *    {@literal @}AllArgsConstructor
+ *    {@literal @}Getter
+ *     public enum TypeEnum {
+ *         PRIVATE("私立"),
+ *         PUBLIC("公立");
+ *
+ *        {@literal @}JsonValue
+ *         public String getCode() {
+ *             return this.name();
+ *         }
+ *         private final String label;
+ *         public static TypeEnum valueOfCode(String code) {
+ *             return valueOf(code);
+ *         }
+ *     }</pre></blockquote>
+ *     <b>2. 自定义数字code</b>
+ *     <blockquote><pre>
+ *    {@literal @}AllArgsConstructor
+ *    {@literal @}Getter
+ *     public enum SexEnum {
+ *         UNKNOWN(0, "Unknown"),
+ *         MALE(1, "Male"),
+ *         FEMALE(2, "Female");
+ *         private static final Map<Integer, SexEnum> codeMap = new HashMap<>();
+ *         static {
+ *             for (SexEnum e : values()) {
+ *                 codeMap.put(e.code, e);
+ *             }
+ *         }
+ *         private final int code;
+ *         private final String label;
+ *        {@literal @}JsonValue
+ *         public int getCode() {
+ *             return this.code;
+ *         }
+ *         public static SexEnum valueOfCode(int code) {
+ *             return codeMap.get(code);
+ *         }
+ *     }
+ *     </pre></blockquote>
+ *
+ * </p>
  * @author Rick
  * @createdAt 2021-10-11 21:56:00
  */
 public class EnumJsonDeserializer extends JsonDeserializer<Enum> {
 
     @Override
-    public Enum deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public Enum deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
         String code = node.asText();
 

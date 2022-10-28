@@ -49,9 +49,14 @@ class TableMeta {
     private String updateProperties;
 
     /**
-     * id属性名
+     * id字段名
      */
     private String idColumnName;
+
+    /**
+     * id属性名
+     */
+    private String idPropertyName;
 
     /**
      * 子表
