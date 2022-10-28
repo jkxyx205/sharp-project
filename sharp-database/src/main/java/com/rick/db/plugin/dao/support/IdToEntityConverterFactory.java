@@ -8,14 +8,14 @@ import org.springframework.core.convert.converter.ConverterFactory;
  * @author Rick
  * @createdAt 2021-10-11 20:28:00
  */
-final public class IdToEntityConverterFactory implements ConverterFactory<Long, BaseEntity> {
+final public class IdToEntityConverterFactory implements ConverterFactory<Object, BaseEntity> {
 
     @Override
-    public <T extends BaseEntity> Converter<Long, T> getConverter(Class<T> targetType) {
+    public <T extends BaseEntity> Converter<Object, T> getConverter(Class<T> targetType) {
         return new IdToEntityConverterFactory.IdToEntity(targetType);
     }
 
-    private static class IdToEntity<T extends BaseEntity> implements Converter<Long, T> {
+    private static class IdToEntity<T extends BaseEntity> implements Converter<Object, T> {
 
         private Class<?> targetType;
 
@@ -24,10 +24,18 @@ final public class IdToEntityConverterFactory implements ConverterFactory<Long, 
         }
 
         @Override
-        public T convert(Long id) {
+        public T convert(Object id) {
+            if (id == null) {
+                return (T) id;
+            }
+
             try {
                 T t = (T) targetType.newInstance();
-                t.setId(id);
+                if (id.getClass() == Long.class) {
+                    t.setId((Long) id);
+                } else if (id.getClass() == String.class) {
+                    t.setId(Long.parseLong((String) id));
+                }
                 return t;
             } catch (Exception e) {
                 return null;

@@ -59,7 +59,11 @@ public final class SQLUtils {
      * @return INSERT INTO t_xx(id, namme) VALUES(?, ?)
      */
     public static int insert(String tableName, String columnNames, Object[] params) {
-        return SQLUtils.JDBC_TEMPLATE.update(getInsertSQL(tableName, columnNames),params);
+        String insertSQL = getInsertSQL(tableName, columnNames);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL=> [{}], args:=> [{}]", insertSQL, params);
+        }
+        return SQLUtils.JDBC_TEMPLATE.update(insertSQL,params);
     }
 
     /**
@@ -70,7 +74,11 @@ public final class SQLUtils {
      * @return
      */
     public static int[] insert(String tableName, String columnNames, List<Object[]> paramsList) {
-        return SQLUtils.JDBC_TEMPLATE.batchUpdate(getInsertSQL(tableName, columnNames), paramsList);
+        String insertSQL = getInsertSQL(tableName, columnNames);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL=> [{}], args:=> [{}]", insertSQL, paramsList);
+        }
+        return SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, paramsList);
     }
 
     /**
@@ -115,7 +123,11 @@ public final class SQLUtils {
      * @return
      */
     public static int[] update(String tableName, String updateColumnNames, List<Object[]> paramsList, String conditionSQL) {
-        return SQLUtils.JDBC_TEMPLATE.batchUpdate(getUpdateSQL(tableName, updateColumnNames, conditionSQL), paramsList);
+        String updateSQL = getUpdateSQL(tableName, updateColumnNames, conditionSQL);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL=> [{}], args:=> [{}]", updateSQL, paramsList);
+        }
+        return SQLUtils.JDBC_TEMPLATE.batchUpdate(updateSQL, paramsList);
     }
 
     /**
