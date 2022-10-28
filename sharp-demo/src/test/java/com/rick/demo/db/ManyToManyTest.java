@@ -26,7 +26,7 @@ public class ManyToManyTest {
 
     @AfterAll
     public static void init() {
-        SQLUtils.deleteNotIn("t_person", "id", Arrays.asList(552098712424472576L, 552100575806939136L));
+        SQLUtils.deleteNotIn("t_person", "id", Arrays.asList(552098712424472576L, 552100575806939136L, 617327246029365249L));
         SQLUtils.deleteNotIn("t_person_role", "person_id", Arrays.asList(552098712424472576L, 552100575806939136L));
     }
 

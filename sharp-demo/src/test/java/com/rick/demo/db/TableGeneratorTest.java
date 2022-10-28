@@ -29,6 +29,8 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Worker.class);
 //        tableGenerator.createTable(Farmer.class);
 //        tableGenerator.createTable(Material.class);
+//        tableGenerator.createTable(Tag.class);
+//        tableGenerator.createTable(Book.class);
     }
 
 }

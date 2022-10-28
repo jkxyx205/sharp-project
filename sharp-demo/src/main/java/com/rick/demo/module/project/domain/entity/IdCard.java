@@ -31,4 +31,5 @@ public class IdCard extends BaseEntity {
      */
     @OneToMany(subTable = "t_person", joinValue = "id_card_id", cascadeSaveOrUpdate = true, oneToOne = true, reversePropertyName = "idCard")
     private Person person;
+
 }
