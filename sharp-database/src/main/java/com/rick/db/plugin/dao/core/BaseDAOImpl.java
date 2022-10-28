@@ -95,6 +95,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private Map<String, String> columnNameToPropertyNameMap;
 
+    private Map<String, String> propertyNameToColumnNameMap;
+
     public BaseDAOImpl() {
         this.init();
     }
@@ -928,8 +930,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         if (CollectionUtils.isNotEmpty(propertyList)) {
             columnNameToPropertyNameMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
+            propertyNameToColumnNameMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
             for (int i = 0; i < columnNameList.size(); i++) {
                 columnNameToPropertyNameMap.put(columnNameList.get(i), propertyList.get(i));
+                propertyNameToColumnNameMap.put(propertyList.get(i),  columnNameList.get(i));
             }
         }
 
@@ -1309,7 +1313,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
 
 
             Set<Long> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
@@ -1329,7 +1333,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
         //region ManyToOne
         for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
-            String refColumnName = manyToOneProperty.getManyToOne().value();
+            String refColumnName = StringUtils.isBlank(manyToOneProperty.getManyToOne().value()) ? propertyNameToColumnNameMap.get(manyToOneProperty.getField().getName()) : manyToOneProperty.getManyToOne().value();
             String storeKey = getTableName() + ":" + refColumnName;
 
             if (BaseDAOThreadLocalValue.remove(storeKey)) {
@@ -1338,7 +1342,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            BaseDAO parentTableDAO = BaseDAOManager.baseDAOMap.get(targetTable);
+            BaseDAO parentTableDAO = BaseDAOManager.baseDAOTableNameMap.get(targetTable);
 
             Set<Long> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
@@ -1376,7 +1380,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String thirdPartyTable = manyToManyProperty.getManyToMany().thirdPartyTable();
             String referenceTable = manyToManyProperty.getManyToMany().referenceTable();
 
-            BaseDAO referenceTableDAO =  BaseDAOManager.baseDAOMap.get(referenceTable);
+            BaseDAO referenceTableDAO =  BaseDAOManager.baseDAOTableNameMap.get(referenceTable);
 
             List<Map<String, Object>> refMapData = sharpService.query(String.format("select %s, %s from %s  where %s in (:value)",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
@@ -1387,7 +1391,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 refIds.add((Long) row.get(referenceColumnName));
             }
 
-            Map<Long, ?> referenceMap = referenceTableDAO.selectByIdsAsMap(refIds);
+            Map<Long, ?> referenceMap = refMapData.isEmpty() ? Collections.emptyMap() : referenceTableDAO.selectByIdsAsMap(refIds);
 
             Map<Long, List<Object>> referenceListMap = Maps.newHashMap();
 
@@ -1433,7 +1437,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
 
             List<?> subDataList;
             Class subClass;
@@ -1497,7 +1501,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOMap.get(targetTable);
+            BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 parentTableBaseDAO.insertOrUpdate(targetObject);

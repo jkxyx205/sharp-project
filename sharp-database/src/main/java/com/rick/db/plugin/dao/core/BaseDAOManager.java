@@ -21,7 +21,9 @@ public class BaseDAOManager {
 
     public static List<BaseDAO> baseDAOList;
 
-    public static Map<String, BaseDAO> baseDAOMap;
+    public static Map<String, BaseDAO> baseDAOTableNameMap;
+
+    public static Map<Class, BaseDAO> baseDAOEntityMap;
 
     public static Map<Class, Map<String, PropertyDescriptor>> entityPropertyDescriptorMap;
 
@@ -31,7 +33,8 @@ public class BaseDAOManager {
         if (!hasAutowired) {
             baseDAOList = Objects.isNull(baseDAOList) ? Collections.emptyList() : baseDAOList;
             BaseDAOManager.baseDAOList = baseDAOList;
-            BaseDAOManager.baseDAOMap = Objects.nonNull(baseDAOList) ? BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getTableName(), v -> v)) : Collections.emptyMap();
+            BaseDAOManager.baseDAOTableNameMap = Objects.nonNull(baseDAOList) ? BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getTableName(), v -> v)) : Collections.emptyMap();
+            BaseDAOManager.baseDAOEntityMap = Objects.nonNull(baseDAOList) ? BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getEntity(), v -> v)) : Collections.emptyMap();
             BaseDAOManager.entityPropertyDescriptorMap = Maps.newHashMapWithExpectedSize(baseDAOList.size());
 
             for (BaseDAO baseDAO : baseDAOList) {
