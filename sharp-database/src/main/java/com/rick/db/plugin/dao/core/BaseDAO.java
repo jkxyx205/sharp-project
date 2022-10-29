@@ -136,6 +136,8 @@ public interface BaseDAO<T> {
 
     Class getEntity();
 
+    String getIdColumnName();
+
     Map<String, Object> entityToMap(T t);
 
     /**

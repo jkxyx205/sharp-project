@@ -50,7 +50,7 @@ public class TableGenerator {
 
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
-                .append(""+(strategy == Id.GenerationType.ASSIGN ? "id varchar(32)" : "id bigint")+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
+                .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" bigint")+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
         List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
 

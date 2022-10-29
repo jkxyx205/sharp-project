@@ -32,6 +32,7 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Tag.class);
 //        tableGenerator.createTable(Book.class);
 //        tableGenerator.createTable(Message.class);
+//        tableGenerator.createTable(Message2.class);
     }
 
 }

@@ -284,7 +284,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         Object[] objects = handleConditionAdvice(params, conditionSQL, false);
         if (hasSubTables()) {
             List<Long> deletedIds = sharpService.getNamedJdbcTemplate().getJdbcTemplate()
-                    .queryForList("SELECT id FROM " + getTableName() + " WHERE " + objects[1], Long.class, (Object[]) objects[0]);
+                    .queryForList("SELECT "+getIdColumnName()+" FROM " + getTableName() + " WHERE " + objects[1], Long.class, (Object[]) objects[0]);
             if (CollectionUtils.isEmpty(deletedIds)) {
                 return 0;
             }
@@ -529,7 +529,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     public Optional<T> selectById(Long id) {
         Assert.notNull(id, "id cannot be null");
         Map<String, Object> params = Params.builder(1)
-                .pv(tableMeta.getIdColumnName(), id)
+                .pv("id", id)
                 .build();
 
         List<T> list = selectByParams(params, tableMeta.getIdColumnName() + " = :id");
@@ -538,18 +538,18 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public Map<Long, T> selectByIdsAsMap(String ids) {
-        return listToMap(selectByIds(ids));
+        return listToIdMap(selectByIds(ids));
     }
 
     @Override
     public Map<Long, T> selectByIdsAsMap(Long ...ids) {
-        return listToMap(selectByIds(ids));
+        return listToIdMap(selectByIds(ids));
     }
 
     @Override
     public Map<Long, T> selectByIdsAsMap(Collection<?> ids) {
         List<T> list = selectByIds(ids);
-        return listToMap(list);
+        return listToIdMap(list);
     }
 
     /**
@@ -666,7 +666,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     public Optional<Long> selectIdByParams(T t, String conditionSQL) {
-        List<Long> ids = selectByParams(entityToMap(t), "id", conditionSQL, sql -> sql, Long.class);
+        List<Long> ids = selectByParams(entityToMap(t), tableMeta.getIdColumnName(), conditionSQL, sql -> sql, Long.class);
         return expectedAsOptional(ids);
     }
 
@@ -677,7 +677,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public List<Long> selectIdsByParams(Map<String, ?> params, String conditionSQL) {
-        return selectByParams(params, "id", conditionSQL, sql -> sql, Long.class);
+        return selectByParams(params, tableMeta.getIdColumnName(), conditionSQL, sql -> sql, Long.class);
     }
 
     @Override
@@ -688,8 +688,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     public void checkId(Long id, Map<String, Object> params, String condition) {
         com.rick.common.http.exception.Assert.notNull(id, "id cannot be null");
-        if (!existsByParams(Params.builder(1 + params.size()).pv("id", id).pvAll(params).build(), "id = :id" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
-            throw new BizException(ResultUtils.exception(404, "id=" + id + " +不存在", id));
+        if (!existsByParams(Params.builder(1 + params.size()).pv("id", id).pvAll(params).build(), getIdColumnName() +" = :id" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
+            throw new BizException(ResultUtils.exception(404, ""+getIdColumnName()+"=" + id + " +不存在", id));
         }
     }
 
@@ -701,10 +701,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     public void checkIds(Collection<Long> ids, Map<String, Object> params, String condition) {
         com.rick.common.http.exception.Assert.state(CollectionUtils.isNotEmpty(ids), "ids cannot be empty");
-        List<Long> idsInDB = sharpService.query("SELECT id FROM " + getTableName() + " WHERE id in (:ids)" + (StringUtils.isBlank(condition) ? "" : " AND " + condition), Params.builder(1 + params.size()).pv("ids", ids).pvAll(params).build(), Long.class);
+        List<Long> idsInDB = sharpService.query("SELECT "+getIdColumnName()+" FROM " + getTableName() + " WHERE "+getIdColumnName()+" IN (:ids)" + (StringUtils.isBlank(condition) ? "" : " AND " + condition), Params.builder(1 + params.size()).pv("ids", ids).pvAll(params).build(), Long.class);
         SetUtils.SetView<Long> difference = SetUtils.difference(Sets.newHashSet(ids), Sets.newHashSet(idsInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
-            throw new BizException(ResultUtils.exception(404, "id=" + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
+            throw new BizException(ResultUtils.exception(404, ""+getIdColumnName()+"=" + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
         }
     }
 
@@ -864,6 +864,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Override
     public Class getEntity() {
         return entityClass;
+    }
+
+    @Override
+    public String getIdColumnName() {
+        return tableMeta.getIdColumnName();
     }
 
     @Override
@@ -1171,12 +1176,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     private String resolveUpdateColumnNames(String columnNames, String primaryColumn) {
-        // \bid\b\s*,?
         String updateColumnNames = columnNames.replaceAll("(?i)(\\b" + primaryColumn + "\\b\\s*,?)", "").trim();
         return updateColumnNames.endsWith(",") ? updateColumnNames.substring(0, updateColumnNames.length() - 1) : updateColumnNames;
     }
 
-    private Map<Long, T> listToMap(List<T> list) {
+    private Map<Long, T> listToIdMap(List<T> list) {
         return list.stream().collect(Collectors.toMap(t -> (isMapClass()) ? (Long) ((Map) t).get(tableMeta.getIdColumnName()) : (Long) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
     }
 
@@ -1212,7 +1216,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             System.arraycopy(params, 0, mergedParams, 0, params.length);
         }
 
-        return new Object[] {mergedParams, "id = ?"};
+        return new Object[] {mergedParams, ""+getIdColumnName()+" = ?"};
     }
 
     private Object[] handleConditionAdvice() {
@@ -1384,7 +1388,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             BaseDAO referenceTableDAO =  BaseDAOManager.baseDAOTableNameMap.get(referenceTable);
 
-            List<Map<String, Object>> refMapData = sharpService.query(String.format("select %s, %s from %s  where %s in (:value)",
+            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value)",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
             ), Params.builder(1).pv("value", columnIds).build());
 
@@ -1474,7 +1478,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                     SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
                 } else {
                     // 删除 除id之外的其他记录
-                    SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), "id",
+                    SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), subTableBaseDAO.getIdColumnName(),
                             deletedIds, new Object[] {refId} , refColumnName + " = ?");
                 }
             }

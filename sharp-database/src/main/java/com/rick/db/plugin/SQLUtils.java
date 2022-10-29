@@ -81,21 +81,26 @@ public final class SQLUtils {
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, paramsList);
     }
 
+    public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id) {
+        return update(tableName, updateColumnNames, params, id, "id");
+    }
+
     /**
      * 根据id更新内容
      * @param tableName  t_xx
      * @param updateColumnNames a, b, c
      * @param params set的参数
      * @param id 1
+     * @param idColumnName 一般为id
      * UPDATE t_xx SET a = ?, b = ?, c = ? WHERE id = ?
      * @return
      */
-    public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id) {
+    public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id, String idColumnName) {
         Assert.notNull(id, "主键不能为null");
         Object[] mergedParams = new Object[params.length + 1];
         mergedParams[params.length] = id;
         System.arraycopy(params, 0, mergedParams, 0, params.length);
-        return update(tableName, updateColumnNames, mergedParams, "id = ?");
+        return update(tableName, updateColumnNames, mergedParams, ""+idColumnName+" = ?");
     }
 
     /**

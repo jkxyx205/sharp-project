@@ -19,7 +19,6 @@ import java.time.Instant;
 @NoArgsConstructor
 public class BaseEntity extends SimpleEntity {
 
-
     @Column(updatable = false)
     private Long createdBy;
 
