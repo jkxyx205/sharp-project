@@ -32,7 +32,7 @@ public class FileConvertUtils {
         PdfReader reader = new PdfReader(data);
         int pages = reader.getNumberOfPages();
 
-        List<byte[]> dataList = Lists.newArrayListWithCapacity(pages);
+        List<byte[]> dataList = Lists.newArrayListWithExpectedSize(pages);
 
         for (int i = 0; i < pages; i++) {
             BufferedImage image = renderer.renderImageWithDPI(i, dpi);

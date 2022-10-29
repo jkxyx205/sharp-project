@@ -59,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService {
     public List<Document> store(List<FileMeta> fileMetaList, String groupName) throws IOException {
         fileStore.storeFileMeta(fileMetaList, groupName);
 
-        List<Document> documentList = Lists.newArrayListWithCapacity(fileMetaList.size());
+        List<Document> documentList = Lists.newArrayListWithExpectedSize(fileMetaList.size());
         for (FileMeta fileMeta : fileMetaList) {
             documentList.add(parse(fileMeta));
         }

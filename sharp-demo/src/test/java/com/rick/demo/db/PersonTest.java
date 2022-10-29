@@ -34,9 +34,9 @@ public class PersonTest {
     @Order(0)
     public void savePerson() {
         Person person = Person.builder()
-                .name("Rick")
+                .name("Tomcat11")
                 .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()))
-                .idCard(IdCard.builder().idNum("32128787988762").address("江苏").build())
+                .idCard(IdCard.builder().idNum("32128787988762110x").address("江苏").build())
                 .build();
         personDAO.insert(person);
     }
@@ -45,11 +45,11 @@ public class PersonTest {
     @Order(0)
     public void saveCardId() {
         Person person = Person.builder()
-                .name("Rick")
+                .name("Docker")
                 .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()))
                 .build();
 
-        IdCard idCard = IdCard.builder().idNum("32128787988762").address("陕西")
+        IdCard idCard = IdCard.builder().idNum("32128787988762120").address("陕西")
                 .person(person)
                 .build();
 
@@ -72,5 +72,45 @@ public class PersonTest {
         assertThat(idCard.getPerson().getRoleList().get(0).getName()).isEqualTo("admin");
         assertThat(idCard.getPerson().getName()).isEqualTo("Rick");
         assertThat(idCard.getIdNum()).isEqualTo("32128787988762");
+    }
+
+    @Order(3)
+    @Test
+    public void testUpdateAll() {
+        Person person = Person.builder()
+                .id(617762367291449344L)
+                .name("Tomcat")
+                .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()))
+                .idCard(IdCard.builder().id(617762367413084160L).idNum("32128787988762110Y").address("四川").build())
+                .build();
+        personDAO.update(person);
+    }
+
+    @Order(4)
+    @Test
+    public void testUpdateAndInsert() {
+        Person person = Person.builder()
+                .id(617762367291449344L)
+                .name("TomcatNew")
+                .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()))
+                .idCard(IdCard.builder().idNum("32128787988762110Y").address("广州").build())
+                .build();
+        personDAO.update(person);
+    }
+
+    @Order(4)
+    @Test
+    public void testUpdateAndInsert2() {
+        Person person = Person.builder()
+                .name("乾隆")
+                .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()))
+                .build();
+
+        IdCard idCard = IdCard.builder().idNum("32128787988762120").address("广西")
+                .id(617764728776876032L)
+                .person(person)
+                .build();
+
+        idCardDAO.update(idCard);
     }
 }
