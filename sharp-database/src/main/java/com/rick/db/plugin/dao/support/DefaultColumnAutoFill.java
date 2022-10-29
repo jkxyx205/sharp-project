@@ -13,7 +13,7 @@ import java.util.Map;
 public class DefaultColumnAutoFill implements ColumnAutoFill {
 
     @Override
-    public Map<String, Object> insertFill(String idPropertyName, Long id) {
+    public Map<String, Object> insertFill(String idPropertyName, Object id) {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(4);
         Instant now = Instant.now();
         fillMap.put(idPropertyName, id);

@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class TeacherDAO extends BaseDAOImpl<Teacher> {
+public class TeacherDAO extends BaseDAOImpl<Teacher, Long> {
 
 }

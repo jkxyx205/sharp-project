@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class Message2DAO extends BaseDAOImpl<Message2> {
+public class Message2DAO extends BaseDAOImpl<Message2, Long> {
 
 }

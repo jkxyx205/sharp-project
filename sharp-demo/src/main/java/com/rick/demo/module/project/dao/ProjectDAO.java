@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  * @createdAt 2021-09-27 11:50:00
  */
 @Repository
-public class ProjectDAO extends BaseDAOImpl<Project> {
+public class ProjectDAO extends BaseDAOImpl<Project, Long> {
 
 }

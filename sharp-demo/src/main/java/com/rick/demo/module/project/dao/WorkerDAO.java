@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class WorkerDAO extends BaseDAOImpl<Worker> {
+public class WorkerDAO extends BaseDAOImpl<Worker, Long> {
 
 }

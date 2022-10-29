@@ -32,7 +32,7 @@ public class SharpConfig {
     public ColumnAutoFill fill() {
         return new ColumnAutoFill() {
             @Override
-            public Map<String, Object> insertFill(String idPropertyName, Long id) {
+            public Map<String, Object> insertFill(String idPropertyName, Object id) {
                 Map<String, Object> fill = new DefaultColumnAutoFill().insertFill(idPropertyName, id);
                 fill.put("created_by", 0L);
                 fill.put("updated_by", 0L);

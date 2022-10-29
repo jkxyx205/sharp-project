@@ -19,7 +19,7 @@ import java.util.Map;
  */
 
 @Repository
-public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer> {
+public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer, Long> {
 
     @Override
     public List<CpnConfigurer> selectByParams(Map<String, ?> params, String conditionSQL) {

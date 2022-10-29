@@ -15,7 +15,7 @@ import java.util.List;
  */
 
 @Repository
-public class FormCpnDAO extends BaseDAOImpl<FormCpn> {
+public class FormCpnDAO extends BaseDAOImpl<FormCpn, Long> {
 
     public List<FormCpn> listByFormId(Long formId) {
         Assert.notNull(formId, "formId cannot be null");

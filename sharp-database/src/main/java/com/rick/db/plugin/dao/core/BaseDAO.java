@@ -9,7 +9,7 @@ import java.util.Optional;
  * @author Rick
  * @createdAt 2021-10-31 09:29:00
  */
-public interface BaseDAO<T> {
+public interface BaseDAO<T, ID> {
     int insert(T t);
 
     int insertOrUpdate(T t);
@@ -20,11 +20,11 @@ public interface BaseDAO<T> {
 
     int[] insertOrUpdate(Collection<T> entities);
 
-    int deleteById(Long id);
+    int deleteById(ID id);
 
     int deleteByIds(String ids);
 
-    int deleteByIds(Long ...ids);
+    int deleteByIds(ID ...ids);
 
     int deleteByIds(Collection<?> ids);
 
@@ -36,7 +36,7 @@ public interface BaseDAO<T> {
 
     int delete(Map<String, Object> params, String conditionSQL);
 
-    int deleteLogicallyById(Long id);
+    int deleteLogicallyById(ID id);
 
     int deleteLogicallyByIds(String ids);
 
@@ -48,7 +48,7 @@ public interface BaseDAO<T> {
      */
     int deleteAll();
 
-    int update(Object[] params, Long id);
+    int update(Object[] params, ID id);
 
     int update(T t);
 
@@ -56,7 +56,7 @@ public interface BaseDAO<T> {
 
     int[] update(Collection<T> entities);
 
-    int update(String updateColumnNames, Object[] params, Long id);
+    int updateById(String updateColumnNames, Object[] params, ID id);
 
     int update(String updateColumnNames, Object[] params, String conditionSQL);
 
@@ -64,25 +64,25 @@ public interface BaseDAO<T> {
 
     int update(String updateColumnNames, Map<String, Object> params, String conditionSQL);
 
-    Optional<T> selectById(Long id);
+    Optional<T> selectById(ID id);
 
-    Map<Long, T> selectByIdsAsMap(String ids);
+    Map<ID, T> selectByIdsAsMap(String ids);
 
-    Map<Long, T> selectByIdsAsMap(Long ...ids);
+    Map<ID, T> selectByIdsAsMap(ID ...ids);
 
-    Map<Long, T> selectByIdsAsMap(Collection<?> ids);
+    Map<ID, T> selectByIdsAsMap(Collection<?> ids);
 
     List<T> selectByIds(String ids);
 
-    List<T> selectByIds(Long ...ids);
+    List<T> selectByIds(ID ...ids);
 
     List<T> selectByIds(Collection<?> ids);
 
-    Optional<Long> selectIdByParams(T t, String conditionSQL);
+    Optional<ID> selectIdByParams(T t, String conditionSQL);
 
-    List<Long> selectIdsByParams(T t, String conditionSQL);
+    List<ID> selectIdsByParams(T t, String conditionSQL);
 
-    List<Long> selectIdsByParams(Map<String, ?> params, String conditionSQL);
+    List<ID> selectIdsByParams(Map<String, ?> params, String conditionSQL);
 
     List<T> selectByParams(String queryString);
 
@@ -116,17 +116,17 @@ public interface BaseDAO<T> {
 
     <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL);
 
-    void checkId(Long id);
+    void checkId(ID id);
 
-    void checkId(Long id, Map<String, Object> params, String condition);
+    void checkId(ID id, Map<String, Object> params, String condition);
 
-    void checkIds(Collection<Long> ids);
+    void checkIds(Collection<ID> ids);
 
-    void checkIds(Collection<Long> ids, Map<String, Object> params, String condition);
+    void checkIds(Collection<ID> ids, Map<String, Object> params, String condition);
 
     void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName);
 
-    Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
+    Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
 
     String getSelectSQL();
 

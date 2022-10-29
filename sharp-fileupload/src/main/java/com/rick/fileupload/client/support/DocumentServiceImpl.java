@@ -70,7 +70,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void rename(long id, String name) {
-        documentDAO.update("name", new Object[] {name}, id);
+        documentDAO.updateById("name", new Object[] {name}, id);
     }
 
     @Override

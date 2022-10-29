@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  * @createdAt 2022-05-01 09:37:00
  */
 @Repository
-public class IdCardDAO extends BaseDAOImpl<IdCard> {
+public class IdCardDAO extends BaseDAOImpl<IdCard, Long> {
 
 }

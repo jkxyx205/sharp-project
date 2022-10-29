@@ -55,7 +55,7 @@ public class TableGenerator {
         List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
 
         for (String columnName : columnNames) {
-            if (tableMeta.getIdPropertyName().equals(columnName)) {
+            if (tableMeta.getIdColumnName().equals(columnName)) {
                 continue;
             }
 

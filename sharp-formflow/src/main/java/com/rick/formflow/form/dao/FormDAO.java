@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class FormDAO extends BaseDAOImpl<Form> {
+public class FormDAO extends BaseDAOImpl<Form, Long> {
 
 }

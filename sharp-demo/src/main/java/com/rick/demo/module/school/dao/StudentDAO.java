@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
  * @createdAt 2022-05-01 14:32:00
  */
 @Repository
-public class StudentDAO extends BaseDAOImpl<Student> {
+public class StudentDAO extends BaseDAOImpl<Student, Long> {
 
 }

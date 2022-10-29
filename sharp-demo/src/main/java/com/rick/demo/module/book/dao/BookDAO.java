@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class BookDAO extends BaseDAOImpl<Book> {
+public class BookDAO extends BaseDAOImpl<Book, Long> {
 
 }

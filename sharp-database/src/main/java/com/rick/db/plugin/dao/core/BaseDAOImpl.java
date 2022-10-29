@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.rick.db.config.Constants.DB_MYSQL;
+import static com.rick.db.plugin.dao.annotation.Id.GenerationType.ASSIGN;
 import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
 
 /**
@@ -53,7 +54,7 @@ import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
  * @createdAt 2021-09-23 16:41:00
  */
 @Slf4j
-public class BaseDAOImpl<T> implements BaseDAO<T> {
+public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     @Autowired
     protected SharpService sharpService;
@@ -81,6 +82,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     private List<String> updatePropertyList;
 
     private Class<?> entityClass;
+
+    private Class<?> idClass;
 
     private String fullColumnNames;
 
@@ -148,7 +151,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             map.put(this.columnNameList, params[index]);
         } else {
             params = handleAutoFill(t, instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
-            setPropertyValue(t, tableMeta.getIdColumnName(), params[index]);
+            setPropertyValue(t, tableMeta.getIdPropertyName(), params[index]);
         }
 
         int count  = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), params);
@@ -211,7 +214,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int deleteById(Long id) {
+    public int deleteById(ID id) {
         Assert.notNull(id, "id不能为空");
         return deleteByIds(Lists.newArrayList(id));
     }
@@ -230,7 +233,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int deleteByIds(Long ...ids) {
+    public int deleteByIds(ID ...ids) {
         Assert.notEmpty(ids, "id不能为空");
         return deleteByIds(Arrays.asList(ids));
     }
@@ -298,7 +301,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     @Transactional(rollbackFor = Exception.class)
     public int delete(Map<String, Object> params, String conditionSQL) {
         if (hasSubTables()) {
-            List<Long> deletedIds = selectIdsByParams(params, conditionSQL);
+            List<ID> deletedIds = selectIdsByParams(params, conditionSQL);
 
             for (String subTable : tableMeta.getSubTables()) {
                 SQLUtils.delete(subTable, subTableRefColumnName, deletedIds);
@@ -315,7 +318,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int deleteLogicallyById(Long id) {
+    public int deleteLogicallyById(ID id) {
         Assert.notNull(id, "id不能为空");
 
         if (hasSubTables()) {
@@ -387,7 +390,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id
      */
     @Override
-    public int update(Object[] params, Long id) {
+    public int update(Object[] params, ID id) {
         return updateById(null, tableMeta.getUpdateColumnNames(), params, id);
     }
 
@@ -406,7 +409,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         cascadeInsertOrUpdate(t);
         BaseDAOThreadLocalValue.removeAll();
         Object[] objects = resolverParamsAndId(t);
-        return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (Long) objects[1]);
+        return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (ID) objects[1]);
     }
 
     /**
@@ -453,7 +456,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         String conditionSQL = null;
         for (T t : collection) {
             Object[] resolverParamsAndIdObjects = resolverParamsAndId(t);
-            Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (Long) resolverParamsAndIdObjects[1]);
+            Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (ID) resolverParamsAndIdObjects[1]);
             Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
             conditionSQL = (String) finalObjects[1];
@@ -472,7 +475,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id                1
      */
     @Override
-    public int update(String updateColumnNames, Object[] params, Long id) {
+    public int updateById(String updateColumnNames, Object[] params, ID id) {
         return updateById(null, updateColumnNames, params, id);
     }
 
@@ -526,7 +529,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
-    public Optional<T> selectById(Long id) {
+    public Optional<T> selectById(ID id) {
         Assert.notNull(id, "id cannot be null");
         Map<String, Object> params = Params.builder(1)
                 .pv("id", id)
@@ -537,17 +540,17 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     @Override
-    public Map<Long, T> selectByIdsAsMap(String ids) {
+    public Map<ID, T> selectByIdsAsMap(String ids) {
         return listToIdMap(selectByIds(ids));
     }
 
     @Override
-    public Map<Long, T> selectByIdsAsMap(Long ...ids) {
+    public Map<ID, T> selectByIdsAsMap(ID ...ids) {
         return listToIdMap(selectByIds(ids));
     }
 
     @Override
-    public Map<Long, T> selectByIdsAsMap(Collection<?> ids) {
+    public Map<ID, T> selectByIdsAsMap(Collection<?> ids) {
         List<T> list = selectByIds(ids);
         return listToIdMap(list);
     }
@@ -565,7 +568,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     @Override
-    public List<T> selectByIds(Long ...ids) {
+    public List<T> selectByIds(ID ...ids) {
         Assert.notEmpty(ids, "ids cannot be empty");
         return selectByIdsWithSpecifiedValue(ids);
     }
@@ -665,28 +668,28 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @return
      */
     @Override
-    public Optional<Long> selectIdByParams(T t, String conditionSQL) {
-        List<Long> ids = selectByParams(entityToMap(t), tableMeta.getIdColumnName(), conditionSQL, sql -> sql, Long.class);
+    public Optional<ID> selectIdByParams(T t, String conditionSQL) {
+        List<ID> ids = (List<ID>) selectByParams(entityToMap(t), tableMeta.getIdColumnName(), conditionSQL, sql -> sql, this.idClass);
         return expectedAsOptional(ids);
     }
 
     @Override
-    public List<Long> selectIdsByParams(T t, String conditionSQL) {
+    public List<ID> selectIdsByParams(T t, String conditionSQL) {
         return selectIdsByParams(entityToMap(t), conditionSQL);
     }
 
     @Override
-    public List<Long> selectIdsByParams(Map<String, ?> params, String conditionSQL) {
-        return selectByParams(params, tableMeta.getIdColumnName(), conditionSQL, sql -> sql, Long.class);
+    public List<ID> selectIdsByParams(Map<String, ?> params, String conditionSQL) {
+        return (List<ID>) selectByParams(params, tableMeta.getIdColumnName(), conditionSQL, sql -> sql, this.idClass);
     }
 
     @Override
-    public void checkId(Long id) {
+    public void checkId(ID id) {
         checkId(id, Collections.emptyMap(), null);
     }
 
     @Override
-    public void checkId(Long id, Map<String, Object> params, String condition) {
+    public void checkId(ID id, Map<String, Object> params, String condition) {
         com.rick.common.http.exception.Assert.notNull(id, "id cannot be null");
         if (!existsByParams(Params.builder(1 + params.size()).pv("id", id).pvAll(params).build(), getIdColumnName() +" = :id" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
             throw new BizException(ResultUtils.exception(404, ""+getIdColumnName()+"=" + id + " +不存在", id));
@@ -694,15 +697,15 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     @Override
-    public void checkIds(Collection<Long> ids) {
+    public void checkIds(Collection<ID> ids) {
         checkIds(ids, Collections.emptyMap(), null);
     }
 
     @Override
-    public void checkIds(Collection<Long> ids, Map<String, Object> params, String condition) {
+    public void checkIds(Collection<ID> ids, Map<String, Object> params, String condition) {
         com.rick.common.http.exception.Assert.state(CollectionUtils.isNotEmpty(ids), "ids cannot be empty");
-        List<Long> idsInDB = sharpService.query("SELECT "+getIdColumnName()+" FROM " + getTableName() + " WHERE "+getIdColumnName()+" IN (:ids)" + (StringUtils.isBlank(condition) ? "" : " AND " + condition), Params.builder(1 + params.size()).pv("ids", ids).pvAll(params).build(), Long.class);
-        SetUtils.SetView<Long> difference = SetUtils.difference(Sets.newHashSet(ids), Sets.newHashSet(idsInDB));
+        List<ID> idsInDB = (List<ID>) sharpService.query("SELECT "+getIdColumnName()+" FROM " + getTableName() + " WHERE "+getIdColumnName()+" IN (:ids)" + (StringUtils.isBlank(condition) ? "" : " AND " + condition), Params.builder(1 + params.size()).pv("ids", ids).pvAll(params).build(), this.idClass);
+        SetUtils.SetView<ID> difference = SetUtils.difference(Sets.newHashSet(ids), Sets.newHashSet(idsInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
             throw new BizException(ResultUtils.exception(404, ""+getIdColumnName()+"=" + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
         }
@@ -803,7 +806,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     @Override
     public void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName) {
-        Map<Long, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(tableMeta.getIdPropertyName())).collect(Collectors.toSet()));
+        Map<ID, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(tableMeta.getIdPropertyName())).collect(Collectors.toSet()));
 
         for (Map<String, Object> row : masterData) {
             List<T> subTableList = refColumnNameMap.get(row.get(tableMeta.getIdPropertyName()));
@@ -812,16 +815,16 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
     }
 
     @Override
-    public Map<Long, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
-        Map<Long, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
+    public Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
+        Map<ID, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
                 refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> {
 
             Object propertyValue = getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
-            if (propertyValue instanceof Long) {
-                return (Long)propertyValue;
+            if (this.idClass.isAssignableFrom(propertyValue.getClass())) {
+                return (ID)propertyValue;
             }
 
-            return (Long)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), tableMeta.getIdPropertyName()));
+            return (ID)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), tableMeta.getIdPropertyName()));
 
         }));
         return refColumnNameMap;
@@ -896,6 +899,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
         this.entityClass = Objects.nonNull(this.entityClass) ? this.entityClass
                 : (Objects.nonNull(actualTypeArgument) ? actualTypeArgument[0] : null);
+        if (this.entityClass == null) {
+            this.idClass = Long.class;
+        } else {
+            this.idClass = ClassUtils.getClassGenericsTypes(this.getClass())[1];
+        }
 
         if (Objects.nonNull(this.entityClass)) {
             if (Map.class.isAssignableFrom(this.entityClass)) {
@@ -994,8 +1002,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             } else {
                 strategy = tableMeta.getId().strategy();
             }
-            Long id = strategy == SEQUENCE ? IdGenerator.getSequenceId() : null;
-            Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill(tableMeta.getIdPropertyName(), id) : columnAutoFill.updateFill();
+            Object id = strategy == SEQUENCE ? IdGenerator.getSequenceId() : getIdValue(t);
+            if (strategy == ASSIGN && Objects.isNull(id)) {
+                throw new RuntimeException("Strategy is assign, id cannot be null!");
+            }
+
+            Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill(tableMeta.getIdColumnName(), id) : columnAutoFill.updateFill();
 
             for (Map.Entry<String, Object> en : fill.entrySet()) {
                 String fillColumnName = en.getKey();
@@ -1180,11 +1192,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         return updateColumnNames.endsWith(",") ? updateColumnNames.substring(0, updateColumnNames.length() - 1) : updateColumnNames;
     }
 
-    private Map<Long, T> listToIdMap(List<T> list) {
-        return list.stream().collect(Collectors.toMap(t -> (isMapClass()) ? (Long) ((Map) t).get(tableMeta.getIdColumnName()) : (Long) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
+    private Map<ID, T> listToIdMap(List<T> list) {
+        return list.stream().collect(Collectors.toMap(t -> (isMapClass()) ? (ID) ((Map) t).get(tableMeta.getIdColumnName()) : (ID) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
     }
 
-    private int updateById(T t, String updateColumnNames, Object[] params, Long id) {
+    private int updateById(T t, String updateColumnNames, Object[] params, ID id) {
         Assert.notNull(id, "id不能为空");
         Object[] objects = mergeIdParam(params, id);
         return update(t, updateColumnNames, (Object[]) objects[0], (String) objects[1]);
@@ -1206,7 +1218,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
      * @param id
      * @return
      */
-    private Object[] mergeIdParam(Object[] params, Long id) {
+    private Object[] mergeIdParam(Object[] params, ID id) {
         Object[] mergedParams;
         if (ArrayUtils.isEmpty(params)) {
             mergedParams = new Object[] {id};
@@ -1268,14 +1280,14 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
     private Object[] resolverParamsAndId(T t) {
         Object[] params;
-        Long id;
+        ID id;
         if (isMapClass()) {
             Map map = (Map) t;
             params = mapToParamsArray(map, this.updateColumnNameList);
-            id = (Long) map.get(tableMeta.getIdColumnName());
+            id = (ID) map.get(tableMeta.getIdColumnName());
         } else {
             params = instanceToParamsArray(t, updatePropertyList);
-            id = (Long) getPropertyValue(t, tableMeta.getIdColumnName());
+            id = (ID) getPropertyValue(t, tableMeta.getIdColumnName());
         }
 
         return new Object[] {params, id};
@@ -1322,8 +1334,8 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
             }
 
-            Set<Long> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
-            Map<Long, List<?>> subTableData = subTableBaseDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
+            Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
+            Map<ID, List<?>> subTableData = subTableBaseDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
 
             for (T t : list) {
                 Object data = subTableData.get(getIdValue(t));
@@ -1350,7 +1362,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
             BaseDAO parentTableDAO = BaseDAOManager.baseDAOTableNameMap.get(targetTable);
 
-            Set<Long> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
+            Set<ID> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(refIds)) {
@@ -1359,7 +1371,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             List<?> parentList = parentTableDAO.selectByIds(refIds);
 
-            Map<Long, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
+            Map<ID, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
             for (T t : list) {
                 Object data = parentIdMap.get(getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
                 setPropertyValue(t, manyToOneProperty.getField(), Objects.isNull(data) ? null : data);
@@ -1381,7 +1393,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             BaseDAOThreadLocalValue.add(storeKey1);
             BaseDAOThreadLocalValue.add(storeKey2);
 
-            Set<Long> columnIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
+            Set<ID> columnIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
 
             String thirdPartyTable = manyToManyProperty.getManyToMany().thirdPartyTable();
             String referenceTable = manyToManyProperty.getManyToMany().referenceTable();
@@ -1472,7 +1484,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                     return;
                 }
 
-                Set<Long> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
+                Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
                 if (CollectionUtils.isEmpty(deletedIds)) {
                     // 删除所有
                     SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
@@ -1513,11 +1525,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
-                Long refId = getIdValue(targetObject);
+                ID refId = getIdValue(targetObject);
 
                 parentTableBaseDAO.insertOrUpdate(targetObject);
                 if (refId == null) { // 添加外键
-                    update(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
+                    updateById(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
                 }
             }
         }
@@ -1533,7 +1545,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
 
             List<?> refDataList = (List<?>) getPropertyValue(t, manyToManyProperty.getField());
 
-            List<Long> refIdsValue = null;
+            List<ID> refIdsValue = null;
             if (CollectionUtils.isNotEmpty(refDataList)) {
                 refIdsValue = Lists.newArrayListWithExpectedSize(refDataList.size());
                 for (Object o : refDataList) {
@@ -1548,11 +1560,11 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
     }
 
-    private Long getIdValue(Object o) {
+    private ID getIdValue(Object o) {
         if (Objects.isNull(o)) {
             return null;
         }
-        return (Long) getPropertyValue(o, tableMeta.getIdPropertyName());
+        return (ID) getPropertyValue(o, tableMeta.getIdPropertyName());
     }
 
     private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {

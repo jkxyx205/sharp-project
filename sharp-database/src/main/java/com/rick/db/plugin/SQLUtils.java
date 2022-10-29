@@ -227,7 +227,7 @@ public final class SQLUtils {
      * @param keyInstance 关联的对象列值 roleId
      * @param guestInstanceIds 被关联的对象列名值 userIds
      */
-    public static void updateRefTable(String refTableName, String keyColumn, String guestColumn, long keyInstance, Collection<?> guestInstanceIds) {
+    public static void updateRefTable(String refTableName, String keyColumn, String guestColumn, Object keyInstance, Collection<?> guestInstanceIds) {
         // 删除
         if (CollectionUtils.isEmpty(guestInstanceIds)) {
             SQLUtils.JDBC_TEMPLATE.update(String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn), keyInstance);

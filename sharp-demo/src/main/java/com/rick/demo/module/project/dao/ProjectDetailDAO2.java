@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class ProjectDetailDAO2 extends BaseDAOImpl<ProjectDetail2> {
+public class ProjectDetailDAO2 extends BaseDAOImpl<ProjectDetail2, Long> {
 
 }

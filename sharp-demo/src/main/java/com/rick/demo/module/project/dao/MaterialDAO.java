@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class MaterialDAO extends BaseDAOImpl<Material> {
+public class MaterialDAO extends BaseDAOImpl<Material, Long> {
 
 }

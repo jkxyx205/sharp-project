@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  */
 
 @Repository
-public class FormCpnValueDAO extends BaseDAOImpl<FormCpnValue> {
+public class FormCpnValueDAO extends BaseDAOImpl<FormCpnValue, Long> {
 
     public int deleteByInstanceId(Long instanceId) {
         return delete("instance_id", Arrays.asList(instanceId));

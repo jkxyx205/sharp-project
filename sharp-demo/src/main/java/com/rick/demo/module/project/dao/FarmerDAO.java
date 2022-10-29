@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class FarmerDAO extends BaseDAOImpl<Farmer> {
+public class FarmerDAO extends BaseDAOImpl<Farmer, Long> {
 
 }

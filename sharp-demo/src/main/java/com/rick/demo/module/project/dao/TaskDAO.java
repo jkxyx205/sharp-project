@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class TaskDAO extends BaseDAOImpl<Task> {
+public class TaskDAO extends BaseDAOImpl<Task, Long> {
 
 }

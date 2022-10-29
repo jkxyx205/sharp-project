@@ -104,7 +104,7 @@ public class BaseDAOImplTest2 {
 
     @Test
     public void testUpdate2() {
-        int count = projectDAO.update("title, sex, status, updated_at, updated_by", new Object[]{
+        int count = projectDAO.updateById("title, sex, status, updated_at, updated_by", new Object[]{
                 "title-update2", 0, "NORMAL", null, null
         }, 479723134929764352L);
 

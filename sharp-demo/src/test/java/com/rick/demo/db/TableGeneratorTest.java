@@ -33,6 +33,7 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Book.class);
 //        tableGenerator.createTable(Message.class);
 //        tableGenerator.createTable(Message2.class);
+//        tableGenerator.createTable(Film.class);
     }
 
 }

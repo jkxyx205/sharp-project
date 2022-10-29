@@ -91,7 +91,7 @@ class TableMetaResolver {
             if (id == null) {
                 id = field.getAnnotation(Id.class);
                 if (Objects.nonNull(id)) {
-                    idColumnName = StringUtils.isNotBlank(id.value()) ? id.value() : field.getName();
+                    idColumnName = StringUtils.isNotBlank(id.value()) ? id.value() : converter.convert(field.getName());
                     idPropertyName = field.getName();
                 }
             }

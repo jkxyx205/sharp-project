@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class RoleDAO extends BaseDAOImpl<Role> {
+public class RoleDAO extends BaseDAOImpl<Role, Long> {
 
 }
