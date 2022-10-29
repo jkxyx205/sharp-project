@@ -152,7 +152,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         }
 
         int count  = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), params);
-        cascadeInsertOrUpdate(t);
+        cascadeInsertOrUpdate(t, true);
         BaseDAOThreadLocalValue.removeAll();
         return count;
     }
@@ -179,9 +179,9 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             return new int[]{};
         }
         Class<?> paramClass = paramsList.iterator().next().getClass();
-        List<T> instanceList = Lists.newArrayListWithCapacity(paramsList.size());
+        List<T> instanceList = Lists.newArrayListWithExpectedSize(paramsList.size());
         if (paramClass == this.entityClass || Map.class.isAssignableFrom(paramClass)) {
-            List<Object[]> params = Lists.newArrayListWithCapacity(paramsList.size());
+            List<Object[]> params = Lists.newArrayListWithExpectedSize(paramsList.size());
 
             for (Object o : paramsList) {
                 instanceList.add((T) o);
@@ -195,7 +195,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 }
             }
             int[] count = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
-            cascadeInsertOrUpdate(instanceList);
+            cascadeInsertOrUpdate(instanceList, true);
             return count;
         } else if (paramClass == Object[].class) {
             return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill((List<?>) paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
@@ -448,7 +448,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             return new int[] {};
         }
 
-        List<Object[]> paramsList = Lists.newArrayListWithCapacity(collection.size());
+        List<Object[]> paramsList = Lists.newArrayListWithExpectedSize(collection.size());
 
         String conditionSQL = null;
         for (T t : collection) {
@@ -494,7 +494,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             return new int[] {};
         }
 
-        List<Object[]> paramsList = Lists.newArrayListWithCapacity(srcParamsList.size());
+        List<Object[]> paramsList = Lists.newArrayListWithExpectedSize(srcParamsList.size());
         for (Object[] params : srcParamsList) {
             Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
             Object[] conditionAdviceObject = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToArray((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
@@ -1414,14 +1414,18 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
         //endregion
     }
 
-    private void cascadeInsertOrUpdate(List<T> instanceList) {
+    private void cascadeInsertOrUpdate(List<T> instanceList, boolean insert) {
         for (T t : instanceList) {
-            cascadeInsertOrUpdate(t);
+            cascadeInsertOrUpdate(t, insert);
         }
         BaseDAOThreadLocalValue.removeAll();
     }
 
     private void cascadeInsertOrUpdate(T t) {
+        cascadeInsertOrUpdate(t, false);
+    }
+
+    private void cascadeInsertOrUpdate(T t, boolean insert) {
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
             if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate()) {
@@ -1433,7 +1437,6 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 continue;
             }
             BaseDAOThreadLocalValue.add(storeKey);
-
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -1458,7 +1461,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 throw new IllegalArgumentException("reversePropertyName must be set");
             }
 
-            if (oneToManyProperty.getOneToMany().cascadeDelete()) { // 级联删除
+            if (!insert && oneToManyProperty.getOneToMany().cascadeDelete()) { // 级联删除
                 if (CollectionUtils.isEmpty(subDataList)) {
                     // 删除所有
                     SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
@@ -1476,6 +1479,10 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
                 }
             }
 
+            if (CollectionUtils.isEmpty(subDataList)) {
+                return;
+            }
+
             for (Object subData : subDataList) {
                 setPropertyValue(subData, reverseField, t);
             }
@@ -1491,7 +1498,7 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             }
 
             String refColumnName = manyToOneProperty.getManyToOne().value();
-            String storeKey =  getTableName() + ":" + refColumnName + ":InsertOrUpdate:";
+            String storeKey =  getTableName() + ":" + refColumnName + ":InsertOrUpdate";
 
             if (BaseDAOThreadLocalValue.remove(storeKey)) {
                 continue;
@@ -1502,8 +1509,12 @@ public class BaseDAOImpl<T> implements BaseDAO<T> {
             BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
+                Long refId = getIdValue(targetObject);
+
                 parentTableBaseDAO.insertOrUpdate(targetObject);
-                update(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
+                if (refId == null) { // 添加外键
+                    update(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
+                }
             }
         }
 
