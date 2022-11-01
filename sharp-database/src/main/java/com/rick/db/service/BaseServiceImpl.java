@@ -1,6 +1,5 @@
 package com.rick.db.service;
 
-import com.rick.common.http.exception.Assert;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.core.BaseDAO;
 import com.rick.db.service.support.Params;
@@ -8,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
 
 import javax.validation.Valid;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -26,32 +23,6 @@ public class BaseServiceImpl<D extends BaseDAO, E extends SimpleEntity> {
 
     @Autowired
     protected SharpService sharpService;
-
-    /**
-     * 保存或更新
-     *
-     * @param e
-     * @return
-     */
-    public boolean saveOrUpdate(@Valid E e) {
-        Long id = (Long) getFieldValue(e, "id");
-        if (Objects.isNull(id)) {
-            return save(e);
-        } else {
-            return update(e);
-        }
-    }
-
-    /**
-     * 批量保存或更新
-     *
-     * @param collection
-     * @return
-     */
-    public boolean saveOrUpdate(@Valid Collection<E> collection) {
-        final int[] insertCount = baseDAO.insertOrUpdate(collection);
-        return insertCount.length == collection.size();
-    }
 
     /**
      * 保存
@@ -69,12 +40,32 @@ public class BaseServiceImpl<D extends BaseDAO, E extends SimpleEntity> {
     }
 
     /**
+     * 保存或更新
+     *
+     * @param e
+     * @return
+     */
+    public boolean saveOrUpdate(@Valid E e) {
+        return baseDAO.insertOrUpdate(e) > 0;
+    }
+
+    /**
+     * 批量保存或更新
+     *
+     * @param collection
+     * @return
+     */
+    public boolean saveOrUpdate(@Valid Collection<E> collection) {
+        final int[] insertCount = baseDAO.insertOrUpdate(collection);
+        return insertCount.length == collection.size();
+    }
+
+    /**
      * 更新
      *
      * @param e
      */
     public boolean update(@Valid E e) {
-        Assert.notNull(getFieldValue(e, "id"), "id cannot be null");
         int count = baseDAO.update(e);
         if (count == 0) {
             log.warn("更新数据行数为0");
@@ -127,16 +118,6 @@ public class BaseServiceImpl<D extends BaseDAO, E extends SimpleEntity> {
     }
 
     /**
-     * 获取所有数据
-     *
-     * @param
-     * @return
-     */
-    public List<E> findAll() {
-        return baseDAO.selectAll();
-    }
-
-    /**
      * 不进行关联查询获取所有数据
      *
      * @param
@@ -159,19 +140,22 @@ public class BaseServiceImpl<D extends BaseDAO, E extends SimpleEntity> {
         return findByConditionWithoutCascade(baseDAO.entityToMap(e), condition);
     }
 
+    /**
+     * 获取所有数据
+     *
+     * @param
+     * @return
+     */
+    public List<E> findAll() {
+        return baseDAO.selectAll();
+    }
+
     public boolean exists(E e, String conditionSQL) {
         return exists(baseDAO.entityToMap(e), conditionSQL);
     }
 
     public boolean exists(Map<String, ?> params, String conditionSQL) {
         return baseDAO.existsByParams(params, conditionSQL);
-    }
-
-
-    private Object getFieldValue(E e, String fieldName) {
-        Method method = ReflectionUtils.findMethod(e.getClass(), "get" + (fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1)));
-        Object value = ReflectionUtils.invokeMethod(method, e);
-        return value;
     }
 
 }

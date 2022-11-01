@@ -1279,6 +1279,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     private Object[] resolverParamsAndId(T t) {
+        Assert.notNull(getIdValue(t), "id不能为空");
         Object[] params;
         ID id;
         if (isMapClass()) {
