@@ -43,6 +43,7 @@ import java.lang.reflect.ParameterizedType;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.rick.db.config.Constants.DB_MYSQL;
@@ -408,7 +409,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         cascadeInsertOrUpdate(t);
         BaseDAOThreadLocalValue.removeAll();
-        Object[] objects = resolverParamsAndId(t);
+        Object[] objects = resolveParamsAndId(t);
         return updateById(t, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (ID) objects[1]);
     }
 
@@ -433,7 +434,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
-            mergedParams[i] = resolverValue(getPropertyValue(t, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));
+            mergedParams[i] = resolveValue(getPropertyValue(t, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));
         }
 
         System.arraycopy(params, 0, mergedParams, size, params.length);
@@ -455,7 +456,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         String conditionSQL = null;
         for (T t : collection) {
-            Object[] resolverParamsAndIdObjects = resolverParamsAndId(t);
+            Object[] resolverParamsAndIdObjects = resolveParamsAndId(t);
             Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (ID) resolverParamsAndIdObjects[1]);
             Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
@@ -804,21 +805,27 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         return new Object[] {sqlHandler.handlerSQl("SELECT " + columnNames + " FROM " + getTableName() +  " WHERE " + ((StringUtils.isBlank(additionCondition) ? "" : additionCondition + " AND "))  + finalConditionSQL), conditionParams};
     }
 
-    @Override
-    public void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName) {
-        Map<ID, List<T>> refColumnNameMap = groupByColumnName(refColumnName, masterData.stream().map(row -> row.get(tableMeta.getIdPropertyName())).collect(Collectors.toSet()));
 
-        for (Map<String, Object> row : masterData) {
-            List<T> subTableList = refColumnNameMap.get(row.get(tableMeta.getIdPropertyName()));
+    @Override
+    public void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property) {
+        Map<ID, List<T>> refColumnNameMap = groupByColumnName(refColumnName, data.stream().map(row -> row.get(valueKey)).collect(Collectors.toSet()));
+
+        for (Map<String, Object> row : data) {
+            List<T> subTableList = refColumnNameMap.get(valueKey);
             row.put(property, CollectionUtils.isEmpty(subTableList) ? Collections.emptyList() : subTableList);
         }
     }
 
     @Override
     public Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
-        Map<ID, List<T>> refColumnNameMap = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(),
-                refColumnName + " IN (:refColumnName)").stream().collect(Collectors.groupingBy(t-> {
+        return groupByColumnName(refColumnName, refValues, this.fullColumnNames, Function.identity());
+    }
 
+    @Override
+    public <M> Map<ID, List<M>> groupByColumnName(String refColumnName, Collection<?> refValues, String columnNames, Function<T, M> function) {
+        List<T> list = (List<T>) selectByParams(Params.builder(1).pv("refColumnName", refValues).build(), columnNames, refColumnName + " IN (:refColumnName)", this.entityClass);
+
+        return list.stream().collect(Collectors.groupingBy(t-> {
             Object propertyValue = getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
             if (this.idClass.isAssignableFrom(propertyValue.getClass())) {
                 return (ID)propertyValue;
@@ -826,8 +833,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
             return (ID)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), tableMeta.getIdPropertyName()));
 
-        }));
-        return refColumnNameMap;
+        }, Collectors.mapping(function, Collectors.toList())));
     }
 
     @Override
@@ -910,7 +916,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
                 this.entityClass = Map.class;
             } else {
                 TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
-                this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdPropertyName();
+                this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
                 this.propertyList = convertToArray(tableMeta.getProperties());
                 this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
                 this.entityFields = ReflectUtils.getAllFields(this.entityClass);
@@ -1015,7 +1021,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
                 int index = columnNameList.indexOf(fillColumnName);
                 if (index > -1 && Objects.isNull(params[index])) {
-                    params[index] = resolverValue(fillColumnValue);
+                    params[index] = resolveValue(fillColumnValue);
 
                     // 将auto值回写到实体中
                     if (t == null || t == params) {
@@ -1061,7 +1067,9 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     private Object getPropertyValue(Object t, String propertyName) {
         try {
-            if (this.entityClass.isAssignableFrom(t.getClass())) {
+            if (isMapClass()) {
+                return ((Map)t).get(tableMeta.getIdColumnName());
+            } if (this.entityClass.isAssignableFrom(t.getClass())) {
                 return propertyDescriptorMap.get(propertyName).getReadMethod().invoke(t);
             } else {
                 return BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getReadMethod().invoke(t);
@@ -1096,7 +1104,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = resolverValue(getPropertyValue(t, includePropertyList.get(i)));
+            params[i] = resolveValue(getPropertyValue(t, includePropertyList.get(i)));
         }
         return params;
     }
@@ -1104,7 +1112,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
         for (int i = 0; i < params.length; i++) {
-            Object param = resolverValue(getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
+            Object param = resolveValue(getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
             params[i] = param;
         }
         return params;
@@ -1114,19 +1122,19 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         Object[] params = new Object[updateColumnNameList.size()];
 
         for (int i = 0; i < updateColumnNameList.size(); i++) {
-            Object param = resolverValue(map.get(updateColumnNameList.get(i)));
+            Object param = resolveValue(map.get(updateColumnNameList.get(i)));
             params[i] = param;
         }
 
         return params;
     }
 
-    private Object resolverValue(Field field, T t) throws IllegalAccessException {
+    private Object resolveValue(Field field, T t) throws IllegalAccessException {
         Object value = field.get(t);
-        return resolverValue(value);
+        return resolveValue(value);
     }
 
-    private Object resolverValue(Object value) {
+    private Object resolveValue(Object value) {
         if (Objects.isNull(value)) {
             return null;
         }
@@ -1278,17 +1286,16 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         return conditionSQL.matches(".*((?i)(to_char|NVL)?\\s*([(][^([(]|[)])]*[)])|("+columnName+"))"+ "\\s*" + "(?i)(like|!=|>=|<=|<|>|=|\\s+in|\\s+not\\s+in|regexp).*");
     }
 
-    private Object[] resolverParamsAndId(T t) {
-        Assert.notNull(getIdValue(t), "id不能为空");
+    private Object[] resolveParamsAndId(T t) {
+        ID id = getIdValue(t);
+        Assert.notNull(id, "id不能为空");
+
         Object[] params;
-        ID id;
         if (isMapClass()) {
             Map map = (Map) t;
             params = mapToParamsArray(map, this.updateColumnNameList);
-            id = (ID) map.get(tableMeta.getIdColumnName());
         } else {
             params = instanceToParamsArray(t, updatePropertyList);
-            id = (ID) getPropertyValue(t, tableMeta.getIdColumnName());
         }
 
         return new Object[] {params, id};

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author Rick
@@ -124,9 +125,18 @@ public interface BaseDAO<T, ID> {
 
     void checkIds(Collection<ID> ids, Map<String, Object> params, String condition);
 
-    void selectAsSubTable(List<Map<String, Object>> masterData, String property, String refColumnName);
+    /**
+     *
+     * @param data 数据源 比如：Grid.list查询结果
+     * @param refColumnName 外键
+     * @param valueKey 数据源中外键value对应的属性名key
+     * @param property 写到数据源中的key
+     */
+    void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property);
 
     Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
+
+    <M> Map<ID, List<M>> groupByColumnName(String refColumnName, Collection<?> refValues, String columnNames, Function<T, M> function);
 
     String getSelectSQL();
 
