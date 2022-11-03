@@ -60,18 +60,27 @@ public class TableGenerator {
             }
 
             Field field = tableMeta.getColumnNameFieldMap().get(columnName);
-            createTableSql.append(columnName).append(" ").append(determineSqlType(field.getType()));
+            createTableSql.append(columnName).append(" ");
 
             Column column = tableMeta.getColumnNameMap().get(columnName);
-            if (Objects.nonNull(column)) {
-                if (column.nullable()) {
-                    createTableSql.append(" not null");
-                }
 
-                if (StringUtils.isNotBlank(column.comment())) {
-                    createTableSql.append(" comment '"+column.comment()+"'");
+            if (Objects.nonNull(column)) {
+                if (StringUtils.isNotBlank(column.columnDefinition())) {
+                    createTableSql.append(column.columnDefinition());
+                } else {
+                    createTableSql.append(determineSqlType(field.getType()));
+                    if (column.nullable()) {
+                        createTableSql.append(" not null");
+                    }
+
+                    if (StringUtils.isNotBlank(column.comment())) {
+                        createTableSql.append(" comment '"+column.comment()+"'");
+                    }
                 }
+            } else {
+                createTableSql.append(determineSqlType(field.getType()));
             }
+
             createTableSql.append(",");
         }
 

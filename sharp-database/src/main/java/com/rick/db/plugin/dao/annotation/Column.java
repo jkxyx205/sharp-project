@@ -19,4 +19,6 @@ public @interface Column {
     boolean nullable() default false;
 
     String comment() default  "";
+
+    String columnDefinition() default "";
 }
