@@ -42,7 +42,7 @@ public class FormBO {
         @Setter
         private Object value;
         
-        public Map<String, Object> getValidatorProperies() {
+        public Map<String, Object> getValidatorProperties() {
             Set<Validator> validatorList = configurer.getValidatorList();
             Map<String, Object> map = Maps.newHashMap();
             for (Validator validator : validatorList) {

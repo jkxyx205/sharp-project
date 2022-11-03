@@ -42,7 +42,7 @@ sharp:
 * [https://xhope.top/?p=1242](https://xhope.top/?p=1242)
 
 # sharp-fileupload
-`sharp-fileupload` 可以上传文件，对图片的处理（裁剪、选装、缩放）。提供了Restfull接口上传，访问文档。底层存储功能支持：
+`sharp-fileupload` 可以上传文件，对图片的处理（裁剪、选装、缩放）。提供了restfull接口上传，访问文档。底层存储功能支持：
 
 * 本地存储
 * 阿里云OSS
@@ -59,7 +59,13 @@ sharp:
 # sharp-formflow
 `sharp-formflow` 自定义表单顾名思义就是由用户定义表单，由用户觉定标签和组件，决定要填写什么格式的数据。目前支持的控件有：文本、长文本、单选、多选、日期、时间、文件、Email、手机号等。
 
-
 更多用法：
 
 * [https://xhope.top/?p=1280](https://xhope.top/?p=1544)
+
+# sharp-report
+`sharp-report` 通用的报表查询，只需要构建查询模型。
+
+更多用法：
+
+* [https://xhope.top/?p=1614](https://xhope.top/?p=1614)
