@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sp="">
+<head>
+    <title th:text="${report.name}"></title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container" style="padding: 10px 0;">
+    <div class="row">
+        <div class="search-panel" style="margin-bottom: 15px;">
+            <form class="query-form-container">
+                <div class="form-group row" style="margin-bottom: 0;">
+                    <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList.size() > 0}">
+                        <label class="col-form-label" th:for="${f.name}" th:text="${f.label}"></label>
+                        <div class="col-md-3" style="margin-bottom: 10px;">
+                            <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}">
+                            <sp:dict th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
+                        </div>
+                    </th:block>
+                    <div class="col-md-5 col-form-btn">
+                        <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList.size() > 0}">
+                            <i class="fa fa-dot-circle-o"></i> 查询</button>
+                        <button class="btn btn-secondary" type="button" name="reset" th:if="${report.queryFieldList.size() > 0}">
+                            <i class="fa fa-remove"></i> 重置</button>
+                        <a class="btn btn-primary ml-2" id="exportBtn" th:href="${'/reports/' + id + '/export'}">
+                            <i class="fa fa-upload"></i> 导出</a>
+                        <button class="btn btn-primary ml-2" id="exportHtmlBtn" type="button">
+                            <i class="fa fa-upload"></i> 导出HTML</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body-scroll-panel" id="report-list" style="width: 100%;">
+            <table class="table table-responsive-sm table-bordered table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th th:each="n : ${report.reportColumnList}" th:text="${n.label}" th:data-name="${n.name}" th:class="${n.sortable ? 'sortable text-' + n.align.name().toLowerCase() : 'text-' + n.align.name().toLowerCase() }"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${grid.rows}">
+                        <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
+                        <td th:each="v : ${grid.rows[mStat.index]}" th:text="${v}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}"></td>
+                    </tr>
+                    <tr class="tr-empty non-data" th:if="${grid.records < 1}">
+                        <td th:colspan="${report.reportColumnList.size() + 1}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer-bar">
+                <div style="margin-bottom: 8px; float: left;">
+                    <span class="breadcrumb-item active" th:text="'共' + ${grid.records} + '条，'+${grid.totalPages}+'页'"></span>
+                    <select onchange="search('page=1&size=' + this.value)">
+                        <option value="15" th:selected="${grid.pageSize == 15}">15条</option>
+                        <option value="50" th:selected="${grid.pageSize == 50}">50条</option>
+                        <option value="100" th:selected="${grid.pageSize == 100}">100条</option>
+                        <option value="200" th:selected="${grid.pageSize == 200}">200条</option>
+                    </select>
+                    <span th:if="${grid.totalPages > 1}">，前往<input class="goto" style="width: 68px;" th:onkeyup="'gotoPage(this, ' + ${grid.page} + ')'" maxlength="6" th:value="${grid.page}">页</span>
+                </div>
+                <nav style="float: right" th:if="${grid.totalPages > 1}">
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item" th:if="${grid.page > 1}"><a class="page-link" th:href="${'javascript:search(''page='+(grid.page - 1)+''')'}">上一页</a></li>
+                        <li th:class="'page-item ' + ${i == grid.page - 1 ? 'active': ''}" th:if="${grid.totalPages > 0}" th:each="i: ${#numbers.sequence(pageInfo.startPage - 1, pageInfo.endPage - 1)}">
+                            <a class="page-link" th:href="${i == grid.page - 1 ? 'javascript:;' : 'javascript:search(''page='+(i+1)+''')'}"  th:text="${i+1}"></a>
+                        </li>
+                        <li class="page-item" th:if="${grid.page < grid.totalPages}">
+                            <a class="page-link" th:href="${'javascript:search(''page='+(grid.page + 1)+''')'}">下一页</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
+<script type="text/javascript" th:src="@{/js/table/jquery.form2json.js}"></script>
+<script type="text/javascript" th:src="@{/js/table/jquery.table.js}"></script>
+<script type="text/javascript" th:src="@{/js/table/jquery.pageTable.js}"></script>
+<script type="text/javascript" th:src="@{/js/table/jquery.formautofill.min.js}"></script>
+<!-- test -->
+<script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
+<script th:inline="javascript">
+
+    var $table = $('#report-list').table({
+        type: 'server',
+        summary: /*[[${report.summary}]]*/,
+        clicked: function (obj, e) {
+            search('page=1&sidx='+$(e).data('name')+'&sord='+e.sord+'')
+        }
+    })
+
+    $('.query-form-container').autofill(getUrlObject()).pageTable()
+    $('#exportBtn').attr('href', $('#exportBtn').attr('href') + _newUrl())
+
+    // test html export
+    $('#exportHtmlBtn').exportTable({
+        target: '#report-list',
+        name: /*[[${report.name} + '']]*/ ,
+        columnsWidth: [7000, 7000]
+    })
+
+    function getUrlObject () {
+        var search = location.search.substring(1);
+
+        if (!search) {
+            return {}
+        }
+
+        return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) })
+    }
+
+    function search(url) {
+        location.href = location.pathname + _newUrl(url)
+    }
+
+    function _newUrl(url) {
+        if (typeof url === 'object')
+            url = $.param(url)
+
+        var search = location.search
+
+        if (!search)
+            return "?" + url
+
+        if (!url) {
+            return search
+        }
+
+        search = search.replace("?", '')
+
+        var searchObject = url2Object(search)
+
+        $.extend(searchObject, url2Object(url));
+        return "?" + $.param(searchObject);
+    }
+
+    function url2Object(search) {
+        var urlObj = {}
+
+        if (!search)
+            return urlObj
+
+        var params = search.split('&');
+        params.forEach(function(item) {
+            var data = item.split('=')
+            if (data.length === 2)
+                urlObj[data[0]] = decodeURIComponent(data[1].replace(/[+]/g, ' '))
+        })
+        return urlObj
+    }
+
+    function gotoPage(o, curPage, event) {
+        if (o.value == curPage) {
+            return
+        }
+        // 兼容FF和IE和Opera
+        var theEvent = event || window.event;
+        var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+        if (code == 13) {
+            if (o.value && o.value.trim()) {
+                var page = o.value.trim()
+
+                if (/^[0-9]*[1-9][0-9]*$/.test(page)) {
+                    search('page=' + o.value)
+                } else {
+                    toastr.error('页码只能是正整数!');
+                }
+                return
+            }
+            toastr.error('页码不能为空!');
+        }
+    }
+</script>
+</body>
+</html>

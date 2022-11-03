@@ -1,0 +1,24 @@
+package com.rick.report.core.model;
+
+import com.rick.db.dto.Grid;
+import com.rick.report.core.entity.Report;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+/**
+ * All rights Reserved, Designed By www.xhope.top
+ *
+ * @version V1.0
+ * @Description: (用一句话描述该文件做什么)
+ * @author: Rick.Xu
+ * @date: 6/18/20 5:44 PM
+ * @Copyright: 2020 www.yodean.com. All rights reserved.
+ */
+@Data
+@AllArgsConstructor
+public class ReportDTO {
+
+    private Report report;
+
+    private Grid<Object[]> grid;
+}

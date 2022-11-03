@@ -26,6 +26,8 @@ public class Person extends BaseEntity {
 
     private String name;
 
+    private String sex;
+
     @ManyToMany(thirdPartyTable = "t_person_role", referenceColumnName = "role_id", columnDefinition = "person_id", referenceTable = "t_role")
     private List<Role> roleList;
 
