@@ -42,7 +42,9 @@ public class JsonStringToListMapConverter implements ConditionalGenericConverter
         try {
             return JsonUtils.toList(source.toString(), Map.class);
         } catch (IOException e) {
-            return null;
+            e.printStackTrace();
         }
+
+        return null;
     }
 }

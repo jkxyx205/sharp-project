@@ -43,7 +43,9 @@ public class JsonStringToCollectionConverter implements ConditionalGenericConver
         try {
             return JsonUtils.toList(source.toString(), targetType.getResolvableType().getGeneric(0).resolve());
         } catch (IOException e) {
-            return null;
+            e.printStackTrace();
         }
+
+        return null;
     }
 }

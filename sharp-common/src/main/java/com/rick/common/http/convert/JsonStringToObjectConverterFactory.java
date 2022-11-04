@@ -40,8 +40,9 @@ final public class JsonStringToObjectConverterFactory implements ConverterFactor
                 return JsonUtils.toObject(source, clazz);
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
             }
+
+            return null;
         }
     }
 

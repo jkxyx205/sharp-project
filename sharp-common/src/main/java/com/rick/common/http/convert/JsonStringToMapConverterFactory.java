@@ -32,8 +32,9 @@ final public class JsonStringToMapConverterFactory implements ConverterFactory<S
                 return (T) JsonUtils.toObject(source, Map.class);
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
             }
+
+            return null;
         }
     }
 
