@@ -1,7 +1,6 @@
 package com.rick.demo.db;
 
 import com.rick.db.plugin.dao.core.TableGenerator;
-import com.rick.report.core.entity.Report;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,7 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Message.class);
 //        tableGenerator.createTable(Message2.class);
 //        tableGenerator.createTable(Film.class);
-        tableGenerator.createTable(Report.class);
+//        tableGenerator.createTable(Report.class);
     }
 
 }

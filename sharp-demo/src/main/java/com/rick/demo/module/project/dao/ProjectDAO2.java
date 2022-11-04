@@ -11,13 +11,4 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ProjectDAO2 extends BaseDAOImpl<Project, Long> {
-
-    public ProjectDAO2() {
-        /**
-         * 手动指定
-         */
-        super("t_project2",
-                "title,description,cover_url,owner_id,sex,address,status,list,phone_number,created_by,created_at,updated_by,updated_at,is_deleted, id",
-                "id");
-    }
 }

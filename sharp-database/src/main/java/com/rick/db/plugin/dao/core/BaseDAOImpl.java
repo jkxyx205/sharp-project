@@ -15,6 +15,7 @@ import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
+import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
@@ -82,7 +83,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     private List<String> updatePropertyList;
 
-    private Class<?> entityClass;
+    private Class<T> entityClass;
 
     private Class<?> idClass;
 
@@ -102,13 +103,8 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         this.init();
     }
 
-    public BaseDAOImpl(Class<?> entityClass) {
+    public BaseDAOImpl(Class<T> entityClass) {
         this.entityClass = entityClass;
-        this.init();
-    }
-
-    public BaseDAOImpl(String tableName, String columnNames, String primaryColumn) {
-        this.tableMeta = new TableMeta(null, null, "", tableName, columnNames, "", resolveUpdateColumnNames(columnNames, primaryColumn), "", primaryColumn, primaryColumn, Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
         this.init();
     }
 
@@ -146,14 +142,8 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         Object[] params;
         int index = columnNameList.indexOf(tableMeta.getIdColumnName());
-        if (isMapClass()) {
-            Map map = (Map) t;
-            params = handleAutoFill(t, mapToParamsArray(map, this.columnNameList), columnNameList, ColumnFillType.INSERT);
-            map.put(this.columnNameList, params[index]);
-        } else {
-            params = handleAutoFill(t, instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
-            setPropertyValue(t, tableMeta.getIdPropertyName(), params[index]);
-        }
+        params = handleAutoFill(t, instanceToParamsArray(t), columnNameList, ColumnFillType.INSERT);
+        setPropertyValue(t, tableMeta.getIdPropertyName(), params[index]);
 
         int count  = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), params);
         cascadeInsertOrUpdate(t, true);
@@ -189,14 +179,10 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
             for (Object o : paramsList) {
                 instanceList.add((T) o);
-                if (isMapClass()) {
-                    params.add(mapToParamsArray((Map) o, this.columnNameList));
-                } else {
-                    if (Objects.nonNull(validatorHelper)) {
-                        validatorHelper.validate(o);
-                    }
-                    params.add(instanceToParamsArray((T) o));
+                if (Objects.nonNull(validatorHelper)) {
+                    validatorHelper.validate(o);
                 }
+                params.add(instanceToParamsArray((T) o));
             }
             int[] count = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
             cascadeInsertOrUpdate(instanceList, true);
@@ -612,12 +598,8 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     @Override
     public List<T> selectByParams(T t, String conditionSQL) {
         Map params;
-        if (isMapClass()) {
-            params = (Map) t;
-        } else {
-//            params = JsonUtils.objectToMap(t);
-            params = entityToMap(t);
-        }
+        //            params = JsonUtils.objectToMap(t);
+        params = entityToMap(t);
         return selectByParams(params, conditionSQL);
     }
 
@@ -693,7 +675,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     public void checkId(ID id, Map<String, Object> params, String condition) {
         com.rick.common.http.exception.Assert.notNull(id, "id cannot be null");
         if (!existsByParams(Params.builder(1 + params.size()).pv("id", id).pvAll(params).build(), getIdColumnName() +" = :id" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
-            throw new BizException(ResultUtils.exception(404, ""+getIdColumnName()+"=" + id + " +不存在", id));
+            throw new BizException(ResultUtils.exception(404, getEntityComment() + " "+getIdColumnName()+" = " + id + " +不存在", id));
         }
     }
 
@@ -708,7 +690,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         List<ID> idsInDB = (List<ID>) sharpService.query("SELECT "+getIdColumnName()+" FROM " + getTableName() + " WHERE "+getIdColumnName()+" IN (:ids)" + (StringUtils.isBlank(condition) ? "" : " AND " + condition), Params.builder(1 + params.size()).pv("ids", ids).pvAll(params).build(), this.idClass);
         SetUtils.SetView<ID> difference = SetUtils.difference(Sets.newHashSet(ids), Sets.newHashSet(idsInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
-            throw new BizException(ResultUtils.exception(404, ""+getIdColumnName()+"=" + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
+            throw new BizException(ResultUtils.exception(404, getEntityComment() + " "+getIdColumnName()+" = " + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
         }
     }
 
@@ -871,7 +853,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     @Override
-    public Class getEntity() {
+    public Class<T> getEntity() {
         return entityClass;
     }
 
@@ -893,10 +875,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         return Optional.of(list.get(0));
     }
 
-    private boolean isMapClass() {
-        return this.entityClass == Map.class;
-    }
-
     private boolean hasSubTables() {
         return !tableMeta.getSubTables().isEmpty();
     }
@@ -904,42 +882,30 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private void init() {
         Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
         this.entityClass = Objects.nonNull(this.entityClass) ? this.entityClass
-                : (Objects.nonNull(actualTypeArgument) ? actualTypeArgument[0] : null);
-        if (this.entityClass == null) {
-            this.idClass = Long.class;
-        } else {
-            this.idClass = ClassUtils.getClassGenericsTypes(this.getClass())[1];
-        }
+                : (Objects.nonNull(actualTypeArgument) ? (Class<T>) actualTypeArgument[0] : null);
 
-        if (Objects.nonNull(this.entityClass)) {
-            if (Map.class.isAssignableFrom(this.entityClass)) {
-                this.entityClass = Map.class;
-            } else {
-                TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
-                this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
-                this.propertyList = convertToArray(tableMeta.getProperties());
-                this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
-                this.entityFields = ReflectUtils.getAllFields(this.entityClass);
+        this.idClass = ClassUtils.getClassGenericsTypes(this.getClass())[1];
+        TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
+        this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
+        this.propertyList = convertToArray(tableMeta.getProperties());
+        this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
+        this.entityFields = ReflectUtils.getAllFields(this.entityClass);
 
-                propertyDescriptorMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
-                for (Field entityField : this.entityFields) {
-                    try {
-                        propertyDescriptorMap.put(entityField.getName(), new PropertyDescriptor(entityField.getName(), this.entityClass));
-                    } catch (IntrospectionException e) {
-                        throw new BeanInitializationException(tableMeta.getTableName() + "初始化异常", e);
-                    }
-                }
-
-                if (Objects.nonNull(this.tableMeta)) {
-                    this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getId(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), this.tableMeta.getIdPropertyName(),tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
-                } else {
-                    this.tableMeta = tableMeta;
-                }
-                log.debug("properties: {}", tableMeta.getProperties());
+        propertyDescriptorMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
+        for (Field entityField : this.entityFields) {
+            try {
+                propertyDescriptorMap.put(entityField.getName(), new PropertyDescriptor(entityField.getName(), this.entityClass));
+            } catch (IntrospectionException e) {
+                throw new BeanInitializationException(tableMeta.getTableName() + "初始化异常", e);
             }
-        } else {
-            this.entityClass = Map.class;
         }
+
+        if (Objects.nonNull(this.tableMeta)) {
+            this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getId(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), this.tableMeta.getIdPropertyName(),tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
+        } else {
+            this.tableMeta = tableMeta;
+        }
+        log.debug("properties: {}", tableMeta.getProperties());
 
         if (Objects.isNull(this.tableMeta)) {
             throw new RuntimeException("Map需要有参数构造函数");
@@ -1027,12 +993,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
                     if (t == null || t == params) {
                         continue;
                     }
-                    if (isMapClass()) {
-                        Map map = (Map) t;
-                        map.put(fillColumnName, fillColumnValue);
-                    } else {
-                        setPropertyValue(t, columnNameToPropertyNameMap.get(fillColumnName), fillColumnValue);
-                    }
+                    setPropertyValue(t, columnNameToPropertyNameMap.get(fillColumnName), fillColumnValue);
                 }
             }
         }
@@ -1067,9 +1028,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     private Object getPropertyValue(Object t, String propertyName) {
         try {
-            if (isMapClass()) {
-                return ((Map)t).get(tableMeta.getIdColumnName());
-            } if (this.entityClass.isAssignableFrom(t.getClass())) {
+            if (this.entityClass.isAssignableFrom(t.getClass())) {
                 return propertyDescriptorMap.get(propertyName).getReadMethod().invoke(t);
             } else {
                 return BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getReadMethod().invoke(t);
@@ -1201,7 +1160,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     private Map<ID, T> listToIdMap(List<T> list) {
-        return list.stream().collect(Collectors.toMap(t -> (isMapClass()) ? (ID) ((Map) t).get(tableMeta.getIdColumnName()) : (ID) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
+        return list.stream().collect(Collectors.toMap(t -> (ID) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
     }
 
     private int updateById(T t, String updateColumnNames, Object[] params, ID id) {
@@ -1291,12 +1250,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         Assert.notNull(id, "id不能为空");
 
         Object[] params;
-        if (isMapClass()) {
-            Map map = (Map) t;
-            params = mapToParamsArray(map, this.updateColumnNameList);
-        } else {
-            params = instanceToParamsArray(t, updatePropertyList);
-        }
+        params = instanceToParamsArray(t, updatePropertyList);
 
         return new Object[] {params, id};
     }
@@ -1317,7 +1271,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
             mergedParams = new Object[params.length + size];
             System.arraycopy(params, 0, mergedParams, size, params.length);
-
         }
 
         return new Object[] {mergedParams, updateColumnNames};
@@ -1611,6 +1564,10 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     private interface SqlHandler {
         String handlerSQl(String srcSQL);
+    }
+
+    private String getEntityComment() {
+        return this.entityClass.getAnnotation(Table.class).comment();
     }
 
 }

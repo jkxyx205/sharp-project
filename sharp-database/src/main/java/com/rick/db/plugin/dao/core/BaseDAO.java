@@ -144,7 +144,7 @@ public interface BaseDAO<T, ID> {
 
     String getTableName();
 
-    Class getEntity();
+    Class<T> getEntity();
 
     String getIdColumnName();
 
