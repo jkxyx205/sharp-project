@@ -580,7 +580,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     @Override
     public List<T> selectByParams(String queryString, String conditionSQL) {
-        final Map<String, String> map = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryString);
+        final Map<String, String> map = StringUtils.isBlank(queryString) ? Collections.emptyMap() : Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryString);
         return selectByParams(map, conditionSQL);
     }
 

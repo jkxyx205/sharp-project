@@ -98,7 +98,7 @@ class TableMetaResolver {
 
             Column annotation = AnnotatedElementUtils.getMergedAnnotation(field, Column.class);
             String columnName = Objects.nonNull(annotation) && StringUtils.isNotBlank(annotation.value())
-                    ? annotation.value() : converter.convert(Objects.nonNull(manyToOneAnnotation) ? fields[1].getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName());
+                    ? annotation.value() : converter.convert(Objects.nonNull(manyToOneAnnotation) ? field.getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName());
 
             columnNameFieldMap.put(columnName, field);
             columnNameMap.put(columnName, annotation);
