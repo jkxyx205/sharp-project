@@ -1,7 +1,7 @@
 package com.rick.db.plugin.table;
 
 import com.rick.common.http.HttpServletRequestUtils;
-import com.rick.common.http.exception.Assert;
+import com.rick.common.http.exception.ExceptionCode;
 import com.rick.db.dto.Grid;
 import com.rick.db.plugin.GridUtils;
 
@@ -37,7 +37,7 @@ public abstract class AbstractTableGridService {
     }
 
     public List<BigDecimal> summary(Map<String, ?> params) {
-        Assert.notNull(getSummarySQL(), "getSummarySQL need overwrite");
+        ExceptionCode.notNull(getSummarySQL(), "getSummarySQL need overwrite");
         return GridUtils.numericObject(getSummarySQL(), params);
     }
 

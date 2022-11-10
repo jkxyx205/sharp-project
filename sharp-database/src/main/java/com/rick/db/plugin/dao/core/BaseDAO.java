@@ -11,9 +11,10 @@ import java.util.function.Function;
  * @createdAt 2021-10-31 09:29:00
  */
 public interface BaseDAO<T, ID> {
-    int insert(T t);
 
-    int insertOrUpdate(T t);
+    int insert(T entity);
+
+    int insertOrUpdate(T entity);
 
     int insert(Object[] params);
 
@@ -51,9 +52,9 @@ public interface BaseDAO<T, ID> {
 
     int update(Object[] params, ID id);
 
-    int update(T t);
+    int update(T entity);
 
-    int update(T t, Object[] params, String conditionSQL);
+    int update(T entity, Object[] params, String conditionSQL);
 
     int[] update(Collection<T> entities);
 
@@ -79,9 +80,15 @@ public interface BaseDAO<T, ID> {
 
     List<T> selectByIds(Collection<?> ids);
 
-    Optional<ID> selectIdByParams(T t, String conditionSQL);
+    Optional<ID> selectIdByParams(T example);
 
-    List<ID> selectIdsByParams(T t, String conditionSQL);
+    Optional<ID> selectIdByParams(T example, String conditionSQL);
+
+    List<ID> selectIdsByParams(T example);
+
+    List<ID> selectIdsByParams(T example, String conditionSQL);
+
+    List<ID> selectIdsByParams(Map<String, ?> params);
 
     List<ID> selectIdsByParams(Map<String, ?> params, String conditionSQL);
 
@@ -89,11 +96,9 @@ public interface BaseDAO<T, ID> {
 
     List<T> selectByParams(String queryString, String conditionSQL);
 
-    List<T> selectByParams(T t);
+    List<T> selectByParams(T example);
 
-    List<T> selectByParams(T t, String conditionSQL);
-
-    List<T> selectByParams(Map<String, ?> params);
+    List<T> selectByParams(T example, String conditionSQL);
 
     List<T> selectAll();
 
@@ -101,19 +106,25 @@ public interface BaseDAO<T, ID> {
 
     boolean existsByParams(Map<String, ?> params, String conditionSQL);
 
+    List<T> selectByParams(Map<String, ?> params);
+
     List<T> selectByParams(Map<String, ?> params, String conditionSQL);
+
+    <E> List<E> selectByParams(Map<String, ?> params, String columnNames, Class<E> clazz);
 
     <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, Class<E> clazz);
 
-    List<T> selectByParamsWithoutCascade(T t);
+    List<T> selectByParamsWithoutCascade(T example);
 
-    List<T> selectByParamsWithoutCascade(T t, String conditionSQL);
+    List<T> selectByParamsWithoutCascade(T example, String conditionSQL);
 
     List<T> selectByParamsWithoutCascade(Map<String, ?> params);
 
     List<T> selectByParamsWithoutCascade(Map<String, ?> params, String conditionSQL);
 
     List<T> selectByParamsWithoutCascade(Map<String, ?> params, String columnNames, String conditionSQL);
+
+    <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames);
 
     <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL);
 
@@ -148,7 +159,7 @@ public interface BaseDAO<T, ID> {
 
     String getIdColumnName();
 
-    Map<String, Object> entityToMap(T t);
+    Map<String, Object> entityToMap(T example);
 
     /**
      * 记录超过1个会抛出异常

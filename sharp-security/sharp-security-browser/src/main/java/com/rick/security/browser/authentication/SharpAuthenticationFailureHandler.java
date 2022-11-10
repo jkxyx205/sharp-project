@@ -1,7 +1,7 @@
 
 package com.rick.security.browser.authentication;
 
-import com.rick.common.http.model.ExceptionResult;
+import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.JsonUtils;
 import com.rick.security.core.properties.SecurityProperties;
 import com.rick.security.core.support.LoginResponseTypeEnum;
@@ -37,7 +37,7 @@ public class SharpAuthenticationFailureHandler extends SimpleUrlAuthenticationFa
 		if (LoginResponseTypeEnum.JSON.equals(securityProperties.getBrowser().getSignInResponseType())) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json;charset=UTF-8");
-			response.getWriter().write(JsonUtils.toJson(new ExceptionResult(-1, exception.getMessage())));
+			response.getWriter().write(JsonUtils.toJson(ResultUtils.fail(-1, exception.getMessage())));
 		}else{
 			super.onAuthenticationFailure(request, response, exception);
 		}

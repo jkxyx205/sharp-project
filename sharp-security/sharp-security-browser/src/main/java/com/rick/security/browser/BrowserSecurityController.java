@@ -3,8 +3,8 @@ package com.rick.security.browser;
 
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
-import com.rick.security.core.support.SecurityConstants;
 import com.rick.security.core.properties.SecurityProperties;
+import com.rick.security.core.support.SecurityConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +65,6 @@ public class BrowserSecurityController {
 			}
 		}
 
-		return ResultUtils.exception(-1, "访问的服务需要身份认证，请引导用户到登录页");
+		return ResultUtils.fail(-1, "访问的服务需要身份认证，请引导用户到登录页");
 	}
 }

@@ -133,7 +133,7 @@ public class ApiExceptionHandler {
         }
 
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
-            return ResultUtils.exception(code, message, data);
+            return ResultUtils.fail(code, message, data);
         }
 
         request.getRequestDispatcher("/error").forward(request, response);

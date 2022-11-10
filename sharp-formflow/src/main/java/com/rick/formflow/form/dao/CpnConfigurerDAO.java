@@ -31,9 +31,9 @@ public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer, Long> {
     }
 
     @Override
-    public int update(CpnConfigurer configurer) {
-        encodeOptions(configurer.getOptions());
-        return super.update(configurer);
+    public int update(CpnConfigurer entity) {
+        encodeOptions(entity.getOptions());
+        return super.update(entity);
     }
 
     @Override
@@ -43,9 +43,9 @@ public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer, Long> {
     }
 
     @Override
-    public int insert(CpnConfigurer configurer) {
-        encodeOptions(configurer.getOptions());
-        return super.insert(configurer);
+    public int insert(CpnConfigurer entity) {
+        encodeOptions(entity.getOptions());
+        return super.insert(entity);
     }
 
     @Override

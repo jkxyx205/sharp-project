@@ -27,12 +27,20 @@ public final class ResultUtils {
         return new Result(false, ResultCode.FAIL.getCode(), ResultCode.FAIL.getMsg(), data);
     }
 
-    public static ExceptionResult exception(int code, String message) {
-        return exception(code, message, null);
+    public static Result fail(String message) {
+        return fail(ResultCode.FAIL.getCode(), message, null);
     }
 
-    public static <T> ExceptionResult<T> exception(int code, String message, T data) {
-        return new ExceptionResult(code, message, data);
+    public static Result fail(int code, String message) {
+        return fail(code, message, null);
+    }
+
+    public static <T> Result fail(String message, T data) {
+        return fail(ResultCode.FAIL.getCode(), message, data);
+    }
+
+    public static <T> Result<T> fail(int code, String message, T data) {
+        return new Result(false, code, message, data);
     }
 
 }

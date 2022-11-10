@@ -1,6 +1,6 @@
 package com.rick.demo.common.exception;
 
-import com.rick.common.http.model.ExceptionResult;
+import com.rick.common.http.exception.ExceptionCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -10,7 +10,7 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-public enum ExceptionCode {
+public enum ExceptionCodeEnum implements ExceptionCode {
     // common
     ARGUMENTS_NOT_VALID(101, "请求参数验证失败:%s"),
     DATA_NOT_EXISTS(404, "请求的数据不存在"),
@@ -26,12 +26,9 @@ public enum ExceptionCode {
     DEMO_REF_UNDONE(2000, "由于依赖关系的限制，无法完成任务");
 
     private int code;
-    private String msg;
-    ExceptionCode(int code, String msg) {
+    private String message;
+    ExceptionCodeEnum(int code, String message) {
         this.code = code;
-        this.msg = msg;
-    }
-    public ExceptionResult<String> result() {
-        return new ExceptionResult<>(getCode(), getMsg());
+        this.message = message;
     }
 }

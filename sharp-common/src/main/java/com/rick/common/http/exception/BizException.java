@@ -1,6 +1,7 @@
 package com.rick.common.http.exception;
 
 import com.rick.common.http.model.Result;
+import com.rick.common.http.model.ResultUtils;
 import lombok.Getter;
 
 /**
@@ -18,6 +19,26 @@ public class BizException extends RuntimeException {
     private Result result;
 
     private Object[] params;
+
+    public BizException(String msg) {
+        this(ResultUtils.fail(msg));
+    }
+
+    public BizException(int code, String msg) {
+        this(ResultUtils.fail(code, msg));
+    }
+
+    public <T> BizException(int code, String msg, T data) {
+        this(ResultUtils.fail(code, msg, data));
+    }
+
+    public BizException(ExceptionCode exceptionCode) {
+        this(ResultUtils.fail(exceptionCode.getCode(), exceptionCode.getMessage()));
+    }
+
+    public BizException(ExceptionCode exceptionCode, Object[] params) {
+        this(ResultUtils.fail(exceptionCode.getCode(), exceptionCode.getMessage()), params);
+    }
 
     public BizException(Result result) {
         super(result.getMsg());

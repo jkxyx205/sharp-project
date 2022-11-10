@@ -32,7 +32,7 @@ public class SqlController {
     public Result result(@PathVariable String key, HttpServletRequest request) {
         String sql = sqlMapping.get(key);
         if (Objects.isNull(sql)) {
-            return ResultUtils.exception(-1, "没有找到"+key+"对应的sql");
+            return ResultUtils.fail(-1, "没有找到"+key+"对应的sql");
         }
 
         return ResultUtils.success(GridUtils.list(sql, HttpServletRequestUtils.getParameterMap(request)));
