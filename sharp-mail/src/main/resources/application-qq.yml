@@ -1,0 +1,18 @@
+spring:
+  mail: # SMTP 发邮件
+    host: smtp.qq.com
+    port: 465
+    username: 10502052@qq.com
+    password: xxx
+    default-encoding: UTF-8
+    imap: # IMAP 收邮件
+      host: imap.qq.com
+      port: 993
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=331

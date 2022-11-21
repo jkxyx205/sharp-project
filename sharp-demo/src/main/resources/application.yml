@@ -7,7 +7,21 @@ spring:
     url: jdbc:mysql://localhost:3306/sharp-demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
     username: root
     password: jkxyx205
-
+  mail:  # SMTP 发邮件
+    host: smtp.qiye.aliyun.com
+    port: 25
+    username: xxx
+    password: xxx
+    default-encoding: UTF-8
+    imap: # IMAP 收邮件
+      host: imap.qiye.aliyun.com
+      port: 143
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 logging:
   level:
     com.rick.demo: DEBUG
@@ -34,3 +48,4 @@ fileupload:
     accessKeyId: xxx
     accessKeySecret: xxx
     bucketName: sharp-fileupload
+

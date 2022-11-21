@@ -1,0 +1,16 @@
+spring:
+  mail: # SMTP 发邮件
+    host: smtp.163.com
+    port: 25
+    username: jkxyx205@163.com
+    password: xxx # 将邮箱开启smtp服务后获取的授权码作为密码；https://help.mail.163.com/faqDetail.do?code=d7a5dc8471cd0c0e8b4b8f4f8e49998b374173cfe9171305fa1ce630d7f67ac21b8ba4d48ed49ebc
+    default-encoding: UTF-8
+    imap: # IMAP 收邮件
+      host: imap.163.com
+      port: 143
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

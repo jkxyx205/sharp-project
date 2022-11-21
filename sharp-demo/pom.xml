@@ -77,6 +77,11 @@
             <artifactId>sharp-report</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.rick.mail</groupId>
+            <artifactId>sharp-mail</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!-- sharp-component end -->
         <dependency>
             <groupId>com.lowagie</groupId>

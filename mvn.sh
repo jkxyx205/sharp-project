@@ -4,6 +4,7 @@ PROJECTS=(
 sharp-dependencies
 sharp-common
 sharp-database
+sharp-mail
 #sharp-report
 #sharp-formflow
 #sharp-fileupload
