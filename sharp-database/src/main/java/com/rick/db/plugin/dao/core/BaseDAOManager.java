@@ -2,6 +2,7 @@ package com.rick.db.plugin.dao.core;
 
 import com.google.common.collect.Maps;
 import com.rick.common.util.ReflectUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanInitializationException;
 
 import java.beans.IntrospectionException;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2021-10-31 09:09:00
  */
+@Slf4j
 public class BaseDAOManager {
 
     public static List<BaseDAO> baseDAOList;
@@ -37,9 +39,6 @@ public class BaseDAOManager {
             BaseDAOManager.entityPropertyDescriptorMap = Maps.newHashMapWithExpectedSize(baseDAOList.size());
 
             for (BaseDAO baseDAO : baseDAOList) {
-                if (baseDAO.getEntityClass() == Map.class) {
-                    continue;
-                }
                 Field[] entityFields = ReflectUtils.getAllFields(baseDAO.getEntityClass());
                 Map<String, PropertyDescriptor> propertyDescriptorMap = Maps.newHashMapWithExpectedSize(entityFields.length);;
                 for (Field entityField : entityFields) {
@@ -60,6 +59,24 @@ public class BaseDAOManager {
 
     public static boolean isEntityClass(Class clazz) {
         return BaseDAOManager.entitiesClass.contains(clazz);
+    }
+
+    public static TableMeta getTableMeta(Class clazz) {
+        return baseDAOEntityMap.get(clazz).getTableMeta();
+    }
+
+    public static Object getPropertyValue(Object value, String propertyName) {
+        if (Objects.isNull(value)) {
+            return null;
+        }
+
+        try {
+            return BaseDAOManager.entityPropertyDescriptorMap.get(value.getClass()).get(propertyName).getReadMethod().invoke(value);
+        } catch (Exception e) {
+            log.error("Cannot get ["+propertyName+"] value, may you lost " + value.getClass().getSimpleName() + "DAO or lost ["+propertyName+"] property for class ["+value.getClass().getSimpleName()+"]");
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

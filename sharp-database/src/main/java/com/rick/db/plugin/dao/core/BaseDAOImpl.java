@@ -25,7 +25,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
@@ -33,9 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -90,8 +88,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private Field[] entityFields;
 
     private String subTableRefColumnName;
-
-    private Map<String, PropertyDescriptor> propertyDescriptorMap;
 
     private Map<String, String> columnNameToPropertyNameMap;
 
@@ -164,10 +160,8 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     @Override
     public int update(Map<String, ?> params) {
-        // TODO
-        return 0;
-//        Object[] arrayParams = mapToParamsArray(params, this.columnNameList);
-//        return updateById(params, tableMeta.getUpdateColumnNames(), arrayParams, (ID)params.get(getIdColumnName()));
+        Object[] arrayParams = mapToParamsArray(params, this.columnNameList);
+        return SQLUtils.update(this.getTableName(), this.tableMeta.getColumnNames(), handleAutoFill(params, arrayParams, columnNameList, ColumnFillType.UPDATE), (Serializable) getIdValue(params), this.getIdColumnName());
     }
 
     /**
@@ -434,7 +428,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
-            mergedParams[i] = resolveValue(getPropertyValue(entity, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));
+            mergedParams[i] = resolveValue(BaseDAOManager.getPropertyValue(entity, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));
         }
 
         System.arraycopy(params, 0, mergedParams, size, params.length);
@@ -845,7 +839,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         List<T> list = (List<T>) selectByParams(Params.builder(1).pv("refColumnName", refValues).build(), columnNames, refColumnName + " IN (:refColumnName)", this.entityClass);
 
         return list.stream().collect(Collectors.groupingBy(t-> {
-            Object propertyValue = getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
+            Object propertyValue = BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
             if (this.idClass.isAssignableFrom(propertyValue.getClass())) {
                 return (ID)propertyValue;
             }
@@ -861,7 +855,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     @Override
-    public String getFullColumnNames() {
+    public String getColumnNames() {
         return fullColumnNames;
     }
 
@@ -876,7 +870,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         params = Maps.newHashMapWithExpectedSize(columnNameList.size());
         for (String columnName : columnNameList) {
             String propertyName = columnNameToPropertyNameMap.get(columnName);
-            Object propertyValue = getPropertyValue(example, propertyName);
+            Object propertyValue = BaseDAOManager.getPropertyValue(example, propertyName);
             if (Objects.nonNull(propertyValue)) {
                 if (BaseDAOManager.isEntityClass(propertyValue.getClass())) {
                     propertyValue = getIdValue(propertyValue);
@@ -892,6 +886,11 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     @Override
     public Class<T> getEntityClass() {
         return entityClass;
+    }
+
+    @Override
+    public TableMeta getTableMeta() {
+        return this.tableMeta;
     }
 
     @Override
@@ -914,15 +913,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         this.propertyList = convertToArray(tableMeta.getProperties());
         this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
         this.entityFields = ReflectUtils.getAllFields(this.entityClass);
-
-        propertyDescriptorMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
-        for (Field entityField : this.entityFields) {
-            try {
-                propertyDescriptorMap.put(entityField.getName(), new PropertyDescriptor(entityField.getName(), this.entityClass));
-            } catch (IntrospectionException e) {
-                throw new BeanInitializationException(tableMeta.getTableName() + "初始化异常", e);
-            }
-        }
 
         log.debug("properties: {}", tableMeta.getProperties());
 
@@ -1039,21 +1029,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     private Object getPropertyValue(Object t, Field field) {
-        return getPropertyValue(t, field.getName());
-    }
-
-    private Object getPropertyValue(Object t, String propertyName) {
-        try {
-            if (this.entityClass.isAssignableFrom(t.getClass())) {
-                return propertyDescriptorMap.get(propertyName).getReadMethod().invoke(t);
-            } else {
-                return BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getReadMethod().invoke(t);
-            }
-        } catch (Exception e) {
-            log.error("Cannot get ["+propertyName+"] value, may you lost " + t.getClass().getSimpleName() + "DAO or lost ["+propertyName+"] property for class ["+t.getClass().getSimpleName()+"]");
-            e.printStackTrace();
-        }
-        return null;
+        return BaseDAOManager.getPropertyValue(t, field.getName());
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
@@ -1066,11 +1042,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     private void setPropertyValue(Object t, String propertyName, Object propertyValue) {
         try {
-            if (this.entityClass.isAssignableFrom(t.getClass())) {
-                propertyDescriptorMap.get(propertyName).getWriteMethod().invoke(t, propertyValue);
-            } else {
-                BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getWriteMethod().invoke(t, propertyValue);
-            }
+            BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getWriteMethod().invoke(t, propertyValue);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1079,7 +1051,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = resolveValue(getPropertyValue(t, includePropertyList.get(i)));
+            params[i] = resolveValue(BaseDAOManager.getPropertyValue(t, includePropertyList.get(i)));
         }
         return params;
     }
@@ -1087,7 +1059,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
         for (int i = 0; i < params.length; i++) {
-            Object param = resolveValue(getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
+            Object param = resolveValue(BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
             params[i] = param;
         }
         return params;
@@ -1102,11 +1074,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         }
 
         return params;
-    }
-
-    private Object resolveValue(Field field, T t) throws IllegalAccessException {
-        Object value = field.get(t);
-        return resolveValue(value);
     }
 
     private Object resolveValue(Object value) {
@@ -1170,13 +1137,8 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         }
     }
 
-    private String resolveUpdateColumnNames(String columnNames, String primaryColumn) {
-        String updateColumnNames = columnNames.replaceAll("(?i)(\\b" + primaryColumn + "\\b\\s*,?)", "").trim();
-        return updateColumnNames.endsWith(",") ? updateColumnNames.substring(0, updateColumnNames.length() - 1) : updateColumnNames;
-    }
-
     private Map<ID, T> listToIdMap(List<T> list) {
-        return list.stream().collect(Collectors.toMap(t -> (ID) getPropertyValue(t, tableMeta.getIdColumnName()), v -> v));
+        return list.stream().collect(Collectors.toMap(t -> (ID) BaseDAOManager.getPropertyValue(t, tableMeta.getIdPropertyName()), v -> v));
     }
 
     private int updateById(T t, String updateColumnNames, Object[] params, ID id) {
@@ -1339,7 +1301,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
             BaseDAO parentTableDAO = BaseDAOManager.baseDAOTableNameMap.get(targetTable);
 
-            Set<ID> refIds = list.stream().map(t -> getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
+            Set<ID> refIds = list.stream().map(t -> getIdValue(BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(refIds)) {
@@ -1350,7 +1312,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
             Map<ID, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
             for (T t : list) {
-                Object data = parentIdMap.get(getIdValue(getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
+                Object data = parentIdMap.get(getIdValue(BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
                 setPropertyValue(t, manyToOneProperty.getField(), Objects.isNull(data) ? null : data);
             }
         }
@@ -1541,7 +1503,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         if (Objects.isNull(o)) {
             return null;
         }
-        return (ID) getPropertyValue(o, tableMeta.getIdPropertyName());
+        return (ID) BaseDAOManager.getPropertyValue(o, this.tableMeta.getIdPropertyName());
     }
 
     private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
