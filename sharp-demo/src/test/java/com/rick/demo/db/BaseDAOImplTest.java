@@ -126,6 +126,14 @@ public class BaseDAOImplTest {
         projectDAO.insert(paramsList);
     }
 
+    @Order(5)
+    @Test
+    public void testSaveMapParamsBatch() {
+        Map<String, Object> row = projectDAO.entityToMap(createProject());
+        List<Map<String, Object>> paramsList = Lists.newArrayList(row);
+        projectDAO.insert(paramsList);
+    }
+
     @Order(6)
     @Test
     public void testDeleteById() {
