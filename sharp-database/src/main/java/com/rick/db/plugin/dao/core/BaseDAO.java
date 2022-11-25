@@ -1,5 +1,8 @@
 package com.rick.db.plugin.dao.core;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +20,10 @@ public interface BaseDAO<T, ID> {
     int insertOrUpdate(T entity);
 
     int insert(Object[] params);
+
+    int insert(Map<String, ?> params);
+
+    int update(Map<String, ?> params);
 
     int[] insert(Collection<?> paramsList);
 
@@ -155,7 +162,7 @@ public interface BaseDAO<T, ID> {
 
     String getTableName();
 
-    Class<T> getEntity();
+    Class<T> getEntityClass();
 
     String getIdColumnName();
 
@@ -167,6 +174,16 @@ public interface BaseDAO<T, ID> {
      * @param <E>
      * @return
      */
-    <E> Optional<E> expectedAsOptional(List<E> list);
+    default <E> Optional<E> expectedAsOptional(List<E> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return Optional.empty();
+        }
+
+        if (list.size() > 1) {
+            throw new IncorrectResultSizeDataAccessException(1, list.size());
+        }
+
+        return Optional.of(list.get(0));
+    }
 
 }

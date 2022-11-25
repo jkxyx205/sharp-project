@@ -131,7 +131,7 @@ public class BaseServiceImpl<D extends BaseDAO, E extends SimpleEntity> {
     public List<E> findByConditionWithoutCascade(Map<String, ?> params, String condition) {
         List<E> list = sharpService.query(baseDAO.getSelectSQL() + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition),
                 params,
-                baseDAO.getEntity());
+                baseDAO.getEntityClass());
 
         return list;
     }

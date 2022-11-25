@@ -27,7 +27,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,11 +101,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         this.init();
     }
 
-    public BaseDAOImpl(Class<T> entityClass) {
-        this.entityClass = entityClass;
-        this.init();
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertOrUpdate(T entity) {
@@ -162,6 +156,20 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(null, params, columnNameList, ColumnFillType.INSERT));
     }
 
+    @Override
+    public int insert(Map<String, ?> params) {
+        Object[] arrayParams = mapToParamsArray(params, this.columnNameList);
+        return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(arrayParams, arrayParams, columnNameList, ColumnFillType.INSERT));
+    }
+
+    @Override
+    public int update(Map<String, ?> params) {
+        // TODO
+        return 0;
+//        Object[] arrayParams = mapToParamsArray(params, this.columnNameList);
+//        return updateById(params, tableMeta.getUpdateColumnNames(), arrayParams, (ID)params.get(getIdColumnName()));
+    }
+
     /**
      * 批量插入数据
      */
@@ -172,8 +180,9 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             return new int[]{};
         }
         Class<?> paramClass = paramsList.iterator().next().getClass();
-        List<T> instanceList = Lists.newArrayListWithExpectedSize(paramsList.size());
-        if (paramClass == this.entityClass || Map.class.isAssignableFrom(paramClass)) {
+
+        if (paramClass == this.entityClass) {
+            List<T> instanceList = Lists.newArrayListWithExpectedSize(paramsList.size());
             List<Object[]> params = Lists.newArrayListWithExpectedSize(paramsList.size());
 
             for (Object o : paramsList) {
@@ -186,6 +195,12 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             int[] count = SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(instanceList, params, columnNameList, ColumnFillType.INSERT));
             cascadeInsertOrUpdate(instanceList, true);
             return count;
+        } else if(Map.class.isAssignableFrom(paramClass)) {
+            List<Object[]> params = Lists.newArrayListWithExpectedSize(paramsList.size());
+            for (Object o : paramsList) {
+                params.add(mapToParamsArray((Map) o, this.columnNameList));
+            }
+            return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill(params, params, columnNameList, ColumnFillType.INSERT));
         } else if (paramClass == Object[].class) {
             return SQLUtils.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), handleAutoFill((List<?>) paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
         }
@@ -740,7 +755,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     @Override
     public List<T> selectByParamsWithoutCascade(Map<String, ?> params, String columnNames, String conditionSQL) {
         Object[] executeCondition = getExecuteCondition(params, columnNames, conditionSQL, sql -> sql);
-        return sharpService.query((String) executeCondition[0], (Map)executeCondition[1], getEntity());
+        return sharpService.query((String) executeCondition[0], (Map)executeCondition[1], getEntityClass());
     }
 
     @Override
@@ -863,7 +878,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             String propertyName = columnNameToPropertyNameMap.get(columnName);
             Object propertyValue = getPropertyValue(example, propertyName);
             if (Objects.nonNull(propertyValue)) {
-                if (isEntity(propertyValue.getClass())) {
+                if (BaseDAOManager.isEntityClass(propertyValue.getClass())) {
                     propertyValue = getIdValue(propertyValue);
                 }
 
@@ -875,26 +890,13 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     @Override
-    public Class<T> getEntity() {
+    public Class<T> getEntityClass() {
         return entityClass;
     }
 
     @Override
     public String getIdColumnName() {
         return tableMeta.getIdColumnName();
-    }
-
-    @Override
-    public <E> Optional<E> expectedAsOptional(List<E> list) {
-        if (CollectionUtils.isEmpty(list)) {
-            return Optional.empty();
-        }
-
-        if (list.size() > 1) {
-            throw new IncorrectResultSizeDataAccessException(1, list.size());
-        }
-
-        return Optional.of(list.get(0));
     }
 
     private boolean hasSubTables() {
@@ -907,7 +909,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
                 : (Objects.nonNull(actualTypeArgument) ? (Class<T>) actualTypeArgument[0] : null);
 
         this.idClass = ClassUtils.getClassGenericsTypes(this.getClass())[1];
-        TableMeta tableMeta = TableMetaResolver.resolve(this.entityClass);
+        this.tableMeta = TableMetaResolver.resolve(this.entityClass);
         this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
         this.propertyList = convertToArray(tableMeta.getProperties());
         this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
@@ -922,16 +924,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             }
         }
 
-        if (Objects.nonNull(this.tableMeta)) {
-            this.tableMeta = new TableMeta(tableMeta.getTable(), tableMeta.getId(), tableMeta.getName(), this.tableMeta.getTableName(), this.tableMeta.getColumnNames(), tableMeta.getProperties(), tableMeta.getUpdateColumnNames(), tableMeta.getUpdateProperties(), this.tableMeta.getIdColumnName(), this.tableMeta.getIdPropertyName(),tableMeta.getSubTables(), tableMeta.getOneToManyAnnotationList(), tableMeta.getManyToOneAnnotationList(), tableMeta.getManyToManyAnnotationList(), tableMeta.getColumnNameFieldMap(), tableMeta.getColumnNameMap());
-        } else {
-            this.tableMeta = tableMeta;
-        }
         log.debug("properties: {}", tableMeta.getProperties());
-
-        if (Objects.isNull(this.tableMeta)) {
-            throw new RuntimeException("Map需要有参数构造函数");
-        }
 
         this.columnNameList = convertToArray(this.tableMeta.getColumnNames());
         this.updateColumnNameList = convertToArray(this.tableMeta.getUpdateColumnNames());
@@ -1011,10 +1004,11 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
                 if (index > -1 && Objects.isNull(params[index])) {
                     params[index] = resolveValue(fillColumnValue);
 
-                    // 将auto值回写到实体中
                     if (t == null || t == params) {
                         continue;
                     }
+
+                    // 将auto值回写到实体中
                     setPropertyValue(t, columnNameToPropertyNameMap.get(fillColumnName), fillColumnValue);
                 }
             }
@@ -1063,7 +1057,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
-        if (field.getType() == Long.class && propertyValue != null && isEntity(propertyValue.getClass())) {
+        if (field.getType() == Long.class && propertyValue != null && BaseDAOManager.isEntityClass((propertyValue.getClass()))) {
             propertyValue = this.getIdValue(propertyValue);
         }
 
@@ -1154,7 +1148,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             }
 
             return values.deleteCharAt(values.length() - 1);
-        } else if (isEntity(value.getClass())){ // 实体对象
+        } else if (BaseDAOManager.isEntityClass((value.getClass()))) { // 实体对象
             return getIdValue(value);
         }
 
@@ -1573,10 +1567,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         String updateSQL = "UPDATE " + tableMeta.getTableName() + " SET " + updateColumnNameBuilder + " WHERE " + newConditionSQL;
         return updateSQL;
-    }
-
-    private boolean isEntity(Class clazz) {
-        return BaseDAOManager.entitiesClass.contains(clazz);
     }
 
     private List<T> selectByIdsWithSpecifiedValue(Object ids) {

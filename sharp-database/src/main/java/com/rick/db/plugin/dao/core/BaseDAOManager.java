@@ -33,29 +33,33 @@ public class BaseDAOManager {
             baseDAOList = Objects.isNull(baseDAOList) ? Collections.emptyList() : baseDAOList;
             BaseDAOManager.baseDAOList = baseDAOList;
             BaseDAOManager.baseDAOTableNameMap = Objects.nonNull(baseDAOList) ? BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getTableName(), v -> v)) : Collections.emptyMap();
-            BaseDAOManager.baseDAOEntityMap = Objects.nonNull(baseDAOList) ? BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getEntity(), v -> v)) : Collections.emptyMap();
+            BaseDAOManager.baseDAOEntityMap = Objects.nonNull(baseDAOList) ? BaseDAOManager.baseDAOList.stream().collect(Collectors.toMap(d -> d.getEntityClass(), v -> v)) : Collections.emptyMap();
             BaseDAOManager.entityPropertyDescriptorMap = Maps.newHashMapWithExpectedSize(baseDAOList.size());
 
             for (BaseDAO baseDAO : baseDAOList) {
-                if (baseDAO.getEntity() == Map.class) {
+                if (baseDAO.getEntityClass() == Map.class) {
                     continue;
                 }
-                Field[] entityFields = ReflectUtils.getAllFields(baseDAO.getEntity());
+                Field[] entityFields = ReflectUtils.getAllFields(baseDAO.getEntityClass());
                 Map<String, PropertyDescriptor> propertyDescriptorMap = Maps.newHashMapWithExpectedSize(entityFields.length);;
                 for (Field entityField : entityFields) {
                     try {
-                        propertyDescriptorMap.put(entityField.getName(), new PropertyDescriptor(entityField.getName(), baseDAO.getEntity()));
+                        propertyDescriptorMap.put(entityField.getName(), new PropertyDescriptor(entityField.getName(), baseDAO.getEntityClass()));
                     } catch (IntrospectionException e) {
                         throw new BeanInitializationException(baseDAO.getTableName() + "初始化异常", e);
                     }
                 }
 
-                entityPropertyDescriptorMap.put(baseDAO.getEntity(), propertyDescriptorMap);
-                entitiesClass.add(baseDAO.getEntity());
+                entityPropertyDescriptorMap.put(baseDAO.getEntityClass(), propertyDescriptorMap);
+                entitiesClass.add(baseDAO.getEntityClass());
             }
 
             BaseDAOManager.hasAutowired = true;
         }
+    }
+
+    public static boolean isEntityClass(Class clazz) {
+        return BaseDAOManager.entitiesClass.contains(clazz);
     }
 
 }
