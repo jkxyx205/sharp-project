@@ -298,8 +298,10 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         if (hasSubTables()) {
             List<ID> deletedIds = selectIdsByParams(params, conditionSQL);
 
-            for (String subTable : tableMeta.getSubTables()) {
-                SQLUtils.delete(subTable, subTableRefColumnName, deletedIds);
+            if (CollectionUtils.isNotEmpty(deletedIds)) {
+                for (String subTable : tableMeta.getSubTables()) {
+                    SQLUtils.delete(subTable, subTableRefColumnName, deletedIds);
+                }
             }
         }
 
