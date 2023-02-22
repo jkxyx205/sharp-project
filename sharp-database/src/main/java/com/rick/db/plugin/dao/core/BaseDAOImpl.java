@@ -552,6 +552,12 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         return listToIdMap(list);
     }
 
+    @Override
+    public Map<ID, T> selectByIdsAsMap(Map<String, ?> params, String conditionSQL) {
+        List<T> list = selectByParams(params, conditionSQL);
+        return listToIdMap(list);
+    }
+
     /**
      * 通过多个ID查找//eg：ids -> “1,2,3,4”
      *
@@ -1422,7 +1428,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
                 if (CollectionUtils.isEmpty(subDataList)) {
                     // 删除所有
                     SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
-                    return;
+                    continue;
                 }
 
                 Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
@@ -1437,7 +1443,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             }
 
             if (CollectionUtils.isEmpty(subDataList)) {
-                return;
+                continue;
             }
 
             for (Object subData : subDataList) {

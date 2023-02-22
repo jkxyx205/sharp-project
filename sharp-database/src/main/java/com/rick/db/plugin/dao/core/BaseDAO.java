@@ -32,6 +32,8 @@ public interface BaseDAO<T, ID> extends CoreDAO<ID> {
 
     Map<ID, T> selectByIdsAsMap(Collection<?> ids);
 
+    Map<ID, T> selectByIdsAsMap(Map<String, ?> params, String conditionSQL);
+
     List<T> selectByIds(String ids);
 
     List<T> selectByIds(ID ...ids);
