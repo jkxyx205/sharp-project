@@ -15,7 +15,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Component
-public class IntegerNumber extends AbstractValidator<Integer> {
+public class PositiveInteger extends AbstractValidator<Integer> {
 
     @Override
     public void valid(Integer value) {
@@ -26,7 +26,7 @@ public class IntegerNumber extends AbstractValidator<Integer> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.INTEGER_NUM;
+        return ValidatorTypeEnum.POSITIVE_INTEGER;
     }
 
     @Override

@@ -16,6 +16,7 @@ public enum CpnTypeEnum {
     SELECT("选项"),
     RADIO("单选"),
     NUMBER_TEXT("数字"),
+    INTEGER_NUMBER("数字"),
     CURRENCY("金额"),
     CHECKBOX("多选"),
     MOBILE("手机号"),

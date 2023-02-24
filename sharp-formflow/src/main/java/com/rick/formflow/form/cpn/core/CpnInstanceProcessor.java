@@ -3,7 +3,6 @@ package com.rick.formflow.form.cpn.core;
 
 import com.rick.formflow.form.service.bo.FormBO;
 import com.rick.formflow.form.valid.core.Validator;
-import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -37,28 +36,15 @@ public class CpnInstanceProcessor {
         this.bindingResult = bindingResult;
     }
 
-    public void valid() throws BindException {
+    public void valid() {
         try {
+            // 静态验证值（不验证数据库配置）
             cpn.valid(cpnValue, configurer.getOptions());
         } catch (IllegalArgumentException e) {
             bindingResult.addError(new FieldError("form", property.getName(), paramValue, false, null, null, configurer.getLabel() + e.getMessage()));
         }
 
-//        Set<Validator> allValidator = Sets.newHashSet();
-//        allValidator.addAll(cpn.cpnValidators());
-//        allValidator.addAll(configurer.getValidatorList());
-//        // 验证业务设置
-//        for (Validator validator : allValidator) {
-//            if (this.cpn.hasValidator(validator)) {
-//                try {
-//                    validator.valid(cpnValue);
-//                } catch (IllegalArgumentException e) {
-//                    bindingResult.addError(new FieldError("form", property.getName(), paramValue, false, null, null, configurer.getLabel() + e.getMessage()));
-//                }
-//            }
-//        }
-
-        // 验证业务设置
+        // 数据库验证
         for (Validator validator : configurer.getValidatorList()) {
             if (this.cpn.hasValidator(validator)) {
                 try {

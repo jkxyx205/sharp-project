@@ -19,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -72,7 +73,7 @@ public class CpnConfigurer extends BaseEntity {
 
             return validators;
         }
-        return validators;
+        return Objects.isNull(validators) ? Collections.emptySet() : validators;
     }
 
     public Set<Validator> getValidatorList() {
@@ -88,6 +89,6 @@ public class CpnConfigurer extends BaseEntity {
             }
         }
 
-        return validatorList;
+        return Objects.isNull(validatorList) ? Collections.emptySet() : validatorList;
     }
 }

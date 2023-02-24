@@ -24,10 +24,18 @@ public interface Cpn<T> {
 
     void check(String[] options);
 
+    /**
+     * 控件支持的验证类型
+     * @return
+     */
     Set<ValidatorTypeEnum> validatorSupports();
 
     boolean hasValidator(Validator validator);
 
+    /**
+     * 控件特性相关验证
+     * @return
+     */
     Set<Validator> cpnValidators();
 
 }

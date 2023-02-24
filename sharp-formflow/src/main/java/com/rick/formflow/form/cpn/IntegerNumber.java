@@ -3,8 +3,6 @@ package com.rick.formflow.form.cpn;
 import com.google.common.collect.Sets;
 import com.rick.formflow.form.cpn.core.AbstractCpn;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
-import com.rick.formflow.form.valid.NumberRegex;
-import com.rick.formflow.form.valid.core.Validator;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -13,15 +11,14 @@ import java.util.Set;
 
 /**
  * @author Rick
- * @createdAt 2021-11-02 20:45:00
+ * @createdAt 2023-02-24 15:05:00
  */
 @Component
-public class Currency extends AbstractCpn<Integer> {
-
+public class IntegerNumber extends AbstractCpn<Integer> {
 
     @Override
     public CpnTypeEnum getCpnType() {
-        return CpnTypeEnum.CURRENCY;
+        return CpnTypeEnum.INTEGER_NUMBER;
     }
 
     @Override
@@ -38,10 +35,4 @@ public class Currency extends AbstractCpn<Integer> {
     protected Set<ValidatorTypeEnum> internalValidatorSupports() {
         return Sets.newHashSet(ValidatorTypeEnum.SIZE);
     }
-
-    @Override
-    public Set<Validator> cpnValidators() {
-        return Sets.newHashSet(new NumberRegex());
-    }
-
 }

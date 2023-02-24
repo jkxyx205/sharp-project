@@ -29,12 +29,12 @@ public class DateRegex extends AbstractValidator<String> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.MOBILE;
+        return ValidatorTypeEnum.DATE;
     }
 
     @Override
     public String getMessage() {
-        return String.format("时间格式不正确") ;
+        return String.format("日期格式不正确，正确的格式是yyyy-MM-dd") ;
     }
 
 }

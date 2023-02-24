@@ -29,7 +29,7 @@ public class EmailRegex extends AbstractValidator<String> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.MOBILE;
+        return ValidatorTypeEnum.EMAIL;
     }
 
     @Override

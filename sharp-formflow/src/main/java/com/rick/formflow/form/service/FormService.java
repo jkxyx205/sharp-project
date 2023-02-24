@@ -74,7 +74,6 @@ public class FormService {
             Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
             String stringValue = Objects.nonNull(formCpnValue) ? formCpnValue.getValue() : cpnConfigurer.getDefaultValue();
             Object value = StringUtils.isBlank(stringValue) ? stringValue : cpn.parseStringValue(stringValue);
-            cpnConfigurer.getValidatorList().addAll(cpn.cpnValidators());
             propertyList.add(new FormBO.Property(formCpn.getId(), formCpn.getName(), cpnConfigurer, value));
         }
 

@@ -39,6 +39,6 @@ public class Required extends AbstractValidator<Object> {
 
     @Override
     public String getMessage() {
-        return "必填项";
+        return "必填项需要填写";
     }
 }

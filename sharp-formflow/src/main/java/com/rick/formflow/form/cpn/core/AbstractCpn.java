@@ -25,13 +25,20 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
 
     @Override
     public void valid(T value, String[] options) {
+        // 验证选项
         if (value instanceof String && StringUtils.isBlank((CharSequence) value)) {
             return;
         }
+
         if (Objects.nonNull(value) && ArrayUtils.isNotEmpty(options)) {
             if (!Sets.newHashSet(options).contains(value)) {
                 throw new IllegalArgumentException("没有找到正确的选项");
             }
+        }
+
+        // 验证控件特性
+        for (Validator cpnValidator : cpnValidators()) {
+            cpnValidator.valid(value);
         }
     }
 
@@ -106,8 +113,11 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
         return validatorSupports().contains(validator.getValidatorType());
     }
 
-    protected void internalValid(String value, String[] options) {};
 
+    /**
+     * 数据库可以配置的验证
+     * @return
+     */
     protected Set<ValidatorTypeEnum> internalValidatorSupports() {return null;};
 
     @Override

@@ -13,10 +13,13 @@ import lombok.Getter;
 public enum ValidatorTypeEnum {
 
     LENGTH("Length"),
-    INTEGER_NUM("IntegerNum"),
+    POSITIVE_INTEGER("Positive Integer"),
+    NUMBER("number"),
     REQUIRED("Required"),
     SIZE("Size"),
+    TEXT_NUMBER_SIZE("TextNumberSize"),
     DATE("Date"),
+    TIME("Time"),
     EMAIL("Email"),
     MOBILE("Mobile"),
     DECIMAL("Decimal");

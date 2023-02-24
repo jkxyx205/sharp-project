@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Pattern;
+
 /**
  * @author Rick
  * @createdAt 2021-11-02 17:13:00
@@ -14,14 +16,14 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
-public class DecimalRegex extends AbstractValidator<String> {
+public class NumberRegex extends AbstractValidator<String> {
 
-    private static final String regex = "^[+-]?([0-9]+\\.?[0-9]*|\\.[0-9]+)$";
+    private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
 
     @Override
     public void valid(String value) {
         if (StringUtils.isNotBlank(value)) {
-            if (!value.matches(regex)) {
+            if (!pattern.matcher(value).matches()) {
                 throw new IllegalArgumentException(getMessage());
             }
         }
@@ -29,12 +31,12 @@ public class DecimalRegex extends AbstractValidator<String> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.DECIMAL;
+        return ValidatorTypeEnum.NUMBER;
     }
 
     @Override
     public String getMessage() {
-        return String.format("小数格式不正确") ;
+        return String.format("数字格式不正确") ;
     }
 
 }

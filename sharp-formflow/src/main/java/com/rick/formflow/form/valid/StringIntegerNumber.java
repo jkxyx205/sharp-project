@@ -27,7 +27,7 @@ public class StringIntegerNumber extends AbstractValidator<String> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.INTEGER_NUM;
+        return ValidatorTypeEnum.POSITIVE_INTEGER;
     }
 
     @Override

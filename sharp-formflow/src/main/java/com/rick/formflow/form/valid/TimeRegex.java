@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeRegex extends AbstractValidator<String> {
 
-    private static final String regex = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$";
+    private static final String regex = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
 
     @Override
     public void valid(String value) {
@@ -29,12 +29,12 @@ public class TimeRegex extends AbstractValidator<String> {
 
     @Override
     public ValidatorTypeEnum getValidatorType() {
-        return ValidatorTypeEnum.MOBILE;
+        return ValidatorTypeEnum.TIME;
     }
 
     @Override
     public String getMessage() {
-        return String.format("时间格式不正确") ;
+        return String.format("时间格式不正确，正确的格式是HH:mm") ;
     }
 
 }
