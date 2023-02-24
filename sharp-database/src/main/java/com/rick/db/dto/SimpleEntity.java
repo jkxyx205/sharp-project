@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serializable;
+
 /**
  * @author Rick
  * @createdAt 2021-09-23 23:10:00
@@ -17,7 +19,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SimpleEntity {
+public class SimpleEntity implements Serializable {
 
     @Id
     @JsonSerialize(using = ToStringSerializer.class)

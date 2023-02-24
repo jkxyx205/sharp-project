@@ -63,6 +63,7 @@ class TableMeta {
      */
     private Set<String> subTables;
 
+    private List<SelectProperty> selectAnnotationList;
 
     private List<OneToManyProperty> oneToManyAnnotationList;
 
@@ -78,6 +79,15 @@ class TableMeta {
     public static class OneToManyProperty {
 
         private OneToMany oneToMany;
+
+        private Field field;
+
+    }
+
+    @Value
+    public static class SelectProperty {
+
+        private Select select;
 
         private Field field;
     }

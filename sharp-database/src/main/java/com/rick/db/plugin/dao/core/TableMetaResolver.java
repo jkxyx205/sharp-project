@@ -54,6 +54,8 @@ class TableMetaResolver {
         StringBuilder propertiesBuilder = new StringBuilder();
         StringBuilder updatePropertiesBuilder = new StringBuilder();
 
+        List<TableMeta.SelectProperty> selectAnnotationList = Lists.newArrayList();
+
         List<TableMeta.OneToManyProperty> oneToManyAnnotationList = Lists.newArrayList();
 
         List<TableMeta.ManyToOneProperty> manyToOneAnnotationList = Lists.newArrayList();
@@ -67,6 +69,11 @@ class TableMetaResolver {
         String idPropertyName = null;
         Id id = null;
         for (Field field : fields) {
+            Select selectAnnotation = field.getAnnotation(Select.class);
+            if (selectAnnotation != null) {
+                selectAnnotationList.add(new TableMeta.SelectProperty(selectAnnotation, field));
+            }
+
             OneToMany oneToManyAnnotation = field.getAnnotation(OneToMany.class);
             if (oneToManyAnnotation != null) {
                 subTables.add(oneToManyAnnotation.subTable());
@@ -123,7 +130,7 @@ class TableMetaResolver {
         }
 
         return new TableMeta(tableAnnotation, id, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idColumnName, idPropertyName, subTables, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
+                updatePropertiesBuilder.toString(), idColumnName, idPropertyName, subTables, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, columnNameMap);
     }
 

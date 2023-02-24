@@ -583,7 +583,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     /**
-     * name=23&age=15,13 => name=:name AND age IN(:age)
+     * name=23&age=15,13&material_id => name=:name AND age IN(:age) AND material_id = :material_id
      * 注意`=`两边的空格问题
      *
      * @param queryString
@@ -1266,6 +1266,37 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
+        // region Select
+        for (TableMeta.SelectProperty selectProperty : tableMeta.getSelectAnnotationList()) {
+            String joinValue = StringUtils.isBlank(selectProperty.getSelect().joinValue()) ? subTableRefColumnName : selectProperty.getSelect().joinValue();
+            String referencePropertyName = StringUtils.isBlank(selectProperty.getSelect().referencePropertyName()) ? tableMeta.getIdPropertyName() : selectProperty.getSelect().referencePropertyName();
+
+            String storeKey = selectProperty.getSelect().table() + ":" + joinValue;
+            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+                continue;
+            }
+            BaseDAOThreadLocalValue.add(storeKey);
+
+            String targetTable = selectProperty.getSelect().table();
+            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
+            if (subTableBaseDAO == null) {
+                throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
+            }
+
+            Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
+            Map<Object, List<?>> subTableData = subTableBaseDAO.groupByColumnName(joinValue, refIds);
+
+            for (T t : list) {
+                Object data = subTableData.get(getValue(t, referencePropertyName));
+                if (selectProperty.getSelect().oneToOne()) {
+                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? null : ((Collection)data).iterator().next());
+                } else {
+                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
+                }
+
+            }
+        }
+        // endregion
 
         //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
@@ -1508,10 +1539,11 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     private ID getIdValue(Object o) {
-        if (Objects.isNull(o)) {
-            return null;
-        }
         return (ID) BaseDAOManager.getPropertyValue(o, this.tableMeta.getIdPropertyName());
+    }
+
+    private Object getValue(Object o, String propertyName) {
+        return (ID) BaseDAOManager.getPropertyValue(o, propertyName);
     }
 
     private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
