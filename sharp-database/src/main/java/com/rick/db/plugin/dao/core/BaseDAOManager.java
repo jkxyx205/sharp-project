@@ -2,6 +2,7 @@ package com.rick.db.plugin.dao.core;
 
 import com.google.common.collect.Maps;
 import com.rick.common.util.ReflectUtils;
+import com.rick.db.plugin.dao.annotation.Table;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanInitializationException;
 
@@ -71,7 +72,17 @@ public class BaseDAOManager {
         }
 
         try {
-            return BaseDAOManager.entityPropertyDescriptorMap.get(value.getClass()).get(propertyName).getReadMethod().invoke(value);
+            Class<?> entityClass = value.getClass();
+            while (Objects.nonNull(entityClass)) {
+                Table tableAnnotation = entityClass.getAnnotation(Table.class);
+                if (Objects.isNull(tableAnnotation)) {
+                    entityClass = entityClass.getSuperclass();
+                } else {
+                    break;
+                }
+            }
+
+            return BaseDAOManager.entityPropertyDescriptorMap.get(entityClass).get(propertyName).getReadMethod().invoke(value);
         } catch (Exception e) {
             log.error("Cannot get ["+propertyName+"] value, may you lost " + value.getClass().getSimpleName() + "DAO or lost ["+propertyName+"] property for class ["+value.getClass().getSimpleName()+"]");
             e.printStackTrace();
