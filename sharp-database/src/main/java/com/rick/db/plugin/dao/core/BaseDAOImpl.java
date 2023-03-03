@@ -1482,12 +1482,18 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             }
 
             // 再插入或更新
-            subTableBaseDAO.insertOrUpdate(subDataList);
+            if (oneToManyProperty.getOneToMany().oneToOne() && oneToManyProperty.getOneToMany().oneToOneOnlySave() && insert) {
+                // oneToOne 只做插入操作
+                subTableBaseDAO.insert(subDataList);
+            } else {
+                subTableBaseDAO.insertOrUpdate(subDataList);
+            }
+
         }
 
         // ManyToOne
         for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
-            if (!manyToOneProperty.getManyToOne().cascadeSaveOrUpdate()) {
+            if (!manyToOneProperty.getManyToOne().cascadeSaveOrUpdate() && !manyToOneProperty.getManyToOne().cascadeSave()) {
                 continue;
             }
 
@@ -1504,8 +1510,12 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 ID refId = getIdValue(targetObject);
+                if (manyToOneProperty.getManyToOne().cascadeSave() && insert) {
+                    parentTableBaseDAO.insert(targetObject);
+                } else {
+                    parentTableBaseDAO.insertOrUpdate(targetObject);
+                }
 
-                parentTableBaseDAO.insertOrUpdate(targetObject);
                 if (refId == null) { // 添加外键
                     updateById(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
                 }

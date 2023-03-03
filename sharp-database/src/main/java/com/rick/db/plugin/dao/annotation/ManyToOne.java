@@ -18,11 +18,17 @@ public @interface ManyToOne {
     String value() default "";
 
     @AliasFor(annotation = Column.class)
-    boolean updatable() default true;
+    boolean updatable() default false;
 
     String parentTable();
 
     boolean cascadeSaveOrUpdate() default false;
+
+    /**
+     * 只做插入操作，不做更新操作。使用场景如，批次物料库存移动的时候，如果是新的批次，则添加，否则不做更新
+     * @return
+     */
+    boolean cascadeSave() default false;
 
     String comment() default  "";
 

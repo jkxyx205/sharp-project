@@ -122,8 +122,12 @@ class TableMetaResolver {
         }
         propertiesBuilder.deleteCharAt(propertiesBuilder.length() - 1);
         columnNamesBuilder.deleteCharAt(columnNamesBuilder.length() - 1);
-        updateColumnNamesBuilder.deleteCharAt(updateColumnNamesBuilder.length() - 1);
-        updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
+
+        if (StringUtils.isNotBlank(updateColumnNamesBuilder.toString())) {
+            updateColumnNamesBuilder.deleteCharAt(updateColumnNamesBuilder.length() - 1);
+            updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
+        }
+
 
         if (Objects.isNull(id)) {
             idColumnName = idPropertyName = DEFAULT_PRIMARY_COLUMN;

@@ -69,7 +69,7 @@ public class TableGenerator {
                     createTableSql.append(column.columnDefinition());
                 } else {
                     createTableSql.append(determineSqlType(field.getType()));
-                    if (column.nullable()) {
+                    if (!column.nullable()) {
                         createTableSql.append(" not null");
                     }
 

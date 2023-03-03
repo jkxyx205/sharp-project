@@ -27,4 +27,6 @@ public @interface OneToMany {
     String joinValue();
 
     boolean oneToOne() default false;
+
+    boolean oneToOneOnlySave() default false;
 }
