@@ -20,7 +20,7 @@ public @interface OneToMany {
      */
     String reversePropertyName() default "";
 
-    boolean cascadeSaveOrUpdate() default false;
+    boolean cascadeInsertOrUpdate() default false;
 
     boolean cascadeDelete() default true;
 
@@ -32,5 +32,5 @@ public @interface OneToMany {
      * 仅插入，场景物料凭证修改的时候，不会更新item数据
      * @return
      */
-    boolean cascadeSave() default false;
+    boolean cascadeInsert() default false;
 }

@@ -1422,7 +1422,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private void cascadeInsertOrUpdate(T t, boolean insert) {
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
-            if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate() && !oneToManyProperty.getOneToMany().cascadeSave()) {
+            if (!oneToManyProperty.getOneToMany().cascadeInsertOrUpdate() && !oneToManyProperty.getOneToMany().cascadeInsert()) {
                 continue;
             }
 
@@ -1482,7 +1482,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             }
 
             // 再插入或更新
-            if (oneToManyProperty.getOneToMany().cascadeSave()) {
+            if (oneToManyProperty.getOneToMany().cascadeInsert()) {
                 List<?> updateSubDataList = subDataList.stream().filter(e -> Objects.isNull(getIdValue(e))).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(updateSubDataList)) {
                     subTableBaseDAO.insert(updateSubDataList);
@@ -1495,7 +1495,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
         // ManyToOne
         for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
-            if (!manyToOneProperty.getManyToOne().cascadeSaveOrUpdate() && !manyToOneProperty.getManyToOne().cascadeSave()) {
+            if (!manyToOneProperty.getManyToOne().cascadeInsertOrUpdate() && !manyToOneProperty.getManyToOne().cascadeInsert()) {
                 continue;
             }
 
@@ -1512,7 +1512,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 ID refId = getIdValue(targetObject);
-                if (manyToOneProperty.getManyToOne().cascadeSave() && Objects.isNull(refId)) {
+                if (manyToOneProperty.getManyToOne().cascadeInsert() && Objects.isNull(refId)) {
                     parentTableBaseDAO.insert(targetObject);
                 } else {
                     parentTableBaseDAO.insertOrUpdate(targetObject);

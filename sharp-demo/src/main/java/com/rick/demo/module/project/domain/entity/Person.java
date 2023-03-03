@@ -31,7 +31,7 @@ public class Person extends BaseEntity {
     @ManyToMany(thirdPartyTable = "t_person_role", referenceColumnName = "role_id", columnDefinition = "person_id", referenceTable = "t_role")
     private List<Role> roleList;
 
-    @ManyToOne(parentTable = "t_person_id_card", value = "id_card_id", cascadeSaveOrUpdate = true)
+    @ManyToOne(parentTable = "t_person_id_card", value = "id_card_id", cascadeInsertOrUpdate = true)
     private IdCard idCard;
 
 }
