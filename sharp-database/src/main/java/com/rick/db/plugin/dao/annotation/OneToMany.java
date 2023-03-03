@@ -28,5 +28,9 @@ public @interface OneToMany {
 
     boolean oneToOne() default false;
 
-    boolean oneToOneOnlySave() default false;
+    /**
+     * 仅插入，场景物料凭证修改的时候，不会更新item数据
+     * @return
+     */
+    boolean cascadeSave() default false;
 }

@@ -1422,7 +1422,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     private void cascadeInsertOrUpdate(T t, boolean insert) {
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
-            if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate()) {
+            if (!oneToManyProperty.getOneToMany().cascadeSaveOrUpdate() && !oneToManyProperty.getOneToMany().cascadeSave()) {
                 continue;
             }
 
@@ -1482,9 +1482,11 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             }
 
             // 再插入或更新
-            if (oneToManyProperty.getOneToMany().oneToOne() && oneToManyProperty.getOneToMany().oneToOneOnlySave() && insert) {
-                // oneToOne 只做插入操作
-                subTableBaseDAO.insert(subDataList);
+            if (oneToManyProperty.getOneToMany().cascadeSave()) {
+                List<?> updateSubDataList = subDataList.stream().filter(e -> Objects.isNull(getIdValue(e))).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(updateSubDataList)) {
+                    subTableBaseDAO.insert(updateSubDataList);
+                }
             } else {
                 subTableBaseDAO.insertOrUpdate(subDataList);
             }
@@ -1510,7 +1512,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 ID refId = getIdValue(targetObject);
-                if (manyToOneProperty.getManyToOne().cascadeSave() && insert) {
+                if (manyToOneProperty.getManyToOne().cascadeSave() && Objects.isNull(refId)) {
                     parentTableBaseDAO.insert(targetObject);
                 } else {
                     parentTableBaseDAO.insertOrUpdate(targetObject);
