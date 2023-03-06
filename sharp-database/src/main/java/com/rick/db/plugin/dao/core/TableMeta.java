@@ -63,6 +63,8 @@ class TableMeta {
      */
     private Set<String> subTables;
 
+    private List<EmbeddedProperty> embeddedPropertyList;
+
     private List<SelectProperty> selectAnnotationList;
 
     private List<OneToManyProperty> oneToManyAnnotationList;
@@ -82,6 +84,14 @@ class TableMeta {
 
         private Field field;
 
+    }
+
+    @Value
+    public static class EmbeddedProperty {
+
+        private Embedded embedded;
+
+        private Field field;
     }
 
     @Value

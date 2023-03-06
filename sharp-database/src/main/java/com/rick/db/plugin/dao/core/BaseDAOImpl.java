@@ -93,6 +93,8 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
 
     private Map<String, String> propertyNameToColumnNameMap;
 
+    private List<Field> embeddedFieldList;
+
     public BaseDAOImpl() {
         this.init();
     }
@@ -897,6 +899,12 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     @Override
+    public List<Field> getEmbeddedFieldList() {
+        return this.embeddedFieldList;
+    }
+
+
+    @Override
     public TableMeta getTableMeta() {
         return this.tableMeta;
     }
@@ -921,6 +929,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         this.propertyList = convertToArray(tableMeta.getProperties());
         this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
         this.entityFields = ReflectUtils.getAllFields(this.entityClass);
+        this.embeddedFieldList = tableMeta.getEmbeddedPropertyList().stream().map(TableMeta.EmbeddedProperty::getField).collect(Collectors.toList());
 
         log.debug("properties: {}", tableMeta.getProperties());
 
@@ -1049,11 +1058,7 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     }
 
     private void setPropertyValue(Object t, String propertyName, Object propertyValue) {
-        try {
-            BaseDAOManager.entityPropertyDescriptorMap.get(t.getClass()).get(propertyName).getWriteMethod().invoke(t, propertyValue);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        BaseDAOManager.setPropertyValue(t, propertyName, propertyValue);
     }
 
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {

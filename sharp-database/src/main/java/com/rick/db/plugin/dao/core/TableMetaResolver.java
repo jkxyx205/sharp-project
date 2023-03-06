@@ -5,7 +5,7 @@ import com.google.common.base.Converter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.annotation.*;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ class TableMetaResolver {
     private static final String DEFAULT_PRIMARY_COLUMN = "id";
 
     public static TableMeta resolve(Class<?> clazz) {
-        if (!BaseEntity.class.isAssignableFrom(clazz)) {
+        if (!SimpleEntity.class.isAssignableFrom(clazz)) {
             log.warn(clazz.getSimpleName() + " forgot extends from BaseEntity?");
         }
 
@@ -54,20 +54,42 @@ class TableMetaResolver {
         StringBuilder propertiesBuilder = new StringBuilder();
         StringBuilder updatePropertiesBuilder = new StringBuilder();
 
+        List<TableMeta.EmbeddedProperty> embeddedPropertyList = Lists.newArrayList();
         List<TableMeta.SelectProperty> selectAnnotationList = Lists.newArrayList();
-
         List<TableMeta.OneToManyProperty> oneToManyAnnotationList = Lists.newArrayList();
-
         List<TableMeta.ManyToOneProperty> manyToOneAnnotationList = Lists.newArrayList();
-
         List<TableMeta.ManyToManyProperty> manyToManyAnnotationList = Lists.newArrayList();
-
         Map<String, Field> columnNameFieldMap = Maps.newHashMap();
         Map<String, Column> columnNameMap = Maps.newHashMap();
 
-        String idColumnName = null;
-        String idPropertyName = null;
-        Id id = null;
+        IdCollector idCollector = new IdCollector();
+        resolveFields(fields, "", idCollector, embeddedPropertyList, selectAnnotationList
+                , subTables, oneToManyAnnotationList, manyToOneAnnotationList,
+                manyToManyAnnotationList, columnNameFieldMap, columnNameMap,
+                columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder, converter);
+
+        propertiesBuilder.deleteCharAt(propertiesBuilder.length() - 1);
+        columnNamesBuilder.deleteCharAt(columnNamesBuilder.length() - 1);
+
+        if (StringUtils.isNotBlank(updateColumnNamesBuilder.toString())) {
+            updateColumnNamesBuilder.deleteCharAt(updateColumnNamesBuilder.length() - 1);
+            updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
+        }
+
+
+        if (Objects.isNull(idCollector.id)) {
+            idCollector.columnName = idCollector.propertyName = DEFAULT_PRIMARY_COLUMN;
+        }
+
+        return new TableMeta(tableAnnotation, idCollector.id, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+                updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, subTables, embeddedPropertyList, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
+                , columnNameFieldMap, columnNameMap);
+    }
+
+    private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList
+    , Set<String> subTables, List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
+                               List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap,
+                               StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder, Converter<String, String> converter) {
         for (Field field : fields) {
             Select selectAnnotation = field.getAnnotation(Select.class);
             if (selectAnnotation != null) {
@@ -91,15 +113,25 @@ class TableMetaResolver {
                 manyToManyAnnotationList.add(new TableMeta.ManyToManyProperty(manyToManyAnnotation, field));
             }
 
+            Embedded embedded = field.getAnnotation(Embedded.class);
+            if (embedded != null) {
+                embeddedPropertyList.add(new TableMeta.EmbeddedProperty(embedded, field));
+                Field[] embeddedFields = getAllFields(field.getType());
+                resolveFields(embeddedFields, propertyNamePrefix + field.getName() + ".", idCollector, embeddedPropertyList, selectAnnotationList
+                        , subTables, oneToManyAnnotationList, manyToOneAnnotationList,
+                        manyToManyAnnotationList, columnNameFieldMap, columnNameMap,
+                        columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder, converter);
+            }
+
             if (AnnotatedElementUtils.hasAnnotation(field, Transient.class)) {
                 continue;
             }
 
-            if (id == null) {
-                id = field.getAnnotation(Id.class);
-                if (Objects.nonNull(id)) {
-                    idColumnName = StringUtils.isNotBlank(id.value()) ? id.value() : converter.convert(field.getName());
-                    idPropertyName = field.getName();
+            if (idCollector.id == null) {
+                idCollector.id = field.getAnnotation(Id.class);
+                if (Objects.nonNull(idCollector.id)) {
+                    idCollector.columnName = StringUtils.isNotBlank(idCollector.id.value()) ? idCollector.id.value() : converter.convert(field.getName());
+                    idCollector.propertyName = field.getName();
                 }
             }
 
@@ -110,32 +142,26 @@ class TableMetaResolver {
             columnNameFieldMap.put(columnName, field);
             columnNameMap.put(columnName, annotation);
 
-            propertiesBuilder.append(field.getName()).append(",");
+            propertiesBuilder.append(propertyNamePrefix + field.getName()).append(",");
             columnNamesBuilder.append(columnName).append(",");
 
             boolean isUpdatableColumn = (Objects.isNull(annotation) || annotation.updatable()) && Objects.isNull(field.getAnnotation(Id.class));
             if (isUpdatableColumn) {
                 updateColumnNamesBuilder.append(columnName).append(",");
-                updatePropertiesBuilder.append(field.getName()).append(",");
+                updatePropertiesBuilder.append(propertyNamePrefix + field.getName()).append(",");
             }
 
         }
-        propertiesBuilder.deleteCharAt(propertiesBuilder.length() - 1);
-        columnNamesBuilder.deleteCharAt(columnNamesBuilder.length() - 1);
+    }
 
-        if (StringUtils.isNotBlank(updateColumnNamesBuilder.toString())) {
-            updateColumnNamesBuilder.deleteCharAt(updateColumnNamesBuilder.length() - 1);
-            updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
-        }
+    private class IdCollector {
 
+        private Id id;
 
-        if (Objects.isNull(id)) {
-            idColumnName = idPropertyName = DEFAULT_PRIMARY_COLUMN;
-        }
+        private String columnName;
 
-        return new TableMeta(tableAnnotation, id, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idColumnName, idPropertyName, subTables, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
-                , columnNameFieldMap, columnNameMap);
+        private String propertyName;
+
     }
 
     private Field[] getAllFields(Class<?> clazz) {

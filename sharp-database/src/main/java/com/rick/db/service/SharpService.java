@@ -1,19 +1,27 @@
 package com.rick.db.service;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Converter;
 import com.rick.common.http.convert.*;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -30,6 +38,8 @@ public class SharpService {
 
     @Autowired
     protected AbstractSqlFormatter sqlFormatter;
+
+    private static final Converter<String, String> converter = CaseFormat.LOWER_UNDERSCORE.converterTo(CaseFormat.LOWER_CAMEL);
 
     @Autowired(required = false)
     private List<ConverterFactory> converterFactories = Collections.emptyList();
@@ -137,12 +147,55 @@ public class SharpService {
             return (List<T>) query(sql, paramMap);
         }
 
-        BeanPropertyRowMapper<T> beanPropertyRowMapper = new BeanPropertyRowMapper<>(clazz);
-        DefaultConversionService defaultConversionService = (DefaultConversionService) beanPropertyRowMapper.getConversionService();
-        customerConversion(defaultConversionService);
+        // 添加嵌套查询
+        NestedRowMapper<T> beanPropertyRowMapper = new NestedRowMapper<>(clazz);
+
+//        BeanPropertyRowMapper<T> beanPropertyRowMapper = new BeanPropertyRowMapper<T>(clazz);
+//        DefaultConversionService defaultConversionService = (DefaultConversionService) beanPropertyRowMapper.getConversionService();
+//        customerConversion(defaultConversionService);
 
         List<T> query = jdbcTemplate.query(sql, paramMap, beanPropertyRowMapper);
         return query;
+    }
+
+    private class NestedRowMapper<T> implements RowMapper<T> {
+
+        private Class<T> mappedClass;
+
+
+
+        public NestedRowMapper(Class<T> mappedClass) {
+           this.mappedClass = mappedClass;
+        }
+
+        @Override
+        public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+            T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
+            BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
+            bw.setAutoGrowNestedPaths(true);
+            bw.setConversionService(DefaultConversionService.getSharedInstance());
+            customerConversion((DefaultConversionService)bw.getConversionService());
+
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnCount = rsmd.getColumnCount();
+
+            for (int index = 1; index <= columnCount; index++) {
+                String column = JdbcUtils.lookupColumnName(rsmd, index);
+                try {
+                    Object value = JdbcUtils.getResultSetValue(rs, index, Class.forName(rsmd.getColumnClassName(index)));
+                    bw.setPropertyValue(camelCaseName(column), value);
+                } catch (TypeMismatchException | NotWritablePropertyException | ClassNotFoundException e) {
+//                    log.warn("Unable to map column '" + column + "' to property");
+                    throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property", e);
+                }
+            }
+
+            return mappedObject;
+        }
+
+        private String camelCaseName(String name) {
+            return name.indexOf("_") > -1 ? converter.convert(name) : name;
+        }
     }
 
     protected List<Map<String, Object>> toMap(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap) {

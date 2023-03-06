@@ -35,6 +35,10 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Message2.class);
 //        tableGenerator.createTable(Film.class);
 //        tableGenerator.createTable(Report.class);
+//        tableGenerator.createTable(Company.class);
+//        tableGenerator.createTable(Vendor.class);
     }
+
+
 
 }

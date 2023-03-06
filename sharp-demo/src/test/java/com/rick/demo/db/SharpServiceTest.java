@@ -58,7 +58,7 @@ public class SharpServiceTest {
     @Test
     public void testListAsClass() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, created_at, is_deleted AS deleted, created_by, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
@@ -125,7 +125,7 @@ public class SharpServiceTest {
     @Test
     public void testQueryObject() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, created_at, is_deleted AS deleted, created_by, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id = :id\n" +
                 "  AND title LIKE :title\n" +
@@ -146,7 +146,7 @@ public class SharpServiceTest {
     @Test
     public void testQueryBean() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, created_at, is_deleted AS deleted, created_by, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +

@@ -1,0 +1,72 @@
+package com.rick.demo.db;
+
+import com.rick.demo.module.embedded.dao.CompanyDAO;
+import com.rick.demo.module.embedded.entity.Company;
+import com.rick.demo.module.embedded.entity.Vendor;
+import com.rick.demo.module.embedded.model.ContactPerson;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author Rick
+ * @createdAt 2023-03-06 14:17:00
+ */
+@SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class CompanyServiceTest {
+    @Autowired
+    private CompanyDAO companyDAO;
+
+    @Test
+    public void testSave() {
+        companyDAO.insert(Company.builder()
+                .name("云")
+                .phone("110")
+                .address("Nanjing")
+                .contactPerson(ContactPerson.builder()
+                        .firstName("Rick")
+                        .lastName("Xu")
+                        .phone("120")
+//                        .vendorList(Arrays.asList(
+//                                Vendor.builder().name("VE_CO").build(),
+//                                Vendor.builder().name("BUILD").build()
+//                                )
+//                        )
+//                        .role(Role.builder().name("Admin").build())
+                        .build())
+                .build());
+    }
+
+    @Test
+    public void testUpdate() {
+        companyDAO.update(Company.builder()
+                .id(664271916529364992L)
+                .name("点")
+                .phone("110")
+                .address("Nanjing")
+                .contactPerson(ContactPerson.builder()
+                        .firstName("Jim")
+                        .lastName("Green")
+                        .phone("119")
+                        .vendorList(Arrays.asList(
+                                Vendor.builder().name("BUILD").build(),
+                                Vendor.builder().name("DREAM").build()
+                                )
+                        )
+                        .build())
+                .build());
+    }
+
+    @Test
+    public void testFindById() {
+        List<Company> list = companyDAO.selectByIds(664271916529364992L, 664272777510924288L);
+        list.forEach(System.out::println);
+
+    }
+}
