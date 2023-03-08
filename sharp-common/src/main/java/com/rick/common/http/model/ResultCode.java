@@ -15,7 +15,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum ResultCode {
-    FAIL(-1, "服务器异常"),
+    FAIL(500, "服务器端异常"),
     OK(0, "OK"),
     ACCESS_FORBIDDEN_ERROR(1, "访问未授权"),
     ARGUMENT_NOT_VALID(2, "参数验证失败");

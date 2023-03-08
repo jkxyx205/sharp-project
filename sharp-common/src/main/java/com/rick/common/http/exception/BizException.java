@@ -24,12 +24,24 @@ public class BizException extends RuntimeException {
         this(ResultUtils.fail(msg));
     }
 
+    public BizException(String msg, Object[] params) {
+        this(ResultUtils.fail(msg), params);
+    }
+
     public BizException(int code, String msg) {
         this(ResultUtils.fail(code, msg));
     }
 
+    public BizException(int code, String msg, Object[] params) {
+        this(ResultUtils.fail(code, msg), params);
+    }
+
     public <T> BizException(int code, String msg, T data) {
         this(ResultUtils.fail(code, msg, data));
+    }
+
+    public <T> BizException(int code, String msg, T data, Object[] params) {
+        this(ResultUtils.fail(code, msg, data), params);
     }
 
     public BizException(ExceptionCode exceptionCode) {
