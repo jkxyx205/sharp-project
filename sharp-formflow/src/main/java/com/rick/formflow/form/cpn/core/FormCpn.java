@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -26,8 +25,8 @@ public class FormCpn extends BaseEntity {
     @NotNull
     private Long formId;
 
-    @NotBlank
-    private String name;
+//    @NotBlank
+//    private String name;
 
     @NotNull
     private Long configId;

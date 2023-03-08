@@ -6,9 +6,13 @@ import com.rick.formflow.form.service.FormAdvice;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -22,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnSingleCandidate(GridService.class)
 @AutoConfigureAfter({GridServiceAutoConfiguration.class})
+@EnableConfigurationProperties({FormFlowProperties.class})
 public class FormFlowServiceAutoConfiguration {
 
     public FormFlowServiceAutoConfiguration() {
@@ -33,7 +38,17 @@ public class FormFlowServiceAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public FormAdvice formAdvice() {
-            return (formId, instanceId, values) -> {};
+            return new FormAdvice() {
+                @Override
+                public void afterInstanceSave(Long formId, Long instanceId, Map<String, Object> values) {
+
+                }
+
+                @Override
+                public Map<String, Object> getValues(Long formId, Long instanceId) {
+                    return Collections.emptyMap();
+                }
+            };
         }
     }
 }

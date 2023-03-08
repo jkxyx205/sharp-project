@@ -3,6 +3,7 @@ package com.rick.formflow.form.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
+import com.rick.formflow.config.FormFlowProperties;
 import com.rick.formflow.form.cpn.core.*;
 import com.rick.formflow.form.dao.CpnConfigurerDAO;
 import com.rick.formflow.form.dao.FormCpnDAO;
@@ -45,6 +46,8 @@ public class FormService {
 
     private final CpnManager cpnManager;
 
+    private final FormFlowProperties formFlowProperties;
+
     public Form save(Form form) {
         formDAO.insert(form);
         return form;
@@ -68,13 +71,21 @@ public class FormService {
             formCpnValueMap = Collections.emptyMap();
         }
 
+        Map<String, Object> values = formAdvice.getValues(formId, instanceId);
+
         for (FormCpn formCpn : formCpnList) {
             CpnConfigurer cpnConfigurer = configIdMap.get(formCpn.getConfigId());
-            FormCpnValue formCpnValue = formCpnValueMap.get(formCpn.getId());
-            Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
-            String stringValue = Objects.nonNull(formCpnValue) ? formCpnValue.getValue() : cpnConfigurer.getDefaultValue();
-            Object value = StringUtils.isBlank(stringValue) ? stringValue : cpn.parseStringValue(stringValue);
-            propertyList.add(new FormBO.Property(formCpn.getId(), formCpn.getName(), cpnConfigurer, value));
+            Object value;
+            if (formFlowProperties.isInsertCpnValue()) {
+                FormCpnValue formCpnValue = formCpnValueMap.get(formCpn.getId());
+                Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
+                String stringValue = Objects.nonNull(formCpnValue) ? formCpnValue.getValue() : cpnConfigurer.getDefaultValue();
+                value = StringUtils.isBlank(stringValue) ? stringValue : cpn.parseStringValue(stringValue);
+            } else {
+                value = values.get(cpnConfigurer.getName());
+            }
+
+            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
         }
 
         return new FormBO(form, instanceId, propertyList);
@@ -119,7 +130,10 @@ public class FormService {
             throw new BindException(bindingResult);
         }
 
-        formCpnValueDAO.insert(FormCpnValueList);
+        if (formFlowProperties.isInsertCpnValue()) {
+            formCpnValueDAO.insert(FormCpnValueList);
+        }
+
         values.put("formId", formId);
         values.put("instanceId", instanceId);
         // postHandler mongoDB 文档存储

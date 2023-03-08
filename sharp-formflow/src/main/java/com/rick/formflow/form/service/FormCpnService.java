@@ -10,7 +10,6 @@ import com.rick.formflow.form.dao.FormDAO;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -67,7 +66,8 @@ public class FormCpnService {
 
         int i = 0;
         for (CpnConfigurer cpnConfigurer : configurerList) {
-            formCpnList.add(new FormCpn(formId, RandomStringUtils.randomAlphabetic(10), cpnConfigurer.getId(), i++));
+//            formCpnList.add(new FormCpn(formId, StringUtils.isBlank(cpnConfigurer.getName()) ? RandomStringUtils.randomAlphabetic(10) : cpnConfigurer.getName(), cpnConfigurer.getId(), i++));
+            formCpnList.add(new FormCpn(formId, cpnConfigurer.getId(), i++));
         }
 
         saveOrUpdateByConfigIds(formId, formCpnList);
@@ -83,9 +83,9 @@ public class FormCpnService {
             FormCpn existsFormCpn = configIdMap.get(formCpn.getConfigId());
             if (Objects.nonNull(existsFormCpn)) {
                 formCpn.setId(existsFormCpn.getId());
-                formCpn.setName(existsFormCpn.getName());
+//                formCpn.setName(existsFormCpn.getName());
             } else {
-                formCpn.setName(RandomStringUtils.randomAlphabetic(10));
+//                formCpn.setName(RandomStringUtils.randomAlphabetic(10));
             }
             formCpn.setOrderNum(i);
         }

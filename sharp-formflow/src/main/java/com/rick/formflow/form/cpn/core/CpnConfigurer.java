@@ -17,6 +17,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Collections;
@@ -36,11 +37,15 @@ import java.util.Set;
 @Table(value = "sys_form_configurer")
 public class CpnConfigurer extends BaseEntity {
 
+    @NotEmpty
+    @Column(nullable = false, updatable = false)
+    private String name;
+
     @NotBlank
     private String label;
 
-    @Column("type")
     @NotNull
+    @Column("type")
     private CpnTypeEnum cpnType;
 
     @JsonIgnore

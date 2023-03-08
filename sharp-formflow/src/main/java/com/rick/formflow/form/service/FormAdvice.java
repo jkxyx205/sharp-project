@@ -12,4 +12,6 @@ public interface FormAdvice {
      * 表单实例数据保存之后
      */
     void afterInstanceSave(Long formId, Long instanceId, Map<String, Object> values);
+
+    Map<String, Object> getValues(Long formId, Long instanceId);
 }
