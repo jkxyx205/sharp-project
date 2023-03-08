@@ -69,7 +69,7 @@ public class BookTest {
                 .build());
     }
 
-    @Order(2)
+    @Order(3)
     @Test
     public void testSelectBook() {
         final Book book = bookDAO.selectById(617321100761636864L).get();

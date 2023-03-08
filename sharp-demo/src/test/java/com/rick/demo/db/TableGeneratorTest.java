@@ -37,6 +37,7 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Report.class);
 //        tableGenerator.createTable(Company.class);
 //        tableGenerator.createTable(Vendor.class);
+//        tableGenerator.createTable(SerialNumber.class);
     }
 
 

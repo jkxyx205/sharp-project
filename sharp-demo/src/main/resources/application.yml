@@ -30,6 +30,9 @@ logging:
 #sharp:
 #  database:
 #    select-cache: true
+formflow:
+  form:
+    insertCpnValue: false
 
 dict:
   items:

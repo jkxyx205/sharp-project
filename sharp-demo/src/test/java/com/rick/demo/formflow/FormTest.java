@@ -76,7 +76,7 @@ public class FormTest {
                 .pv("HNepFsUCaN", "Jkxyx205")
                 .pv("WpOZNqQasd", "32")
                 .pv("NUqlBwLPfW", "足球")
-                .pv("xYfeMutDQK", list)
+                .pv("xYfeMutDQK", list) //table
                 .pv("checkbox", Arrays.asList("足球", "篮球"))
                 .pv("agree", "同意")
                 .pv("textarea", "简介")

@@ -174,6 +174,13 @@ public class ProjectServiceTest {
         assertThrows(BizException.class, ()-> projectService.checkIds(Arrays.asList(479723663504343043L, 12L)));
     }
 
+    @Order(17)
+    @Test
+    public void selectSingleValueById() {
+        UserStatusEnum userStatus = projectDAO.selectSingleValueById(479723663504343043L, "status", UserStatusEnum.class).get();
+        assertThat(userStatus).isEqualTo(UserStatusEnum.LOCKED);
+    }
+
     public Project createProject() {
         Project project = new Project();
         project.setTitle("项目标题 " + System.currentTimeMillis());
