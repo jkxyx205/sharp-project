@@ -10,6 +10,7 @@ import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.core.BaseDAO;
 import com.rick.db.plugin.dao.core.BaseDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
+import com.rick.db.plugin.dao.support.BaseCodeEntityIdFillService;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
 import com.rick.db.plugin.dao.support.DefaultConditionAdvice;
@@ -65,6 +66,11 @@ public class GridServiceAutoConfiguration {
         @Bean
         public GridService gridService() {
             return new GridService();
+        }
+
+        @Bean
+        public BaseCodeEntityIdFillService getBaseCodeEntityIdFillService() {
+            return new BaseCodeEntityIdFillService();
         }
 
     }

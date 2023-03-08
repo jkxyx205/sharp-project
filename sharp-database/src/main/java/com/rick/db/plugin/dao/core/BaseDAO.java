@@ -45,6 +45,8 @@ public interface BaseDAO<T, ID> extends CoreDAO<ID> {
 
     Optional<ID> selectIdByParams(T example, String conditionSQL);
 
+    <S> Optional<S> selectSingleValueById(ID id, String columnName, Class<S> clazz);
+
     List<ID> selectIdsByParams(T example);
 
     List<ID> selectIdsByParams(T example, String conditionSQL);

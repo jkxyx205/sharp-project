@@ -139,7 +139,7 @@ public class SharpService {
     }
 
     protected <T> List<T> toClass(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap, Class<T> clazz) {
-        if (clazz == String.class || Number.class.isAssignableFrom(clazz) || Character.class == clazz || Boolean.class == clazz) {
+        if (clazz == String.class || Number.class.isAssignableFrom(clazz) || Character.class == clazz || Boolean.class == clazz || clazz.isEnum()) {
             return jdbcTemplate.queryForList(sql, paramMap, clazz);
         }
 

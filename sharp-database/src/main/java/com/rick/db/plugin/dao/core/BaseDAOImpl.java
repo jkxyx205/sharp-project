@@ -661,11 +661,6 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
         return (List<T>) selectByParams(params, fullColumnNames, conditionSQL, srcSQL -> srcSQL, entityClass);
     }
 
-    @Override
-    public Optional<ID> selectIdByParams(T example) {
-        return selectIdByParams(example, null);
-    }
-
     /**
      * 根据条件获取id，如果有多条会抛出异常
      * @param example
@@ -676,6 +671,18 @@ public class BaseDAOImpl<T, ID> implements BaseDAO<T, ID> {
     public Optional<ID> selectIdByParams(T example, String conditionSQL) {
         List<ID> ids = (List<ID>) selectByParams(entityToMap(example), tableMeta.getIdColumnName(), conditionSQL, sql -> sql, this.idClass);
         return expectedAsOptional(ids);
+    }
+
+    @Override
+    public Optional<ID> selectIdByParams(T example) {
+        return selectIdByParams(example, null);
+    }
+
+    @Override
+    public <T> Optional<T> selectSingleValueById(ID id, String columnName, Class<T> clazz) {
+        Assert.notNull(id, "id cannot be null");
+        List<T> values = selectByParams(Params.builder(1).pv(tableMeta.getIdPropertyName(), id).build(), columnName, tableMeta.getIdColumnName() + " = :" + tableMeta.getIdPropertyName(), clazz);
+        return expectedAsOptional(values);
     }
 
     @Override
