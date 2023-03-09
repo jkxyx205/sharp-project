@@ -1,6 +1,5 @@
 package com.rick.db.plugin.dao.core;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +81,6 @@ public interface BaseDAO<T, ID> extends CoreDAO<ID> {
     Class<T> getEntityClass();
 
     TableMeta getTableMeta();
-
-    List<Field> getEmbeddedFieldList();
 
     Map<String, Object> entityToMap(T example);
 

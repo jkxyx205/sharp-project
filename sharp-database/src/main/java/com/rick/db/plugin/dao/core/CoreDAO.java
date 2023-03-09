@@ -20,6 +20,8 @@ public interface CoreDAO<ID> {
 
     int update(Map<String, ?> params);
 
+    int insertOrUpdate(Map<String, ?> params);
+
     int[] insert(Collection<?> paramsList);
 
     int deleteById(ID id);
@@ -60,16 +62,13 @@ public interface CoreDAO<ID> {
 
     int update(String updateColumnNames, Map<String, Object> params, String conditionSQL);
 
-
     List<ID> selectIdsByParams(Map<String, ?> params);
 
     List<ID> selectIdsByParams(Map<String, ?> params, String conditionSQL);
 
-
     long countByParams(Map<String, ?> params, String conditionSQL);
 
     boolean existsByParams(Map<String, ?> params, String conditionSQL);
-
 
     <E> List<E> selectByParams(Map<String, ?> params, String columnNames, Class<E> clazz);
 

@@ -15,7 +15,7 @@ import java.util.Set;
  */
 @Value
 @ToString
-class TableMeta {
+public class TableMeta {
 
     private Table table;
 
