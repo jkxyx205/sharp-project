@@ -10,6 +10,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -52,9 +55,22 @@ public class SerialNumberDAOTest {
     }
 
     @Test
-    public void testFillId() {
+    public void testFillId1() {
+        SerialNumber serialNumber = SerialNumber.builder().code("11").build();
+        idFillService.fill(Arrays.asList(serialNumber));
+        assertThat(serialNumber.getId()).isEqualTo(664984730659258368L);
+    }
+
+    @Test
+    public void testFillId2() {
         SerialNumber serialNumber = SerialNumber.builder().code("11").build();
         idFillService.fill(serialNumber);
         assertThat(serialNumber.getId()).isEqualTo(664984730659258368L);
+    }
+
+    @Test
+    public void testFillId3() {
+        List<SerialNumber> list = idFillService.fill(SerialNumber.class, Arrays.asList("11", "12", "13"));
+        assertThat(list.get(0).getId()).isEqualTo(664984730659258368L);
     }
 }
