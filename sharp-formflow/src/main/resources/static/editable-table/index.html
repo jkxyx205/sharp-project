@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editable Table Test</title>
+</head>
+<body>
+  <!-- <form action="/xx" id = "12" onsubmit="submitForm(); return false"> -->
+    <form onsubmit="submitForm(); return false">
+    <table class="table1">
+        <thead>
+        <tr>
+            <th>姓名</th>
+            <th>年龄</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <table class="table2">
+        <thead>
+        <tr>
+            <th>姓名</th>
+            <th>年龄</th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" value="xx"></td>
+            <td><input type="text" value="qq"></td>
+            <td class="operator">x</td>
+          </tr>
+        </tbody>
+    </table>
+    <button>click</button>
+  </form>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="editable-table.js"></script>
+  <script>
+
+    var $t1 = $('.table1').editableTable({
+        value:  [[1, 2], [3, 4]] 
+    })
+
+    $('.table2').editableTable({
+        value:  [[5, 6], [7, 8]] 
+    })
+
+    function submitForm() {
+        console.log($t1.editableTable('getValue'))
+    }
+
+  </script>
+</body>
+</html>

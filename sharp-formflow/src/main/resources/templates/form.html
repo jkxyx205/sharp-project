@@ -9,11 +9,15 @@
             content: '*';
             color: red;
         }
+
+        .form-check {
+            display: inline-block!important;
+        }
     </style>
 </head>
 <body>
     <div class="container" style="padding-top: 56px;" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}">
-        <form class="needs-validation" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="'form_' + ${formBO.form.id}" th:name="'form_' + ${formBO.form.id}" novalidate>
+        <form class="needs-validation" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="${formBO.form.id}" th:name="${formBO.form.code}" novalidate>
             <h2 class="mb-5" th:text="${formBO.form.name}"></h2>
 <!--            th:with="isRequired = ${#lists.contains(p.configurer.validatorList, required)}"-->
             <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.validatorProperties.get('Required.required') eq null ? false : p.validatorProperties.get('Required.required')}">
@@ -77,17 +81,20 @@
                         <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
                     </div>
 
-                    <table class="table"
-                           th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TABLE}">
+                    <table th:class="${p.name + ' table'}"
+                           th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TABLE}" th:id="${p.name}" th:name="${p.name}">
                         <thead>
-                        <tr>
-                            <th th:each="label : ${p.configurer.getAdditionalInfo().get('labels')}" th:text="${label}"></th>
-                        </tr>
+                            <tr>
+                                <th th:each="c : ${p.configurer.getAdditionalInfo().get('columns')}" th:text="${c.label}"></th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="row : ${p.value}">
-                            <td th:each="col: ${row}" th:text="${col}"></td>
-                        </tr>
+                            <tr th:each="row : ${p.value}">
+                                <td th:each="col: ${row}">
+                                    <input type="text" class="form-control" th:value="${col}">
+                                </td>
+                                <td class="operator">x</td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -109,7 +116,18 @@
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script th:src="@{/jquery.form2json.js}"></script>
 <script th:src="@{/ajaxfileupload.js}"></script>
+<script th:src="@{/editable-table/editable-table.js}"></script>
 <script th:inline="javascript">
+    /*<![CDATA[*/
+    var p = [[${formBO.propertyList}]]
+    var tables = p.filter(c => c.configurer.cpnType == 'TABLE')
+    tables.forEach(c => {
+        $('.' + c.name).editableTable({
+            columns: c.configurer.additionalInfo.columns.length
+        })
+    })
+    /*]]>*/
+
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var form = document.querySelectorAll('.needs-validation')[0]
 
@@ -131,6 +149,11 @@
         var formData = $('form').form2json({
             multiValSelector: '[type=checkbox]'
         });
+
+        tables.forEach(c => {
+            formData[c.name] = $('.' + c.name).editableTable('getValue')
+        })
+
         console.log(formData)
 
         $.ajax ({

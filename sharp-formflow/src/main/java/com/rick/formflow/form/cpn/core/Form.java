@@ -1,6 +1,6 @@
 package com.rick.formflow.form.cpn.core;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,9 +20,11 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_form")
-public class Form extends BaseEntity {
+public class Form extends BaseCodeEntity {
 
     @NotBlank
     private String name;
+
+    private String serviceName;
 
 }

@@ -45,7 +45,7 @@ public class FormFlowServiceAutoConfiguration {
                 }
 
                 @Override
-                public Map<String, Object> getValues(Long formId, Long instanceId) {
+                public Map<String, Object> getValue(Long formId, Long instanceId) {
                     return Collections.emptyMap();
                 }
             };

@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.BaseCodeDAOImpl;
 import com.rick.formflow.form.cpn.core.Form;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class FormDAO extends BaseDAOImpl<Form, Long> {
+public class FormDAO extends BaseCodeDAOImpl<Form, Long> {
 
 }

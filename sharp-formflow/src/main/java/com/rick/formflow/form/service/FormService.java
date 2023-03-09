@@ -19,7 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Collections;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,13 +42,13 @@ public class FormService {
 
     private final FormCpnValueDAO formCpnValueDAO;
 
-    private final FormAdvice formAdvice;
-
     private final CpnManager cpnManager;
 
     private final FormFlowProperties formFlowProperties;
 
-    public Form save(Form form) {
+    private final Map<String, FormAdvice> formAdviceMap;
+
+    public Form save(@Valid Form form) {
         formDAO.insert(form);
         return form;
     }
@@ -58,34 +58,43 @@ public class FormService {
     }
 
     public FormBO getFormBOByIdAndInstanceId(Long formId, Long instanceId) {
+        boolean isInstanceForm = Objects.nonNull(instanceId);
         Form form = formDAO.selectById(formId).get();
         List<FormCpn> formCpnList = formCpnDAO.listByFormId(formId);
         Map<Long, CpnConfigurer> configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
 
         List<FormBO.Property> propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
-        Map<Long, FormCpnValue> formCpnValueMap;
-        if (Objects.nonNull(instanceId)) {
+        Map<Long, FormCpnValue> formCpnValueMap = null;
+        if (isInstanceForm) {
             formCpnValueMap = formCpnValueDAO.selectByInstanceIdAsMap(instanceId);
-        } else {
-            formCpnValueMap = Collections.emptyMap();
         }
-
-        Map<String, Object> values = formAdvice.getValues(formId, instanceId);
 
         for (FormCpn formCpn : formCpnList) {
             CpnConfigurer cpnConfigurer = configIdMap.get(formCpn.getConfigId());
-            Object value;
+            Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
+            String value = null;
             if (formFlowProperties.isInsertCpnValue()) {
-                FormCpnValue formCpnValue = formCpnValueMap.get(formCpn.getId());
-                Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
-                String stringValue = Objects.nonNull(formCpnValue) ? formCpnValue.getValue() : cpnConfigurer.getDefaultValue();
-                value = StringUtils.isBlank(stringValue) ? stringValue : cpn.parseStringValue(stringValue);
+                if (isInstanceForm) {
+                    FormCpnValue formCpnValue = formCpnValueMap.get(formCpn.getId());
+                    if (Objects.nonNull(formCpnValue)) {
+                        value = formCpnValue.getValue();
+                    }
+                } else {
+                    value = cpnConfigurer.getDefaultValue();
+                }
             } else {
-                value = values.get(cpnConfigurer.getName());
+                if (isInstanceForm) {
+                    FormAdvice formAdvice = formAdviceMap.get(form.getServiceName());
+                    Map<String, Object> valueMap = formAdvice.getValue(formId, instanceId);
+                    value = valueMap.get(cpnConfigurer.getName()) == null ? null : String.valueOf(valueMap.get(cpnConfigurer.getName()));
+                } else {
+                    value = cpnConfigurer.getDefaultValue();
+                }
             }
 
-            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
+            Object dist = StringUtils.isBlank(value) ? value : cpn.parseStringValue(value);
+            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, dist));
         }
 
         return new FormBO(form, instanceId, propertyList);
@@ -118,7 +127,8 @@ public class FormService {
 
             String value = processor.getParamValue();
 
-            FormCpnValueList.add(FormCpnValue.builder().value(value)
+            FormCpnValueList.add(FormCpnValue.builder()
+                    .value(value)
                     .formCpnId(property.getId())
                     .instanceId(instanceId)
                     .formId(formId)
@@ -137,7 +147,11 @@ public class FormService {
         values.put("formId", formId);
         values.put("instanceId", instanceId);
         // postHandler mongoDB 文档存储
-        formAdvice.afterInstanceSave(formId, instanceId, values);
+        FormAdvice formAdvice = formAdviceMap.get(form.getForm().getServiceName());
+        if (formAdvice != null) {
+            formAdvice.afterInstanceSave(formId, instanceId, values);
+        }
+
     }
 
     public int delete(Long instanceId) {

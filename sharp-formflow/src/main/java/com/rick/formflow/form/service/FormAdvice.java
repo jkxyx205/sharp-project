@@ -13,5 +13,5 @@ public interface FormAdvice {
      */
     void afterInstanceSave(Long formId, Long instanceId, Map<String, Object> values);
 
-    Map<String, Object> getValues(Long formId, Long instanceId);
+    Map<String, Object> getValue(Long formId, Long instanceId);
 }
