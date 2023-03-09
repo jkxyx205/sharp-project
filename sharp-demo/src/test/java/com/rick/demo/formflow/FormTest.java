@@ -1,6 +1,5 @@
 package com.rick.demo.formflow;
 
-import com.google.common.collect.Lists;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.support.Params;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
@@ -49,18 +48,18 @@ public class FormTest {
 
     @Test
     public void testSaveForm() {
-        formService.save(Form.builder().name("我的第一个表单").build());
+        formService.save(Form.builder().code("001" + System.currentTimeMillis()).name("我的第一个表单").build());
     }
 
     @Test
     public void testAddConfigurerToForm() {
         formCpnService.saveOrUpdateByConfigIds(formId, configIds);
-        formService.save(Form.builder().name("我的第一个表单").build());
+        formService.save(Form.builder().code("first"+ System.currentTimeMillis()).name("我的第一个表单").build());
     }
 
     @Test
     public void testAddConfigurerToForm2() {
-        Form form = Form.builder().name("我的第二个表单").build();
+        Form form = Form.builder().name("我的第二个表单").code("second").build();
         formService.save(form);
 
         List<CpnConfigurer> cpnConfigurerList = new CpnTest().createCpnConfigurerList();
@@ -69,18 +68,15 @@ public class FormTest {
 
     @Test
     public void testAddInstanceToForm() throws BindException {
-        List<Object[]> list = Lists.newArrayListWithExpectedSize(1);
-        list.add(new Object[] {"rick", 32});
-
         formService.post(formId,  Params.builder()
-                .pv("HNepFsUCaN", "Jkxyx205")
-                .pv("WpOZNqQasd", "32")
-                .pv("NUqlBwLPfW", "足球")
-                .pv("xYfeMutDQK", list) //table
-                .pv("checkbox", Arrays.asList("足球", "篮球"))
+                .pv("name", "Jkxyx205")
+                .pv("age", "32")
+                .pv("hobby", "足球")
+                .pv("info", Arrays.asList(new Object[] {"rick", 32})) //table
+                .pv("hobby2", Arrays.asList("足球", "篮球"))
                 .pv("agree", "同意")
-                .pv("textarea", "简介")
-                .pv("radio", "男")
+                .pv("remark", "简介")
+                .pv("sex", "男")
                 .pv("mobile", "18898987765")
                 .pv("file", Arrays.asList("https://xhope.top/", "https://xhope.top/"))
                 .pv("email", "jkxyx205@163.com")

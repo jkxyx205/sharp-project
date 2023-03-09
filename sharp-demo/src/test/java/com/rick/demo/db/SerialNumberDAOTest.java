@@ -70,7 +70,14 @@ public class SerialNumberDAOTest {
 
     @Test
     public void testFillId3() {
-        List<SerialNumber> list = idFillService.fill(SerialNumber.class, Arrays.asList("11", "12", "13"));
+        List<SerialNumber> list = idFillService.fill(SerialNumber.class, Arrays.asList("11"));
         assertThat(list.get(0).getId()).isEqualTo(664984730659258368L);
+    }
+
+    @Test
+    public void testFillId4() {
+        assertThrows(BizException.class, ()-> {
+            idFillService.fill(SerialNumber.class, Arrays.asList("11", "12", "13"));
+        });
     }
 }

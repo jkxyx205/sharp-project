@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Rick
  * @createdAt 2021-11-07 09:19:00
  */
-@Component
+@Component("project")
 @Slf4j
 public class ProjectFormSaveAdvice implements FormAdvice {
 
@@ -21,7 +21,7 @@ public class ProjectFormSaveAdvice implements FormAdvice {
     }
 
     @Override
-    public Map<String, Object> getValues(Long formId, Long instanceId) {
+    public Map<String, Object> getValue(Long formId, Long instanceId) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", "RickFromTable");
         return map;

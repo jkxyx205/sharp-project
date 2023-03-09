@@ -32,7 +32,7 @@ logging:
 #    select-cache: true
 formflow:
   form:
-    insertCpnValue: false
+    insertCpnValue: true
 
 dict:
   items:

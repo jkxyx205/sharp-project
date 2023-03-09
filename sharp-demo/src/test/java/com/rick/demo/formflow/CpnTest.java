@@ -44,9 +44,20 @@ public class CpnTest {
 
         CpnConfigurer cpnConfigurerText = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.TEXT)
+                .name("name")
                 .label("姓名")
                 .placeholder("请输入姓名")
                 .defaultValue("Rick")
+                .validatorList(textValidatorList)
+                .build();
+
+        CpnConfigurer cpnConfigurerRadio = CpnConfigurer.builder()
+                .cpnType(CpnTypeEnum.RADIO)
+                .name("sex")
+                .label("性别")
+                .placeholder("请输入性别")
+                .options(new String[] {"男", "女","保密"})
+                .defaultValue("保密")
                 .validatorList(textValidatorList)
                 .build();
 
@@ -55,6 +66,7 @@ public class CpnTest {
         numberValidatorList.add(new Size(18, 100));
         CpnConfigurer cpnConfigurerNumber = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.NUMBER_TEXT)
+                .name("age")
                 .label("年龄")
                 .placeholder("请输入年龄")
                 .defaultValue("18")
@@ -66,6 +78,7 @@ public class CpnTest {
         selectValidatorList.add(new Required(true));
         CpnConfigurer cpnConfigurerSelect = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.SELECT)
+                .name("hobby")
                 .label("兴趣爱好(单选)")
                 .placeholder("请输入兴趣爱好")
                 .options(new String[] {"足球", "篮球","乒乓球","羽毛球"})
@@ -78,6 +91,7 @@ public class CpnTest {
         selectValidatorList.add(new Required(true));
         CpnConfigurer cpnConfigurerCheckbox = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.CHECKBOX)
+                .name("hobby2")
                 .label("兴趣爱好(多选)")
                 .placeholder("请输入兴趣爱好")
                 .options(new String[] {"足球", "篮球","乒乓球","羽毛球"})
@@ -90,13 +104,18 @@ public class CpnTest {
         numberValidatorList.add(new Required(true));
         CpnConfigurer cpnConfigurerTable = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.TABLE)
+                .name("info")
                 .label("信息收集")
                 .placeholder("请输入信息收集")
-                .additionalInfo(Params.builder().pv("labels", Arrays.asList("姓名", "年龄")).build())
+                .additionalInfo(Params.builder()
+//                        .pv("labels", Arrays.asList("姓名", "年龄"))
+//                        .pv("validators", Arrays.asList(cpnConfigurerText, cpnConfigurerNumber))
+                          .pv("columns", Arrays.asList(cpnConfigurerText, cpnConfigurerNumber))
+                        .build())
                 .validatorList(tableValidatorList)
                 .build();
 
-        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(cpnConfigurerText, cpnConfigurerNumber, cpnConfigurerSelect, cpnConfigurerTable, cpnConfigurerCheckbox);
+        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(cpnConfigurerText, cpnConfigurerNumber, cpnConfigurerSelect, cpnConfigurerTable, cpnConfigurerCheckbox, cpnConfigurerRadio);
         return cpnConfigurerList;
     }
 

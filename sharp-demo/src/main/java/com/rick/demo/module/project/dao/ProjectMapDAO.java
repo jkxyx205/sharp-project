@@ -12,6 +12,7 @@ public class ProjectMapDAO extends MapCoreDAOImpl<Long> {
 
     public ProjectMapDAO() {
         super("t_project3",
+                "测试表",
                 "title,description,cover_url,owner_id,sex,address,status,list,created_by,created_at,updated_by,updated_at,is_deleted,phone_number,id",
                 "id");
     }
