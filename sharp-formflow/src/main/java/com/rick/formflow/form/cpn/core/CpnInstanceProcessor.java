@@ -38,7 +38,7 @@ public class CpnInstanceProcessor {
 
     public void valid() {
         try {
-            // 静态验证值（不验证数据库配置）
+            // 常规验证
             cpn.valid(cpnValue, configurer.getOptions());
         } catch (IllegalArgumentException e) {
             bindingResult.addError(new FieldError("form", property.getName(), paramValue, false, null, null, configurer.getLabel() + e.getMessage()));

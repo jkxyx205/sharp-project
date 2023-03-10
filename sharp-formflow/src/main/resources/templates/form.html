@@ -20,19 +20,19 @@
         <form class="needs-validation" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="${formBO.form.id}" th:name="${formBO.form.code}" novalidate>
             <h2 class="mb-5" th:text="${formBO.form.name}"></h2>
 <!--            th:with="isRequired = ${#lists.contains(p.configurer.validatorList, required)}"-->
-            <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.validatorProperties.get('Required.required') eq null ? false : p.validatorProperties.get('Required.required')}">
+            <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.configurer.validatorProperties.get('Required.required') eq null ? false : p.configurer.validatorProperties.get('Required.required')}">
                 <label th:for="${p.name}" class="col-sm-2 col-form-label" th:classappend="${isRequired ? 'required' : ''}" th:text="${p.configurer.label}"></label>
                 <div class="col-sm-10">
-                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXT}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperties.get('Length.max')}"
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXT}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                            th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
-                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).NUMBER_TEXT}" type="number" class="form-control" min="0" th:id="${p.name}" th:name="${p.name}" th:max="${p.validatorProperties.get('Size.max')}" th:min="${p.validatorProperties.get('Size.min')}"
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).NUMBER_TEXT}" type="number" class="form-control" min="0" th:id="${p.name}" th:name="${p.name}" th:max="${p.configurer.validatorProperties.get('Size.max')}" th:min="${p.configurer.validatorProperties.get('Size.min')}"
                            th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
-                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).MOBILE}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" maxlength="11"
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).MOBILE}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" maxlength="11" pattern="1[34578]\d{9}$"
                            th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
-                    <textarea th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXTAREA}" type="number" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperties.get('Length.max')}"
+                    <textarea th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXTAREA}" type="number" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                               th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" th:text="${p.value}"></textarea>
 
                     <select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
@@ -56,7 +56,7 @@
                             </ul>
                     </div>
 
-                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).EMAIL}" type="email" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.validatorProperties.get('Length.max')}"
+                    <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).EMAIL}" type="email" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                            th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
                     <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).DATE}" type="date" class="form-control" th:id="${p.name}" th:name="${p.name}"
@@ -76,7 +76,7 @@
                     </div>
 
                     <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).RADIO}" th:each="option : ${p.configurer.options}">
-                        <input class="form-check-input" type="radio" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}"
+                        <input class="form-check-input" type="radio" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${option eq p.value}"
                                th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
                         <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
                     </div>
@@ -85,7 +85,10 @@
                            th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TABLE}" th:id="${p.name}" th:name="${p.name}">
                         <thead>
                             <tr>
-                                <th th:each="c : ${p.configurer.getAdditionalInfo().get('columns')}" th:text="${c.label}"></th>
+                                <th th:each="c : ${p.configurer.getAdditionalInfo().get('columns')}"
+                                    th:with="isRequired = ${c.validatorProperties.get('Required.required') eq null ? false : c.validatorProperties.get('Required.required')}">
+                                    <label class="col-form-label" th:classappend="${isRequired ? 'required' : ''}" th:text="${c.label}"></label>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>

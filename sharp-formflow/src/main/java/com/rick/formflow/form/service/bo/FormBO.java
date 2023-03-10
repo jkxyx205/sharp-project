@@ -1,20 +1,14 @@
 package com.rick.formflow.form.service.bo;
 
-import com.google.common.collect.Maps;
-import com.rick.common.util.ReflectUtils;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.Form;
-import com.rick.formflow.form.valid.core.Validator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
-import org.apache.commons.lang3.StringUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Rick
@@ -41,30 +35,6 @@ public class FormBO {
 
         @Setter
         private Object value;
-        
-        public Map<String, Object> getValidatorProperties() {
-            Set<Validator> validatorList = configurer.getValidatorList();
-            Map<String, Object> map = Maps.newHashMap();
-            for (Validator validator : validatorList) {
-                Method[] methods = validator.getClass().getMethods();
-                Field[] allFields = ReflectUtils.getAllFields(validator.getClass());
-                Set<String> getMethodsNames = Arrays.stream(allFields).map(field -> {
-                    return (field.getType() == boolean.class ? "is" : "get") + StringUtils.capitalize(field.getName());
-                }).collect(Collectors.toSet());
-
-                for (Method method : methods) {
-                    if (getMethodsNames.contains(method.getName())) {
-                        try {
-                            map.put(validator.getClass().getSimpleName() + "." + StringUtils.uncapitalize((method.getName().startsWith("get")) ?method.getName().substring(3) : method.getName().substring(2)), method.invoke(validator));
-                        }  catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-            }
-            return map;
-        }
 
     }
 

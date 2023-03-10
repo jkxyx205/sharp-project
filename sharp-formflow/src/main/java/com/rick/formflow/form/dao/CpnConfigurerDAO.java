@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Repository;
@@ -19,7 +19,7 @@ import java.util.Map;
  */
 
 @Repository
-public class CpnConfigurerDAO extends BaseDAOImpl<CpnConfigurer, Long> {
+public class CpnConfigurerDAO extends EntityDAOImpl<CpnConfigurer, Long> {
 
     @Override
     public List<CpnConfigurer> selectByParams(Map<String, ?> params, String conditionSQL) {

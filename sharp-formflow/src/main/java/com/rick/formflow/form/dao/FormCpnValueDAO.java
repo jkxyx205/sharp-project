@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.formflow.form.cpn.core.FormCpnValue;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  */
 
 @Repository
-public class FormCpnValueDAO extends BaseDAOImpl<FormCpnValue, Long> {
+public class FormCpnValueDAO extends EntityDAOImpl<FormCpnValue, Long> {
 
     public int deleteByInstanceId(Long instanceId) {
         return delete("instance_id", Arrays.asList(instanceId));

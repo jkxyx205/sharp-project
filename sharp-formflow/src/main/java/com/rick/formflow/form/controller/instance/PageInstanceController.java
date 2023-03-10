@@ -2,6 +2,9 @@ package com.rick.formflow.form.controller.instance;
 
 import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
+import com.rick.common.util.JsonUtils;
+import com.rick.formflow.form.cpn.core.CpnConfigurer;
+import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,11 +41,24 @@ public class PageInstanceController {
      * @return
      */
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
-    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) {
+    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) throws IOException {
         FormBO formBO = getFormBO(formId, instanceId);
 
         model.addAttribute("formBO", formBO);
         model.addAttribute("model", getDataModel(formBO.getPropertyList()));
+
+        // table
+        for (FormBO.Property property : formBO.getPropertyList()) {
+            if (property.getConfigurer().getCpnType() == CpnTypeEnum.TABLE) {
+                List<Map<String, Object>> list = (List<Map<String, Object>>) property.getConfigurer().getAdditionalInfo().get("columns");
+                List<CpnConfigurer> tableCpnConfigurerList = new ArrayList<>();
+                for (Map<String, Object> map : list) {
+                    CpnConfigurer cpnConfigurer = JsonUtils.toObject(JsonUtils.toJson(map), CpnConfigurer.class);
+                    tableCpnConfigurerList.add(cpnConfigurer);
+                }
+                property.getConfigurer().getAdditionalInfo().put("columns", tableCpnConfigurerList);
+            }
+        }
 
         return "form";
     }

@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.formflow.form.cpn.core.FormCpn;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 
 @Repository
-public class FormCpnDAO extends BaseDAOImpl<FormCpn, Long> {
+public class FormCpnDAO extends EntityDAOImpl<FormCpn, Long> {
 
     public List<FormCpn> listByFormId(Long formId) {
         Assert.notNull(formId, "formId cannot be null");

@@ -73,6 +73,10 @@ public class FormService {
         for (FormCpn formCpn : formCpnList) {
             CpnConfigurer cpnConfigurer = configIdMap.get(formCpn.getConfigId());
             Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
+
+            // 可配置验证 和 控件验证 合并
+            cpnConfigurer.getValidatorList().addAll(cpn.cpnValidators());
+
             String value = null;
             if (formFlowProperties.isInsertCpnValue()) {
                 if (isInstanceForm) {
@@ -87,21 +91,22 @@ public class FormService {
                 if (isInstanceForm) {
                     FormAdvice formAdvice = formAdviceMap.get(form.getServiceName());
                     Map<String, Object> valueMap = formAdvice.getValue(formId, instanceId);
-                    value = valueMap.get(cpnConfigurer.getName()) == null ? null : String.valueOf(valueMap.get(cpnConfigurer.getName()));
+                    value = valueMap.get(cpnConfigurer.getName()) == null ? null : cpn.getStringValue(valueMap.get(cpnConfigurer.getName()));
                 } else {
                     value = cpnConfigurer.getDefaultValue();
                 }
             }
 
-            Object dist = StringUtils.isBlank(value) ? value : cpn.parseStringValue(value);
-            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, dist));
+            Object distValue = StringUtils.isBlank(value) ? value : cpn.parseStringValue(value);
+
+            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, distValue));
         }
 
         return new FormBO(form, instanceId, propertyList);
     }
 
     public void post(Long formId, Map<String, Object> values) throws BindException {
-        handle(formId, IdGenerator.getSequenceId(), values);
+        handle(formId, null, values);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -111,6 +116,9 @@ public class FormService {
     }
 
     private void handle(Long formId, Long instanceId, Map<String, Object> values) throws BindException {
+        boolean isInsert = Objects.isNull(instanceId);
+        instanceId = (instanceId == null ? IdGenerator.getSequenceId() : instanceId);
+
         FormBO form = getFormBOById(formId);
 
         List<FormCpnValue> FormCpnValueList = Lists.newArrayListWithExpectedSize(form.getPropertyList().size());
@@ -144,11 +152,17 @@ public class FormService {
             formCpnValueDAO.insert(FormCpnValueList);
         }
 
-        values.put("formId", formId);
-        values.put("instanceId", instanceId);
         // postHandler mongoDB 文档存储
         FormAdvice formAdvice = formAdviceMap.get(form.getForm().getServiceName());
         if (formAdvice != null) {
+            values.put("formId", formId);
+            if (!isInsert) {
+                values.put("instanceId", instanceId);
+                values.put("id", instanceId);
+            } else {
+                instanceId = null;
+            }
+
             formAdvice.afterInstanceSave(formId, instanceId, values);
         }
 
