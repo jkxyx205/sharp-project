@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.IdGenerator;
-import com.rick.common.util.ReflectUtils;
 import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
@@ -34,7 +33,7 @@ import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
  * @createdAt 2021-09-23 16:41:00
  */
 @Slf4j
-public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T, ID> {
+public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityDAO<T, ID> {
 
     private TableMeta tableMeta;
 
@@ -46,15 +45,13 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
     private Class<T> entityClass;
 
-    private Field[] entityFields;
-
     private String subTableRefColumnName;
 
     private Map<String, String> columnNameToPropertyNameMap;
 
     private Map<String, String> propertyNameToColumnNameMap;
 
-    public BaseDAOImpl() {
+    public EntityDAOImpl() {
         this.init();
     }
 
@@ -90,10 +87,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             validatorHelper.validate(entity);
         }
 
-        Object[] params;
-        int index = columnNameList.indexOf(this.idColumnName);
-        params = handleAutoFill(entity, instanceToParamsArray(entity), columnNameList, ColumnFillType.INSERT);
-        setPropertyValue(entity, tableMeta.getIdPropertyName(), params[index]);
+        Object[] params = handleAutoFill(entity, instanceToParamsArray(entity), columnNameList, ColumnFillType.INSERT);
 
         int count  = SQLUtils.insert(this.tableName, this.columnNames, params);
         cascadeInsertOrUpdate(entity, true);
@@ -271,7 +265,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
         cascadeInsertOrUpdate(entity);
         BaseDAOThreadLocalValue.removeAll();
-        Object[] objects = resolveParamsAndId(entity);
+        Object[] objects = resolveUpdateParamsAndId(entity);
         return updateById(entity, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (ID) objects[1]);
     }
 
@@ -289,14 +283,13 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
         cascadeInsertOrUpdate(entity);
         BaseDAOThreadLocalValue.removeAll();
-        List<String> updateColumnNames = convertToArray(tableMeta.getUpdateColumnNames());
-        int size = updateColumnNames.size();
+        int size = this.updateColumnNameList.size();
 
         params = ArrayUtils.isEmpty(params) ? new Object[] {} : params;
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
-            mergedParams[i] = resolveValue(BaseDAOManager.getPropertyValue(entity, columnNameToPropertyNameMap.get(updateColumnNames.get(i))));
+            mergedParams[i] = resolveValue(EntityDAOManager.getPropertyValue(entity, columnNameToPropertyNameMap.get(this.updateColumnNameList.get(i))));
         }
 
         System.arraycopy(params, 0, mergedParams, size, params.length);
@@ -318,7 +311,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
         String conditionSQL = null;
         for (T t : collection) {
-            Object[] resolverParamsAndIdObjects = resolveParamsAndId(t);
+            Object[] resolverParamsAndIdObjects = resolveUpdateParamsAndId(t);
             Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (ID) resolverParamsAndIdObjects[1]);
             Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
@@ -441,6 +434,14 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
         return selectByParams(params, null);
     }
 
+    @Override
+    public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
+        return selectByParams(params, selectColumnNames, conditionSQL, null, entityClass, list -> {
+            cascadeSelect(list);
+            BaseDAOThreadLocalValue.removeByTableName(getTableName());
+        });
+    }
+
     /**
      * 获取所有
      *
@@ -487,18 +488,13 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     }
 
     @Override
-    public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
-        return selectByParams(params, fullColumnNames, conditionSQL, srcSQL -> srcSQL, entityClass);
-    }
-
-    @Override
     public List<T> selectByParamsWithoutCascade(T example) {
         return selectByParamsWithoutCascade(example, null);
     }
 
     @Override
     public List<T> selectByParamsWithoutCascade(T example, String conditionSQL) {
-        return selectByParamsWithoutCascade(entityToMap(example), fullColumnNames, conditionSQL);
+        return selectByParamsWithoutCascade(entityToMap(example), selectColumnNames, conditionSQL);
     }
 
     @Override
@@ -508,7 +504,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
     @Override
     public List<T> selectByParamsWithoutCascade(Map<String, ?> params, String conditionSQL) {
-        return selectByParamsWithoutCascade(params, fullColumnNames, conditionSQL);
+        return selectByParamsWithoutCascade(params, selectColumnNames, conditionSQL);
     }
 
     @Override
@@ -522,12 +518,15 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     }
 
     @Override
+    public <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, Class<E> clazz) {
+        return selectByParams(params, columnNames, conditionSQL, src -> src, clazz);
+    }
+
+    @Override
     protected <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler, Class<E> clazz) {
         return selectByParams(params, columnNames, conditionSQL, sqlHandler, clazz, list -> {
-            if (clazz == entityClass) {
-                cascadeSelect((List<T>) list);
-                BaseDAOThreadLocalValue.removeByTableName(getTableName());
-            }
+            cascadeSelect((List<T>) list);
+            BaseDAOThreadLocalValue.removeByTableName(getTableName());
         });
     }
 
@@ -543,7 +542,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
     @Override
     public Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
-        return groupByColumnName(refColumnName, refValues, this.fullColumnNames, Function.identity());
+        return groupByColumnName(refColumnName, refValues, this.selectColumnNames, Function.identity());
     }
 
     @Override
@@ -551,7 +550,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
         List<T> list = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(), columnNames, refColumnName + " IN (:refColumnName)", this.entityClass);
 
         return list.stream().collect(Collectors.groupingBy(t-> {
-            Object propertyValue = BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
+            Object propertyValue = EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
             if (this.idClass.isAssignableFrom(propertyValue.getClass())) {
                 return (ID)propertyValue;
             }
@@ -562,24 +561,14 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     }
 
     @Override
-    public String getColumnNames() {
-        return this.columnNames;
-    }
-
-    @Override
-    public String getTableName() {
-        return this.tableName;
-    }
-
-    @Override
     public Map<String, Object> entityToMap(T example) {
         Map<String, Object> params;
         params = Maps.newHashMapWithExpectedSize(columnNameList.size());
         for (String columnName : columnNameList) {
             String propertyName = columnNameToPropertyNameMap.get(columnName);
-            Object propertyValue = BaseDAOManager.getPropertyValue(example, propertyName);
+            Object propertyValue = EntityDAOManager.getPropertyValue(example, propertyName);
             if (Objects.nonNull(propertyValue)) {
-                if (BaseDAOManager.isEntityClass(propertyValue.getClass())) {
+                if (EntityDAOManager.isEntityClass(propertyValue.getClass())) {
                     propertyValue = getIdValue(propertyValue);
                 }
 
@@ -600,11 +589,6 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
         return this.tableMeta;
     }
 
-    @Override
-    public String getIdColumnName() {
-        return this.idColumnName;
-    }
-
     private boolean hasSubTables() {
         return !tableMeta.getSubTables().isEmpty();
     }
@@ -615,30 +599,26 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
         this.entityClass = (Class<T>) actualTypeArgument[0];
 
         this.tableMeta = TableMetaResolver.resolve(this.entityClass);
-
-        super.init(tableMeta.getTableName(), getEntityComment(), tableMeta.getColumnNames(), tableMeta.getIdColumnName(), (Class<ID>) actualTypeArgument[1]);
-
-        this.subTableRefColumnName = tableMeta.getName() + "_" + this.idColumnName;
-        this.propertyList = convertToArray(tableMeta.getProperties());
-        this.updatePropertyList = convertToArray(tableMeta.getUpdateProperties());
-        this.entityFields = ReflectUtils.getAllFields(this.entityClass);
-
         log.debug("properties: {}", tableMeta.getProperties());
 
-        this.columnNameList = convertToArray(this.columnNames);
-        this.updateColumnNameList = convertToArray(this.tableMeta.getUpdateColumnNames());
+        this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
+
+        this.propertyList = convertToList(tableMeta.getProperties());
+        this.updatePropertyList = convertToList(tableMeta.getUpdateProperties());
+
+        this.columnNameList = convertToList(this.tableMeta.getColumnNames());
+        this.updateColumnNameList = convertToList(this.tableMeta.getUpdateColumnNames());
 
         if (CollectionUtils.isNotEmpty(propertyList)) {
-            columnNameToPropertyNameMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
-            propertyNameToColumnNameMap = Maps.newHashMapWithExpectedSize(this.entityFields.length);
+            columnNameToPropertyNameMap = Maps.newHashMapWithExpectedSize(columnNameList.size());
+            propertyNameToColumnNameMap = Maps.newHashMapWithExpectedSize(columnNameList.size());
             for (int i = 0; i < columnNameList.size(); i++) {
                 columnNameToPropertyNameMap.put(columnNameList.get(i), propertyList.get(i));
                 propertyNameToColumnNameMap.put(propertyList.get(i),  columnNameList.get(i));
             }
         }
 
-        initFullColumnNames();
-
+        super.init(tableMeta.getTableName(), tableMeta.getColumnNames(), tableMeta.getIdColumnName(), (Class<ID>) actualTypeArgument[1]);
         log.debug("tableName: {}, this.columnNames: {}", this.tableName, this.columnNames);
     }
 
@@ -667,7 +647,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
     @Override
     protected ID getIdValue(Object o) {
-        return (ID) BaseDAOManager.getPropertyValue(o, this.tableMeta.getIdPropertyName());
+        return (ID) EntityDAOManager.getPropertyValue(o, this.tableMeta.getIdPropertyName());
     }
 
     @Override
@@ -676,11 +656,11 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     }
 
     protected void setPropertyValue(Object t, String propertyName, Object propertyValue) {
-        BaseDAOManager.setPropertyValue(t, propertyName, propertyValue);
+        EntityDAOManager.setPropertyValue(t, propertyName, propertyValue);
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
-        if (field.getType() == Long.class && propertyValue != null && BaseDAOManager.isEntityClass((propertyValue.getClass()))) {
+        if (field.getType() == Long.class && propertyValue != null && EntityDAOManager.isEntityClass((propertyValue.getClass()))) {
             propertyValue = this.getIdValue(propertyValue);
         }
 
@@ -690,7 +670,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = resolveValue(BaseDAOManager.getPropertyValue(t, includePropertyList.get(i)));
+            params[i] = resolveValue(EntityDAOManager.getPropertyValue(t, includePropertyList.get(i)));
         }
         return params;
     }
@@ -698,7 +678,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     protected Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
         for (int i = 0; i < params.length; i++) {
-            Object param = resolveValue(BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
+            Object param = resolveValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
             params[i] = param;
         }
         return params;
@@ -716,7 +696,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     }
 
     private Map<ID, T> listToIdMap(List<T> list) {
-        return list.stream().collect(Collectors.toMap(t -> (ID) BaseDAOManager.getPropertyValue(t, tableMeta.getIdPropertyName()), v -> v));
+        return list.stream().collect(Collectors.toMap(t -> (ID) EntityDAOManager.getPropertyValue(t, tableMeta.getIdPropertyName()), v -> v));
     }
 
     private int update(T t, String updateColumnNames, Object[] params, String conditionSQL) {
@@ -727,7 +707,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
         return handleConditionAdvice(new Object[]{}, null, false);
     }
 
-    private Object[] resolveParamsAndId(T t) {
+    private Object[] resolveUpdateParamsAndId(T t) {
         ID id = getIdValue(t);
         Assert.notNull(id, "id不能为空");
 
@@ -753,13 +733,13 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = selectProperty.getSelect().table();
-            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
-            if (subTableBaseDAO == null) {
+            EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            if (subTableEntityDAO == null) {
                 throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
             }
 
             Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
-            Map<Object, List<?>> subTableData = subTableBaseDAO.groupByColumnName(joinValue, refIds);
+            Map<Object, List<?>> subTableData = subTableEntityDAO.groupByColumnName(joinValue, refIds);
 
             for (T t : list) {
                 Object data = subTableData.get(getValue(t, referencePropertyName));
@@ -782,13 +762,13 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
-            if (subTableBaseDAO == null) {
+            EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            if (subTableEntityDAO == null) {
                 throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
             }
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
-            Map<ID, List<?>> subTableData = subTableBaseDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
+            Map<ID, List<?>> subTableData = subTableEntityDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
 
             for (T t : list) {
                 Object data = subTableData.get(getIdValue(t));
@@ -813,9 +793,9 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            BaseDAO parentTableDAO = BaseDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO parentTableDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
 
-            Set<ID> refIds = list.stream().map(t -> getIdValue(BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
+            Set<ID> refIds = list.stream().map(t -> getIdValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(refIds)) {
@@ -826,7 +806,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
 
             Map<ID, ?> parentIdMap = parentList.stream().collect(Collectors.toMap(this::getIdValue, v -> v));
             for (T t : list) {
-                Object data = parentIdMap.get(getIdValue(BaseDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
+                Object data = parentIdMap.get(getIdValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))));
                 setPropertyValue(t, manyToOneProperty.getField(), Objects.isNull(data) ? null : data);
             }
         }
@@ -851,7 +831,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             String thirdPartyTable = manyToManyProperty.getManyToMany().thirdPartyTable();
             String referenceTable = manyToManyProperty.getManyToMany().referenceTable();
 
-            BaseDAO referenceTableDAO =  BaseDAOManager.baseDAOTableNameMap.get(referenceTable);
+            EntityDAO referenceTableDAO =  EntityDAOManager.baseDAOTableNameMap.get(referenceTable);
 
             List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value)",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
@@ -913,7 +893,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            BaseDAO subTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
 
             List<?> subDataList;
             Class subClass;
@@ -938,17 +918,17 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             if (!insert && oneToManyProperty.getOneToMany().cascadeDelete()) { // 级联删除
                 if (CollectionUtils.isEmpty(subDataList)) {
                     // 删除所有
-                    SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
+                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refId));
                     continue;
                 }
 
                 Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
                 if (CollectionUtils.isEmpty(deletedIds)) {
                     // 删除所有
-                    SQLUtils.delete(subTableBaseDAO.getTableName(), refColumnName, Arrays.asList(refId));
+                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refId));
                 } else {
                     // 删除 除id之外的其他记录
-                    SQLUtils.deleteNotIn(subTableBaseDAO.getTableName(), subTableBaseDAO.getIdColumnName(),
+                    SQLUtils.deleteNotIn(subTableEntityDAO.getTableName(), subTableEntityDAO.getIdColumnName(),
                             deletedIds, new Object[] {refId} , refColumnName + " = ?");
                 }
             }
@@ -965,10 +945,10 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             if (oneToManyProperty.getOneToMany().cascadeInsert()) {
                 List<?> updateSubDataList = subDataList.stream().filter(e -> Objects.isNull(getIdValue(e))).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(updateSubDataList)) {
-                    subTableBaseDAO.insert(updateSubDataList);
+                    subTableEntityDAO.insert(updateSubDataList);
                 }
             } else {
-                subTableBaseDAO.insertOrUpdate(subDataList);
+                subTableEntityDAO.insertOrUpdate(subDataList);
             }
 
         }
@@ -988,14 +968,14 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
             BaseDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            BaseDAO parentTableBaseDAO =  BaseDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO parentTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 ID refId = getIdValue(targetObject);
                 if (manyToOneProperty.getManyToOne().cascadeInsert() && Objects.isNull(refId)) {
-                    parentTableBaseDAO.insert(targetObject);
+                    parentTableEntityDAO.insert(targetObject);
                 } else {
-                    parentTableBaseDAO.insertOrUpdate(targetObject);
+                    parentTableEntityDAO.insertOrUpdate(targetObject);
                 }
 
                 if (refId == null) { // 添加外键
@@ -1031,7 +1011,7 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
     }
 
     private Object getValue(Object o, String propertyName) {
-        return BaseDAOManager.getPropertyValue(o, propertyName);
+        return EntityDAOManager.getPropertyValue(o, propertyName);
     }
 
     private List<T> selectByIdsWithSpecifiedValue(Object ids) {
@@ -1043,25 +1023,12 @@ public class BaseDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements BaseDAO<T
         return this.entityClass.getAnnotation(Table.class).comment();
     }
 
-
-    private void initFullColumnNames() {
-        if (CollectionUtils.isEmpty(this.propertyList)) {
-            this.fullColumnNames = this.columnNames;
-            return;
-        }
-
-        int columnSize = this.columnNameList.size();
-        StringBuilder selectSQLBuilder = new StringBuilder();
-        for (int i = 0; i < columnSize; i++) {
-            selectSQLBuilder.append(this.getTableName() + "." + this.columnNameList.get(i))
-                    .append(" AS \"").append(this.propertyList.get(i)).append("\",");
-        }
-        selectSQLBuilder.deleteCharAt(selectSQLBuilder.length() - 1);
-
-        this.fullColumnNames = selectSQLBuilder.toString();
+    @Override
+    protected String columnAliasName(String columnName) {
+        return columnNameToPropertyNameMap.get(columnName);
     }
 
     private Object getPropertyValue(Object t, Field field) {
-        return BaseDAOManager.getPropertyValue(t, field.getName());
+        return EntityDAOManager.getPropertyValue(t, field.getName());
     }
 }

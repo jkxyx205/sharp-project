@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2023-03-08 22:10:00
  */
-public class BaseCodeDAOImpl<T extends BaseCodeEntity, ID> extends BaseDAOImpl<T, ID> {
+public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOImpl<T, ID> {
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
@@ -173,6 +173,7 @@ public class BaseCodeDAOImpl<T extends BaseCodeEntity, ID> extends BaseDAOImpl<T
     }
 
     public void checkCodeIfExists(String code) {
+        Assert.notNull(code, "code cannot be null");
         if (existsByParams(Params.builder(1 ).pv("code", code).build(), "code = :code")) {
             throw new BizException(ResultUtils.fail(400, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + " 已经存在", code));
         }

@@ -1,14 +1,11 @@
 package com.rick.db.plugin.dao.core;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
+ * 根接口
  * @author Rick
  * @createdAt 2021-10-31 09:29:00
  */
@@ -74,7 +71,6 @@ public interface CoreDAO<ID> {
 
     <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, Class<E> clazz);
 
-
     <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames);
 
     <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL);
@@ -87,39 +83,12 @@ public interface CoreDAO<ID> {
 
     void checkIds(Collection<ID> ids, Map<String, Object> params, String condition);
 
-    /**
-     *
-     * @param data 数据源 比如：Grid.list查询结果
-     * @param refColumnName 外键
-     * @param valueKey 数据源中外键value对应的属性名key
-     * @param property 写到数据源中的key
-     */
-    void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property);
-
-    String getSelectSQL();
+    String getTableName();
 
     String getColumnNames();
 
-    String getTableName();
-
     String getIdColumnName();
 
-    /**
-     * 记录超过1个会抛出异常
-     * @param list
-     * @param <E>
-     * @return
-     */
-    default <E> Optional<E> expectedAsOptional(List<E> list) {
-        if (CollectionUtils.isEmpty(list)) {
-            return Optional.empty();
-        }
-
-        if (list.size() > 1) {
-            throw new IncorrectResultSizeDataAccessException(1, list.size());
-        }
-
-        return Optional.of(list.get(0));
-    }
+    String getSelectSQL();
 
 }

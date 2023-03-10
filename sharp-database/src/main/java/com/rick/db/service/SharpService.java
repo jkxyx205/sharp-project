@@ -1,8 +1,7 @@
 package com.rick.db.service;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.base.Converter;
 import com.rick.common.http.convert.*;
+import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
 import lombok.AllArgsConstructor;
@@ -38,8 +37,6 @@ public class SharpService {
 
     @Autowired
     protected AbstractSqlFormatter sqlFormatter;
-
-    private static final Converter<String, String> converter = CaseFormat.LOWER_UNDERSCORE.converterTo(CaseFormat.LOWER_CAMEL);
 
     @Autowired(required = false)
     private List<ConverterFactory> converterFactories = Collections.emptyList();
@@ -183,7 +180,7 @@ public class SharpService {
                 String column = JdbcUtils.lookupColumnName(rsmd, index);
                 try {
                     Object value = JdbcUtils.getResultSetValue(rs, index, Class.forName(rsmd.getColumnClassName(index)));
-                    bw.setPropertyValue(camelCaseName(column), value);
+                    bw.setPropertyValue(getCamelCaseName(column), value);
                 } catch (TypeMismatchException | NotWritablePropertyException | ClassNotFoundException e) {
 //                    log.warn("Unable to map column '" + column + "' to property");
                     throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property", e);
@@ -193,8 +190,8 @@ public class SharpService {
             return mappedObject;
         }
 
-        private String camelCaseName(String name) {
-            return name.indexOf("_") > -1 ? converter.convert(name) : name;
+        private String getCamelCaseName(String name) {
+            return name.indexOf("_") > -1 ? BaseEntityConstants.underscoreToCamelConverter.convert(name) : name;
         }
     }
 

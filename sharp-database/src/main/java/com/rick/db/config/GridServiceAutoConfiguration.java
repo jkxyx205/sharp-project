@@ -7,8 +7,8 @@ import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
 import com.rick.db.plugin.GridUtils;
 import com.rick.db.plugin.SQLUtils;
-import com.rick.db.plugin.dao.core.BaseDAO;
-import com.rick.db.plugin.dao.core.BaseDAOManager;
+import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
 import com.rick.db.plugin.dao.support.BaseCodeEntityIdFillService;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
@@ -95,10 +95,10 @@ public class GridServiceAutoConfiguration {
         }
 
         @Bean
-        public BaseDAOManager baseDAOManager(@Autowired(required = false) List<BaseDAO> baseDAOList) {
-            BaseDAOManager baseDAOManager = new BaseDAOManager();
-            BaseDAOManager.setBaseDAOList(baseDAOList);
-            return baseDAOManager;
+        public EntityDAOManager baseDAOManager(@Autowired(required = false) List<EntityDAO> entityDAOList) {
+            EntityDAOManager entityDAOManager = new EntityDAOManager();
+            EntityDAOManager.setBaseDAOList(entityDAOList);
+            return entityDAOManager;
         }
 
         @Bean

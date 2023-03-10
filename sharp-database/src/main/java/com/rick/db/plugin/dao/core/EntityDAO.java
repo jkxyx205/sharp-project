@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @author Rick
  * @createdAt 2021-10-31 09:29:00
  */
-public interface BaseDAO<T, ID> extends CoreDAO<ID> {
+public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     int insert(T entity);
 
@@ -73,6 +73,15 @@ public interface BaseDAO<T, ID> extends CoreDAO<ID> {
     List<T> selectByParamsWithoutCascade(Map<String, ?> params, String conditionSQL);
 
     List<T> selectByParamsWithoutCascade(Map<String, ?> params, String columnNames, String conditionSQL);
+
+    /**
+     *
+     * @param data 数据源 比如：Grid.list查询结果
+     * @param refColumnName 外键
+     * @param valueKey 数据源中外键value对应的属性名key
+     * @param property 写到数据源中的key
+     */
+    void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property);
 
     Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
 

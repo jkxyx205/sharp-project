@@ -5,8 +5,8 @@ import com.google.common.collect.Sets;
 import com.rick.common.http.exception.BizException;
 import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.core.BaseCodeDAOImpl;
-import com.rick.db.plugin.dao.core.BaseDAOManager;
+import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -105,7 +105,7 @@ public class BaseCodeEntityIdFillService {
             return id;
         }
 
-        return ((BaseCodeDAOImpl) BaseDAOManager.baseDAOEntityMap.get(clazz)).selectIdByCodeOrThrowException(code);
+        return ((EntityCodeDAOImpl) EntityDAOManager.baseDAOEntityMap.get(clazz)).selectIdByCodeOrThrowException(code);
     }
 
     private <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {
@@ -113,7 +113,7 @@ public class BaseCodeEntityIdFillService {
             return Collections.emptyMap();
         }
 
-        Map<String, Long> codeIdMap = ((BaseCodeDAOImpl) BaseDAOManager.baseDAOEntityMap.get(clazz)).selectCodeIdMap(codes);
+        Map<String, Long> codeIdMap = ((EntityCodeDAOImpl) EntityDAOManager.baseDAOEntityMap.get(clazz)).selectCodeIdMap(codes);
 
         SetUtils.SetView<String> difference = SetUtils.difference(Sets.newHashSet(codes), codeIdMap.keySet());
         if (CollectionUtils.isNotEmpty(difference)) {
