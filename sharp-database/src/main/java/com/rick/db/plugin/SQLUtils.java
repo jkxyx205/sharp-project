@@ -42,7 +42,6 @@ public final class SQLUtils {
 
     private static SharpDatabaseProperties SHARP_DATABASE_PROPERTIES;
 
-
     public void setNamedJdbcTemplate(NamedParameterJdbcTemplate namedJdbcTemplate) {
         SQLUtils.NAMED_JDBC_TEMPLATE = namedJdbcTemplate;
         SQLUtils.JDBC_TEMPLATE = namedJdbcTemplate.getJdbcTemplate();
@@ -50,6 +49,10 @@ public final class SQLUtils {
 
     public void setSharpDatabaseProperties(SharpDatabaseProperties sharpDatabaseProperties) {
         SQLUtils.SHARP_DATABASE_PROPERTIES = sharpDatabaseProperties;
+    }
+
+    public static void execute(String sql) {
+        JDBC_TEMPLATE.execute(sql);
     }
 
     /**

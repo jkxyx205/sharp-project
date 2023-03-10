@@ -1,16 +1,13 @@
 package com.rick.db.service;
 
-import com.rick.common.http.convert.*;
 import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.formatter.AbstractSqlFormatter;
-import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,8 +35,8 @@ public class SharpService {
     @Autowired
     protected AbstractSqlFormatter sqlFormatter;
 
-    @Autowired(required = false)
-    private List<ConverterFactory> converterFactories = Collections.emptyList();
+    @Autowired
+    private ConversionService conversionService;
 
     public interface JdbcTemplateCallback<T> {
         List<T> query(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap);
@@ -146,11 +143,6 @@ public class SharpService {
 
         // 添加嵌套查询
         NestedRowMapper<T> beanPropertyRowMapper = new NestedRowMapper<>(clazz);
-
-//        BeanPropertyRowMapper<T> beanPropertyRowMapper = new BeanPropertyRowMapper<T>(clazz);
-//        DefaultConversionService defaultConversionService = (DefaultConversionService) beanPropertyRowMapper.getConversionService();
-//        customerConversion(defaultConversionService);
-
         List<T> query = jdbcTemplate.query(sql, paramMap, beanPropertyRowMapper);
         return query;
     }
@@ -159,10 +151,8 @@ public class SharpService {
 
         private Class<T> mappedClass;
 
-
-
         public NestedRowMapper(Class<T> mappedClass) {
-           this.mappedClass = mappedClass;
+            this.mappedClass = mappedClass;
         }
 
         @Override
@@ -170,8 +160,7 @@ public class SharpService {
             T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
             BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
             bw.setAutoGrowNestedPaths(true);
-            bw.setConversionService(DefaultConversionService.getSharedInstance());
-            customerConversion((DefaultConversionService)bw.getConversionService());
+            bw.setConversionService(conversionService);
 
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
@@ -203,21 +192,6 @@ public class SharpService {
         Map<String, Object> paramMap = new HashMap<>();
         String formatSql = sqlFormatter.formatSql(sql, params, paramMap);
         return new SqlFormatter(formatSql, paramMap);
-    }
-
-    private void customerConversion(DefaultConversionService defaultConversionService) {
-        for (ConverterFactory converterFactory : converterFactories) {
-            defaultConversionService.addConverterFactory(converterFactory);
-        }
-
-        // 内置转换器
-        defaultConversionService.addConverterFactory(new CodeToEnumConverterFactory());
-        defaultConversionService.addConverter(new JsonStringToListMapConverter());
-        defaultConversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
-        defaultConversionService.addConverterFactory(new JsonStringToMapConverterFactory());
-        defaultConversionService.addConverter(new JsonStringToCollectionConverter());
-        defaultConversionService.addConverter(new JsonStringToSetMapConverter());
-        defaultConversionService.addConverterFactory(new IdToEntityConverterFactory());
     }
 
     @AllArgsConstructor

@@ -47,7 +47,7 @@ public interface CoreDAO<ID> {
      * 性能不好，慎用
      * @return
      */
-    int deleteAll();
+    long deleteAll();
 
     int update(Object[] params, ID id);
 

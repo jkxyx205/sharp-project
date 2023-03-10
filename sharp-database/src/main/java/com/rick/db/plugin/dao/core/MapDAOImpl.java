@@ -117,23 +117,13 @@ public class MapDAOImpl<ID> extends AbstractCoreDAO<ID> implements MapDAO<ID> {
     }
 
     @Override
-    protected ID getIdValue(Object o) {
-        return (ID) ((Map)o).get(getIdColumnName());
-    }
-
-    @Override
     protected ID generatorId(Object t) {
         if (Objects.isNull(t)) {
             return (ID) IdGenerator.getSequenceId();
         }
 
-        ID id = getIdValue(t);
+        ID id = (ID) ((Map)t).get(getIdColumnName());
         return id == null ? (ID) IdGenerator.getSequenceId() :id;
-    }
-
-    @Override
-    protected void setColumnValue(Object o, String columnName, Object value) {
-        ((Map)o).put(columnName, value);
     }
 
     @Override

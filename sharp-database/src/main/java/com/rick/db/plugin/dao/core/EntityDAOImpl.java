@@ -9,12 +9,16 @@ import com.rick.db.constant.BaseEntityConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
-import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -34,6 +38,9 @@ import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
  */
 @Slf4j
 public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityDAO<T, ID> {
+
+    @Autowired
+    private ConversionService conversionService;
 
     private TableMeta tableMeta;
 
@@ -226,13 +233,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public int deleteAll() {
-        List<T> list = selectAll();
-        if (CollectionUtils.isNotEmpty(list)) {
-            return deleteByIds(list.stream().map(s -> getIdValue(s)).collect(Collectors.toSet()));
+    public long deleteAll() {
+        List<ID> idList = (List<ID>) selectByParams(Collections.emptyMap(),getIdColumnName(), idClass);
+        if (CollectionUtils.isNotEmpty(idList)) {
+            return deleteByIds(idList);
         }
 
-        return list.size();
+        return idList.size();
     }
 
     /**
@@ -249,6 +256,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     public <E> List<E> selectByParams(Map<String, ?> params, String columnNames, Class<E> clazz) {
         return selectByParams(params, columnNames, null, clazz);
+    }
+
+    @Override
+    public int update(Map<String, ?> params) {
+        return update(mapToEntity(params));
     }
 
     /**
@@ -513,11 +525,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames) {
-        return selectByParamsAsMap(params, columnNames, null);
-    }
-
-    @Override
     public <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, Class<E> clazz) {
         return selectByParams(params, columnNames, conditionSQL, src -> src, clazz);
     }
@@ -525,8 +532,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     protected <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler, Class<E> clazz) {
         return selectByParams(params, columnNames, conditionSQL, sqlHandler, clazz, list -> {
-            cascadeSelect((List<T>) list);
-            BaseDAOThreadLocalValue.removeByTableName(getTableName());
+            if (EntityDAOManager.isEntityClass(clazz)) {
+                cascadeSelect((List<T>) list);
+                BaseDAOThreadLocalValue.removeByTableName(getTableName());
+            }
         });
     }
 
@@ -577,6 +586,25 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
         }
         return params;
+    }
+
+    private T mapToEntity(Map<String, ?> map) {
+        T mappedObject = BeanUtils.instantiateClass(this.entityClass);
+
+        BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
+        bw.setAutoGrowNestedPaths(true);
+        bw.setConversionService(conversionService);
+
+        for (String columnName : columnNameList) {
+            String propertyName = columnNameToPropertyNameMap.get(columnName);
+            Object propertyValue = map.get(columnName) == null ? map.get(propertyName) : map.get(columnName);
+
+            if (Objects.nonNull(propertyValue)) {
+                bw.setPropertyValue(propertyName, propertyValue);
+            }
+        }
+
+        return mappedObject;
     }
 
     @Override
@@ -645,14 +673,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return id;
     }
 
-    @Override
     protected ID getIdValue(Object o) {
         return (ID) EntityDAOManager.getPropertyValue(o, this.tableMeta.getIdPropertyName());
-    }
-
-    @Override
-    protected void setColumnValue(Object o, String columnName, Object value) {
-        setPropertyValue(o, columnNameToPropertyNameMap.get(columnName), value);
     }
 
     protected void setPropertyValue(Object t, String propertyName, Object propertyValue) {
@@ -671,6 +693,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
             params[i] = resolveValue(EntityDAOManager.getPropertyValue(t, includePropertyList.get(i)));
+        }
+        return params;
+    }
+
+    private Object[] instanceToParamsArray(Map<String, Object> m, List<String> includePropertyList) {
+        Object[] params = new Object[includePropertyList.size()];
+        for (int i = 0; i < includePropertyList.size(); i++) {
+            params[i] = resolveValue(m.get(includePropertyList.get(i)));
         }
         return params;
     }
@@ -1017,10 +1047,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     private List<T> selectByIdsWithSpecifiedValue(Object ids) {
         Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, this.idColumnName + " IN(:ids)");
-    }
-
-    private String getEntityComment() {
-        return this.entityClass.getAnnotation(Table.class).comment();
     }
 
     @Override

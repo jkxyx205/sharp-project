@@ -1,5 +1,6 @@
 package com.rick.db.config;
 
+import com.rick.common.http.convert.*;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
@@ -10,23 +11,25 @@ import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
-import com.rick.db.plugin.dao.support.BaseCodeEntityIdFillService;
-import com.rick.db.plugin.dao.support.ColumnAutoFill;
-import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
-import com.rick.db.plugin.dao.support.DefaultConditionAdvice;
+import com.rick.db.plugin.dao.support.*;
 import com.rick.db.service.GridService;
 import com.rick.db.service.support.SharpServiceQueryInterceptor;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -80,7 +83,10 @@ public class GridServiceAutoConfiguration {
     static class GridServiceCacheConfiguration {}
 
     @Configuration
-    static class BaseDAOConfiguration {
+    static class BaseDAOConfiguration implements ApplicationListener<ContextRefreshedEvent> {
+
+        @Autowired(required = false)
+        private List<ConverterFactory> converterFactories;
 
         @Bean
         @ConditionalOnMissingBean
@@ -107,6 +113,27 @@ public class GridServiceAutoConfiguration {
         public ValidatorHelper validatorHelper(Validator validator) {
             return new ValidatorHelper(validator);
         }
+
+        @Override
+        public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+            FormattingConversionService conversionService = contextRefreshedEvent.getApplicationContext().getBean(FormattingConversionService.class);
+
+            if (CollectionUtils.isNotEmpty(converterFactories)) {
+                for (ConverterFactory converterFactory : converterFactories) {
+                    conversionService.addConverterFactory(converterFactory);
+                }
+            }
+
+            conversionService.addConverterFactory(new StringToLocalDateConverterFactory());
+
+            conversionService.addConverterFactory(new CodeToEnumConverterFactory());
+            conversionService.addConverter(new JsonStringToListMapConverter());
+            conversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
+            conversionService.addConverterFactory(new JsonStringToMapConverterFactory());
+            conversionService.addConverter(new JsonStringToCollectionConverter());
+            conversionService.addConverter(new JsonStringToSetMapConverter());
+            conversionService.addConverterFactory(new IdToEntityConverterFactory());
+        }
     }
 
     @Configuration
@@ -124,7 +151,7 @@ public class GridServiceAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnClass(org.apache.ibatis.session.SqlSessionFactory.class)
+    @ConditionalOnClass(SqlSessionFactory.class)
     @RequiredArgsConstructor
     static class MappedSharpServiceConfiguration {
 

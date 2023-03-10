@@ -114,7 +114,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Override
     public int update(Map<String, ?> params) {
         Object[] arrayParams = convertToArray(params, this.columnNameList);
-        return SQLUtils.update(this.getTableName(), this.columnNames, handleAutoFill(params, arrayParams, columnNameList, ColumnFillType.UPDATE), (Serializable) getIdValue(params), this.getIdColumnName());
+        return SQLUtils.update(this.getTableName(), this.columnNames, handleAutoFill(params, arrayParams, columnNameList, ColumnFillType.UPDATE), (Serializable) params.get(getIdColumnName()), this.getIdColumnName());
     }
 
     /**
@@ -231,7 +231,8 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyById(ID id) {
         Assert.notNull(id, "id不能为空");
-        return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
+                return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
+//        return deleteLogicallyByIds(Arrays.asList(id));
     }
 
     /**
@@ -261,12 +262,12 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     @Override
-    public int deleteAll() {
-        List<Map<String, Object>> list = selectByParams(Collections.emptyMap(), getColumnNames(), null);
-        if (CollectionUtils.isNotEmpty(list)) {
-            return deleteByIds(list.stream().map(s -> getIdValue(s)).collect(Collectors.toSet()));
+    public long deleteAll() {
+        long count = countByParams(null, null);
+        if (count > 0) {
+            SQLUtils.execute("TRUNCATE TABLE " + tableName);
         }
-        return list.size();
+        return count;
     }
 
     /**
@@ -441,7 +442,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     @Override
     public <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames) {
-        return null;
+        return selectByParamsAsMap(params, columnNames, null);
     }
 
     /**
@@ -520,10 +521,6 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return selectColumnNames;
     }
 
-    public List<String> getColumnNameList() {
-        return columnNameList;
-    }
-
     protected Object resolveValue(Object value) {
         if (Objects.isNull(value)) {
             return null;
@@ -577,8 +574,6 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
             return String.valueOf(value);
         }
     }
-
-    protected abstract ID getIdValue(Object o);
 
     protected void init(String tableName, String columnNames, String idColumnName, Class<ID> idClass) {
         this.tableName = tableName;
@@ -636,7 +631,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return Arrays.asList(values.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
     }
 
-    private Object[] convertToArray(Map map, List<String> columnNameList) {
+    private Object[] convertToArray(Map<String, ?> map, List<String> columnNameList) {
         Object[] params = new Object[columnNameList.size()];
 
         for (int i = 0; i < columnNameList.size(); i++) {
@@ -647,7 +642,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return params;
     }
 
-    protected String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
+    private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {
         List<String> updateColumnList = convertToList(updateColumnNames);
         Object[] params = new Object[updateColumnList.size()];
         Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
@@ -688,8 +683,15 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
                         continue;
                     }
 
-                    // 将auto值回写到实体中
-                    setColumnValue(t, fillColumnName, fillColumnValue);
+                    if (Map.class.isAssignableFrom(t.getClass())) {
+                        ((Map)t).put(fillColumnName, fillColumnValue);
+                    } else {
+                        // 将auto值回写到实体中
+                        EntityDAOManager.setPropertyValue(t
+                                , EntityDAOManager.getTableMeta(t.getClass()).getColumnNameFieldMap().get(fillColumnName).getName()
+                                , fillColumnValue);
+                    }
+
                 }
             }
         }
@@ -706,9 +708,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     protected abstract ID generatorId(Object t);
 
-    protected abstract void setColumnValue(Object o, String columnName, Object value);
-
-    protected Object[] handleUpdateAutoFill(String updateColumnNames, Object[] params) {
+    private Object[] handleUpdateAutoFill(String updateColumnNames, Object[] params) {
         Object mergedParams = params;
         if (Objects.nonNull(columnAutoFill)) {
             Map<String, Object> fill = columnAutoFill.updateFill();
@@ -755,7 +755,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      * @param <E>
      * @return
      */
-    protected <E> Optional<E> expectedAsOptional(List<E> list) {
+    public <E> Optional<E> expectedAsOptional(List<E> list) {
         if (CollectionUtils.isEmpty(list)) {
             return Optional.empty();
         }
@@ -802,11 +802,11 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return new Object[]{mergedParams, conditionSQL};
     }
 
-    protected String getConditionSQL(Map<String, ?> params) {
+    private String getConditionSQL(Map<String, ?> params) {
         return getConditionSQL(this.columnNameList, params);
     }
 
-    protected String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params) {
+    private String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params) {
         StringBuilder sb = new StringBuilder();
         for (String columnName : paramNameList) {
             Object value = params.get(columnName);

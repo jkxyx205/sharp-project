@@ -119,7 +119,7 @@ public class EntityDAOManager {
             }
         } catch (Exception e) {
             log.error("Cannot get ["+propertyName+"] value, may you lost " + value.getClass().getSimpleName() + "DAO or lost ["+propertyName+"] property for class ["+value.getClass().getSimpleName()+"]");
-            e.printStackTrace();
+            throw new RuntimeException();
         }
 
         return false;
