@@ -108,8 +108,6 @@ public class CpnTest {
                 .label("信息收集")
                 .placeholder("请输入信息收集")
                 .additionalInfo(Params.builder()
-//                        .pv("labels", Arrays.asList("姓名", "年龄"))
-//                        .pv("validators", Arrays.asList(cpnConfigurerText, cpnConfigurerNumber))
                           .pv("columns", Arrays.asList(cpnConfigurerText, cpnConfigurerNumber))
                         .build())
                 .validatorList(tableValidatorList)

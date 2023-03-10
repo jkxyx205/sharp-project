@@ -8,9 +8,7 @@ import com.rick.demo.module.project.domain.entity.Dept;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,6 +17,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @createdAt 2021-06-02 19:13:00
  */
 public class JsonUtilsTest {
+
+    @Test
+    public void testListList() throws IOException {
+        List<List<String>> list = new ArrayList<>();
+        list.add(Arrays.asList("1", "2"));
+        list.add(Arrays.asList("3", "4"));
+
+        System.out.println(JsonUtils.toJson(list));
+        System.out.println(JsonUtils.toList("[[\"1\",\"2\"],[\"3\",\"4\"]]", List.class));
+        System.out.println(JsonUtils.toList("[[\"足球\", \"篮球\"]]", List.class));
+    }
+
 
     @Test
     public void testToJson() throws IOException {

@@ -2,6 +2,7 @@ package com.rick.demo.formflow;
 
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.support.Params;
+import com.rick.formflow.config.FormFlowProperties;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.Form;
 import com.rick.formflow.form.service.FormCpnService;
@@ -28,6 +29,9 @@ public class FormTest {
 
     @Autowired
     private FormCpnService formCpnService;
+
+    @Autowired
+    private FormFlowProperties formFlowProperties;
 
     private static Long formId = 487677232379494400L;
 
@@ -88,7 +92,12 @@ public class FormTest {
     @Test
     public void testFindInstanceToForm() {
         FormBO form1 = formService.getFormBOById(formId);
-        FormBO form2 = formService.getFormBOByIdAndInstanceId(formId, instanceId);
+        if (formFlowProperties.isInsertCpnValue()) {
+            FormBO form2 = formService.getFormBOByIdAndInstanceId(formId, instanceId);
+        } else {
+            FormBO form2 = formService.getFormBOByIdAndInstanceId(formId, 665628482239229955L);
+        }
+
     }
 
 }

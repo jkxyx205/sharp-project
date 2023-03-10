@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BaseDAOImplTest {
+public class EntityDAOImplTest {
 
     @Autowired
     private ProjectDAO projectDAO;
@@ -363,7 +363,6 @@ public class BaseDAOImplTest {
         long count2 = projectDAO.countByParams(Params.builder(1).pv("title", "title1").build(), "title = :title");
         assertThat(count).isEqualTo(1);
         assertThat(count2).isEqualTo(0);
-
 
         boolean e1 = projectDAO.existsByParams(Params.builder(1).pv("title", "title").build(), "title like :title");
         boolean e2 = projectDAO.existsByParams(Params.builder(1).pv("title", "title1").build(), "title = :title");

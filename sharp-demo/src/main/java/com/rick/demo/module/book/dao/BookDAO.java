@@ -1,6 +1,6 @@
 package com.rick.demo.module.book.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.demo.module.book.entity.Book;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class BookDAO extends BaseDAOImpl<Book, Long> {
+public class BookDAO extends EntityDAOImpl<Book, Long> {
 
 }

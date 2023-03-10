@@ -1,6 +1,6 @@
 package com.rick.demo.module.school.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.demo.module.school.entity.SchoolLicense;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
  * @createdAt 2022-05-01 14:32:00
  */
 @Repository
-public class SchoolLicenseDAO extends BaseDAOImpl<SchoolLicense, Long> {
+public class SchoolLicenseDAO extends EntityDAOImpl<SchoolLicense, Long> {
 
 }

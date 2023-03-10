@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.demo.module.project.domain.entity.Worker;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class WorkerDAO extends BaseDAOImpl<Worker, Long> {
+public class WorkerDAO extends EntityDAOImpl<Worker, Long> {
 
 }

@@ -1,6 +1,6 @@
 package com.rick.demo.module.school.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.demo.module.school.entity.Teacher;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class TeacherDAO extends BaseDAOImpl<Teacher, Long> {
+public class TeacherDAO extends EntityDAOImpl<Teacher, Long> {
 
 }

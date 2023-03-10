@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.dao;
 
-import com.rick.db.plugin.dao.core.BaseDAOImpl;
+import com.rick.db.plugin.dao.core.EntityDAOImpl;
 import com.rick.demo.module.project.domain.entity.Message2;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class Message2DAO extends BaseDAOImpl<Message2, Long> {
+public class Message2DAO extends EntityDAOImpl<Message2, Long> {
 
 }

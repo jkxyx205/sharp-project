@@ -68,7 +68,7 @@ public class ValidateTest {
             projectService.save(Project.builder().status(UserStatusEnum.LOCKED).build());
         }).isInstanceOf(ConstraintViolationException.class);
 
-        projectService.save(Project.builder().title("title").status(UserStatusEnum.LOCKED).build());
+        projectService.save(Project.builder().title("title-validator").status(UserStatusEnum.LOCKED).build());
     }
 
 }

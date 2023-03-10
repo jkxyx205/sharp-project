@@ -1,6 +1,6 @@
 package com.rick.demo.module.code.dao;
 
-import com.rick.db.plugin.dao.core.BaseCodeDAOImpl;
+import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
 import com.rick.demo.module.code.entity.SerialNumber;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class SerialNumberDAO extends BaseCodeDAOImpl<SerialNumber, Long> {
+public class SerialNumberDAO extends EntityCodeDAOImpl<SerialNumber, Long> {
 
 }

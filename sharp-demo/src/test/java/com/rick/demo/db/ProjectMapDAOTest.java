@@ -34,13 +34,13 @@ public class ProjectMapDAOTest {
 
     @AfterAll
     public static void init() {
-        DataInit.init();
+//        DataInit.init();
     }
 
     @Test
     public void testSaveProject() {
         Map<String, Object> project = createProject();
-        project.put("title", "项目标题abc");
+        project.put("title", "项目标题abcd");
         projectDAO.insert(project);
     }
 
@@ -55,7 +55,7 @@ public class ProjectMapDAOTest {
 
     @Test
     public void testFindById() {
-        Optional<Map> optional4 = projectDAO.selectById(479723134929764352L);
+        Optional<Map<String, Object>> optional4 = projectDAO.selectById(479723134929764352L);
         assertThat(optional4.get().get("title")).isEqualTo("rick");
     }
 
@@ -64,7 +64,7 @@ public class ProjectMapDAOTest {
         Map<String, Object> params = Maps.newHashMapWithExpectedSize(2);
         params.put("title", "rick");
         params.put("description", "desc");
-        List<Map> list = projectDAO.selectByParams(params, "title,description", "title = :title AND description = :description");
+        List<Map<String, Object>> list = projectDAO.selectByParams(params, "title,description", "title = :title AND description = :description");
         assertThat(list.size()).isEqualTo(1);
     }
 

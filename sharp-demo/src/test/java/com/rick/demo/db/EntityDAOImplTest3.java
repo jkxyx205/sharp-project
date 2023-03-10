@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BaseDAOImplTest3 {
+public class EntityDAOImplTest3 {
 
     @Autowired
     private ProjectDAO2 projectDAO;

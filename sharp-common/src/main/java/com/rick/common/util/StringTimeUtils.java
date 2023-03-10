@@ -74,6 +74,10 @@ public final class StringTimeUtils {
     }
 
     public static LocalDate getLocalDate(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+
         return toLocalDateTime(value).toLocalDate();
     }
 
