@@ -1,7 +1,7 @@
 package com.rick.db.plugin.dao.core;
 
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
@@ -52,7 +52,7 @@ public class TableGenerator {
                 .append("(")
                 .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" bigint")+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
-        List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
+        List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX));
 
         for (String columnName : columnNames) {
             if (tableMeta.getIdColumnName().equals(columnName)) {

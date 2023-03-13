@@ -6,6 +6,7 @@ import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
 import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
+import com.rick.db.plugin.DatabaseMetaData;
 import com.rick.db.plugin.GridUtils;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
@@ -58,37 +59,6 @@ public class GridServiceAutoConfiguration {
     static class GridServiceConfiguration {
 
         @Bean
-        public AbstractSqlFormatter sqlFormatter(SharpDatabaseProperties sharpDatabaseProperties) {
-            if (Constants.DB_ORACLE.equals(sharpDatabaseProperties.getType())) {
-                return new OracleSqlFormatter();
-            }
-
-            return new MysqlSqlFormatter();
-        }
-
-        @Bean
-        public GridService gridService() {
-            return new GridService();
-        }
-
-        @Bean
-        public BaseCodeEntityIdFillService getBaseCodeEntityIdFillService() {
-            return new BaseCodeEntityIdFillService();
-        }
-
-    }
-
-    @ConditionalOnProperty(prefix = "sharp.database", name = "select-cache")
-    @Import({SharpServiceQueryInterceptor.class})
-    static class GridServiceCacheConfiguration {}
-
-    @Configuration
-    static class BaseDAOConfiguration implements ApplicationListener<ContextRefreshedEvent> {
-
-        @Autowired(required = false)
-        private List<ConverterFactory> converterFactories;
-
-        @Bean
         @ConditionalOnMissingBean
         public ColumnAutoFill columnAutoFill() {
             return new DefaultColumnAutoFill();
@@ -99,6 +69,38 @@ public class GridServiceAutoConfiguration {
         public DefaultConditionAdvice defaultConditionAdvice() {
             return new DefaultConditionAdvice();
         }
+
+        @Bean
+        public AbstractSqlFormatter sqlFormatter(SharpDatabaseProperties sharpDatabaseProperties) {
+            if (Constants.DB_ORACLE.equals(sharpDatabaseProperties.getType())) {
+                return new OracleSqlFormatter();
+            }
+
+            return new MysqlSqlFormatter();
+        }
+
+
+        @Bean
+        public GridService gridService(JdbcTemplate jdbcTemplate) {
+            DatabaseMetaData.initTableMapping(jdbcTemplate);
+            return new GridService();
+        }
+
+        @Bean
+        public BaseCodeEntityIdFillService getBaseCodeEntityIdFillService() {
+            return new BaseCodeEntityIdFillService();
+        }
+    }
+
+    @ConditionalOnProperty(prefix = "sharp.database", name = "select-cache")
+    @Import({SharpServiceQueryInterceptor.class})
+    static class GridServiceCacheConfiguration {}
+
+    @Configuration
+    static class EnttiyDAOConfiguration implements ApplicationListener<ContextRefreshedEvent> {
+
+        @Autowired(required = false)
+        private List<ConverterFactory> converterFactories;
 
         @Bean
         public EntityDAOManager baseDAOManager(@Autowired(required = false) List<EntityDAO> entityDAOList) {

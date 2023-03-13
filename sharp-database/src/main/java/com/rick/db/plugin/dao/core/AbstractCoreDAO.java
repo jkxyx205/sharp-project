@@ -2,14 +2,12 @@ package com.rick.db.plugin.dao.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.http.exception.ExceptionCode;
-import com.rick.common.util.EnumUtils;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
 import com.rick.db.config.SharpDatabaseProperties;
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
@@ -22,16 +20,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.SqlTypeValue;
-import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -85,7 +78,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     @Override
-    public int insertOrUpdate(Map<String, ?> params) {
+    public int insertOrUpdate(Map<String, Object> params) {
         if (params.get(this.getIdColumnName()) == null) {
             return insert(params);
         }
@@ -94,8 +87,8 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     @Override
-    public int insert(Map<String, ?> params) {
-        Object[] arrayParams = convertToArray(params, this.columnNameList);
+    public int insert(Map<String, Object> params) {
+        Object[] arrayParams = SQLUtils.convertToArray(params, this.columnNameList, this::resolveValue);
         return insert(arrayParams);
     }
 
@@ -113,7 +106,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     @Override
     public int update(Map<String, ?> params) {
-        Object[] arrayParams = convertToArray(params, this.columnNameList);
+        Object[] arrayParams = SQLUtils.convertToArray(params, this.columnNameList, this::resolveValue);
         return SQLUtils.update(this.getTableName(), this.columnNames, handleAutoFill(params, arrayParams, columnNameList, ColumnFillType.UPDATE), (Serializable) params.get(getIdColumnName()), this.getIdColumnName());
     }
 
@@ -130,7 +123,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         if(Map.class.isAssignableFrom(paramClass)) {
             List<Object[]> params = Lists.newArrayListWithExpectedSize(paramsList.size());
             for (Object o : paramsList) {
-                params.add(convertToArray((Map) o, this.columnNameList));
+                params.add(SQLUtils.convertToArray((Map)o, this.columnNameList, this::resolveValue));
             }
             return SQLUtils.insert(this.tableName, this.columnNames, handleAutoFill(params, params, columnNameList, ColumnFillType.INSERT));
         } else if (paramClass == Object[].class) {
@@ -231,7 +224,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyById(ID id) {
         Assert.notNull(id, "id不能为空");
-                return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
+                return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
 //        return deleteLogicallyByIds(Arrays.asList(id));
     }
 
@@ -243,7 +236,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(String ids) {
         Assert.hasText(ids, "id不能为空");
-        return deleteLogicallyByIds(Arrays.asList(ids.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX)));
+        return deleteLogicallyByIds(Arrays.asList(ids.split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX)));
     }
 
     /**
@@ -258,7 +251,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         Object[] mergedParams = new Object[ids.size() + 1];
         mergedParams[0] = 1;
         System.arraycopy(ids.toArray(), 0, mergedParams, 1, ids.size());
-        return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.idColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+        return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.idColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
     }
 
     @Override
@@ -522,67 +515,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     protected Object resolveValue(Object value) {
-        if (Objects.isNull(value)) {
-            return null;
-        }
-        // 处理BaseDAOImpl特殊类型
-        if (Enum.class.isAssignableFrom(value.getClass())) {
-            return EnumUtils.getCode((Enum) value);
-        } else if (value.getClass() == Instant.class) {
-            return Timestamp.from((Instant) value);
-        } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(value.getClass())) {
-            return toJson(value);
-        } else if (Collection.class.isAssignableFrom(value.getClass())) {
-            Collection<?> coll = (Collection<?>) value;
-            if (coll.size() == 0) {
-                return "[]";
-            } else {
-//                if (EntityDAOManager.isEntityClass(coll.iterator().next().getClass())) {
-//                    value = coll.stream().map(e -> EntityDAOManager.getIdValue(e)).collect(Collectors.toCollection(() -> {
-//                        try {
-//                            return coll.getClass().newInstance();
-//                        } catch (Exception e) {
-//                            throw new IllegalArgumentException(e);
-//                        }
-//                    }));
-//                }
-
-                return toJson(value);
-            }/*else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
-                return toJson(value);
-            }*/
-        } else if (Map.class.isAssignableFrom(value.getClass())) {
-            Map<String, ?> map = (Map<String, ?>)value;
-            if (map.size() == 0) {
-                return "{}";
-            } else {
-                return toJson(value);
-            }
-        } else if (value.getClass().isArray()) {
-            int length = Array.getLength(value);
-            if (length == 0) {
-                return null;
-            }
-            StringBuilder values = new StringBuilder();
-            for (int i = 0; i < length; i ++) {
-                Object o = Array.get(value, i);
-                values.append(o).append(",");
-            }
-
-            return values.deleteCharAt(values.length() - 1);
-        } else if (EntityDAOManager.isEntityClass((value.getClass()))) {
-            // 实体对象
-            return EntityDAOManager.getIdValue(value);
-        }
-
-        // JDBC 支持类型
-        int sqlTypeValue = StatementCreatorUtils.javaTypeToSqlParameterType(value.getClass());
-
-        if (SqlTypeValue.TYPE_UNKNOWN != sqlTypeValue) {
-            return value;
-        } else {
-            return String.valueOf(value);
-        }
+       return SQLUtils.resolveValue(value);
     }
 
     protected void init(String tableName, String columnNames, String idColumnName, Class<ID> idClass) {
@@ -607,7 +540,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     protected String columnAliasName(String columnName) {
-        return BaseEntityConstants.underscoreToCamelConverter.convert(columnName);
+        return SharpDbConstants.underscoreToCamelConverter.convert(columnName);
     }
 
     /**
@@ -638,18 +571,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     protected List<String> convertToList(String values) {
-        return Arrays.asList(values.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX));
-    }
-
-    private Object[] convertToArray(Map<String, ?> map, List<String> columnNameList) {
-        Object[] params = new Object[columnNameList.size()];
-
-        for (int i = 0; i < columnNameList.size(); i++) {
-            Object param = resolveValue(map.get(columnNameList.get(i)));
-            params[i] = param;
-        }
-
-        return params;
+        return Arrays.asList(values.split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX));
     }
 
     private String getParamsUpdateSQL(String updateColumnNames, Map<String, Object> paramsMap, String conditionSQL) {

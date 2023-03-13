@@ -1,8 +1,11 @@
 package com.rick.db.plugin;
 
 import com.google.common.collect.Maps;
+import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
+import com.rick.common.util.EnumUtils;
+import com.rick.common.util.JsonUtils;
 import com.rick.db.config.SharpDatabaseProperties;
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.PageModel;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +14,18 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.rick.db.config.Constants.DB_MYSQL;
@@ -55,6 +65,12 @@ public final class SQLUtils {
         JDBC_TEMPLATE.execute(sql);
     }
 
+    public static int insert(String tableName, Map<String, Object> params) {
+        return insert(tableName,
+                StringUtils.join(params.keySet(), ","),
+                convertToArray(params));
+    }
+
     /**
      * 单个批量插入
      * @param tableName t_xx
@@ -82,6 +98,12 @@ public final class SQLUtils {
             log.debug("SQL=> [{}], args:=> [{}]", insertSQL, paramsList);
         }
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, paramsList);
+    }
+
+    public static int update(String tableName, Map<String, Object> params, String idColumnName) {
+        Serializable id = (Serializable) params.get(idColumnName);
+        params.remove(idColumnName);
+        return update(tableName, StringUtils.join(params.keySet(), ","), convertToArray(params), id, idColumnName);
     }
 
     public static int update(String tableName, String updateColumnNames, Object[] params, Serializable id) {
@@ -192,7 +214,7 @@ public final class SQLUtils {
         for (String subTable : subTables) {
             delete(subTable, refColumnName, deleteValues);
         }
-        return delete(masterTable, BaseEntityConstants.ID_COLUMN_NAME, deleteValues, conditionParams, conditionSQL);
+        return delete(masterTable, SharpDbConstants.ID_COLUMN_NAME, deleteValues, conditionParams, conditionSQL);
     }
 
     /**
@@ -396,11 +418,11 @@ public final class SQLUtils {
         return String.format("INSERT INTO %s(%s) VALUES(%s)",
                 tableName,
                 columnNames,
-                StringUtils.join(Collections.nCopies(columnNames.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX).length, "?"), ","));
+                StringUtils.join(Collections.nCopies(columnNames.split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX).length, "?"), ","));
     }
 
     private static String getUpdateSQL(String tableName, String columnNames, String conditionSQL) {
-        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(BaseEntityConstants.COLUMN_NAME_SEPARATOR_REGEX), " = ?,") + " = ? WHERE " + conditionSQL;
+        return "UPDATE " + tableName + " SET " + StringUtils.join(columnNames.split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX), " = ?,") + " = ? WHERE " + conditionSQL;
     }
 
     /**
@@ -411,6 +433,102 @@ public final class SQLUtils {
      */
     public static String paramsHolderToQuestionHolder(String sql) {
         return sql.replaceAll(AbstractSqlFormatter.PARAM_REGEX, "?");
+    }
+
+
+    private static Object[] convertToArray(Map<String, ?> map) {
+        return convertToArray(map, map.keySet(), SQLUtils::resolveValue);
+    }
+
+    public static Object[] convertToArray(Map<String, ?> map, Collection<String> columnNames, Function resolveValue) {
+        Object[] params = new Object[columnNames.size()];
+        Iterator<String> iterator = columnNames.iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            Object param = resolveValue.apply(map.get(iterator.next()));
+            params[i++] = param;
+        }
+
+        return params;
+    }
+
+    public static Object resolveValue(Object value) {
+        return resolveValue(value, null);
+    }
+
+    public static Object resolveValue(Object value, ResolveValueFunction resolveValueFn) {
+        if (Objects.isNull(value)) {
+            return null;
+        }
+        // 处理EntityDAOImpl特殊类型
+        if (Enum.class.isAssignableFrom(value.getClass())) {
+            return EnumUtils.getCode((Enum) value);
+        } else if (value.getClass() == Instant.class) {
+            return Timestamp.from((Instant) value);
+        } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(value.getClass())) {
+            return toJson(value);
+        } else if (Collection.class.isAssignableFrom(value.getClass())) {
+            Collection<?> coll = (Collection<?>) value;
+            if (coll.size() == 0) {
+                return "[]";
+            } else {
+                return toJson(value);
+            }/*else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
+                return toJson(value);
+            }*/
+        } else if (Map.class.isAssignableFrom(value.getClass())) {
+            Map<String, ?> map = (Map<String, ?>)value;
+            if (map.size() == 0) {
+                return "{}";
+            } else {
+                return toJson(value);
+            }
+        } else if (value.getClass().isArray()) {
+            int length = Array.getLength(value);
+            if (length == 0) {
+                return null;
+            }
+            StringBuilder values = new StringBuilder();
+            for (int i = 0; i < length; i ++) {
+                Object o = Array.get(value, i);
+                values.append(o).append(",");
+            }
+
+            return values.deleteCharAt(values.length() - 1);
+        }
+
+        if (resolveValueFn != null) {
+            Object[] resolveValueFnValue = resolveValueFn.apply(value);
+            if (resolveValueFnValue[0] == Boolean.TRUE) {
+                return resolveValueFnValue[1];
+            }
+        }
+
+        // JDBC 支持类型
+        int sqlTypeValue = StatementCreatorUtils.javaTypeToSqlParameterType(value.getClass());
+
+        if (SqlTypeValue.TYPE_UNKNOWN != sqlTypeValue) {
+            return value;
+        } else {
+            return String.valueOf(value);
+        }
+    }
+
+    private static String toJson(Object value) {
+        try {
+            return JsonUtils.toJson(value);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public interface ResolveValueFunction {
+        /**
+         *
+         * @param value
+         * @return 0 = true 1 value
+         */
+        Object[] apply(Object value);
     }
 
 }

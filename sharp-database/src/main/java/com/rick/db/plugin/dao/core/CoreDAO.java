@@ -13,11 +13,11 @@ public interface CoreDAO<ID> {
 
     int insert(Object[] params);
 
-    int insert(Map<String, ?> params);
+    int insert(Map<String, Object> params);
 
     int update(Map<String, ?> params);
 
-    int insertOrUpdate(Map<String, ?> params);
+    int insertOrUpdate(Map<String, Object> params);
 
     int[] insert(Collection<?> paramsList);
 

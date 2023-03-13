@@ -2,8 +2,15 @@ package com.rick.db.plugin.dao.core;
 
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.IdGenerator;
+import com.rick.common.validate.ValidatorHelper;
+import com.rick.db.config.SharpDatabaseProperties;
+import com.rick.db.plugin.DatabaseMetaData;
+import com.rick.db.plugin.dao.support.ColumnAutoFill;
+import com.rick.db.plugin.dao.support.ConditionAdvice;
+import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -16,17 +23,39 @@ import java.util.function.Function;
  */
 public class MapDAOImpl<ID> extends AbstractCoreDAO<ID> implements MapDAO<ID> {
 
+    public MapDAOImpl(String tableName) {
+        this(tableName, DatabaseMetaData.tableColumnMap.get(tableName), DatabaseMetaData.tablePrimaryKeyMap.get(tableName));
+    }
+
+    /**
+     * @MapDAOImpl.of
+     * @param tableName
+     * @param idClass
+     */
+    public MapDAOImpl(String tableName, Class<ID> idClass) {
+        this(tableName, StringUtils.join(DatabaseMetaData.tableColumnMap.get(tableName), ", "), DatabaseMetaData.tablePrimaryKeyMap.get(tableName), idClass);
+    }
 
     public MapDAOImpl(String tableName, List<String> columnNameList, String idColumnName) {
         this(tableName, StringUtils.join(columnNameList, ", "), idColumnName);
     }
 
     public MapDAOImpl(String tableName, String columnNames, String idColumnName) {
-        super.init(tableName, columnNames, idColumnName, (Class<ID>) ClassUtils.getClassGenericsTypes(this.getClass())[0]);
+        this(tableName, columnNames, idColumnName, null);
     }
 
-    public MapDAOImpl(String tableName) {
-        // 获取所有字段
+    private MapDAOImpl(String tableName, String columnNames, String idColumnName, Class<ID> idClass) {
+        super.init(tableName, columnNames, idColumnName, idClass == null ? (Class<ID>) ClassUtils.getClassGenericsTypes(this.getClass())[0] : idClass);
+    }
+
+    public static <ID> MapDAO<ID> of(ApplicationContext applicationContext, String tableName, Class<ID> idClass) {
+        MapDAOImpl<ID> mapDAO = new MapDAOImpl<>(tableName, idClass);
+        mapDAO.sharpService = applicationContext.getBean(SharpService.class);
+        mapDAO.conditionAdvice = applicationContext.getBean(ConditionAdvice.class);
+        mapDAO.columnAutoFill = applicationContext.getBean(ColumnAutoFill.class);
+        mapDAO.validatorHelper = applicationContext.getBean(ValidatorHelper.class);
+        mapDAO.sharpDatabaseProperties = applicationContext.getBean(SharpDatabaseProperties.class);
+        return mapDAO;
     }
 
     @Override

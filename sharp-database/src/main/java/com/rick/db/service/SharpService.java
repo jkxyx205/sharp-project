@@ -1,6 +1,6 @@
 package com.rick.db.service;
 
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -180,7 +180,7 @@ public class SharpService {
         }
 
         private String getCamelCaseName(String name) {
-            return name.indexOf("_") > -1 ? BaseEntityConstants.underscoreToCamelConverter.convert(name) : name;
+            return name.indexOf("_") > -1 ? SharpDbConstants.underscoreToCamelConverter.convert(name) : name;
         }
     }
 

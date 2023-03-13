@@ -1,6 +1,6 @@
 package com.rick.db.plugin.dao.support;
 
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.service.support.Params;
 
 import java.util.Map;
@@ -13,6 +13,6 @@ public class DefaultConditionAdvice implements ConditionAdvice {
 
     @Override
     public Map<String, Object> getCondition() {
-        return Params.builder().pv(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, false).build();
+        return Params.builder().pv(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, false).build();
     }
 }

@@ -2,7 +2,7 @@ package com.rick.db.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
 import lombok.Getter;
@@ -37,7 +37,7 @@ public class BaseEntityWithAssign {
 
     private Instant updatedAt;
 
-    @Column(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME)
+    @Column(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME)
     private Boolean deleted;
 
     @Override

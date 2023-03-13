@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.IdGenerator;
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
@@ -79,6 +79,17 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         int[] insertCount = insert(entities.stream().filter(t -> Objects.isNull(getIdValue(t))).collect(Collectors.toList()));
 
         return ArrayUtils.addAll(insertCount, updateCount);
+    }
+
+    @Override
+    public int insert(Map<String, Object> params) {
+        T t = mapToEntity(params);
+        int count = insert(t);
+        if (count > 0) {
+            params.put(tableMeta.getIdPropertyName(), getIdValue(t));
+        }
+
+        return count;
     }
 
     /**
@@ -197,12 +208,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 if (thirdPartyTableCollect.contains(subTable)) {
                     SQLUtils.delete(subTable, subTableRefColumnName, Arrays.asList(id));
                 } else {
-                    update(subTable, null, BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
+                    update(subTable, null, SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
                 }
             }
         }
 
-        return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
+        return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
     }
 
     /**
@@ -224,12 +235,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 if (thirdPartyTableCollect.contains(subTable)) {
                     SQLUtils.delete(subTable, subTableRefColumnName, ids);
                 } else {
-                    update(subTable, null, BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+                    update(subTable, null, SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
                 }
             }
         }
 
-        return update(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.idColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+        return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.idColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
     }
 
     @Override
@@ -660,6 +671,17 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         log.debug("tableName: {}, this.columnNames: {}", this.tableName, this.columnNames);
     }
 
+    @Override
+    protected Object resolveValue(Object value) {
+        return SQLUtils.resolveValue(value, v -> {
+            if (EntityDAOManager.isEntityClass((value.getClass()))) {
+                // 实体对象
+                return new Object[] {Boolean.TRUE, EntityDAOManager.getIdValue(value)};
+            }
+
+            return new Object[] {Boolean.FALSE};
+        });
+    }
 
     @Override
     protected boolean isUpdateFillColumnName(String fillColumnName) {

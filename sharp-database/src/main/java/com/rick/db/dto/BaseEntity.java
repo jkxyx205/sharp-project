@@ -1,6 +1,6 @@
 package com.rick.db.dto;
 
-import com.rick.db.constant.BaseEntityConstants;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.plugin.dao.annotation.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +29,7 @@ public class BaseEntity extends SimpleEntity {
 
     private Instant updatedAt;
 
-    @Column(BaseEntityConstants.LOGIC_DELETE_COLUMN_NAME)
+    @Column(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME)
     private Boolean deleted;
 
 }
