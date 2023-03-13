@@ -25,7 +25,6 @@ import java.lang.reflect.Array;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.rick.db.config.Constants.DB_MYSQL;
@@ -435,17 +434,16 @@ public final class SQLUtils {
         return sql.replaceAll(AbstractSqlFormatter.PARAM_REGEX, "?");
     }
 
-
-    private static Object[] convertToArray(Map<String, ?> map) {
-        return convertToArray(map, map.keySet(), SQLUtils::resolveValue);
+    public static Object[] convertToArray(Map<String, ?> map) {
+        return convertToArray(map, map.keySet());
     }
 
-    public static Object[] convertToArray(Map<String, ?> map, Collection<String> columnNames, Function resolveValue) {
+    public static Object[] convertToArray(Map<String, ?> map, Collection<String> columnNames) {
         Object[] params = new Object[columnNames.size()];
         Iterator<String> iterator = columnNames.iterator();
         int i = 0;
         while (iterator.hasNext()) {
-            Object param = resolveValue.apply(map.get(iterator.next()));
+            Object param = map.get(iterator.next());
             params[i++] = param;
         }
 

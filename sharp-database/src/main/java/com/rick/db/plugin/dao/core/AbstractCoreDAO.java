@@ -22,7 +22,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -86,7 +85,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     @Override
     public int insert(Map<String, Object> params) {
-        Object[] arrayParams = SQLUtils.convertToArray(params, this.columnNameList, this::resolveValue);
+        Object[] arrayParams = SQLUtils.convertToArray(params, this.columnNameList);
         return insert(arrayParams);
     }
 
@@ -99,13 +98,16 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Override
     public int insert(Object[] params) {
         Assert.notEmpty(params, "参数不能为空");
-        return SQLUtils.insert(this.tableName, this.columnNames, handleAutoFill(null, params, columnNameList, ColumnFillType.INSERT));
+        return SQLUtils.insert(this.tableName, this.columnNames, resolveParams(handleAutoFill(null, params, columnNameList, ColumnFillType.INSERT)));
     }
 
     @Override
     public int update(Map<String, ?> params) {
-        Object[] arrayParams = SQLUtils.convertToArray(params, this.columnNameList, this::resolveValue);
-        return SQLUtils.update(this.getTableName(), this.columnNames, handleAutoFill(params, arrayParams, columnNameList, ColumnFillType.UPDATE), (Serializable) params.get(getIdColumnName()), this.getIdColumnName());
+        List<String> updateColumnNameList = this.columnNameList.stream().filter(columnName -> !columnName.equals(idColumnName)).collect(Collectors.toList());
+        return updateById(params,
+                updateColumnNameList.stream().collect(Collectors.joining(",")),
+                SQLUtils.convertToArray(params, updateColumnNameList),
+                (ID) params.get(idColumnName));
     }
 
     /**
@@ -121,11 +123,11 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         if(Map.class.isAssignableFrom(paramClass)) {
             List<Object[]> params = Lists.newArrayListWithExpectedSize(paramsList.size());
             for (Object o : paramsList) {
-                params.add(SQLUtils.convertToArray((Map)o, this.columnNameList, this::resolveValue));
+                params.add(SQLUtils.convertToArray((Map)o, this.columnNameList));
             }
-            return SQLUtils.insert(this.tableName, this.columnNames, handleAutoFill(params, params, columnNameList, ColumnFillType.INSERT));
+            return SQLUtils.insert(this.tableName, this.columnNames, resolveParams(handleAutoFill(params, params, columnNameList, ColumnFillType.INSERT)));
         } else if (paramClass == Object[].class) {
-            return SQLUtils.insert(this.tableName, this.columnNames, handleAutoFill((List<?>) paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT));
+            return SQLUtils.insert(this.tableName, this.columnNames, resolveParams(handleAutoFill((List<?>) paramsList, (List<Object[]>) paramsList, columnNameList, ColumnFillType.INSERT)));
         }
 
         throw new RuntimeException("List不支持的批量操作范型类型，目前仅支持Object[]、entity、Map");
@@ -560,6 +562,23 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return new Object[] {mergedParams, ""+getIdColumnName()+" = ?"};
     }
 
+    protected Object[] resolveParams(Object[] params) {
+        for (int i = 0; i < params.length; i++) {
+            params[i] = resolveValue(params[i]);
+        }
+        return params;
+    }
+
+    protected List<Object[]> resolveParams(List<Object[]> paramList) {
+        for (Object[] params : paramList) {
+            for (int i = 0; i < params.length; i++) {
+                params[i] = resolveValue(params[i]);
+            }
+        }
+
+        return paramList;
+    }
+
     protected List<String> convertToList(String values) {
         return Arrays.asList(values.split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX));
     }
@@ -668,11 +687,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
         Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
         Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
-        params = (Object[])conditionAdviceObjects[0];
-        for (int i = 0; i < params.length; i++) {
-            params[i] = resolveValue(params[i]);
-        }
-        return SQLUtils.update(tableName, (String) updateAutoObjects[1], params, (String) conditionAdviceObjects[1]);
+        return SQLUtils.update(tableName, (String) updateAutoObjects[1], resolveParams((Object[])conditionAdviceObjects[0]), (String) conditionAdviceObjects[1]);
     }
 
     /**
@@ -758,4 +773,5 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
         return " = :" + columnName;
     }
+
 }

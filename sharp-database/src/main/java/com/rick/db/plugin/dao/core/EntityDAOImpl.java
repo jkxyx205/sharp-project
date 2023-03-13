@@ -729,31 +729,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return params;
     }
 
-    private Object[] instanceToParamsArray(Map<String, Object> m, List<String> includePropertyList) {
-        Object[] params = new Object[includePropertyList.size()];
-        for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = resolveValue(m.get(includePropertyList.get(i)));
-        }
-        return params;
-    }
-
     protected Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
         for (int i = 0; i < params.length; i++) {
             Object param = resolveValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
             params[i] = param;
         }
-        return params;
-    }
-
-    private Object[] mapToParamsArray(Map map, List<String> updateColumnNameList) {
-        Object[] params = new Object[updateColumnNameList.size()];
-
-        for (int i = 0; i < updateColumnNameList.size(); i++) {
-            Object param = resolveValue(map.get(updateColumnNameList.get(i)));
-            params[i] = param;
-        }
-
         return params;
     }
 
