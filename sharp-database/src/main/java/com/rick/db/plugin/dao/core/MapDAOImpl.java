@@ -3,6 +3,7 @@ package com.rick.db.plugin.dao.core;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.IdGenerator;
 import com.rick.db.service.support.Params;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -15,8 +16,17 @@ import java.util.function.Function;
  */
 public class MapDAOImpl<ID> extends AbstractCoreDAO<ID> implements MapDAO<ID> {
 
+
+    public MapDAOImpl(String tableName, List<String> columnNameList, String idColumnName) {
+        this(tableName, StringUtils.join(columnNameList, ", "), idColumnName);
+    }
+
     public MapDAOImpl(String tableName, String columnNames, String idColumnName) {
         super.init(tableName, columnNames, idColumnName, (Class<ID>) ClassUtils.getClassGenericsTypes(this.getClass())[0]);
+    }
+
+    public MapDAOImpl(String tableName) {
+        // 获取所有字段
     }
 
     @Override

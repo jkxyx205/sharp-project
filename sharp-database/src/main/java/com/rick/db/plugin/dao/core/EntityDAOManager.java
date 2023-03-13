@@ -125,6 +125,18 @@ public class EntityDAOManager {
         return false;
     }
 
+    public static Object getIdValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (!isEntityClass(value.getClass())) {
+            throw new IllegalArgumentException("不是 entity 对象，无法获取 id 字段值！");
+        }
+
+        return EntityDAOManager.getPropertyValue(value, EntityDAOManager.getTableMeta(value.getClass()).getIdPropertyName());
+    }
+
     public static Object getPropertyValue(Object value, String propertyName) {
         if (Objects.isNull(value)) {
             return null;

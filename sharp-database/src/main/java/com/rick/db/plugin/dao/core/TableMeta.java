@@ -75,6 +75,8 @@ public class TableMeta {
 
     private Map<String, Field> columnNameFieldMap;
 
+    private Map<String, Field> fieldMap;
+
     private Map<String, Column> columnNameMap;
 
     @Value

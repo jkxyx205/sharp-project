@@ -91,6 +91,8 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     TableMeta getTableMeta();
 
-    Map<String, Object> entityToMap(T example);
+    Map<String, Object> entityToMap(T entity);
+
+    T mapToEntity(Map<String, ?> map);
 
 }

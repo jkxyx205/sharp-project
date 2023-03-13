@@ -570,37 +570,47 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public Map<String, Object> entityToMap(T example) {
+    public Map<String, Object> entityToMap(T entity) {
+        if (entity == null) {
+            return Collections.emptyMap();
+        }
+
+        Set<String> fieldNames = tableMeta.getFieldMap().keySet();
+        
         Map<String, Object> params;
-        params = Maps.newHashMapWithExpectedSize(columnNameList.size());
-        for (String columnName : columnNameList) {
-            String propertyName = columnNameToPropertyNameMap.get(columnName);
-            Object propertyValue = EntityDAOManager.getPropertyValue(example, propertyName);
+        params = Maps.newHashMapWithExpectedSize(fieldNames.size());
+        for (String fieldName : fieldNames) {
+            String columnName = propertyNameToColumnNameMap.get(fieldName);
+            Object propertyValue = EntityDAOManager.getPropertyValue(entity, fieldName);
             if (Objects.nonNull(propertyValue)) {
-                if (EntityDAOManager.isEntityClass(propertyValue.getClass())) {
-                    propertyValue = getIdValue(propertyValue);
+                params.put(fieldName, propertyValue);
+
+                if (columnName != null && !fieldName.equals(columnName)) {
+                    params.put(columnName, resolveValue(propertyValue));
                 }
 
-                params.put(propertyName, propertyValue);
-                params.put(columnName, propertyValue);
             }
         }
         return params;
     }
 
-    private T mapToEntity(Map<String, ?> map) {
+    @Override
+    public T mapToEntity(Map<String, ?> map) {
         T mappedObject = BeanUtils.instantiateClass(this.entityClass);
 
         BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
         bw.setAutoGrowNestedPaths(true);
         bw.setConversionService(conversionService);
 
-        for (String columnName : columnNameList) {
-            String propertyName = columnNameToPropertyNameMap.get(columnName);
-            Object propertyValue = map.get(columnName) == null ? map.get(propertyName) : map.get(columnName);
+        Set<String> fieldNames = tableMeta.getFieldMap().keySet();
+
+        for (String fieldName : fieldNames) {
+            String columnName = propertyNameToColumnNameMap.get(fieldName);
+            Object propertyValue = map.get(fieldName) == null ? map.get(columnName) : map.get(fieldName);
 
             if (Objects.nonNull(propertyValue)) {
-                bw.setPropertyValue(propertyName, propertyValue);
+//                bw.setPropertyValue(fieldName, resolveValue(propertyValue));
+                bw.setPropertyValue(fieldName, propertyValue);
             }
         }
 

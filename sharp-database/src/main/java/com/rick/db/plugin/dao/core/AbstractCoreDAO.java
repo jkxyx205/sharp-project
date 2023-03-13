@@ -537,6 +537,16 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
             if (coll.size() == 0) {
                 return "[]";
             } else {
+//                if (EntityDAOManager.isEntityClass(coll.iterator().next().getClass())) {
+//                    value = coll.stream().map(e -> EntityDAOManager.getIdValue(e)).collect(Collectors.toCollection(() -> {
+//                        try {
+//                            return coll.getClass().newInstance();
+//                        } catch (Exception e) {
+//                            throw new IllegalArgumentException(e);
+//                        }
+//                    }));
+//                }
+
                 return toJson(value);
             }/*else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
                 return toJson(value);
@@ -562,7 +572,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
             return values.deleteCharAt(values.length() - 1);
         } else if (EntityDAOManager.isEntityClass((value.getClass()))) {
             // 实体对象
-            return EntityDAOManager.getPropertyValue(value, EntityDAOManager.getTableMeta(value.getClass()).getIdPropertyName());
+            return EntityDAOManager.getIdValue(value);
         }
 
         // JDBC 支持类型

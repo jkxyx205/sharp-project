@@ -24,17 +24,21 @@ final public class IdToEntityConverterFactory implements ConverterFactory<Object
         }
 
         @Override
-        public T convert(Object id) {
-            if (id == null) {
-                return (T) id;
+        public T convert(Object obj) {
+            if (obj == null) {
+                return null;
             }
 
             try {
+                if (obj instanceof SimpleEntity) {
+                    return (T) obj;
+                }
+
                 T t = (T) targetType.newInstance();
-                if (id.getClass() == Long.class) {
-                    t.setId((Long) id);
-                } else if (id.getClass() == String.class) {
-                    t.setId(Long.parseLong((String) id));
+                if (obj.getClass() == Long.class) {
+                    t.setId((Long) obj);
+                } else if (obj.getClass() == String.class) {
+                    t.setId(Long.parseLong((String) obj));
                 }
                 return t;
             } catch (Exception e) {
