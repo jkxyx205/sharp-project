@@ -46,6 +46,14 @@ public class ProjectMapByTableNameDAOTest {
 
     @Test
     public void testUpdate() {
+        Map<String, Object> project = createProject();
+        project.put("id", 479723134929764352L);
+        project.put("title", "hello");
+        projectDAO.update(project);
+    }
+
+    @Test
+    public void testUpdate2() {
         projectDAO.update("title, description", Params.builder(3)
                 .pv("title", "rick")
                 .pv("description", "desc")

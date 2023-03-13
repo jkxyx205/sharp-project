@@ -117,7 +117,7 @@ public class BookTest {
     public void testSqlUtilInsert() {
         SQLUtils.insert("t_book", Params.builder()
                 .pv("id", IdGenerator.getSimpleId())
-                .pv("title", "Test1")
+                .pv("title", "Test1" + System.currentTimeMillis())
                 .pv("person_id", "617327246029365249")
                 .build());
     }
