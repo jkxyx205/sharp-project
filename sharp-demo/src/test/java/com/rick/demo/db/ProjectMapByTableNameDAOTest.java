@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.service.support.Params;
-import com.rick.demo.module.project.dao.ProjectMapDAO;
+import com.rick.demo.module.project.dao.ProjectMapByTableNameDAO;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.enums.SexEnum;
@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @createdAt 2022-11-25 17:44:00
  */
 @SpringBootTest
-public class ProjectMapDAOTest {
+public class ProjectMapByTableNameDAOTest {
 
     @Autowired
-    private ProjectMapDAO projectDAO;
+    private ProjectMapByTableNameDAO projectDAO;
 
     @AfterAll
     public static void init() {

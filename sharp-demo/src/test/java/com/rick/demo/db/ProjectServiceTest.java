@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -179,6 +180,14 @@ public class ProjectServiceTest {
     public void selectSingleValueById() {
         UserStatusEnum userStatus = projectDAO.selectSingleValueById(479723663504343043L, "status", UserStatusEnum.class).get();
         assertThat(userStatus).isEqualTo(UserStatusEnum.LOCKED);
+    }
+
+    @Order(17)
+    @Test
+    public void testInsertMap() {
+        Map<String, Object> map = projectDAO.entityToMap(createProject());
+        projectDAO.insert(map);
+        assertThat("add...").isEqualTo(projectDAO.selectById((Long) map.get("id")).get().getProjectDetailList().get(0).getTitle());
     }
 
     public Project createProject() {

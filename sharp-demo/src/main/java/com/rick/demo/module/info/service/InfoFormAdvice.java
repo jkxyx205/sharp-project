@@ -1,11 +1,14 @@
 package com.rick.demo.module.info.service;
 
 import com.rick.demo.module.info.dao.InfoDAO;
+import com.rick.demo.module.info.entity.Info;
 import com.rick.formflow.form.service.FormAdvice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Rick
@@ -24,6 +27,11 @@ public class InfoFormAdvice implements FormAdvice {
 
     @Override
     public Map<String, Object> getValue(Long formId, Long instanceId) {
-        return infoDAO.entityToMap(infoDAO.selectById(instanceId).get());
+        Optional<Info> infoOptional = infoDAO.selectById(instanceId);
+        if (infoOptional.isPresent()) {
+            return infoDAO.entityToMap(infoOptional.get());
+        }
+
+        return Collections.emptyMap();
     }
 }

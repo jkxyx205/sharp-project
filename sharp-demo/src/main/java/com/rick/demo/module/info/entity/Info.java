@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Rick
@@ -39,7 +40,7 @@ public class Info extends BaseEntity {
 
     private String mobile;
 
-    private String file;
+    private List<Map<String, Object>> file;
 
     private String email;
 
