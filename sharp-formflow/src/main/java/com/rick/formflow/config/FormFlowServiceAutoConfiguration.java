@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -38,14 +37,19 @@ public class FormFlowServiceAutoConfiguration {
         public FormAdvice formAdvice() {
             return new FormAdvice() {
                 @Override
-                public void afterInstanceSave(Long formId, Long instanceId, Map<String, Object> values) {
+                public void beforeInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
 
                 }
 
                 @Override
-                public Map<String, Object> getValue(Long formId, Long instanceId) {
-                    return Collections.emptyMap();
+                public void afterInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
+
                 }
+
+//                @Override
+//                public Map<String, Object> getValue(Long formId, Long instanceId) {
+//                    return Collections.emptyMap();
+//                }
             };
         }
     }

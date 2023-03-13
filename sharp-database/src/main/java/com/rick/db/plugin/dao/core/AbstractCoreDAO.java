@@ -3,7 +3,6 @@ package com.rick.db.plugin.dao.core;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.rick.common.http.exception.ExceptionCode;
-import com.rick.common.util.JsonUtils;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Constants;
 import com.rick.db.config.SharpDatabaseProperties;
@@ -23,7 +22,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -552,7 +550,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     protected Object[] mergeIdParam(Object[] params, ID id) {
         Object[] mergedParams;
         if (ArrayUtils.isEmpty(params)) {
-            mergedParams = new Object[] {id};
+            mergedParams = new Object[]{id};
         } else {
             mergedParams = new Object[params.length + 1];
             mergedParams[params.length] = id;
@@ -560,14 +558,6 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         }
 
         return new Object[] {mergedParams, ""+getIdColumnName()+" = ?"};
-    }
-
-    private String toJson(Object value) {
-        try {
-            return JsonUtils.toJson(value);
-        } catch (IOException e) {
-            return null;
-        }
     }
 
     protected List<String> convertToList(String values) {
@@ -617,7 +607,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
                     if (Map.class.isAssignableFrom(t.getClass())) {
                         ((Map)t).put(fillColumnName, fillColumnValue);
-                    } else {
+                    } else if (EntityDAOManager.isEntityClass(t.getClass())) {
                         // 将auto值回写到实体中
                         EntityDAOManager.setPropertyValue(t
                                 , EntityDAOManager.getTableMeta(t.getClass()).getColumnNameFieldMap().get(fillColumnName).getName()
@@ -678,7 +668,11 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
         Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
         Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
-        return SQLUtils.update(tableName, (String) updateAutoObjects[1], (Object[])conditionAdviceObjects[0], (String) conditionAdviceObjects[1]);
+        params = (Object[])conditionAdviceObjects[0];
+        for (int i = 0; i < params.length; i++) {
+            params[i] = resolveValue(params[i]);
+        }
+        return SQLUtils.update(tableName, (String) updateAutoObjects[1], params, (String) conditionAdviceObjects[1]);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.rick.formflow.form.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
+import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.MapDAO;
 import com.rick.db.plugin.dao.core.MapDAOImpl;
 import com.rick.formflow.form.cpn.core.*;
@@ -12,7 +13,7 @@ import com.rick.formflow.form.dao.FormCpnValueDAO;
 import com.rick.formflow.form.dao.FormDAO;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +37,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Validated
 public class FormService {
-
-    private static final String CREATE_TABLE_PREFIX = "sys_form_instance_";
 
     private final FormDAO formDAO;
 
@@ -71,25 +70,22 @@ public class FormService {
 
         List<FormBO.Property> propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
-        FormAdvice formAdvice = null;
         Map<String, Object> valueMap = null;
         Map<Long, FormCpnValue> formCpnValueMap = null;
 
         if (isInstanceForm) {
-            formAdvice = formAdviceMap.get(form.getServiceName());
-
             if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
                 formCpnValueMap = formCpnValueDAO.selectByInstanceIdAsMap(instanceId);
             } else if (form.getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
-                MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, CREATE_TABLE_PREFIX + form.getCode(), Long.class);
-                Optional<Map<String, Object>> mapOptional = mapDAO.selectById(instanceId);
-                if (mapOptional.isPresent()) {
+                if (StringUtils.isNotBlank(form.getRepositoryName())) {
+                    EntityDAO entityDAO = applicationContext.getBean(form.getRepositoryName(), EntityDAO.class);
+                    Optional optional = entityDAO.selectById(instanceId);
+                    valueMap = entityDAO.entityToMap(optional.get());
+                } else {
+                    MapDAO<Long> dao = MapDAOImpl.of(applicationContext, form.getTableName(), Long.class);
+                    Optional<Map<String, Object>> mapOptional = dao.selectById(instanceId);
                     valueMap = mapOptional.get();
                 }
-            }
-
-            if (formAdvice != null && MapUtils.isEmpty(valueMap)) {
-                valueMap = formAdvice.getValue(formId, instanceId);
             }
         }
 
@@ -117,10 +113,6 @@ public class FormService {
                     } else {
                         distValue = tableValue;
                     }
-                }
-
-                if (formAdvice != null && value == null && distValue == null) {
-                    distValue = valueMap.get(cpnConfigurer.getName());
                 }
 
             } else {
@@ -186,14 +178,19 @@ public class FormService {
         if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
             formCpnValueDAO.insert(FormCpnValueList);
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
-            MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, CREATE_TABLE_PREFIX + form.getForm().getCode(), Long.class);
-            mapDAO.insertOrUpdate(values);
+            if (StringUtils.isNotBlank(form.getForm().getRepositoryName())) {
+                EntityDAO entityDAO = applicationContext.getBean(form.getForm().getRepositoryName(), EntityDAO.class);
+                entityDAO.insertOrUpdate(values);
+            } else {
+                MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, form.getForm().getTableName(), Long.class);
+                mapDAO.insertOrUpdate(values);
+            }
         }
 
         // postHandler mongoDB 文档存储
-        FormAdvice formAdvice = formAdviceMap.get(form.getForm().getServiceName());
+        FormAdvice formAdvice = formAdviceMap.get(form.getForm().getFormAdviceName());
         if (formAdvice != null) {
-            formAdvice.afterInstanceSave(formId, instanceId, values);
+            formAdvice.afterInstanceHandle(formId, instanceId, values);
         }
 
     }

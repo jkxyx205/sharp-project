@@ -27,8 +27,12 @@ public class Form extends BaseCodeEntity {
     @NotBlank
     private String name;
 
-    @Column(comment = "外部服务的名称")
-    private String serviceName;
+    @Column(comment = "formAdviceName服务的名称")
+    private String formAdviceName;
+
+    private String tableName;
+
+    private String repositoryName;
 
     private StorageStrategyEnum storageStrategy;
 
