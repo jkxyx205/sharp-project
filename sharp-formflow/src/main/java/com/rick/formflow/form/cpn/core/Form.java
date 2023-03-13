@@ -1,6 +1,8 @@
 package com.rick.formflow.form.cpn.core;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.rick.db.dto.BaseCodeEntity;
+import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +27,28 @@ public class Form extends BaseCodeEntity {
     @NotBlank
     private String name;
 
+    @Column(comment = "外部服务的名称")
     private String serviceName;
+
+    private StorageStrategyEnum storageStrategy;
+
+    @AllArgsConstructor
+    @Getter
+    public enum StorageStrategyEnum {
+        NONE("无"),
+        INNER_TABLE("内部表"),
+        CREATE_TABLE("外部表");
+
+        @JsonValue
+        public String getCode() {
+            return this.name();
+        }
+
+        private final String label;
+
+        public static Form.StorageStrategyEnum valueOfCode(String code) {
+            return valueOf(code);
+        }
+    }
 
 }

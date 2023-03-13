@@ -6,7 +6,6 @@ import com.rick.formflow.form.service.FormAdvice;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +25,6 @@ import java.util.Map;
 @Configuration
 @ConditionalOnSingleCandidate(GridService.class)
 @AutoConfigureAfter({GridServiceAutoConfiguration.class})
-@EnableConfigurationProperties({FormFlowProperties.class})
 public class FormFlowServiceAutoConfiguration {
 
     public FormFlowServiceAutoConfiguration() {

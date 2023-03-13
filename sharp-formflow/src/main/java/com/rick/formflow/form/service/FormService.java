@@ -3,7 +3,8 @@ package com.rick.formflow.form.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
-import com.rick.formflow.config.FormFlowProperties;
+import com.rick.db.plugin.dao.core.MapDAO;
+import com.rick.db.plugin.dao.core.MapDAOImpl;
 import com.rick.formflow.form.cpn.core.*;
 import com.rick.formflow.form.dao.CpnConfigurerDAO;
 import com.rick.formflow.form.dao.FormCpnDAO;
@@ -11,7 +12,8 @@ import com.rick.formflow.form.dao.FormCpnValueDAO;
 import com.rick.formflow.form.dao.FormDAO;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
@@ -23,6 +25,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,8 @@ import java.util.stream.Collectors;
 @Validated
 public class FormService {
 
+    private static final String CREATE_TABLE_PREFIX = "sys_form_instance_";
+
     private final FormDAO formDAO;
 
     private final FormCpnDAO formCpnDAO;
@@ -44,9 +49,9 @@ public class FormService {
 
     private final CpnManager cpnManager;
 
-    private final FormFlowProperties formFlowProperties;
-
     private final Map<String, FormAdvice> formAdviceMap;
+
+    private final ApplicationContext applicationContext;
 
     public Form save(@Valid Form form) {
         formDAO.insert(form);
@@ -59,15 +64,33 @@ public class FormService {
 
     public FormBO getFormBOByIdAndInstanceId(Long formId, Long instanceId) {
         boolean isInstanceForm = Objects.nonNull(instanceId);
+
         Form form = formDAO.selectById(formId).get();
         List<FormCpn> formCpnList = formCpnDAO.listByFormId(formId);
         Map<Long, CpnConfigurer> configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
 
         List<FormBO.Property> propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
+        FormAdvice formAdvice = null;
+        Map<String, Object> valueMap = null;
         Map<Long, FormCpnValue> formCpnValueMap = null;
+
         if (isInstanceForm) {
-            formCpnValueMap = formCpnValueDAO.selectByInstanceIdAsMap(instanceId);
+            formAdvice = formAdviceMap.get(form.getServiceName());
+
+            if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
+                formCpnValueMap = formCpnValueDAO.selectByInstanceIdAsMap(instanceId);
+            } else if (form.getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
+                MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, CREATE_TABLE_PREFIX + form.getCode(), Long.class);
+                Optional<Map<String, Object>> mapOptional = mapDAO.selectById(instanceId);
+                if (mapOptional.isPresent()) {
+                    valueMap = mapOptional.get();
+                }
+            }
+
+            if (formAdvice != null && MapUtils.isEmpty(valueMap)) {
+                valueMap = formAdvice.getValue(formId, instanceId);
+            }
         }
 
         for (FormCpn formCpn : formCpnList) {
@@ -78,26 +101,35 @@ public class FormService {
             cpnConfigurer.getValidatorList().addAll(cpn.cpnValidators());
 
             String value = null;
-            if (formFlowProperties.isInsertCpnValue()) {
-                if (isInstanceForm) {
+            Object distValue = null;
+
+            if (isInstanceForm) {
+                if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
                     FormCpnValue formCpnValue = formCpnValueMap.get(formCpn.getId());
                     if (Objects.nonNull(formCpnValue)) {
                         value = formCpnValue.getValue();
                     }
-                } else {
-                    value = cpnConfigurer.getDefaultValue();
+                } else if (form.getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
+                    Object tableValue = valueMap.get(cpnConfigurer.getName());
+
+                    if (tableValue != null && tableValue instanceof String) {
+                        value = (String) tableValue;
+                    } else {
+                        distValue = tableValue;
+                    }
                 }
+
+                if (formAdvice != null && value == null && distValue == null) {
+                    distValue = valueMap.get(cpnConfigurer.getName());
+                }
+
             } else {
-                if (isInstanceForm) {
-                    FormAdvice formAdvice = formAdviceMap.get(form.getServiceName());
-                    Map<String, Object> valueMap = formAdvice.getValue(formId, instanceId);
-                    value = valueMap.get(cpnConfigurer.getName()) == null ? null : cpn.getStringValue(valueMap.get(cpnConfigurer.getName()));
-                } else {
-                    value = cpnConfigurer.getDefaultValue();
-                }
+                value = cpnConfigurer.getDefaultValue();
             }
 
-            Object distValue = StringUtils.isBlank(value) ? value : cpn.parseStringValue(value);
+            if (distValue == null) {
+                distValue = value == null ? null : cpn.parseStringValue(value);
+            }
 
             propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, distValue));
         }
@@ -116,8 +148,11 @@ public class FormService {
     }
 
     private void handle(Long formId, Long instanceId, Map<String, Object> values) throws BindException {
-        boolean isInsert = Objects.isNull(instanceId);
-        instanceId = (instanceId == null ? IdGenerator.getSequenceId() : instanceId);
+        values.put("formId", formId);
+        values.put("instanceId", instanceId);
+        values.put("id", instanceId);
+
+        Long innerTableId = instanceId == null ? IdGenerator.getSequenceId() : instanceId;
 
         FormBO form = getFormBOById(formId);
 
@@ -138,7 +173,7 @@ public class FormService {
             FormCpnValueList.add(FormCpnValue.builder()
                     .value(value)
                     .formCpnId(property.getId())
-                    .instanceId(instanceId)
+                    .instanceId(innerTableId)
                     .formId(formId)
                     .configId(property.getConfigurer().getId())
                     .build());
@@ -148,21 +183,16 @@ public class FormService {
             throw new BindException(bindingResult);
         }
 
-        if (formFlowProperties.isInsertCpnValue()) {
+        if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
             formCpnValueDAO.insert(FormCpnValueList);
+        } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
+            MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, CREATE_TABLE_PREFIX + form.getForm().getCode(), Long.class);
+            mapDAO.insertOrUpdate(values);
         }
 
         // postHandler mongoDB 文档存储
         FormAdvice formAdvice = formAdviceMap.get(form.getForm().getServiceName());
         if (formAdvice != null) {
-            values.put("formId", formId);
-            if (!isInsert) {
-                values.put("instanceId", instanceId);
-                values.put("id", instanceId);
-            } else {
-                instanceId = null;
-            }
-
             formAdvice.afterInstanceSave(formId, instanceId, values);
         }
 
