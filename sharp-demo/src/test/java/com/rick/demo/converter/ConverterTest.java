@@ -3,8 +3,9 @@ package com.rick.demo.converter;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.format.support.FormattingConversionService;
+import org.springframework.core.convert.ConversionService;
 
 import java.time.Instant;
 
@@ -18,7 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ConverterTest {
 
     @Autowired
-    private FormattingConversionService formattingConversionService;
+    @Qualifier("dbConversionService")
+    private ConversionService formattingConversionService;
 
     @Test
     public void testConvert() {

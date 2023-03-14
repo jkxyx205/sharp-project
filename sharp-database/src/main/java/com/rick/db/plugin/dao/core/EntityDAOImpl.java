@@ -18,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -40,6 +41,7 @@ import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
 public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityDAO<T, ID> {
 
     @Autowired
+    @Qualifier("dbConversionService")
     private ConversionService conversionService;
 
     private TableMeta tableMeta;

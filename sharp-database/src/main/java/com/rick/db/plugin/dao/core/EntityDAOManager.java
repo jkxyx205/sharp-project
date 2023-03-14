@@ -10,7 +10,10 @@ import org.springframework.beans.factory.BeanInitializationException;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.rick.common.util.ReflectUtils.getAllFields;
@@ -32,8 +35,6 @@ public class EntityDAOManager {
 
     public static Map<Class, Map<String, PropertyDescriptor>> entityPropertyDescriptorMap;
 
-    public static Set<Class> entitiesClass = new HashSet<>();
-
     private static boolean hasAutowired = false;
 
     public static void setBaseDAOList(List<EntityDAO> entityDAOList) {
@@ -45,10 +46,10 @@ public class EntityDAOManager {
             EntityDAOManager.entityEmbeddedMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getEntityClass(), v -> v.getTableMeta().getEmbeddedPropertyList().stream().map(TableMeta.EmbeddedProperty::getField).collect(Collectors.toList()))) : Collections.emptyMap();
             EntityDAOManager.entityPropertyDescriptorMap = Maps.newHashMapWithExpectedSize(entityDAOList.size());
 
+
             for (EntityDAO entityDAO : entityDAOList) {
                 Field[] entityFields = getAllFields(entityDAO.getEntityClass());
                 handleFields(entityFields,  entityPropertyDescriptorMap, entityDAO.getEntityClass());
-                entitiesClass.add(entityDAO.getEntityClass());
             }
 
             EntityDAOManager.hasAutowired = true;
@@ -75,11 +76,12 @@ public class EntityDAOManager {
     }
 
     public static boolean isEntityClass(Class clazz) {
-        return EntityDAOManager.entitiesClass.contains(clazz);
+        return getEntityClass(clazz) != null;
+
     }
 
     public static TableMeta getTableMeta(Class clazz) {
-        return baseDAOEntityMap.get(clazz).getTableMeta();
+        return baseDAOEntityMap.get(getEntityClass(clazz)).getTableMeta();
     }
 
     public static void setPropertyValue(Object value, String propertyName, Object propertyValue) {
@@ -189,19 +191,22 @@ public class EntityDAOManager {
     }
 
     private static Class getEntityClass(Object value) {
-        Class<?> entityClass = value.getClass();
+        if (value == null) {
+           return null;
+        }
+        return getEntityClass(value.getClass());
+    }
+
+    private static Class getEntityClass(Class<?> entityClass) {
         while (Objects.nonNull(entityClass)) {
             Table tableAnnotation = entityClass.getAnnotation(Table.class);
             if (Objects.isNull(tableAnnotation)) {
                 entityClass = entityClass.getSuperclass();
             } else {
-                break;
+                return entityClass;
             }
         }
 
-        return entityClass;
+        return null;
     }
-
-
-
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -36,6 +37,7 @@ public class SharpService {
     protected AbstractSqlFormatter sqlFormatter;
 
     @Autowired
+    @Qualifier("dbConversionService")
     private ConversionService conversionService;
 
     public interface JdbcTemplateCallback<T> {

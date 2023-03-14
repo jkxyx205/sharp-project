@@ -1,11 +1,11 @@
 package com.rick.demo.converter;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.rick.common.util.JsonUtils;
+import com.rick.db.dto.BaseEntity;
 import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author Rick
  * @createdAt 2022-10-27 14:14:00
  */
-public class EntityIdJsonDeserializer<T> extends JsonDeserializer<T> {
+public class EntityIdJsonDeserializer<T extends BaseEntity> extends JsonDeserializer<T> {
 
     private Class clazz;
 
@@ -23,7 +23,7 @@ public class EntityIdJsonDeserializer<T> extends JsonDeserializer<T> {
     }
 
     @Override
-    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
         try {
             if (node.isNumber()) {

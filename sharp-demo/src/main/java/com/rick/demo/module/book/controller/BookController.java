@@ -23,6 +23,12 @@ public class BookController {
         return book;
     }
 
+    @PostMapping("/v2")
+    public Book postSave2(@RequestBody Book book) {
+        bookDAO.insertOrUpdate(book);
+        return book;
+    }
+
     @GetMapping
     public BookDTO getSave(BookDTO book) {
 //        bookDAO.insertOrUpdate(book);

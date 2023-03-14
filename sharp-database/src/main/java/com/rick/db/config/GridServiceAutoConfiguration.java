@@ -23,14 +23,13 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.format.support.FormattingConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -97,7 +96,7 @@ public class GridServiceAutoConfiguration {
     static class GridServiceCacheConfiguration {}
 
     @Configuration
-    static class EnttiyDAOConfiguration implements ApplicationListener<ContextRefreshedEvent> {
+    static class EnttiyDAOConfiguration {
 
         @Autowired(required = false)
         private List<ConverterFactory> converterFactories;
@@ -116,26 +115,27 @@ public class GridServiceAutoConfiguration {
             return new ValidatorHelper(validator);
         }
 
-        @Override
-        public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-            FormattingConversionService conversionService = contextRefreshedEvent.getApplicationContext().getBean(FormattingConversionService.class);
+        @Bean
+        public ConversionService dbConversionService() {
+            DefaultFormattingConversionService dbConversionService= new DefaultFormattingConversionService();
 
             if (CollectionUtils.isNotEmpty(converterFactories)) {
                 for (ConverterFactory converterFactory : converterFactories) {
-                    conversionService.addConverterFactory(converterFactory);
+                    dbConversionService.addConverterFactory(converterFactory);
                 }
             }
 
-            conversionService.addConverterFactory(new StringToLocalDateConverterFactory());
-
-            conversionService.addConverterFactory(new CodeToEnumConverterFactory());
-            conversionService.addConverter(new JsonStringToListMapConverter());
-            conversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
-            conversionService.addConverterFactory(new JsonStringToMapConverterFactory());
-            conversionService.addConverter(new JsonStringToCollectionConverter());
-            conversionService.addConverter(new JsonStringToSetMapConverter());
-            conversionService.addConverterFactory(new IdToEntityConverterFactory());
+            dbConversionService.addConverterFactory(new StringToLocalDateConverterFactory());
+            dbConversionService.addConverterFactory(new CodeToEnumConverterFactory());
+            dbConversionService.addConverter(new JsonStringToListMapConverter());
+            dbConversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
+            dbConversionService.addConverterFactory(new JsonStringToMapConverterFactory());
+            dbConversionService.addConverter(new JsonStringToCollectionConverter());
+            dbConversionService.addConverter(new JsonStringToSetMapConverter());
+            dbConversionService.addConverterFactory(new IdToEntityConverterFactory());
+            return dbConversionService;
         }
+
     }
 
     @Configuration
