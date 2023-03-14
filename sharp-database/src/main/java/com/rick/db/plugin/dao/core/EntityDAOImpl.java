@@ -58,6 +58,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     private Map<String, String> propertyNameToColumnNameMap;
 
+    private boolean hasCascadeDelete = false;
+
     public EntityDAOImpl() {
         this.init();
     }
@@ -151,22 +153,23 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(Map<String, Object> params, String conditionSQL) {
-        CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
-            TableMeta subTableMeta = subTableEntityDAO.getTableMeta();
-            // 删除子表
-            if (CollectionUtils.isNotEmpty(set)) {
-                SQLUtils.delete(subTableMeta.getTableName(), oneToManyProperty.getOneToMany().joinValue(), set);
-            }
+        if (hasCascadeDelete) {
+            CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
+                TableMeta subTableMeta = subTableEntityDAO.getTableMeta();
+                // 删除子表
+                if (CollectionUtils.isNotEmpty(set)) {
+                    SQLUtils.delete(subTableMeta.getTableName(), oneToManyProperty.getOneToMany().joinValue(), set);
+                }
+            }, (manyToManyProperty, set) -> {
+                if (CollectionUtils.isNotEmpty(set)) {
+                    SQLUtils.delete(manyToManyProperty.getManyToMany().thirdPartyTable(), manyToManyProperty.getManyToMany().columnDefinition(), set);
+                }
+            });
 
-        }, (manyToManyProperty, set) -> {
-            if (CollectionUtils.isNotEmpty(set)) {
-                SQLUtils.delete(manyToManyProperty.getManyToMany().thirdPartyTable(), manyToManyProperty.getManyToMany().columnDefinition(), set);
-            }
-        });
+            selectByParams(params, idColumnName, conditionSQL, null, this.entityClass);
+            CascadeSelectThreadLocalValue.removeAll();
+        }
 
-        selectByParams(params, idColumnName, conditionSQL, null, this.entityClass);
-
-        CascadeSelectThreadLocalValue.removeAll();
         return super.delete(params, conditionSQL);
     }
 
@@ -188,26 +191,29 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(Collection<?> ids) {
-        CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
-            // 逻辑删除子表
-            if (CollectionUtils.isNotEmpty(set)) {
-                subTableEntityDAO.update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, Params.builder(1).pv("refIds", set)
-                                .pv(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, true)
-                                .build(),
-                        oneToManyProperty.getOneToMany().joinValue() + " IN (:refIds) AND is_deleted = 0");
-            }
-        }, (manyToManyProperty, set) -> {
-            if (set.size() > 0) {
-                Object[] mergedParams = new Object[set.size() + 1];
-                mergedParams[0] = 1;
-                System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
-                SQLUtils.update(manyToManyProperty.getManyToMany().thirdPartyTable(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME,
-                        mergedParams, manyToManyProperty.getManyToMany().columnDefinition() + " IN " + SQLUtils.formatInSQLPlaceHolder(set.size()));
-            }
-        });
+        if (hasCascadeDelete) {
+            CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
+                // 逻辑删除子表
+                if (CollectionUtils.isNotEmpty(set)) {
+                    subTableEntityDAO.update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, Params.builder(1).pv("refIds", set)
+                                    .pv(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, true)
+                                    .build(),
+                            oneToManyProperty.getOneToMany().joinValue() + " IN (:refIds) AND is_deleted = 0");
+                }
+            }, (manyToManyProperty, set) -> {
+                if (set.size() > 0) {
+                    Object[] mergedParams = new Object[set.size() + 1];
+                    mergedParams[0] = 1;
+                    System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
+                    SQLUtils.update(manyToManyProperty.getManyToMany().thirdPartyTable(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME,
+                            mergedParams, manyToManyProperty.getManyToMany().columnDefinition() + " IN " + SQLUtils.formatInSQLPlaceHolder(set.size()));
+                }
+            });
 
-        selectByParams(Params.builder(1).pv("ids", ids).build(), idColumnName, getIdColumnName() + " IN (:ids)", null, this.entityClass);
-        CascadeSelectThreadLocalValue.removeAll();
+            selectByParams(Params.builder(1).pv("ids", ids).build(), idColumnName, getIdColumnName() + " IN (:ids)", null, this.entityClass);
+            CascadeSelectThreadLocalValue.removeAll();
+        }
+
         return super.deleteLogicallyByIds(ids);
     }
 
@@ -602,6 +608,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         this.tableMeta = TableMetaResolver.resolve(this.entityClass);
         log.debug("properties: {}", tableMeta.getProperties());
 
+        hasCascadeDelete = CollectionUtils.isNotEmpty(tableMeta.getManyToManyAnnotationList()) ||
+                tableMeta.getOneToManyAnnotationList().stream().anyMatch(s -> s.getOneToMany().cascadeDelete());
+
         this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
 
         this.propertyList = convertToList(tableMeta.getProperties());
@@ -760,11 +769,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
 
-            boolean cascadeDelete = oneToManyProperty.getOneToMany().cascadeDelete();
-
             // 级联删除
             if (CascadeSelectThreadLocalValue.getOneToManyConsumer() != null) {
-                if (!cascadeDelete) {
+                if (!oneToManyProperty.getOneToMany().cascadeDelete()) {
                     continue;
                 }
             }

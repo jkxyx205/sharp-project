@@ -25,4 +25,11 @@ public class WorkerDAOImplTest {
                 .name("Rick")
                 .build());
     }
+
+    @Test
+    public void testDeleteAll() {
+        workerDAO.deleteAll();
+    }
+
+
 }

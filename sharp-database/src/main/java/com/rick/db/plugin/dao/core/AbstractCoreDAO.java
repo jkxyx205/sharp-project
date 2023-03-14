@@ -227,7 +227,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyById(ID id) {
         Assert.notNull(id, "id不能为空");
-                return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
+        return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
 //        return deleteLogicallyByIds(Arrays.asList(id));
     }
 
