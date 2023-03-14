@@ -6,9 +6,9 @@ import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.IdGenerator;
 import com.rick.db.constant.SharpDbConstants;
+import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
-import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -109,7 +109,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         int count  = SQLUtils.insert(this.tableName, this.columnNames, params);
         cascadeInsertOrUpdate(entity, true);
-        BaseDAOThreadLocalValue.removeAll();
+        EntityDAOThreadLocalValue.removeAll();
         return count;
     }
 
@@ -145,52 +145,29 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(String deleteColumn, Collection<?> deleteValues) {
-        Assert.hasText(deleteColumn, "deleteColumn不能为空");
-        Object[] objects = handleConditionAdvice();
-        if (hasSubTables()) {
-            return SQLUtils.deleteCascade(this.tableName, subTableRefColumnName, deleteValues, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
-        }
-        return SQLUtils.delete(this.tableName, deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
-    }
-
-    /**
-     * 构造条件和参数删除。注意占位符用？
-     *
-     * @param params
-     * @param conditionSQL id IN (?, ?) AND group_id = ?
-     * @return
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public int delete(Object[] params, String conditionSQL) {
-        Object[] objects = handleConditionAdvice(params, conditionSQL, false);
-        if (hasSubTables()) {
-            List<Long> deletedIds = sharpService.getNamedJdbcTemplate().getJdbcTemplate()
-                    .queryForList("SELECT "+getIdColumnName()+" FROM " + getTableName() + " WHERE " + objects[1], Long.class, (Object[]) objects[0]);
-            if (CollectionUtils.isEmpty(deletedIds)) {
-                return 0;
-            }
-            return SQLUtils.deleteCascade(this.tableName, subTableRefColumnName, deletedIds, (Object[]) objects[0], (String) objects[1], tableMeta.getSubTables().toArray(new String[] {}));
-        }
-
-        return SQLUtils.delete(this.tableName, (Object[]) objects[0], (String) objects[1]);
+        return delete(Params.builder(1).pv(deleteColumn, deleteValues).build(), deleteColumn + " IN (:" + deleteColumn + ")");
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(Map<String, Object> params, String conditionSQL) {
-        if (hasSubTables()) {
-            List<ID> deletedIds = selectIdsByParams(params, conditionSQL);
-
-            if (CollectionUtils.isNotEmpty(deletedIds)) {
-                for (String subTable : tableMeta.getSubTables()) {
-                    SQLUtils.delete(subTable, subTableRefColumnName, deletedIds);
-                }
+        CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
+            TableMeta subTableMeta = subTableEntityDAO.getTableMeta();
+            // 删除子表
+            if (CollectionUtils.isNotEmpty(set)) {
+                SQLUtils.delete(subTableMeta.getTableName(), oneToManyProperty.getOneToMany().joinValue(), set);
             }
-        }
 
-        int count = sharpService.update("DELETE FROM " + getTableName() + " WHERE " + conditionSQL, params);
-        return count;
+        }, (manyToManyProperty, set) -> {
+            if (CollectionUtils.isNotEmpty(set)) {
+                SQLUtils.delete(manyToManyProperty.getManyToMany().thirdPartyTable(), manyToManyProperty.getManyToMany().columnDefinition(), set);
+            }
+        });
+
+        selectByParams(params, idColumnName, conditionSQL, null, this.entityClass);
+
+        CascadeSelectThreadLocalValue.removeAll();
+        return super.delete(params, conditionSQL);
     }
 
     /**
@@ -201,56 +178,42 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyById(ID id) {
         Assert.notNull(id, "id不能为空");
-
-        if (hasSubTables()) {
-            for (String subTable : tableMeta.getSubTables()) {
-                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationList().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
-                if (thirdPartyTableCollect.contains(subTable)) {
-                    SQLUtils.delete(subTable, subTableRefColumnName, Arrays.asList(id));
-                } else {
-                    update(subTable, null, SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, subTableRefColumnName + " = ?");
-                }
-            }
-        }
-
-        return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{1, id}, this.idColumnName + " = ?");
+        return deleteLogicallyByIds(Arrays.asList(id));
     }
 
     /**
      * 通过主键id批量逻辑刪除 eg：ids -> [1, 2, 3, 4]
-     * @param ids
+     * @param
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(Collection<?> ids) {
-        Assert.notEmpty(ids, "id不能为空");
-
-        Object[] mergedParams = new Object[ids.size() + 1];
-        mergedParams[0] = 1;
-        System.arraycopy(ids.toArray(), 0, mergedParams, 1, ids.size());
-
-        if (hasSubTables()) {
-            for (String subTable : tableMeta.getSubTables()) {
-                Set<String> thirdPartyTableCollect = tableMeta.getManyToManyAnnotationList().stream().map(TableMeta.ManyToManyProperty::getManyToMany).map(ManyToMany::thirdPartyTable).collect(Collectors.toSet());
-                if (thirdPartyTableCollect.contains(subTable)) {
-                    SQLUtils.delete(subTable, subTableRefColumnName, ids);
-                } else {
-                    update(subTable, null, SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, subTableRefColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
-                }
+        CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
+            // 逻辑删除子表
+            if (CollectionUtils.isNotEmpty(set)) {
+                subTableEntityDAO.update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, Params.builder(1).pv("refIds", set)
+                                .pv(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, true)
+                                .build(),
+                        oneToManyProperty.getOneToMany().joinValue() + " IN (:refIds) AND is_deleted = 0");
             }
-        }
+        }, (manyToManyProperty, set) -> {
+            if (set.size() > 0) {
+                Object[] mergedParams = new Object[set.size() + 1];
+                mergedParams[0] = 1;
+                System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
+                SQLUtils.update(manyToManyProperty.getManyToMany().thirdPartyTable(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME,
+                        mergedParams, manyToManyProperty.getManyToMany().columnDefinition() + " IN " + SQLUtils.formatInSQLPlaceHolder(set.size()));
+            }
+        });
 
-        return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.idColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
+        selectByParams(Params.builder(1).pv("ids", ids).build(), idColumnName, getIdColumnName() + " IN (:ids)", null, this.entityClass);
+        CascadeSelectThreadLocalValue.removeAll();
+        return super.deleteLogicallyByIds(ids);
     }
 
     @Override
     public long deleteAll() {
-        List<ID> idList = (List<ID>) selectByParams(Collections.emptyMap(),getIdColumnName(), idClass);
-        if (CollectionUtils.isNotEmpty(idList)) {
-            return deleteByIds(idList);
-        }
-
-        return idList.size();
+        return this.delete(Collections.emptyMap(), null);
     }
 
     /**
@@ -287,7 +250,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         cascadeInsertOrUpdate(entity);
-        BaseDAOThreadLocalValue.removeAll();
+        EntityDAOThreadLocalValue.removeAll();
         Object[] objects = resolveUpdateParamsAndId(entity);
         return updateById(entity, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (ID) objects[1]);
     }
@@ -305,7 +268,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         cascadeInsertOrUpdate(entity);
-        BaseDAOThreadLocalValue.removeAll();
+        EntityDAOThreadLocalValue.removeAll();
         int size = this.updateColumnNameList.size();
 
         params = ArrayUtils.isEmpty(params) ? new Object[] {} : params;
@@ -336,13 +299,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         for (T t : collection) {
             Object[] resolverParamsAndIdObjects = resolveUpdateParamsAndId(t);
             Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (ID) resolverParamsAndIdObjects[1]);
-            Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), (String) mergeIdParamObjects[1], false);
+            Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), null, (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
             conditionSQL = (String) finalObjects[1];
             cascadeInsertOrUpdate(t);
         }
 
-        BaseDAOThreadLocalValue.removeAll();
+        EntityDAOThreadLocalValue.removeAll();
         return SQLUtils.update(this.tableName, tableMeta.getUpdateColumnNames(), paramsList, conditionSQL);
     }
 
@@ -440,10 +403,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public List<T> selectByParams(T example, String conditionSQL) {
-        Map params;
-        //            params = JsonUtils.objectToMap(t);
-        params = entityToMap(example);
-        return selectByParams(params, conditionSQL);
+        return selectByParams(entityToMap(example), conditionSQL);
     }
 
     /**
@@ -459,10 +419,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
-        return selectByParams(params, selectColumnNames, conditionSQL, null, entityClass, list -> {
-            cascadeSelect(list);
-            BaseDAOThreadLocalValue.removeByTableName(getTableName());
-        });
+        return selectByParams(params, selectColumnNames, conditionSQL, null, entityClass);
     }
 
     /**
@@ -542,10 +499,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     protected <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler, Class<E> clazz) {
-        return selectByParams(params, columnNames, conditionSQL, sqlHandler, clazz, list -> {
+        return super.selectByParams(params, columnNames, conditionSQL, sqlHandler, clazz, list -> {
             if (EntityDAOManager.isEntityClass(clazz)) {
                 cascadeSelect((List<T>) list);
-                BaseDAOThreadLocalValue.removeByTableName(getTableName());
+                EntityDAOThreadLocalValue.removeByTableName(getTableName());
             }
         });
     }
@@ -620,7 +577,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             Object propertyValue = map.get(fieldName) == null ? map.get(columnName) : map.get(fieldName);
 
             if (Objects.nonNull(propertyValue)) {
-//                bw.setPropertyValue(fieldName, resolveValue(propertyValue));
                 bw.setPropertyValue(fieldName, propertyValue);
             }
         }
@@ -636,10 +592,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     public TableMeta getTableMeta() {
         return this.tableMeta;
-    }
-
-    private boolean hasSubTables() {
-        return !tableMeta.getSubTables().isEmpty();
     }
 
     private void init() {
@@ -746,10 +698,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return update(this.tableName, t, updateColumnNames, params, conditionSQL);
     }
 
-    private Object[] handleConditionAdvice() {
-        return handleConditionAdvice(new Object[]{}, null, false);
-    }
-
     private Object[] resolveUpdateParamsAndId(T t) {
         ID id = getIdValue(t);
         Assert.notNull(id, "id不能为空");
@@ -770,10 +718,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String referencePropertyName = StringUtils.isBlank(selectProperty.getSelect().referencePropertyName()) ? tableMeta.getIdPropertyName() : selectProperty.getSelect().referencePropertyName();
 
             String storeKey = selectProperty.getSelect().table() + ":" + joinValue;
-            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-            BaseDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = selectProperty.getSelect().table();
             EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -799,10 +747,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
             String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue();
-            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-            BaseDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -811,7 +759,17 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
-            Map<ID, List<?>> subTableData = subTableEntityDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
+
+            boolean cascadeDelete = oneToManyProperty.getOneToMany().cascadeDelete();
+
+            // 级联删除
+            if (CascadeSelectThreadLocalValue.getOneToManyConsumer() != null) {
+                if (!cascadeDelete) {
+                    continue;
+                }
+            }
+
+            Map<ID, List<? extends SimpleEntity>> subTableData = subTableEntityDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
 
             for (T t : list) {
                 Object data = subTableData.get(getIdValue(t));
@@ -820,8 +778,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 } else {
                     setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
                 }
-
             }
+
+            // 级别联删除
+            if (CascadeSelectThreadLocalValue.getOneToManyConsumer() != null) {
+                CascadeSelectThreadLocalValue.getOneToManyConsumer().accept(oneToManyProperty, subTableEntityDAO, refIds);
+            }
+
         }
         //endregion
 
@@ -830,10 +793,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String refColumnName = StringUtils.isBlank(manyToOneProperty.getManyToOne().value()) ? propertyNameToColumnNameMap.get(manyToOneProperty.getField().getName()) : manyToOneProperty.getManyToOne().value();
             String storeKey = getTableName() + ":" + refColumnName;
 
-            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-            BaseDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
             EntityDAO parentTableDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -862,12 +825,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String storeKey1 = getTableName() + ":" + referenceColumnName;
             String storeKey2 = getTableName() + ":" + columnDefinition;
 
-            if (BaseDAOThreadLocalValue.remove(storeKey1) || BaseDAOThreadLocalValue.remove(storeKey2)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey1) || EntityDAOThreadLocalValue.remove(storeKey2)) {
                 continue;
             }
 
-            BaseDAOThreadLocalValue.add(storeKey1);
-            BaseDAOThreadLocalValue.add(storeKey2);
+            EntityDAOThreadLocalValue.add(storeKey1);
+            EntityDAOThreadLocalValue.add(storeKey2);
 
             Set<ID> columnIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
 
@@ -902,6 +865,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 Object data = referenceListMap.get(getIdValue(t));
                 setPropertyValue(t, manyToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
             }
+
+            if (CascadeSelectThreadLocalValue.getManyToManyConsumer() != null) {
+                CascadeSelectThreadLocalValue.getManyToManyConsumer().accept(manyToManyProperty, columnIds);
+            }
         }
         //endregion
     }
@@ -910,7 +877,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         for (T t : instanceList) {
             cascadeInsertOrUpdate(t, insert);
         }
-        BaseDAOThreadLocalValue.removeAll();
+        EntityDAOThreadLocalValue.removeAll();
     }
 
     private void cascadeInsertOrUpdate(T t) {
@@ -930,10 +897,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue() + ":InsertOrUpdate";
-            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-            BaseDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -1005,10 +972,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String refColumnName = manyToOneProperty.getManyToOne().value();
             String storeKey =  getTableName() + ":" + refColumnName + ":InsertOrUpdate";
 
-            if (BaseDAOThreadLocalValue.remove(storeKey)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
-            BaseDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
             EntityDAO parentTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
@@ -1069,5 +1036,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     private Object getPropertyValue(Object t, Field field) {
         return EntityDAOManager.getPropertyValue(t, field.getName());
+    }
+
+    interface TriConsumer<K, V, S> {
+        void accept(K k, V v, S s);
     }
 }

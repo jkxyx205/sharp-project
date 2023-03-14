@@ -7,7 +7,6 @@ import lombok.Value;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Rick
@@ -57,11 +56,6 @@ public class TableMeta {
      * id属性名
      */
     private String idPropertyName;
-
-    /**
-     * 子表
-     */
-    private Set<String> subTables;
 
     private List<EmbeddedProperty> embeddedPropertyList;
 

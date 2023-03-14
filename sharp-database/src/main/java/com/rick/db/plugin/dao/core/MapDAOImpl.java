@@ -28,9 +28,9 @@ public class MapDAOImpl<ID> extends AbstractCoreDAO<ID> implements MapDAO<ID> {
     }
 
     /**
-     * @MapDAOImpl.of
-     * @param tableName
-     * @param idClass
+     * @see #of
+     * @param tableName 表名
+     * @param idClass 注解字段的class
      */
     public MapDAOImpl(String tableName, Class<ID> idClass) {
         this(tableName, StringUtils.join(DatabaseMetaData.tableColumnMap.get(tableName), ", "), DatabaseMetaData.tablePrimaryKeyMap.get(tableName), idClass);

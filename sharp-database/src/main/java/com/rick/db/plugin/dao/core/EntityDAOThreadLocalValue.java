@@ -11,7 +11,7 @@ import java.util.Set;
  * @createdAt 2022-04-15 14:51:00
  */
 @UtilityClass
-public class BaseDAOThreadLocalValue {
+public class EntityDAOThreadLocalValue {
 
     private static ThreadLocal<Set<String>> threadLocalContainer = ThreadLocal.withInitial(() -> new HashSet<>());
 

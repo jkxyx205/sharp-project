@@ -11,21 +11,31 @@ import java.util.Map;
  */
 public interface CoreDAO<ID> {
 
+    int insertOrUpdate(Map<String, Object> params);
+
     int insert(Object[] params);
 
     int insert(Map<String, Object> params);
 
     int update(Map<String, ?> params);
 
-    int insertOrUpdate(Map<String, Object> params);
-
     int[] insert(Collection<?> paramsList);
+
+    int update(Object[] params, ID id);
+
+    int updateById(String updateColumnNames, Object[] params, ID id);
+
+    int update(String updateColumnNames, Object[] params, String conditionSQL);
+
+    int[] update(String updateColumnNames, List<Object[]> srcParamsList, String conditionSQL);
+
+    int update(String updateColumnNames, Map<String, Object> params, String conditionSQL);
 
     int deleteById(ID id);
 
     int deleteByIds(String ids);
 
-    int deleteByIds(ID ...ids);
+    int deleteByIds(ID... ids);
 
     int deleteByIds(Collection<?> ids);
 
@@ -41,6 +51,8 @@ public interface CoreDAO<ID> {
 
     int deleteLogicallyByIds(String ids);
 
+    int deleteLogicallyByIds(ID... ids);
+
     int deleteLogicallyByIds(Collection<?> ids);
 
     /**
@@ -48,16 +60,6 @@ public interface CoreDAO<ID> {
      * @return
      */
     long deleteAll();
-
-    int update(Object[] params, ID id);
-
-    int updateById(String updateColumnNames, Object[] params, ID id);
-
-    int update(String updateColumnNames, Object[] params, String conditionSQL);
-
-    int[] update(String updateColumnNames, List<Object[]> srcParamsList, String conditionSQL);
-
-    int update(String updateColumnNames, Map<String, Object> params, String conditionSQL);
 
     List<ID> selectIdsByParams(Map<String, ?> params);
 

@@ -55,7 +55,7 @@ public class SharpService {
         SqlFormatter sqlFormatter = getSQLFormatter(sql, params);
 
         if (log.isDebugEnabled()) {
-            log.debug("SQL=> [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
+            log.debug("SQL => [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
         }
 
         return jdbcTemplateCallback.query(namedJdbcTemplate, sqlFormatter.formatSql, sqlFormatter.paramMap);
@@ -114,7 +114,7 @@ public class SharpService {
     public int update(String sql, Map<String, ?> params) {
         SqlFormatter sqlFormatter = getSQLFormatter(sql, params);
         if (log.isDebugEnabled()) {
-            log.debug("SQL=> [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
+            log.debug("SQL => [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
         }
         return namedJdbcTemplate.update(sqlFormatter.formatSql, sqlFormatter.paramMap);
     }

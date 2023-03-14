@@ -79,7 +79,7 @@ public final class SQLUtils {
     public static int insert(String tableName, String columnNames, Object[] params) {
         String insertSQL = getInsertSQL(tableName, columnNames);
         if (log.isDebugEnabled()) {
-            log.debug("SQL=> [{}], args:=> [{}]", insertSQL, params);
+            log.debug("SQL => [{}], args:=> [{}]", insertSQL, params);
         }
         return SQLUtils.JDBC_TEMPLATE.update(insertSQL,params);
     }
@@ -94,7 +94,7 @@ public final class SQLUtils {
     public static int[] insert(String tableName, String columnNames, List<Object[]> paramsList) {
         String insertSQL = getInsertSQL(tableName, columnNames);
         if (log.isDebugEnabled()) {
-            log.debug("SQL=> [{}], args:=> [{}]", insertSQL, paramsList);
+            log.debug("SQL => [{}], args:=> [{}]", insertSQL, paramsList);
         }
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, paramsList);
     }
@@ -138,7 +138,7 @@ public final class SQLUtils {
     public static int update(String tableName, String updateColumnNames, Object[] params, String conditionSQL) {
         String updateSQL = getUpdateSQL(tableName, updateColumnNames, conditionSQL);
         if (log.isDebugEnabled()) {
-            log.debug("SQL=> [{}], args:=> [{}]", updateSQL, params);
+            log.debug("SQL => [{}], args:=> [{}]", updateSQL, params);
         }
         return SQLUtils.JDBC_TEMPLATE.update(updateSQL, params);
     }
@@ -154,7 +154,7 @@ public final class SQLUtils {
     public static int[] update(String tableName, String updateColumnNames, List<Object[]> paramsList, String conditionSQL) {
         String updateSQL = getUpdateSQL(tableName, updateColumnNames, conditionSQL);
         if (log.isDebugEnabled()) {
-            log.debug("SQL=> [{}], args:=> [{}]", updateSQL, paramsList);
+            log.debug("SQL => [{}], args:=> [{}]", updateSQL, paramsList);
         }
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(updateSQL, paramsList);
     }
@@ -368,7 +368,7 @@ public final class SQLUtils {
 
             deletedCount += SQLUtils.JDBC_TEMPLATE.update(deleteSQL, mergedParams);
             if (log.isDebugEnabled()) {
-                log.debug("SQL=> [{}], args:=> [{}]", deleteSQL, mergedParams);
+                log.debug("SQL => [{}], args:=> [{}]", deleteSQL, mergedParams);
             }
         }
 
@@ -426,9 +426,8 @@ public final class SQLUtils {
 
     /**
      * name = :name AND age = : age
-     * name = ? AND age = ?
      * @param sql
-     * @return
+     * @return name = ? AND age = ?
      */
     public static String paramsHolderToQuestionHolder(String sql) {
         return sql.replaceAll(AbstractSqlFormatter.PARAM_REGEX, "?");

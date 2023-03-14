@@ -11,6 +11,5 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface Table {
     String value() default "";
-    String[] subTables() default {};
     String comment() default  "";
 }

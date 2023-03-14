@@ -4,7 +4,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Converter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.annotation.*;
 import lombok.experimental.UtilityClass;
@@ -13,7 +12,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,10 +42,8 @@ class TableMetaResolver {
         String name = (TABLE_PREFIX + converter.convert(clazz.getSimpleName()));
 
         String tableName;
-        Set<String> subTables = Sets.newHashSet();
         if (Objects.nonNull(tableAnnotation)) {
             tableName = tableAnnotation.value();
-            subTables.addAll(Arrays.asList(tableAnnotation.subTables()));
         } else {
             tableName = name;
         }
@@ -64,8 +64,8 @@ class TableMetaResolver {
         Map<String, Column> columnNameMap = Maps.newHashMap();
 
         IdCollector idCollector = new IdCollector();
-        resolveFields(fields, "", idCollector, embeddedPropertyList, selectAnnotationList
-                , subTables, oneToManyAnnotationList, manyToOneAnnotationList,
+        resolveFields(fields, "", idCollector, embeddedPropertyList, selectAnnotationList,
+                oneToManyAnnotationList, manyToOneAnnotationList,
                 manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                 columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder, converter);
 
@@ -83,12 +83,12 @@ class TableMetaResolver {
         }
 
         return new TableMeta(tableAnnotation, idCollector.id, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, subTables, embeddedPropertyList, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
+                updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, fieldMap, columnNameMap);
     }
 
-    private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList
-    , Set<String> subTables, List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
+    private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
+     List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
                                List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap, Map<String, Field> fieldMap,
                                StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder, Converter<String, String> converter) {
         for (Field field : fields) {
@@ -102,7 +102,6 @@ class TableMetaResolver {
 
             OneToMany oneToManyAnnotation = field.getAnnotation(OneToMany.class);
             if (oneToManyAnnotation != null) {
-                subTables.add(oneToManyAnnotation.subTable());
                 oneToManyAnnotationList.add(new TableMeta.OneToManyProperty(oneToManyAnnotation, field));
             }
 
@@ -113,7 +112,6 @@ class TableMetaResolver {
 
             ManyToMany manyToManyAnnotation = field.getAnnotation(ManyToMany.class);
             if (manyToManyAnnotation != null) {
-                subTables.add(manyToManyAnnotation.thirdPartyTable());
                 manyToManyAnnotationList.add(new TableMeta.ManyToManyProperty(manyToManyAnnotation, field));
             }
 
@@ -122,7 +120,7 @@ class TableMetaResolver {
                 embeddedPropertyList.add(new TableMeta.EmbeddedProperty(embedded, field));
                 Field[] embeddedFields = getAllFields(field.getType());
                 resolveFields(embeddedFields, propertyName + ".", idCollector, embeddedPropertyList,
-                        selectAnnotationList, subTables, oneToManyAnnotationList, manyToOneAnnotationList,
+                        selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
                         manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                         columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder, converter);
             }
@@ -169,7 +167,7 @@ class TableMetaResolver {
     }
 
     private Field[] getAllFields(Class<?> clazz) {
-        List<Field> list = new ArrayList();
+        List<Field> list = new ArrayList<>();
         while (Objects.nonNull(clazz)) {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {

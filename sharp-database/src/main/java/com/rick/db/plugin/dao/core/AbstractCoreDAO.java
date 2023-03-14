@@ -193,7 +193,8 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Transactional(rollbackFor = Exception.class)
     public int delete(String deleteColumn, Collection<?> deleteValues) {
         Assert.hasText(deleteColumn, "deleteColumn不能为空");
-        return SQLUtils.delete(this.tableName, deleteColumn, deleteValues);
+        Object[] objects = handleConditionAdvice(new Object[]{}, null, null, false);
+        return SQLUtils.delete(this.tableName, deleteColumn, deleteValues, (Object[]) objects[0], (String) objects[1]);
     }
 
     /**
@@ -206,14 +207,16 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(Object[] params, String conditionSQL) {
-        return SQLUtils.delete(this.tableName, params, conditionSQL);
+        Object[] objects = handleConditionAdvice(params, null, conditionSQL, false);
+        return SQLUtils.delete(this.tableName, (Object[]) objects[0], (String) objects[1]);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(Map<String, Object> params, String conditionSQL) {
-        int count = sharpService.update("DELETE FROM " + getTableName() + " WHERE " + conditionSQL, params);
-        return count;
+        Object[] objects = handleConditionAdvice(new Object[]{}, params, conditionSQL, true);
+        String conditionSql = (String) objects[1];
+        return sharpService.update("DELETE FROM " + getTableName() + " WHERE " + conditionSql, params);
     }
 
     /**
@@ -237,6 +240,13 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     public int deleteLogicallyByIds(String ids) {
         Assert.hasText(ids, "id不能为空");
         return deleteLogicallyByIds(Arrays.asList(ids.split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX)));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteLogicallyByIds(ID... ids) {
+        Assert.notNull(ids, "ids不能为空");
+        return deleteLogicallyByIds(Arrays.asList(ids));
     }
 
     /**
@@ -295,7 +305,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         List<Object[]> paramsList = Lists.newArrayListWithExpectedSize(srcParamsList.size());
         for (Object[] params : srcParamsList) {
             Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
-            Object[] conditionAdviceObject = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
+            Object[] conditionAdviceObject = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), null, conditionSQL, false);
             paramsList.add((Object[]) conditionAdviceObject[0]);
             conditionSQL = (String) conditionAdviceObject[1];
             updateColumnNames = (String) updateAutoObjects[1];
@@ -364,7 +374,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     protected <E> List<E> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler, Class<E> clazz, Consumer<List<E>> afterSelect) {
         sqlHandler = (sqlHandler == null) ? src -> src : sqlHandler;
 
-        Object[] executeCondition = getExecuteCondition(params, columnNames, conditionSQL, sqlHandler);
+        Object[] executeCondition = getSelectByParamsCondition(params, columnNames, conditionSQL, sqlHandler);
 
         List<E> list = Objects.isNull(clazz) ? sharpService.query((String) executeCondition[0], (Map)executeCondition[1]) :
                 sharpService.query((String) executeCondition[0], (Map)executeCondition[1], clazz);
@@ -387,7 +397,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      * @param sqlHandler
      * @return
      */
-    private Object[] getExecuteCondition(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler) {
+    private Object[] getSelectByParamsCondition(Map<String, ?> params, String columnNames, String conditionSQL, SqlHandler sqlHandler) {
         if (MapUtils.isEmpty(params)) {
             params = Collections.emptyMap();
         }
@@ -446,7 +456,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      */
     @Override
     public <K, V> Map<K, V> selectByParamsAsMap(Map<String, ?> params, String columnNames, String conditionSQL) {
-        Object[] executeCondition = getExecuteCondition(params, columnNames, conditionSQL, sql -> sql);
+        Object[] executeCondition = getSelectByParamsCondition(params, columnNames, conditionSQL, sql -> sql);
         return sharpService.queryForKeyValue((String) executeCondition[0], (Map)executeCondition[1]);
     }
 
@@ -587,7 +597,8 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         List<String> updateColumnList = convertToList(updateColumnNames);
         Object[] params = new Object[updateColumnList.size()];
         Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
-        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, true);
+
+        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(null, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), paramsMap, conditionSQL, true);
 
         List<String> newUpdateColumnList = convertToList((String) updateAutoObjects[1]);
         Object[] newParams = (Object[]) conditionAdviceObjects[0];
@@ -686,7 +697,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
         Object[] updateAutoObjects = handleUpdateAutoFill(updateColumnNames, params);
-        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), conditionSQL, false);
+        Object[] conditionAdviceObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) updateAutoObjects[0], convertToList((String) updateAutoObjects[1]), ColumnFillType.UPDATE), null, conditionSQL, false);
         return SQLUtils.update(tableName, (String) updateAutoObjects[1], resolveParams((Object[])conditionAdviceObjects[0]), (String) conditionAdviceObjects[1]);
     }
 
@@ -714,14 +725,14 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      * @param conditionSQL
      * @return
      */
-    protected Object[] handleConditionAdvice(Object[] params, String conditionSQL, boolean isParamHolder) {
+    protected Object[] handleConditionAdvice(Object[] params, Map<String, Object> paramsMap, String conditionSQL, boolean isParamHolder) {
         Object[] mergedParams = params;
         if (Objects.nonNull(this.conditionAdvice)) {
             Map<String, Object> conditionParams = conditionAdvice.getCondition();
+            final String finalConditionSQL = conditionSQL;
 
             if (MapUtils.isNotEmpty(conditionParams)) {
-                Collection<String> filteredConditionParams = conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key)).collect(Collectors.toList());
-
+                Collection<String> filteredConditionParams = conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key) && !isConditionSQLContainsColumnName(finalConditionSQL, key)).collect(Collectors.toList());
                 String additionCondition = getConditionSQL(filteredConditionParams, conditionParams);
                 if (StringUtils.isNotBlank(additionCondition)) {
                     if (!isParamHolder) {
@@ -736,8 +747,12 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
                     int i = 0;
                     for (String key : filteredConditionParams) {
                         mergedParams[params.length + i++] = conditionParams.get(key);
+                        if (MapUtils.isNotEmpty(paramsMap)) {
+                            paramsMap.put(key, conditionParams.get(key));
+                        }
                     }
                 }
+
             }
         }
         return new Object[]{mergedParams, conditionSQL};
