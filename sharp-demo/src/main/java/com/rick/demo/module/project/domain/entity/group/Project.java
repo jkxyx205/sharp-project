@@ -21,7 +21,7 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @Setter
-@Table(value = "t_project2", subTables = {"t_project_detail2"})
+@Table(value = "t_project2")
 @NoArgsConstructor
 public class Project extends BaseEntity {
 

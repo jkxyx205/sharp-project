@@ -22,12 +22,12 @@ import java.util.Map;
 @SuperBuilder
 @Getter
 @Setter
-@Table(value = "t_project1", subTables = {"t_project_detail1"}, comment = "任务")
+@Table(value = "t_project1", comment = "任务")
 @NoArgsConstructor
 public class Project extends BaseEntity {
 
     @NotBlank(message = "项目名称不能为空")
-    @Column(comment="项目名称", nullable = true)
+    @Column(comment="项目名称")
     private String title;
 
     private String description;

@@ -113,4 +113,16 @@ public class PersonTest {
 
         idCardDAO.update(idCard);
     }
+
+    @Order(7)
+    @Test
+    public void testDelete() {
+        personDAO.deleteLogicallyById(667049700548964352L);
+    }
+
+    @Order(8)
+    @Test
+    public void testDelete2() {
+        personDAO.deleteById(667049700548964352L);
+    }
 }

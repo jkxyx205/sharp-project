@@ -346,9 +346,12 @@ public class EntityDAOImplTest {
     @Order(26)
     @Test
     public void testUpdateMap() {
-        int count = projectDAO.update(" owner_id , sex, description",
-                Params.builder().pv("cover_url", "http://xhope.top")
+        int count = projectDAO.update("owner_id , sex, description",
+                Params.builder()
                         .pv("id", 479723663504343040L)
+                        // cover_url 不会更新，因为没有指定该字段更新
+                        .pv("cover_url", "http://xhope.top/")
+                        .pv("sex", 1)
                         .pv("description", "new-description222").build(),
                 "id = :id AND title like :title");
 

@@ -48,7 +48,8 @@ public class ProjectMapByTableNameDAOTest {
     public void testUpdate() {
         Map<String, Object> project = createProject();
         project.put("id", 479723134929764352L);
-        project.put("title", "hello");
+        project.put("title", "rick");
+        project.put("description", "desc");
         projectDAO.update(project);
     }
 

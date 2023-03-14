@@ -1,4 +1,4 @@
-package com.rick.db.core;
+package com.rick.demo.db;
 
 import com.rick.db.formatter.OracleSqlFormatter;
 
