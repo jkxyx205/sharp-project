@@ -96,7 +96,7 @@ public class GridServiceAutoConfiguration {
     static class GridServiceCacheConfiguration {}
 
     @Configuration
-    static class EnttiyDAOConfiguration {
+    static class EntityDAOConfiguration {
 
         @Autowired(required = false)
         private List<ConverterFactory> converterFactories;
