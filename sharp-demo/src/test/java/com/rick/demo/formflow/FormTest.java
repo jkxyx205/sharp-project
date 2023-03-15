@@ -72,13 +72,14 @@ public class FormTest {
                 .pv("name", "Jkxyx205")
                 .pv("age", "32")
                 .pv("hobby", "足球")
-                .pv("info", Arrays.asList(new Object[] {"rick", 32})) //table
+                .pv("info", Arrays.asList(Arrays.asList("rick", 32))) //table
                 .pv("hobby2", Arrays.asList("足球", "篮球"))
-                .pv("agree", "同意")
+                .pv("agree", Arrays.asList("同意"))
                 .pv("remark", "简介")
                 .pv("sex", "男")
                 .pv("mobile", "18898987765")
-                .pv("file", Arrays.asList("https://xhope.top/", "https://xhope.top/"))
+                .pv("file", Arrays.asList(Params.builder(1).pv("url", "https://xhope.top/").build(),
+                        Params.builder(1).pv("url", "https://xhope.top/").build()))
                 .pv("email", "jkxyx205@163.com")
                 .pv("date", "1990-12-23")
                 .build());

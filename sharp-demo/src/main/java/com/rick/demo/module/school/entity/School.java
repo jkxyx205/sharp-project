@@ -1,6 +1,9 @@
 package com.rick.demo.module.school.entity;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializer;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.*;
 import com.rick.demo.module.project.domain.entity.Address;
@@ -65,6 +68,8 @@ public class School extends BaseEntity {
      * 「学校」和「证书」1对1外键
      *  1 <==> 1
      */
+    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
+//    @JsonAlias("schoolLicenseId")
     @ManyToOne(value = "school_license_id", parentTable = "t_school_license", comment = "证书信息")
     private SchoolLicense schoolLicense;
 
@@ -72,6 +77,8 @@ public class School extends BaseEntity {
      * 「学校」和「学生」1对多
      *  1 <==> N
      */
+    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
+    @JsonAlias("studentIds")
     @OneToMany(subTable = "t_school_student", joinValue = "school_id")
     private List<Student> studentList;
 
@@ -79,6 +86,8 @@ public class School extends BaseEntity {
      * 「学校」和「老师」多对多
      *  N <==> N
      */
+    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
+    @JsonAlias("teacherIds")
     @ManyToMany(thirdPartyTable = "t_school_teacher_related", columnDefinition = "school_id", referenceTable = "t_school_teacher", referenceColumnName = "teacher_id")
     private List<Teacher> teacherList;
 

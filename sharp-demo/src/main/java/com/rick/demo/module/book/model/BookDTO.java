@@ -22,29 +22,60 @@ public class BookDTO extends Book {
 
     private List<Long> tagIds;
 
+    /**
+     * 扩展字段
+     */
     private SexEnum sex;
 
+    /**
+     * 扩展字段
+     */
     private School.TypeEnum type;
 
-    @Override
-    public Person getPerson() {
-        if (personId != null) {
-            return Person.builder().id(personId).build();
-        }
-        return super.getPerson();
+    public void setPersonId(Long personId) {
+        this.setPerson(Person.builder().id(personId).build());
     }
 
-    @Override
-    public List<Tag> getTagList() {
+    public void setTagIds(List<Long> tagIds) {
         if (CollectionUtils.isNotEmpty(tagIds)) {
             List<Tag> tagList = new ArrayList<>();
 
             for (Long tagId : tagIds) {
                 tagList.add(Tag.builder().id(tagId).build());
             }
-            return tagList;
+            setTagList(tagList);
         }
-        return super.getTagList();
     }
+
+//    @Override
+//    public Person getPerson() {
+//        if (super.getPerson() != null) {
+//            return super.getPerson();
+//        }
+//
+//        if (personId != null) {
+//            return Person.builder().id(personId).build();
+//        }
+//
+//        return null;
+//    }
+//
+//    @Override
+//    public List<Tag> getTagList() {
+//        if (getTagList() != null) {
+//            return getTagList();
+//        }
+//
+//        if (CollectionUtils.isNotEmpty(tagIds)) {
+//            List<Tag> tagList = new ArrayList<>();
+//
+//            for (Long tagId : tagIds) {
+//                tagList.add(Tag.builder().id(tagId).build());
+//            }
+//            return tagList;
+//        }
+//
+//        return null;
+//    }
 
 }

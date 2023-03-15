@@ -1,5 +1,8 @@
 package com.rick.demo.module.project.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializer;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
@@ -31,6 +34,8 @@ public class Person extends BaseEntity {
     @ManyToMany(thirdPartyTable = "t_person_role", referenceColumnName = "role_id", columnDefinition = "person_id", referenceTable = "t_role")
     private List<Role> roleList;
 
+    @JsonAlias({"idCard", "id_card_id"})
+    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @ManyToOne(parentTable = "t_person_id_card", value = "id_card_id", cascadeInsertOrUpdate = true)
     private IdCard idCard;
 

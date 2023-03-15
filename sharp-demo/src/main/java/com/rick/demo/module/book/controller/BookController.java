@@ -30,7 +30,13 @@ public class BookController {
     }
 
     @GetMapping
-    public BookDTO getSave(BookDTO book) {
+    public BookDTO getSave(BookDTO book, String testId) {
+//        bookDAO.insertOrUpdate(book);
+        return book;
+    }
+
+    @GetMapping("v2")
+    public Book getSave2(Book book) {
 //        bookDAO.insertOrUpdate(book);
         return book;
     }

@@ -1,20 +1,17 @@
 package com.rick.demo.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.rick.common.http.convert.CodeToEnumConverterFactory;
 import com.rick.common.http.exception.ApiExceptionHandler;
-import com.rick.common.http.json.deserializer.EnumJsonDeserializer;
 import com.rick.common.http.util.MessageUtils;
+import com.rick.common.http.web.SharpWebMvcConfigurer;
 import com.rick.common.validate.ServiceMethodValidationInterceptor;
 import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.core.convert.converter.ConverterFactory;
 
-import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Rick
@@ -22,32 +19,39 @@ import javax.annotation.PostConstruct;
  */
 @Configuration
 @Import({ApiExceptionHandler.class, MessageUtils.class, ServiceMethodValidationInterceptor.class})
+//@EnableResultWrapped
 //@ComponentScan(basePackageClasses = MessageUtils.class)
 @RequiredArgsConstructor
-public class MvcConfig implements WebMvcConfigurer {
+public class MvcConfig extends SharpWebMvcConfigurer {
 
-    private final ObjectMapper objectMapper;
+//    private final ObjectMapper objectMapper;
 
     /**
      * 注入，这样才能在@PostConstruct获取 BaseDAOManager
-     * @param registry
+     * @param
      */
 //    private final EntityDAOManager entityDAOManager;
 
     @Override
-    public void addFormatters(FormatterRegistry registry) {
-        // 排在前面优先使用 如果没有找到code仍然会尝试NAME。所以SexEnum可以通过1或者DEFAULT去反序列化
-        registry.addConverterFactory(new CodeToEnumConverterFactory());
-        registry.addConverterFactory(new IdToEntityConverterFactory());
+    public List<ConverterFactory> converterFactories() {
+        return Arrays.asList(new IdToEntityConverterFactory());
     }
 
-    @PostConstruct
-    public void postConstruct() {
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
+//    @Override
+//    public void addFormatters(FormatterRegistry registry) {
+//        // 排在前面优先使用 如果没有找到code仍然会尝试NAME。所以SexEnum可以通过1或者DEFAULT去反序列化
+//        registry.addConverterFactory(new CodeToEnumConverterFactory());
+//        registry.addConverterFactory(new IdToEntityConverterFactory());
+//    }
+
+//    @PostConstruct
+//    public void postConstruct() {
+//        SimpleModule simpleModule = new SimpleModule();
+//        simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
 
         // id 映射到 实体对象
-        // 如果 addDeserializer 就会替换原来的 BeanDeserializer，有问题
+        // 如果 addDeserializer 就会替换原来的 BeanDeserializer，有问题，
+        // 手动在bean中添加：@JsonDeserialize(using = EntityIdJsonDeserializer.class)
 
 //        for (Class clazz : EntityDAOManager.baseDAOEntityMap.keySet()) {
 //            simpleModule.addDeserializer(clazz, new EntityIdJsonDeserializer(clazz));
@@ -61,7 +65,7 @@ public class MvcConfig implements WebMvcConfigurer {
 //        simpleModule.addDeserializer(Person.class, new EntityIdJsonDeserializer<>(Person.class));
 //        simpleModule.addDeserializer(Tag.class, new EntityIdJsonDeserializer<>(Tag.class));
 
-        objectMapper.registerModule(simpleModule);
-    }
+//        objectMapper.registerModule(simpleModule);
+//    }
 
 }
