@@ -50,7 +50,7 @@
                             <ul class="list-group list-group-flush">
                                 <th:block th:if="${p.value ne null}">
                                 <li class="list-group-item" th:each="f : ${p.value}">
-                                    <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link" th:onclick="deleteAttachment([[${p.name}]], [[${f.id}]], this)">删除</button>
+                                    <a th:text="${f.full_name}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link" th:onclick="deleteAttachment([[${p.name}]], [[${f.id}]], this)">删除</button>
                                 </li>
                                 </th:block>
                             </ul>
@@ -209,7 +209,7 @@
 
                     data.data.forEach(function (attachment) {
                         $('#' + fileElementId).siblings('ul').append("<li class=\"list-group-item\">\n" +
-                            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link\" onclick=\"deleteAttachment('"+fileElementId+"', "+attachment.id+", this)\">删除</button>\n" +
+                            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.full_name+"</a><button type=\"button\" class=\"btn btn-link\" onclick=\"deleteAttachment('"+fileElementId+"', "+attachment.id+", this)\">删除</button>\n" +
                         "</li>")
                     })
 
