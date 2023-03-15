@@ -550,7 +550,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     protected String columnAliasName(String columnName) {
-        return SharpDbConstants.underscoreToCamelConverter.convert(columnName);
+        return com.rick.common.util.StringUtils.camelToSnake(columnName);
     }
 
     /**

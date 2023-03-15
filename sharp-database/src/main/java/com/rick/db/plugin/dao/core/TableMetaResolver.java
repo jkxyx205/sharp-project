@@ -1,7 +1,5 @@
 package com.rick.db.plugin.dao.core;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.base.Converter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.db.dto.SimpleEntity;
@@ -17,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.rick.common.util.StringUtils.camelToSnake;
 
 /**
  * @author Rick
@@ -37,9 +37,7 @@ class TableMetaResolver {
 
         Table tableAnnotation = clazz.getAnnotation(Table.class);
 
-        Converter<String, String> converter = CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE);
-
-        String name = (TABLE_PREFIX + converter.convert(clazz.getSimpleName()));
+        String name = (TABLE_PREFIX + camelToSnake(clazz.getSimpleName()));
 
         String tableName;
         if (Objects.nonNull(tableAnnotation)) {
@@ -67,7 +65,7 @@ class TableMetaResolver {
         resolveFields(fields, "", idCollector, embeddedPropertyList, selectAnnotationList,
                 oneToManyAnnotationList, manyToOneAnnotationList,
                 manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
-                columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder, converter);
+                columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
 
         propertiesBuilder.deleteCharAt(propertiesBuilder.length() - 1);
         columnNamesBuilder.deleteCharAt(columnNamesBuilder.length() - 1);
@@ -90,7 +88,7 @@ class TableMetaResolver {
     private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
      List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
                                List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap, Map<String, Field> fieldMap,
-                               StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder, Converter<String, String> converter) {
+                               StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder) {
         for (Field field : fields) {
             String propertyName = propertyNamePrefix + field.getName();
             fieldMap.put(propertyName, field);
@@ -122,7 +120,7 @@ class TableMetaResolver {
                 resolveFields(embeddedFields, propertyName + ".", idCollector, embeddedPropertyList,
                         selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
                         manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
-                        columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder, converter);
+                        columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
             }
 
             if (AnnotatedElementUtils.hasAnnotation(field, Transient.class)) {
@@ -132,14 +130,14 @@ class TableMetaResolver {
             if (idCollector.id == null) {
                 idCollector.id = field.getAnnotation(Id.class);
                 if (Objects.nonNull(idCollector.id)) {
-                    idCollector.columnName = StringUtils.isNotBlank(idCollector.id.value()) ? idCollector.id.value() : converter.convert(field.getName());
+                    idCollector.columnName = StringUtils.isNotBlank(idCollector.id.value()) ? idCollector.id.value() : camelToSnake(field.getName());
                     idCollector.propertyName = field.getName();
                 }
             }
 
             Column annotation = AnnotatedElementUtils.getMergedAnnotation(field, Column.class);
             String columnName = Objects.nonNull(annotation) && StringUtils.isNotBlank(annotation.value())
-                    ? annotation.value() : converter.convert(Objects.nonNull(manyToOneAnnotation) ? field.getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName());
+                    ? annotation.value() : camelToSnake(Objects.nonNull(manyToOneAnnotation) ? field.getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName());
 
             columnNameFieldMap.put(columnName, field);
             columnNameMap.put(columnName, annotation);

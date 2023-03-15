@@ -1,6 +1,6 @@
 package com.rick.db.service;
 
-import com.rick.db.constant.SharpDbConstants;
+import com.rick.common.util.StringUtils;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -171,7 +171,7 @@ public class SharpService {
                 String column = JdbcUtils.lookupColumnName(rsmd, index);
                 try {
                     Object value = JdbcUtils.getResultSetValue(rs, index, Class.forName(rsmd.getColumnClassName(index)));
-                    bw.setPropertyValue(getCamelCaseName(column), value);
+                    bw.setPropertyValue(StringUtils.snakeToCamel(column), value);
                 } catch (TypeMismatchException | NotWritablePropertyException | ClassNotFoundException e) {
 //                    log.warn("Unable to map column '" + column + "' to property");
                     throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property", e);
@@ -181,9 +181,6 @@ public class SharpService {
             return mappedObject;
         }
 
-        private String getCamelCaseName(String name) {
-            return name.indexOf("_") > -1 ? SharpDbConstants.underscoreToCamelConverter.convert(name) : name;
-        }
     }
 
     protected List<Map<String, Object>> toMap(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap) {
