@@ -305,4 +305,34 @@ public final class StringUtils {
         return false;
     }
 
+    // found at https://www.geeksforgeeks.org/convert-snake-case-string-to-camel-case-in-java/#:~:text=replaceFirst()%20method%20to%20convert,next%20letter%20of%20the%20underscore.
+    // Function to convert the string
+    // from snake case to camel case
+    public static String snakeToCamel(String str) {
+        // Run a loop till string
+        // string contains underscore
+        while (str.contains("_")) {
+
+            // Replace the first occurrence
+            // of letter that present after
+            // the underscore, to capitalize
+            // form of next letter of underscore
+            str = str
+                    .replaceFirst(
+                            "_[a-z]",
+                            String.valueOf(
+                                    Character.toUpperCase(
+                                            str.charAt(
+                                                    str.indexOf("_") + 1))));
+        }
+
+        // Return string
+        return str;
+    }
+
+    public static String camelToSnake(final String camelStr) {
+        String ret = camelStr.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z])([A-Z])", "$1_$2");
+        return ret.toLowerCase();
+    }
+
 }

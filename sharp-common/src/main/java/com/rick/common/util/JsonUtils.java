@@ -3,15 +3,17 @@ package com.rick.common.util;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rick.common.http.json.deserializer.EnumJsonDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Rick
@@ -19,12 +21,17 @@ import java.util.*;
  */
 public final class JsonUtils {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
+        objectMapper.registerModule(simpleModule);
+
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.setSerializationInclusion(Include.NON_NULL);
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
 
     private JsonUtils() {
@@ -58,14 +65,21 @@ public final class JsonUtils {
         return objectMapper.treeToValue(node, clazz);
     }
 
+    public static <T> List<T> toList(JsonNode node, Class<T> clazz) throws IOException {
+        return objectMapper.readerForListOf(clazz).readValue(node);
+    }
+
     public static <T> List<T> toList(String json, Class<T> clazz) throws IOException {
-        JavaType javaType = getCollectionType(ArrayList.class, clazz);
-        return objectMapper.readValue(json, javaType);
+        return objectMapper.readerForListOf(clazz).readValue(json);
     }
 
     public static <T> Set<T> toSet(String json, Class<T> clazz) throws IOException {
         JavaType javaType = getCollectionType(HashSet.class, clazz);
         return objectMapper.readValue(json, javaType);
+    }
+
+    public static <T> Set<T> toSet(JsonNode node) throws IOException {
+        return objectMapper.readerFor(new TypeReference<Set<T>>(){}).readValue(node);
     }
 
     public static <T> Object toObjectFromFile(String fileName, Class<T> clazz) throws IOException {
@@ -87,11 +101,12 @@ public final class JsonUtils {
         return jsonNode;
     }
 
-    public static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
-        return objectMapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
-    }
-
     public static Map<String, ?> objectToMap(Object obj) {
         return objectMapper.convertValue(obj, Map.class);
     }
+
+    private static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
+        return objectMapper.getTypeFactory().constructParametricType(collectionClass, elementClasses);
+    }
+
 }
