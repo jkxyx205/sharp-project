@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -63,6 +64,7 @@ public class ApiExceptionHandler {
         }
 
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
+            response.setStatus(result.getCode());
             return result;
         }
 
@@ -105,7 +107,8 @@ public class ApiExceptionHandler {
             return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, ex.getMessage());
         }
 
-        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID);
+        MethodArgumentNotValidException me = (MethodArgumentNotValidException) ex;
+        return exceptionHandler(request, response, ex, ResultCode.ARGUMENT_NOT_VALID, formatErrors(me.getBindingResult().getAllErrors()));
     }
 
     /**
@@ -116,7 +119,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result elseExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
-        return exceptionHandler(request, response, ex, ResultCode.FAIL);
+        return exceptionHandler(request, response, ex, ResultCode.ERROR);
     }
 
     private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, ResultCode resultCode) throws ServletException, IOException {
@@ -133,6 +136,7 @@ public class ApiExceptionHandler {
         }
 
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
+            response.setStatus(code);
             return ResultUtils.fail(code, message, data);
         }
 
@@ -164,7 +168,7 @@ public class ApiExceptionHandler {
     private List<Map<String, Object>> formatErrors(Set<ConstraintViolation<?>> constraintViolationSet) {
         return constraintViolationSet.stream().map(constraintViolation -> {
             Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
-            params.put("field", StringUtils.substringAfterLast(constraintViolation.getPropertyPath().toString(), "."));
+            params.put("field", StringUtils.substringAfterLast("."+ constraintViolation.getPropertyPath().toString(), "."));
             params.put("message", constraintViolation.getMessage());
             params.put("rejectedValue", constraintViolation.getInvalidValue());
             return params;

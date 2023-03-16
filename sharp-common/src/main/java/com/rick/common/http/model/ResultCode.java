@@ -15,10 +15,12 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum ResultCode {
-    FAIL(500, "服务器端异常"),
-    OK(0, "OK"),
-    ACCESS_FORBIDDEN_ERROR(1, "访问未授权"),
-    ARGUMENT_NOT_VALID(2, "参数验证失败");
+    ERROR(500, "服务器端异常"),
+    OK(200, "OK"),
+    ARGUMENT_NOT_VALID(400, "参数验证失败"),
+    ACCESS_FORBIDDEN_ERROR(403, "访问未授权"),
+    RESOURCE_NOT_EXISTS_ERROR(404, "资源不存在");
+
 
     private int code;
 

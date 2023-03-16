@@ -24,11 +24,11 @@ public final class ResultUtils {
     }
 
     public static <T> Result<T> fail(T data) {
-        return new Result(false, ResultCode.FAIL.getCode(), ResultCode.FAIL.getMsg(), data);
+        return new Result(false, ResultCode.ERROR.getCode(), ResultCode.ERROR.getMsg(), data);
     }
 
     public static Result fail(String message) {
-        return fail(ResultCode.FAIL.getCode(), message, null);
+        return fail(ResultCode.ERROR.getCode(), message, null);
     }
 
     public static Result fail(int code, String message) {
@@ -36,7 +36,7 @@ public final class ResultUtils {
     }
 
     public static <T> Result fail(String message, T data) {
-        return fail(ResultCode.FAIL.getCode(), message, data);
+        return fail(ResultCode.ERROR.getCode(), message, data);
     }
 
     public static <T> Result<T> fail(int code, String message, T data) {

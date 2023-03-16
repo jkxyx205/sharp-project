@@ -1,10 +1,9 @@
 package com.rick.common.http.web;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.rick.common.http.convert.CodeToEnumConverterFactory;
-import com.rick.common.http.json.deserializer.EnumJsonDeserializer;
 import com.rick.common.http.web.param.ParamNameProcessor;
 import com.rick.common.util.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,9 +53,11 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
     @Autowired(required = false)
     public void register(ObjectMapper objectMapper) {
         if (objectMapper != null) {
-            SimpleModule simpleModule = new SimpleModule();
-            simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
-            objectMapper.registerModule(simpleModule);
+            // jackson 自带的 EnumDeserializer 代替 EnumJsonDeserializer
+//            SimpleModule simpleModule = new SimpleModule();
+//            simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
+//            objectMapper.registerModule(simpleModule);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         }
     }

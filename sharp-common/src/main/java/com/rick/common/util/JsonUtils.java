@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.rick.common.http.json.deserializer.EnumJsonDeserializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -24,9 +22,9 @@ public final class JsonUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
-        objectMapper.registerModule(simpleModule);
+//        SimpleModule simpleModule = new SimpleModule();
+//        simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
+//        objectMapper.registerModule(simpleModule);
 
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.registerModule(new JavaTimeModule());

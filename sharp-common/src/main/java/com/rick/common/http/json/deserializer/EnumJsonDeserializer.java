@@ -60,7 +60,11 @@ import java.lang.reflect.Field;
  * </p>
  * @author Rick
  * @createdAt 2021-10-11 21:56:00
+ * EnumDeserializer 自带的完成相同的功能，按照顺序依次解析：
+ *  如果有@JsonValue：先根据value，没有再根据order，没有报错
+ *  如果没有@JsonValue：先根据name，没有再根据order，没有报错
  */
+@Deprecated
 public class EnumJsonDeserializer extends JsonDeserializer<Enum> {
 
     @Override
