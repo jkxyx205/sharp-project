@@ -132,4 +132,14 @@ public class BookTest {
                 .build(), "id");
     }
 
+    @Order(3)
+    @Test
+    public void testUpdateByColumnName() {
+        final Book book = bookDAO.selectById(617321100761636864L).get();
+        System.out.println("1. -------------------");
+        bookDAO.update(book, "title");
+        System.out.println("2. -------------------");
+        bookDAO.update("title", new Object[]{book.getTitle(), book.getId()}, "id = ?");
+    }
+
 }

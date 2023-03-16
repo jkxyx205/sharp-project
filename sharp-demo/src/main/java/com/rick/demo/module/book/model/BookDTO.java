@@ -1,9 +1,11 @@
 package com.rick.demo.module.book.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.rick.demo.module.book.entity.Book;
 import com.rick.demo.module.book.entity.Tag;
 import com.rick.demo.module.project.domain.entity.Person;
 import com.rick.demo.module.project.domain.enums.SexEnum;
+import com.rick.demo.module.project.domain.enums.TestCodeEnum;
 import com.rick.demo.module.school.entity.School;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,6 +33,9 @@ public class BookDTO extends Book {
      * 扩展字段
      */
     private School.TypeEnum type;
+
+    @JsonAlias("testCode")
+    private TestCodeEnum testCode;
 
     public void setPersonId(Long personId) {
         this.setPerson(Person.builder().id(personId).build());

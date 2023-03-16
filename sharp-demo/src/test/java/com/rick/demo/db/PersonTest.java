@@ -125,4 +125,14 @@ public class PersonTest {
     public void testDelete2() {
         personDAO.deleteById(667049700548964352L);
     }
+
+    @Order(1)
+    @Test
+    public void testUpdate() {
+        Person person = personDAO.selectById(552098712424472576L).get();
+        System.out.println("1. -------------------");
+        personDAO.update(person, "name");
+        System.out.println("2. -------------------");
+        personDAO.update("name", new Object[]{person.getName(), person.getId()}, "id = ?");
+    }
 }

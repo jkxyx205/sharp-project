@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.rick.common.util.JsonUtils;
 import com.rick.demo.module.project.domain.entity.Dept;
+import com.rick.demo.module.project.domain.enums.TestCodeEnum;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -102,6 +103,19 @@ public class JsonUtilsTest {
         params.put("id", id);
         JsonNode jsonNode = JsonUtils.toJsonNode(params);
         assertThat(jsonNode.get("id").asLong()).isEqualTo(1L);
+    }
+
+    @Test
+    public void testCodeEnum() throws IOException {
+        List<TestCodeEnum> TestCodeList1 = JsonUtils.toList("[\"11\", \"10\"]", TestCodeEnum.class);
+        System.out.println(TestCodeList1);
+
+        List<TestCodeEnum> TestCodeList2 = JsonUtils.toList("[\"0\", \"1\"]", TestCodeEnum.class);
+        System.out.println(TestCodeList2);
+
+        // 有@JsonValue 下面执行报错
+//        List<TestCodeEnum> TestCodeList3 = JsonUtils.toList("[\"UNKNOWN\", \"CODE\"]", TestCodeEnum.class);
+//        System.out.println(TestCodeList3);
     }
 
 }

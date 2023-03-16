@@ -199,6 +199,7 @@ public class EntityDAOImplTest {
         Project project = createProject();
         project.setTitle("title-entity-update");
         project.setId(479723134929764352L);
+        project.setProjectDetailList(Arrays.asList(ProjectDetail.builder().title("rick").groupId(110L).build()));
         projectDAO.update(project);
     }
 
@@ -381,7 +382,7 @@ public class EntityDAOImplTest {
         project.setTitle("title-entity-update");
         project.setId(479723134929764352L);
 
-        long count = projectDAO.update(project, null, "id = 1 AND is_deleted = 1");
+        long count = projectDAO.update(project, new Object[]{"test"}, "id = 1 AND is_deleted = 1 AND title = ?");
         assertThat(count).isEqualTo(0);
     }
 

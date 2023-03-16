@@ -96,6 +96,17 @@ public class SchoolTest {
         checkSchool(schoolLicense.getSchool());
     }
 
+    @Order(4)
+    @Test
+    public void testUpdate() {
+        Optional<School> option = schoolDAO.selectById(552173736070144000L);
+        School school = option.get();
+        System.out.println("1. -------------------");
+        schoolDAO.update(school, "name");
+        System.out.println("2. -------------------");
+        schoolDAO.update("name", new Object[]{school.getName(), school.getId()}, "id = ?");
+    }
+
     private School createSchool(SchoolLicense schoolLicense) {
         return School.builder()
                 .name("清华大学")
