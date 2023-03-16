@@ -253,20 +253,24 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      */
     @Override
     public int update(T entity) {
+        return update(entity, tableMeta.getUpdateColumnNames());
+    }
+
+    @Override
+    public int update(T entity, String updateColumnNames) {
         if (Objects.nonNull(validatorHelper)) {
             validatorHelper.validate(entity);
         }
 
-        cascadeInsertOrUpdate(entity);
-        EntityDAOThreadLocalValue.removeAll();
-        Object[] objects = resolveUpdateParamsAndId(entity);
-        return updateById(entity, tableMeta.getUpdateColumnNames(), (Object[]) objects[0], (ID) objects[1]);
+        Object[] objects = resolveUpdateParamsAndId(entity, convertToList(updateColumnNames));
+        return updateById(entity, updateColumnNames, (Object[]) objects[0], (ID) objects[1]);
     }
 
     /**
+     * 更新entity
      * @param entity
      * @param params   where语句后面的参数
-     * @param conditionSQL
+     * @param conditionSQL 这里的条件优先级高，可以覆盖condition
      * @return
      */
     @Override
@@ -275,8 +279,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             validatorHelper.validate(entity);
         }
 
-        cascadeInsertOrUpdate(entity);
-        EntityDAOThreadLocalValue.removeAll();
         int size = this.updateColumnNameList.size();
 
         params = ArrayUtils.isEmpty(params) ? new Object[] {} : params;
@@ -304,13 +306,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         List<Object[]> paramsList = Lists.newArrayListWithExpectedSize(collection.size());
 
         String conditionSQL = null;
-        for (T t : collection) {
-            Object[] resolverParamsAndIdObjects = resolveUpdateParamsAndId(t);
+        for (T entity : collection) {
+            Object[] resolverParamsAndIdObjects = resolveUpdateParamsAndId(entity, updateColumnNameList);
             Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (ID) resolverParamsAndIdObjects[1]);
-            Object[] finalObjects = handleConditionAdvice(handleAutoFill(t, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), null, (String) mergeIdParamObjects[1], false);
+            Object[] finalObjects = handleConditionAdvice(handleAutoFill(entity, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), null, (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
             conditionSQL = (String) finalObjects[1];
-            cascadeInsertOrUpdate(t);
+            cascadeInsertOrUpdate(entity, false);
         }
 
         EntityDAOThreadLocalValue.removeAll();
@@ -701,6 +703,16 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return params;
     }
 
+    @Override
+    protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
+        if (t != null && t.getClass() == getEntityClass()) {
+            cascadeInsertOrUpdate((T) t, false);
+            EntityDAOThreadLocalValue.removeAll();
+        }
+
+        return super.update(tableName, t, updateColumnNames, params, conditionSQL);
+    }
+
     private Map<ID, T> listToIdMap(List<T> list) {
         return list.stream().collect(Collectors.toMap(t -> (ID) EntityDAOManager.getPropertyValue(t, tableMeta.getIdPropertyName()), v -> v));
     }
@@ -709,12 +721,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return update(this.tableName, t, updateColumnNames, params, conditionSQL);
     }
 
-    private Object[] resolveUpdateParamsAndId(T t) {
+    private Object[] resolveUpdateParamsAndId(T t, List<String> updateColumnNameList) {
         ID id = getIdValue(t);
         Assert.notNull(id, "id不能为空");
 
         Object[] params;
-        params = instanceToParamsArray(t, updatePropertyList);
+        params = instanceToParamsArray(t,
+                updatePropertyList.stream().filter(property -> updateColumnNameList.contains(propertyNameToColumnNameMap.get(property))).collect(Collectors.toList()));
 
         return new Object[] {params, id};
     }
@@ -887,10 +900,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             cascadeInsertOrUpdate(t, insert);
         }
         EntityDAOThreadLocalValue.removeAll();
-    }
-
-    private void cascadeInsertOrUpdate(T t) {
-        cascadeInsertOrUpdate(t, false);
     }
 
     /**

@@ -20,6 +20,8 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     int update(T entity);
 
+    int update(T entity, String updateColumnNames);
+
     int update(T entity, Object[] params, String conditionSQL);
 
     int[] update(Collection<T> entities);
