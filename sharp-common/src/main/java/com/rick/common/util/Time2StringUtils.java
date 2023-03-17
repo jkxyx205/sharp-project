@@ -2,9 +2,12 @@ package com.rick.common.util;
 
 import lombok.experimental.UtilityClass;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -16,10 +19,33 @@ import java.util.Objects;
 @UtilityClass
 public final class Time2StringUtils {
 
-    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DEFAULT_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static final DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static String format(Date date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return format(date, simpleDateFormat);
+    }
+
+    public static String format(Date date, SimpleDateFormat simpleDateFormat) {
+        if (date == null) {
+            return null;
+        }
+
+        return simpleDateFormat.format(date);
+    }
+
+    public static String format(LocalDate localDate) {
+        return format(localDate, DEFAULT_DATE_FORMATTER);
+    }
+
+    public static String format(LocalDate localDate, DateTimeFormatter formatter) {
+        return Objects.isNull(localDate) ? null : formatter.format(localDate);
+    }
 
     public static String format(LocalDateTime dateTime) {
-        return format(dateTime, DEFAULT_FORMATTER);
+        return format(dateTime, DEFAULT_TIME_FORMATTER);
     }
 
     public static String format(LocalDateTime dateTime, DateTimeFormatter formatter) {
@@ -27,7 +53,7 @@ public final class Time2StringUtils {
     }
 
     public static String format(Instant instant) {
-        return format(instant, DEFAULT_FORMATTER);
+        return format(instant, DEFAULT_TIME_FORMATTER);
     }
 
     public static String format(Instant instant, DateTimeFormatter formatter) {
@@ -35,7 +61,7 @@ public final class Time2StringUtils {
     }
 
     public static String format(long milliseconds) {
-        return format(milliseconds, DEFAULT_FORMATTER);
+        return format(milliseconds, DEFAULT_TIME_FORMATTER);
     }
 
     public static String format(long milliseconds, DateTimeFormatter formatter) {

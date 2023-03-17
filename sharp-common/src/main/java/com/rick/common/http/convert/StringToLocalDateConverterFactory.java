@@ -1,6 +1,6 @@
 package com.rick.common.http.convert;
 
-import com.rick.common.util.StringTimeUtils;
+import com.rick.common.util.String2TimeUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
@@ -21,7 +21,7 @@ final public class StringToLocalDateConverterFactory implements ConverterFactory
 
         @Override
         public T convert(String source) {
-          return (T) StringTimeUtils.getLocalDate(source);
+          return (T) String2TimeUtils.toLocalDate(source);
         }
     }
 }

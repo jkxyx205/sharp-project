@@ -14,7 +14,7 @@ import java.util.Objects;
  * @createdAt  2021-01-17 12:42:00
  */
 @UtilityClass
-public final class StringTimeUtils {
+public final class String2TimeUtils {
 
     private static final String DATE_FORMAT_REGEX = "\\d{4}-\\d{2}-\\d{2}";
 
@@ -64,16 +64,7 @@ public final class StringTimeUtils {
         return LocalDateTime.parse(formatValue, SQL_TIME_FORMATTER).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static Instant toInstant(String value) {
-        if (Objects.isNull(value)) {
-            return null;
-        }
-
-        LocalDateTime localDateTime = toLocalDateTime(value);
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
-    }
-
-    public static LocalDate getLocalDate(String value) {
+    public static LocalDate toLocalDate(String value) {
         if (StringUtils.isBlank(value)) {
             return null;
         }
@@ -81,8 +72,22 @@ public final class StringTimeUtils {
         return toLocalDateTime(value).toLocalDate();
     }
 
-    public static LocalTime getTime(String value) {
+    /**
+     * 2023-12-11 23:23
+     * @param value
+     * @return
+     */
+    public static LocalTime toTime2(String value) {
         return toLocalDateTime(value).toLocalTime();
+    }
+
+    public static Instant toInstant(String value) {
+        if (Objects.isNull(value)) {
+            return null;
+        }
+
+        LocalDateTime localDateTime = toLocalDateTime(value);
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }
 
     /**
@@ -143,4 +148,5 @@ public final class StringTimeUtils {
     private static boolean isDateMinute(String value) {
         return value.matches(YYYY_MM_DD_HH_MM_FORMAT_REGEX);
     }
+
 }
