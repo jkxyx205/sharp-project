@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -26,6 +27,9 @@ public class DictServiceImpl implements DictService, InitializingBean {
     private final SharpService sharpService;
 
     private final DictProperties dictProperties;
+
+    @Autowired(required = false)
+    private DictDOSupplier dictDOSupplier;
 
     private static final String SELECT_SQL = "SELECT type, name, label, sort FROM sys_dict WHERE type = :type";
 
@@ -53,18 +57,21 @@ public class DictServiceImpl implements DictService, InitializingBean {
             return;
         }
 
-        // yml
-        for (DictProperties.Item item : dictProperties.getItems()) {
-            if (item.getType().equals(type)) {
-                initYml(item);
-            }
-        }
+        // yml 不需要 rebuild
+//        for (DictProperties.Item item : dictProperties.getItems()) {
+//            if (item.getType().equals(type)) {
+//                initYml(item);
+//            }
+//        }
     }
 
     @Override
     public void afterPropertiesSet() {
         // sys_dict
         List<DictDO> list = getDbDictList(null);
+        if (dictDOSupplier != null) {
+            list.addAll(dictDOSupplier.get());
+        }
 
         Map<String, List<DictDO>> map = list.stream().collect(Collectors.groupingBy(DictDO::getType));
         DictUtils.dictMap = Maps.newHashMapWithExpectedSize(dictProperties.getItems().size() + map.size());
@@ -94,6 +101,8 @@ public class DictServiceImpl implements DictService, InitializingBean {
             initMap(item.getType(), item.getMap());
         } else if (Objects.nonNull(item.getSql())) {
             initSQL(item.getType(), item.getSql());
+        } else if(Objects.nonNull(item.getList())) {
+            initList(item.getType(), item.getList());
         }
     }
 
@@ -103,11 +112,25 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private void initMap(String type, Map<String, String> map) {
         List<DictDO> list = Lists.newArrayListWithExpectedSize(map.size());
+
         int i = 0;
         for (Map.Entry<String, String> en : map.entrySet()) {
             list.add(DictDO.builder().type(type)
                     .name(en.getKey())
                     .label(en.getValue())
+                    .sort(i++).build());
+
+        }
+        DictUtils.dictMap.put(type, list);
+    }
+
+    private void initList(String type, List<String> strings) {
+        List<DictDO> list = Lists.newArrayListWithExpectedSize(strings.size());
+        int i = 0;
+        for (String key : strings) {
+            list.add(DictDO.builder().type(type)
+                    .name(key)
+                    .label(key)
                     .sort(i++).build());
 
         }

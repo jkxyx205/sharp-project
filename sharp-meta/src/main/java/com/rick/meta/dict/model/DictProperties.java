@@ -25,5 +25,7 @@ public class DictProperties {
         private String sql;
 
         private Map<String, String> map;
+
+        private List<String> list;
     }
 }

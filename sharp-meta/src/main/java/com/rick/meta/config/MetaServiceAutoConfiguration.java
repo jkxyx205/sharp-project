@@ -2,6 +2,9 @@ package com.rick.meta.config;
 
 import com.rick.db.config.GridServiceAutoConfiguration;
 import com.rick.db.service.GridService;
+import com.rick.meta.dict.convert.ArrayDictConverter;
+import com.rick.meta.dict.convert.DictConverter;
+import com.rick.meta.dict.convert.SqlDateConverter;
 import com.rick.meta.dict.model.DictProperties;
 import com.rick.meta.dict.service.DictService;
 import com.rick.meta.dict.service.DictServiceImpl;
@@ -42,6 +45,21 @@ public class MetaServiceAutoConfiguration {
         @Bean
         public PropertyService getPropertyService(GridService gridService) {
             return new PropertyServiceImpl(gridService);
+        }
+
+        @Bean
+        public DictConverter dictConverter() {
+            return new DictConverter();
+        }
+
+        @Bean
+        public SqlDateConverter localDateConverter() {
+            return new SqlDateConverter();
+        }
+
+        @Bean
+        public ArrayDictConverter arrayDictConverter() {
+            return new ArrayDictConverter();
         }
     }
 }
