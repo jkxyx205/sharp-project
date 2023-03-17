@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,9 @@ public class User extends BaseEntity {
 
     @Column(comment = "自我介绍", columnDefinition = "text", nullable = false)
     private String introduce;
+
+    @Column(comment = "得分")
+    private BigDecimal score;
 
     @Column(comment = "附件", columnDefinition = "text", value = "attachment", nullable = false)
     private List<Map<String, Object>> attachmentList;

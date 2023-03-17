@@ -48,8 +48,8 @@ public class MetaServiceAutoConfiguration {
         }
 
         @Bean
-        public DictConverter dictConverter() {
-            return new DictConverter();
+        public DictConverter dictConverter(DictService dictService) {
+            return new DictConverter(dictService);
         }
 
         @Bean
@@ -58,8 +58,8 @@ public class MetaServiceAutoConfiguration {
         }
 
         @Bean
-        public ArrayDictConverter arrayDictConverter() {
-            return new ArrayDictConverter();
+        public ArrayDictConverter arrayDictConverter(DictService dictService) {
+            return new ArrayDictConverter(dictService);
         }
     }
 }

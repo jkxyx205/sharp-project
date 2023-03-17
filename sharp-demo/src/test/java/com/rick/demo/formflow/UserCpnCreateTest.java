@@ -83,6 +83,7 @@ public class UserCpnCreateTest {
                         "       t_user.age               AS \"age\",\n" +
                         "       t_user.birthday          AS \"birthday\",\n" +
                         "       t_user.mobile            AS \"mobile\",\n" +
+                        "       t_user.score            AS \"score\",\n" +
                         "       t_user.email             AS \"email\",\n" +
                         "       t_user.native_place      AS \"nativePlace\",\n" +
                         "       t_user.hobby             AS \"hobbyList\",\n" +
@@ -105,8 +106,9 @@ public class UserCpnCreateTest {
                         new ReportColumn("name", "姓名", true),
                         new ReportColumn("gender", "性别"),
                         new ReportColumn("age", "年龄"),
-                        new ReportColumn("birthday", "出生日期",false, null, Arrays.asList("localDateConverter")),
+                        new ReportColumn("birthday", "出生日期",true, null, Arrays.asList("localDateConverter")),
                         new ReportColumn("mobile", "手机号码"),
+                        new ReportColumn("score", "得分"),
                         new ReportColumn("email", "邮箱"),
                         new ReportColumn("nativePlace", "籍贯"),
                         new ReportColumn("hobbyList", "兴趣爱好", false, "hobbyList", Arrays.asList("arrayDictConverter")),
@@ -131,8 +133,7 @@ public class UserCpnCreateTest {
                         new QueryField("marriage", "婚否", QueryField.Type.SELECT, "bol")
                 ))
                 .pageable(true)
-//                .summary(true)
-                .summaryColumnNames("age, mobile")
+                .summaryColumnNames("age, score")
                 .sidx("name")
                 .sord(SordEnum.ASC)
                 .build());

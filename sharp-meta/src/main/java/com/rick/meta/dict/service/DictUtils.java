@@ -18,7 +18,7 @@ import java.util.Optional;
  * @date: 9/27/19 10:40 AM
  * @Copyright: 2019 www.yodean.com. All rights reserved.
  */
-final public class DictUtils {
+final class DictUtils {
 
     public static Map<String, List<DictDO>> dictMap;
 

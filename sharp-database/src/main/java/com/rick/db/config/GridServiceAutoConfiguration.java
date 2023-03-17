@@ -14,18 +14,19 @@ import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
 import com.rick.db.plugin.dao.support.*;
 import com.rick.db.service.GridService;
-import com.rick.db.service.support.SharpServiceQueryInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterFactory;
@@ -91,9 +92,9 @@ public class GridServiceAutoConfiguration {
         }
     }
 
-    @ConditionalOnProperty(prefix = "sharp.database", name = "select-cache")
-    @Import({SharpServiceQueryInterceptor.class})
-    static class GridServiceCacheConfiguration {}
+//    @ConditionalOnProperty(prefix = "sharp.database", name = "select-cache")
+//    @Import({SharpServiceQueryInterceptor.class})
+//    static class GridServiceCacheConfiguration {}
 
     @Configuration
     static class EntityDAOConfiguration {

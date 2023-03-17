@@ -3,7 +3,6 @@ package com.rick.db.service.support;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
 import java.util.HashMap;
@@ -14,7 +13,7 @@ import java.util.Objects;
  * @author Rick
  * @createdAt 2021-10-22 11:52:00
  */
-@Aspect
+//@Aspect
 @Slf4j
 public class SharpServiceQueryInterceptor {
 

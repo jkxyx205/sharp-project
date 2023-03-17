@@ -9,7 +9,7 @@ import com.rick.common.http.model.ResultUtils;
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
 import com.rick.db.dto.QueryModel;
-import com.rick.db.plugin.table.DefaultTableGridService;
+import com.rick.db.plugin.GridUtils;
 import com.rick.db.service.GridService;
 import com.rick.excel.table.QueryResultExportTable;
 import com.rick.excel.table.model.MapTableColumn;
@@ -18,10 +18,11 @@ import com.rick.report.core.dao.ReportDAO;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.ReportColumn;
 import com.rick.report.core.model.ReportDTO;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,30 +38,27 @@ import java.util.stream.Collectors;
  * All rights Reserved, Designed By www.xhope.top
  *
  * @version V1.0
- * @Description: (用一句话描述该文件做什么)
- * @author: Rick.Xu
- * @date: 6/18/20 3:34 PM
- * @Copyright: 2020 www.yodean.com. All rights reserved.
+ * @author Rick.Xu
+ * @date 6/18/20 3:34 PM
  */
 @Service
+@RequiredArgsConstructor
+@Validated
 public class ReportService {
 
     private static final String EXCEL_EXTENSION = ".xlsx";
 
-    @Autowired
-    private ReportDAO reportDAO;
+    private final ReportDAO reportDAO;
 
-    @Autowired
-    private GridService gridService;
+    private final GridService gridService;
 
-    @Autowired
-    private Map<String, ValueConverter> valueConverterMap;
+    private final Map<String, ValueConverter> valueConverterMap;
 
     /**
      * 创建报表
      */
     public int saveOrUpdate(@Valid Report report) {
-        validateNonDeleteSQL(report.getQuerySql());
+        validateNonDeleteSql(report.getQuerySql());
         return reportDAO.insertOrUpdate(report);
     }
 
@@ -77,28 +75,21 @@ public class ReportService {
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
-        Optional<Report> optional = findById(id);
-        if (!optional.isPresent()) {
-            throw new BizException(ResultUtils.fail("Report not exists"));
-        }
-
-        Report report = optional.get();
-        validateNonDeleteSQL(report.getQuerySql());
+        Report report = getReport(id);
 
         String summarySQL = null;
         List<String> summaryColumnNameList = null;
         if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
-            summaryColumnNameList = Arrays.stream(report.getSummaryColumnNames().split(",")).collect(Collectors.toList());
-            summarySQL = "SELECT " + summaryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(10,3))").collect(Collectors.joining(", ")) + " FROM "
-                    + StringUtils.substringAfter(report.getQuerySql(), "FROM");
+            summaryColumnNameList = Arrays.stream(report.getSummaryColumnNames().split("\\s*,\\s*")).collect(Collectors.toList());
+            summarySQL = "SELECT " + summaryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(10,3))").collect(Collectors.joining(", ")) +
+                    report.getQuerySql().substring(report.getQuerySql().toUpperCase().indexOf("FROM"));
         }
 
-        DefaultTableGridService defaultTableGridService = new DefaultTableGridService(report.getQuerySql(), null, summarySQL);
-        Grid<Map<String, Object>> grid = defaultTableGridService.list(requestMap);
+        Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
 
         Map<String, BigDecimal> summaryMap = null;
         if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
-            List<BigDecimal> summaryList = defaultTableGridService.summary(requestMap);
+            List<BigDecimal> summaryList = GridUtils.numericObject(summarySQL, requestMap);
             if (grid.getRecords() > 0) {
                 summaryMap = Maps.newHashMapWithExpectedSize(summaryColumnNameList.size());
                 for (int i = 0; i < summaryColumnNameList.size(); i++) {
@@ -107,25 +98,55 @@ public class ReportService {
             }
         }
 
-        ReportDTO reportDTO = new ReportDTO(report, convert(grid, report), summaryMap);
-        return reportDTO;
+        return new ReportDTO(report, convert(grid, report), summaryMap);
+    }
+
+    public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
+        Report report = getReport(id);
+
+        QueryModel queryModel = QueryModel.of(HttpServletRequestUtils.getParameterMap(request));
+        PageModel pageModel = queryModel.getPageModel();
+        pageModel.setSize(-1);
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
+        String fileName = report.getName() + timestamp + EXCEL_EXTENSION;
+
+        QueryResultExportTable exportTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
+            @Override
+            public void setRows(List<?> rows) {
+                toObjectArrayListAndConvert((List<Map<String, Object>>) rows, report.getReportColumnList());
+                super.setRows(rows);
+            }
+        };
+
+        exportTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName));
+    }
+
+    private Report getReport(long id) {
+        Optional<Report> optional = findById(id);
+        if (!optional.isPresent()) {
+            throw new BizException(ResultUtils.fail("Report not exists"));
+        }
+
+        Report report = optional.get();
+        validateNonDeleteSql(report.getQuerySql());
+        return report;
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
         List<ReportColumn> reportColumnList = report.getReportColumnList();
 
-        Grid<Object[]> grid = Grid.<Object[]>builder()
-                .rows(toObjectArrayRowsAndTranslate(paramGrid.getRows(), reportColumnList))
+        return Grid.<Object[]>builder()
+                .rows(toObjectArrayListAndConvert(paramGrid.getRows(), reportColumnList))
                 .pageSize(paramGrid.getPageSize())
                 .page(paramGrid.getPage())
                 .totalPages(paramGrid.getTotalPages())
                 .records(paramGrid.getRecords())
                 .build();
-
-        return grid;
     }
 
-    private List<Object[]> toObjectArrayRowsAndTranslate(List<Map<String, Object>> rows, List<ReportColumn> reportColumnList) {
+    private List<Object[]> toObjectArrayListAndConvert(List<Map<String, Object>> rows, List<ReportColumn> reportColumnList) {
         List<Object[]> objectArrayRows = Lists.newArrayListWithExpectedSize(rows.size());
 
         int columnSize = reportColumnList.size();
@@ -151,41 +172,13 @@ public class ReportService {
         return objectArrayRows;
     }
 
-    public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
-        Optional<Report> optional = findById(id);
-        if (!optional.isPresent()) {
-            throw new BizException(ResultUtils.fail("Report not exists"));
-        }
-
-        Report report = optional.get();
-        validateNonDeleteSQL(report.getQuerySql());
-
-        QueryModel queryModel = QueryModel.of(HttpServletRequestUtils.getParameterMap(request));
-        PageModel pageModel = queryModel.getPageModel();
-        pageModel.setSize(-1);
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-        String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
-        String fileName = report.getName() + timestamp + EXCEL_EXTENSION;
-
-        QueryResultExportTable exportTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
-            @Override
-            public void setRows(List<?> rows) {
-                toObjectArrayRowsAndTranslate((List<Map<String, Object>>) rows, report.getReportColumnList());
-                super.setRows(rows);
-            }
-        };
-
-        exportTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName));
-    }
-
     private List<MapTableColumn> convert(List<ReportColumn> reportColumnList) {
         List<MapTableColumn> mapTableColumnList = Lists.newArrayListWithExpectedSize(reportColumnList.size());
 
-        for (com.rick.report.core.model.ReportColumn ReportColumn : reportColumnList) {
-            MapTableColumn mapTableColumn = new MapTableColumn(ReportColumn.getName(), ReportColumn.getLabel());
-            if (Objects.nonNull(ReportColumn.getColumnWidth())) {
-                mapTableColumn.setColumnWidth(ReportColumn.getColumnWidth() * 50);
+        for (ReportColumn reportColumn : reportColumnList) {
+            MapTableColumn mapTableColumn = new MapTableColumn(reportColumn.getName(), reportColumn.getLabel());
+            if (Objects.nonNull(reportColumn.getColumnWidth())) {
+                mapTableColumn.setColumnWidth(reportColumn.getColumnWidth() * 50);
             }
 
             mapTableColumnList.add(mapTableColumn);
@@ -194,9 +187,9 @@ public class ReportService {
         return mapTableColumnList;
     }
 
-    private void validateNonDeleteSQL(String sql) {
-        boolean isNULLorDeleteSQL = Objects.isNull(sql) || sql.matches("(?i).*delete\\s+from*.");
-        if (isNULLorDeleteSQL) {
+    private void validateNonDeleteSql(String sql) {
+        boolean isNullOrDeleteSql = Objects.isNull(sql) || sql.matches("(?i).*delete\\s+from*.");
+        if (isNullOrDeleteSql) {
             throw new BizException(ResultUtils.fail("Report sql error!"));
         }
     }

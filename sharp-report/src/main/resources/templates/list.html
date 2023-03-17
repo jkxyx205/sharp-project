@@ -68,7 +68,7 @@
                     </tr>
                     <tr th:if="${summary ne null}">
                         <td style="font-weight: bold;">合计</td>
-                        <td th:each="n : ${report.reportColumnList}" th:text="${summary[n.name]}"></td>
+                        <td th:each="n : ${report.reportColumnList}" th:text="${summary.get(n.name)}"></td>
                     </tr>
                     <tr class="tr-empty non-data" th:if="${grid.records < 1}">
                         <td th:colspan="${report.reportColumnList.size() + 1}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
