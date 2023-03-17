@@ -3,6 +3,7 @@ package com.rick.formflow.config;
 import com.rick.db.config.GridServiceAutoConfiguration;
 import com.rick.db.service.GridService;
 import com.rick.formflow.form.service.FormAdvice;
+import com.rick.formflow.form.service.bo.FormBO;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
@@ -37,12 +38,12 @@ public class FormFlowServiceAutoConfiguration {
         public FormAdvice formAdvice() {
             return new FormAdvice() {
                 @Override
-                public void beforeInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
+                public void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
 
                 }
 
                 @Override
-                public void afterInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
+                public void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
 
                 }
 

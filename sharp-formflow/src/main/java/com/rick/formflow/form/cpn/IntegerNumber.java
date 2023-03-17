@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import com.rick.formflow.form.cpn.core.AbstractCpn;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -22,13 +21,20 @@ public class IntegerNumber extends AbstractCpn<Integer> {
     }
 
     @Override
-    public Integer parseStringValue(String value) {
-        return StringUtils.isBlank(value) ? null : Integer.parseInt(value);
+    public Integer parseValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof String) {
+            return Integer.parseInt((String) value);
+        }
+        return (Integer) value;
     }
 
     @Override
     public Integer httpConverter(Object value) {
-        return parseStringValue((String) value);
+        return parseValue(value);
     }
 
     @Override

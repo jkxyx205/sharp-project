@@ -6,14 +6,16 @@ import com.rick.common.util.JsonUtils;
 import com.rick.formflow.form.valid.core.Validator;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -24,14 +26,14 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
     private Class<?> cpnClass;
 
     @Override
-    public void valid(T value, String[] options) {
+    public void valid(T value, List<CpnConfigurer.CpnOption> options) {
         // 验证选项
         if (value instanceof String && StringUtils.isBlank((CharSequence) value)) {
             return;
         }
 
-        if (Objects.nonNull(value) && ArrayUtils.isNotEmpty(options)) {
-            if (!Sets.newHashSet(options).contains(value)) {
+        if (Objects.nonNull(value) && CollectionUtils.isNotEmpty(options)) {
+            if (!options.stream().map(CpnConfigurer.CpnOption::getName).collect(Collectors.toSet()).contains(value)) {
                 throw new IllegalArgumentException("没有找到正确的选项");
             }
         }
@@ -42,17 +44,40 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
         }
     }
 
+    /**
+     * 处理 String 类型的 value
+     * @param value
+     * @return
+     */
     @Override
-    public T parseStringValue(String value) {
-        if (cpnClass == String.class) {
-            return (T) value;
+    public T parseValue(Object value) {
+        if (value == null) {
+            return null;
         }
 
-        try {
-            return (T) JsonUtils.toObject(value, cpnClass);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (value instanceof String) {
+            String stringVal = (String) value;
+
+            if (cpnClass == String.class) {
+                return (T) value;
+            } else if (cpnClass == Integer.class) {
+                return (T) Integer.valueOf((String) value);
+            } else if (cpnClass == BigDecimal.class) {
+                return (T) new BigDecimal((String) value);
+            }
+
+            try {
+                // 当个字符
+                if (!(stringVal.startsWith("[") || stringVal.startsWith("{"))) {
+                    stringVal = "[\""+value+"\"]";
+                }
+
+                return (T) JsonUtils.toObject(stringVal, cpnClass);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
         return null;
     }
 
@@ -82,14 +107,14 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
         }
 
         if (value instanceof String) {
-            return parseStringValue((String) value);
+            return parseValue((String) value);
         }
 
         return (T) value;
     }
 
     @Override
-    public void check(String[] options) {}
+    public void check(List<CpnConfigurer.CpnOption> options) {}
 
     @Override
     public Set<ValidatorTypeEnum> validatorSupports() {

@@ -96,8 +96,7 @@ public class FormService {
             // 可配置验证 和 控件验证 合并
             cpnConfigurer.getValidatorList().addAll(cpn.cpnValidators());
 
-            String value = null;
-            Object distValue = null;
+            Object value = null;
 
             if (isInstanceForm) {
                 if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
@@ -106,24 +105,16 @@ public class FormService {
                         value = formCpnValue.getValue();
                     }
                 } else if (form.getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
-                    Object tableValue = valueMap.get(cpnConfigurer.getName());
-
-                    if (tableValue != null && tableValue instanceof String) {
-                        value = (String) tableValue;
-                    } else {
-                        distValue = tableValue;
-                    }
+                    value = valueMap.get(cpnConfigurer.getName());
                 }
 
             } else {
                 value = cpnConfigurer.getDefaultValue();
             }
 
-            if (distValue == null) {
-                distValue = value == null ? null : cpn.parseStringValue(value);
-            }
+            value = value == null ? null : cpn.parseValue(value);
 
-            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, distValue));
+            propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
         }
 
         return new FormBO(form, instanceId, propertyList);
@@ -140,18 +131,18 @@ public class FormService {
     }
 
     private void handle(Long formId, Long instanceId, Map<String, Object> values) throws BindException {
+        FormBO form = getFormBOById(formId);
+
         values.put("formId", formId);
         values.put("instanceId", instanceId);
         values.put("id", instanceId);
 
         Long innerTableId = instanceId == null ? IdGenerator.getSequenceId() : instanceId;
 
-        FormBO form = getFormBOById(formId);
-
         List<FormCpnValue> FormCpnValueList = Lists.newArrayListWithExpectedSize(form.getPropertyList().size());
 
         Map<String, Object> map = Maps.newHashMap();
-        BindingResult bindingResult =  new MapBindingResult(map, getClass().getName());
+        BindingResult bindingResult = new MapBindingResult(map, getClass().getName());
 
         for (FormBO.Property property : form.getPropertyList()) {
             CpnInstanceProcessor processor = new CpnInstanceProcessor(property, cpnManager, values.get(property.getName()), bindingResult);
@@ -175,6 +166,11 @@ public class FormService {
             throw new BindException(bindingResult);
         }
 
+        FormAdvice formAdvice = formAdviceMap.get(form.getForm().getFormAdviceName());
+        if (formAdvice != null) {
+            formAdvice.beforeInstanceHandle(form, instanceId, values);
+        }
+
         if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
             formCpnValueDAO.insert(FormCpnValueList);
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
@@ -188,9 +184,8 @@ public class FormService {
         }
 
         // postHandler mongoDB 文档存储
-        FormAdvice formAdvice = formAdviceMap.get(form.getForm().getFormAdviceName());
         if (formAdvice != null) {
-            formAdvice.afterInstanceHandle(formId, instanceId, values);
+            formAdvice.afterInstanceHandle(form, instanceId, values);
         }
 
     }

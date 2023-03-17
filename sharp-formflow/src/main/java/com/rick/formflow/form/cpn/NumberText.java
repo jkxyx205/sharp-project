@@ -32,4 +32,16 @@ public class NumberText extends AbstractCpn<String> {
         return Sets.newHashSet(new NumberRegex());
     }
 
+    @Override
+    public String parseValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Integer) {
+            return value.toString();
+        }
+        return super.parseValue(value);
+    }
+
 }

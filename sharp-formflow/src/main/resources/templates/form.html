@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Form自定义表单</title>
+    <title th:text="${formBO.form.name}"></title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .col-form-label.required:after {
@@ -37,7 +37,7 @@
 
                     <select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
                            th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
-                        <option th:each="option : ${p.configurer.options}" th:value="${option}" th:text="${option}" th:selected="${option eq p.value}"></option>
+                        <option th:each="option : ${p.configurer.options}" th:value="${option.name}" th:text="${option.label}" th:selected="${option.name eq p.value}"></option>
                     </select>
 
                     <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">
@@ -63,10 +63,10 @@
                            th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
 
                     <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).CHECKBOX}" th:each="option : ${p.configurer.options}">
-                        <input class="form-check-input" type="checkbox" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${p.value ne null && #sets.contains(p.value, option)}" th:required="${p.configurer.options.length eq 1 && isRequired}"
+                        <input class="form-check-input" type="checkbox" th:name="${p.name}" th:id="${option.name}" th:value="${option.name}" th:checked="${p.value ne null && #sets.contains(p.value, option.name)}" th:required="${p.configurer.options.size() eq 1 && isRequired}"
                                th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
-                        <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
-                        <th:block th:if="${p.configurer.options.length eq 1}">
+                        <label class="form-check-label" th:for="${option.name}" th:text="${option.label}"></label>
+                        <th:block th:if="${p.configurer.options.size() eq 1}">
                             <!--前端验证所有验证信息-->
                             <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
                                  th:text="${v.message}"></div>
@@ -76,9 +76,9 @@
                     </div>
 
                     <div class="form-check" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).RADIO}" th:each="option : ${p.configurer.options}">
-                        <input class="form-check-input" type="radio" th:name="${p.name}" th:id="${option}" th:value="${option}" th:checked="${option eq p.value}"
+                        <input class="form-check-input" type="radio" th:name="${p.name}" th:id="${option.name}" th:value="${option.name}" th:checked="${option.name eq p.value}"
                                th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
-                        <label class="form-check-label" th:for="${option}" th:text="${option}"></label>
+                        <label class="form-check-label" th:for="${option.name}" th:text="${option.label}"></label>
                     </div>
 
                     <table th:class="${p.name + ' table'}"

@@ -2,20 +2,21 @@ package com.rick.formflow.form.cpn;
 
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
 import com.rick.formflow.form.cpn.core.AbstractCpn;
+import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -25,9 +26,9 @@ import java.util.List;
 public class CheckBox extends AbstractCpn<List<String>> {
 
     @Override
-    public void valid(List<String> value, String[] options) {
-        if (CollectionUtils.isNotEmpty(value) && ArrayUtils.isNotEmpty(options)) {
-            if (SetUtils.difference(new HashSet<>(value), Sets.newHashSet(options)).size() > 0) {
+    public void valid(List<String> value, List<CpnConfigurer.CpnOption> options) {
+        if (CollectionUtils.isNotEmpty(value) && CollectionUtils.isNotEmpty(options)) {
+            if (SetUtils.difference(new HashSet<>(value), options.stream().map(CpnConfigurer.CpnOption::getName).collect(Collectors.toSet())).size() > 0) {
                 throw new IllegalArgumentException("没有找到正确的选项");
             }
         }
@@ -55,8 +56,24 @@ public class CheckBox extends AbstractCpn<List<String>> {
     }
 
     @Override
-    public void check(String[] options) {
+    public void check(List<CpnConfigurer.CpnOption> options) {
         // TODO 选项不能重复
     }
 
+    @Override
+    public List<String> parseValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            if (value == Boolean.TRUE) {
+                return Arrays.asList(Boolean.TRUE.toString(), "1");
+            } else {
+                return Arrays.asList(Boolean.FALSE.toString(), "0");
+            }
+        }
+
+        return super.parseValue(value);
+    }
 }

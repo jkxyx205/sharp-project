@@ -62,7 +62,7 @@ public class CpnConfigurer extends BaseEntity {
     private Set<Map<String, ?>> validators;
 
     @Column("options")
-    private String[] options;
+    private List<CpnOption> options;
 
     @Column("default_value")
     private String defaultValue;
@@ -89,7 +89,7 @@ public class CpnConfigurer extends BaseEntity {
             validatorList = Sets.newHashSetWithExpectedSize(validators.size());
             try {
                 for (Map<String, ?> validatorInfo : validators) {
-                    Class<? extends Validator> validatorType = ValidatorManager.getValidatorByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validatorType")));
+                    Class<? extends Validator> validatorType = ValidatorManager.getValidatorByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validator_type")));
                     validatorList.add(JsonUtils.toObject(JsonUtils.toJson(validatorInfo), validatorType));
                 }
             } catch (IOException e) {
@@ -120,5 +120,23 @@ public class CpnConfigurer extends BaseEntity {
 
         }
         return map;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class CpnOption {
+
+        private String name;
+
+        private String label;
+
+        public CpnOption(String label) {
+            this(label, label);
+        }
+
+        public CpnOption(String name, String label) {
+            this.name = name;
+            this.label = label;
+        }
     }
 }

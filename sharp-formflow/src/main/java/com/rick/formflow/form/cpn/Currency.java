@@ -6,9 +6,9 @@ import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.valid.NumberRegex;
 import com.rick.formflow.form.valid.core.Validator;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -16,7 +16,7 @@ import java.util.Set;
  * @createdAt 2021-11-02 20:45:00
  */
 @Component
-public class Currency extends AbstractCpn<Integer> {
+public class Currency extends AbstractCpn<BigDecimal> {
 
 
     @Override
@@ -25,13 +25,13 @@ public class Currency extends AbstractCpn<Integer> {
     }
 
     @Override
-    public Integer parseStringValue(String value) {
-        return StringUtils.isBlank(value) ? null : Integer.parseInt(value);
+    public BigDecimal parseValue(Object value) {
+        return value == null ? null : (value instanceof String ? super.parseValue(value) : (BigDecimal) value);
     }
 
     @Override
-    public Integer httpConverter(Object value) {
-        return parseStringValue((String) value);
+    public BigDecimal httpConverter(Object value) {
+        return parseValue(value);
     }
 
     @Override
