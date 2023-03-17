@@ -3,21 +3,43 @@
 <head>
     <title th:text="${report.name}"></title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <style>
+        .ms-parent {
+            padding: 0;
+        }
+
+        .ms-parent .ms-choice {
+            display: block;
+            border: none;
+            height: 33px;
+            line-height: 33px;
+        }
+    </style>
 </head>
 <body>
 <div class="container" style="padding: 10px 0;">
+    <h2 class="mb-5" th:text="${report.name}"></h2>
     <div class="row">
         <div class="search-panel" style="margin-bottom: 15px;">
             <form class="query-form-container">
                 <div class="form-group row" style="margin-bottom: 0;">
                     <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList.size() > 0}">
                         <label class="col-form-label" th:for="${f.name}" th:text="${f.label}"></label>
-                        <div class="col-md-3" style="margin-bottom: 10px;">
+                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() ne 'DATE_RANGE'}">
                             <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}">
                             <sp:dict th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
+                            <sp:dict th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem/>
+                        </div>
+                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                            <input class="form-control" th:id="${f.name + '0'}" type="date" th:name="${f.name + '0'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">
+                            <span style="position: absolute;top: 7px;right: -8px;">-</span>
+                        </div>
+                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                            <input class="form-control" th:id="${f.name + '1'}" type="date" th:name="${f.name + '1'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">
                         </div>
                     </th:block>
-                    <div class="col-md-5 col-form-btn">
+                    <div class="col-md-4 col-form-btn">
                         <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList.size() > 0}">
                             <i class="fa fa-dot-circle-o"></i> 查询</button>
                         <button class="btn btn-secondary" type="button" name="reset" th:if="${report.queryFieldList.size() > 0}">
@@ -43,6 +65,10 @@
                     <tr th:each="m : ${grid.rows}">
                         <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
                         <td th:each="v : ${grid.rows[mStat.index]}" th:text="${v}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}"></td>
+                    </tr>
+                    <tr th:if="${summary ne null}">
+                        <td style="font-weight: bold;">合计</td>
+                        <td th:each="n : ${report.reportColumnList}" th:text="${summary[n.name]}"></td>
                     </tr>
                     <tr class="tr-empty non-data" th:if="${grid.records < 1}">
                         <td th:colspan="${report.reportColumnList.size() + 1}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
@@ -82,19 +108,52 @@
 <script type="text/javascript" th:src="@{/js/table/jquery.table.js}"></script>
 <script type="text/javascript" th:src="@{/js/table/jquery.pageTable.js}"></script>
 <script type="text/javascript" th:src="@{/js/table/jquery.formautofill.min.js}"></script>
+<script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+<script th:src="@{/plugins/math.min.js}"></script>
 <!-- test -->
 <script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
 <script th:inline="javascript">
 
-    var $table = $('#report-list').table({
+    $.fn.multipleSelect.locales['zh-CN'] = {
+        formatSelectAll: function () {
+            return '[全选]'
+        },
+        formatAllSelected: function () {
+            return '已选择所有记录'
+        },
+        formatCountSelected: function(count, total) {
+            return '已从' + total + '条记录中选择' + count + '条'
+        },
+        formatNoMatchesFound: function () {
+            return '没有找到记录'
+        }
+    }
+
+    $.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
+
+    let urlObject = getUrlObject();
+
+    /*<![CDATA[*/
+    var fz = [[${report.queryFieldList}]]
+    var multipleSelect = fz.filter(f => f.type == 'MULTIPLE_SELECT')
+    multipleSelect.forEach(f => {
+        var value = urlObject[f.name]
+        $('#' + f.name).multipleSelect({
+            selectAll: true,
+            single: false,
+            placeholder: '请输入' + f.label
+        }).multipleSelect('setSelects', !value ? '' : value.split(','))
+    })
+    /*]]>*/
+
+    $('#report-list').table({
         type: 'server',
-        summary: /*[[${report.summary}]]*/,
         clicked: function (obj, e) {
             search('page=1&sidx='+$(e).data('name')+'&sord='+e.sord+'')
         }
     })
 
-    $('.query-form-container').autofill(getUrlObject()).pageTable()
+    $('.query-form-container').autofill(urlObject).pageTable()
     $('#exportBtn').attr('href', $('#exportBtn').attr('href') + _newUrl())
 
     // test html export
@@ -119,8 +178,9 @@
     }
 
     function _newUrl(url) {
-        if (typeof url === 'object')
+        if (typeof url === 'object') {
             url = $.param(url)
+        }
 
         var search = location.search
 
@@ -174,6 +234,37 @@
             }
             toastr.error('页码不能为空!');
         }
+    }
+
+    function formatInteger(num) {
+        if (typeof num === 'undefined' || num === null)
+            return ''
+
+        var num = (num || 0).toString(), result = '';
+
+        var d = num.split('.');
+        var s = ''
+
+        if (d.length > 1) {
+            s = '.' + d[1]
+        }
+
+        num = d[0]
+
+        var sign = ''
+        var firstLetter = num.charAt(0)
+
+        if (/^\-|\+$/.test(firstLetter)) {
+            num = num.substr(1)
+            sign = firstLetter
+        }
+
+        while (num.length > 3) {
+            result = ',' + num.slice(-3) + result;
+            num = num.slice(0, num.length - 3);
+        }
+        if (num) { result = num + result; }
+        return sign + result + s;
     }
 </script>
 </body>

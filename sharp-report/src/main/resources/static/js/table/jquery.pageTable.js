@@ -17,7 +17,18 @@
 
             $search.on('click', function () {
                 var param = _this.$element.form2json({allowEmptyMultiVal:true});
+
                 param.page = 1
+                $multipleSelect.each(function () {
+                    // https://multiple-select.wenzhixin.net.cn/
+                    var values = $(this).multipleSelect('getSelects')
+                    if (values.length > 0) {
+                        param[this.name] = $(this).multipleSelect('getSelects').join(",")
+                    } else {
+                        param[this.name] = undefined
+                    }
+                })
+
                 search(param)
             })
 
@@ -29,11 +40,13 @@
                     $(this).find("option").each(function() {
                         $(this).prop('selected', false);
                     });
+
+                    $(this).multipleSelect('uncheckAll')
                 });
                 $search.click()
             })
 
-            this.$element.find('select').on('change', function () {
+            this.$element.find('select').not("[multiple]").on('change', function () {
                 $search.click()
             })
 

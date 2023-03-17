@@ -53,11 +53,7 @@ public class Report extends BaseEntity {
     @Column(columnDefinition = "text not null")
     private String querySql;
 
-    /**
-     * 统计
-     */
-    @Column(columnDefinition = "bit default 0")
-    private Boolean summary;
+    private String summaryColumnNames;
 
     @NotNull
     @Column(value = "report_column_list", columnDefinition = "text")

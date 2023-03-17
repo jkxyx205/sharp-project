@@ -24,7 +24,7 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
     private String label;
 
     /**
-     * type: text, select, date_range
+     * type: text, mutile select, date_range
      */
     private Type type;
 
@@ -49,7 +49,7 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
     }
 
     public enum Type {
-        TEXT, SELECT, DATE_RANGE;
+        TEXT, SELECT, MULTIPLE_SELECT, DATE_RANGE;
     }
 
 }

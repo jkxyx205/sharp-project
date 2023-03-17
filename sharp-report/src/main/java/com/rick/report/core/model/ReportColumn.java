@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -25,6 +26,10 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
 
     private String label;
 
+    private List<String> valueConverterNameList;
+
+    private String context;
+
     private Boolean sortable = false;
 
     private Integer columnWidth;
@@ -38,9 +43,23 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
     }
 
     public ReportColumn(String name, String label, Boolean sortable) {
+        this(name, label, sortable, null, null);
+    }
+
+    public ReportColumn(String name, String label, Boolean sortable, List<String> valueConverterNameList) {
         this.name = name;
         this.label = label;
+        this.valueConverterNameList = valueConverterNameList;
         this.sortable = sortable;
+    }
+
+    public ReportColumn(String name, String label, Boolean sortable, String context, List<String> valueConverterNameList) {
+        this.name = name;
+        this.label = label;
+        this.context = context;
+        this.valueConverterNameList = valueConverterNameList;
+        this.sortable = sortable;
+
     }
 
 }

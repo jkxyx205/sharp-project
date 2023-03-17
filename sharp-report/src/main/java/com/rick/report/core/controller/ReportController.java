@@ -39,6 +39,7 @@ public class ReportController {
         ReportDTO reportDTO = reportService.list(id, HttpServletRequestUtils.getParameterMap(request));
         Grid gird = reportDTO.getGrid();
         model.addAttribute("report", reportDTO.getReport());
+        model.addAttribute("summary", reportDTO.getSummaryMap());
         model.addAttribute("grid", gird);
         model.addAttribute("id", id);
         model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), gird.getPageSize(), gird.getPage()));

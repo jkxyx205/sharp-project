@@ -1,6 +1,7 @@
 package com.rick.report.core.service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.exception.BizException;
@@ -8,13 +9,17 @@ import com.rick.common.http.model.ResultUtils;
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
 import com.rick.db.dto.QueryModel;
+import com.rick.db.plugin.table.DefaultTableGridService;
 import com.rick.db.service.GridService;
 import com.rick.excel.table.QueryResultExportTable;
 import com.rick.excel.table.model.MapTableColumn;
+import com.rick.meta.dict.convert.ValueConverter;
 import com.rick.report.core.dao.ReportDAO;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.ReportColumn;
 import com.rick.report.core.model.ReportDTO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +27,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -48,6 +52,9 @@ public class ReportService {
 
     @Autowired
     private GridService gridService;
+
+    @Autowired
+    private Map<String, ValueConverter> valueConverterMap;
 
     /**
      * 创建报表
@@ -77,31 +84,38 @@ public class ReportService {
 
         Report report = optional.get();
         validateNonDeleteSQL(report.getQuerySql());
-        QueryModel queryModel = QueryModel.of(requestMap);
-        if (!report.getPageable()) {
-            queryModel.getPageModel().setSize(-1);
-        }
-        Grid<Map<String, Object>> grid = gridService.query(report.getQuerySql(), queryModel.getPageModel(), queryModel.getParams());
 
-        ReportDTO reportDTO = new ReportDTO(report, convert(grid, report));
+        String summarySQL = null;
+        List<String> summaryColumnNameList = null;
+        if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
+            summaryColumnNameList = Arrays.stream(report.getSummaryColumnNames().split(",")).collect(Collectors.toList());
+            summarySQL = "SELECT " + summaryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(10,3))").collect(Collectors.joining(", ")) + " FROM "
+                    + StringUtils.substringAfter(report.getQuerySql(), "FROM");
+        }
+
+        DefaultTableGridService defaultTableGridService = new DefaultTableGridService(report.getQuerySql(), null, summarySQL);
+        Grid<Map<String, Object>> grid = defaultTableGridService.list(requestMap);
+
+        Map<String, BigDecimal> summaryMap = null;
+        if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
+            List<BigDecimal> summaryList = defaultTableGridService.summary(requestMap);
+            if (grid.getRecords() > 0) {
+                summaryMap = Maps.newHashMapWithExpectedSize(summaryColumnNameList.size());
+                for (int i = 0; i < summaryColumnNameList.size(); i++) {
+                    summaryMap.put(summaryColumnNameList.get(i), summaryList.get(i));
+                }
+            }
+        }
+
+        ReportDTO reportDTO = new ReportDTO(report, convert(grid, report), summaryMap);
         return reportDTO;
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
-        List<Object[]> rows = Lists.newArrayListWithExpectedSize(paramGrid.getRows().size());
-        List<ReportColumn>  reportColumnList = report.getReportColumnList();
-        int columnSize = reportColumnList.size();
-
-        for (Map m : paramGrid.getRows()) {
-            Object[] row = new Object[columnSize];
-            for (int i = 0; i < columnSize; i++) {
-                row[i] = m.get(reportColumnList.get(i).getName());
-            }
-            rows.add(row);
-        }
+        List<ReportColumn> reportColumnList = report.getReportColumnList();
 
         Grid<Object[]> grid = Grid.<Object[]>builder()
-                .rows(rows)
+                .rows(toObjectArrayRowsAndTranslate(paramGrid.getRows(), reportColumnList))
                 .pageSize(paramGrid.getPageSize())
                 .page(paramGrid.getPage())
                 .totalPages(paramGrid.getTotalPages())
@@ -109,6 +123,32 @@ public class ReportService {
                 .build();
 
         return grid;
+    }
+
+    private List<Object[]> toObjectArrayRowsAndTranslate(List<Map<String, Object>> rows, List<ReportColumn> reportColumnList) {
+        List<Object[]> objectArrayRows = Lists.newArrayListWithExpectedSize(rows.size());
+
+        int columnSize = reportColumnList.size();
+        for (Map<String, Object> rowMap : rows) {
+            Object[] row = new Object[columnSize];
+            for (int i = 0; i < columnSize; i++) {
+                ReportColumn reportColumn = reportColumnList.get(i);
+
+                row[i] = rowMap.get(reportColumn.getName());
+
+                if (CollectionUtils.isNotEmpty(reportColumn.getValueConverterNameList())) {
+                    for (String convertName : reportColumn.getValueConverterNameList()) {
+                        row[i] = valueConverterMap.get(convertName).convert(reportColumn.getContext(), row[i]);
+                    }
+
+                    rowMap.put(reportColumn.getName(), row[i]);
+                }
+
+            }
+            objectArrayRows.add(row);
+        }
+
+        return objectArrayRows;
     }
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
@@ -128,7 +168,14 @@ public class ReportService {
         String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
         String fileName = report.getName() + timestamp + EXCEL_EXTENSION;
 
-        QueryResultExportTable exportTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList()));
+        QueryResultExportTable exportTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
+            @Override
+            public void setRows(List<?> rows) {
+                toObjectArrayRowsAndTranslate((List<Map<String, Object>>) rows, report.getReportColumnList());
+                super.setRows(rows);
+            }
+        };
+
         exportTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName));
     }
 

@@ -5,6 +5,9 @@ import com.rick.report.core.entity.Report;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
 /**
  * All rights Reserved, Designed By www.xhope.top
  *
@@ -21,4 +24,6 @@ public class ReportDTO {
     private Report report;
 
     private Grid<Object[]> grid;
+
+    private Map<String, BigDecimal> summaryMap;
 }
