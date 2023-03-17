@@ -56,7 +56,7 @@ public class CpnTest {
                 .name("sex")
                 .label("性别")
                 .placeholder("请输入性别")
-                .options(new String[] {"男", "女","保密"})
+                .options(Arrays.asList(new CpnConfigurer.CpnOption("男"), new CpnConfigurer.CpnOption("女"), new CpnConfigurer.CpnOption("保密")))
                 .defaultValue("保密")
                 .validatorList(textValidatorList)
                 .build();
@@ -78,11 +78,11 @@ public class CpnTest {
         selectValidatorList.add(new Required(true));
         CpnConfigurer cpnConfigurerSelect = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.SELECT)
-                .name("hobby")
-                .label("兴趣爱好(单选)")
+                .name("native_place")
+                .label("籍贯(单选)")
                 .placeholder("请输入兴趣爱好")
-                .options(new String[] {"足球", "篮球","乒乓球","羽毛球"})
-                .defaultValue("足球")
+                .options(Arrays.asList(new CpnConfigurer.CpnOption("陕西"), new CpnConfigurer.CpnOption("江苏"), new CpnConfigurer.CpnOption("四川"), new CpnConfigurer.CpnOption("上海")))
+                .defaultValue("江苏")
                 .validatorList(selectValidatorList)
                 .build();
 
@@ -91,10 +91,10 @@ public class CpnTest {
         selectValidatorList.add(new Required(true));
         CpnConfigurer cpnConfigurerCheckbox = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.CHECKBOX)
-                .name("hobby2")
+                .name("hobby")
                 .label("兴趣爱好(多选)")
                 .placeholder("请输入兴趣爱好")
-                .options(new String[] {"足球", "篮球","乒乓球","羽毛球"})
+                .options(Arrays.asList(new CpnConfigurer.CpnOption("足球"), new CpnConfigurer.CpnOption("篮球"), new CpnConfigurer.CpnOption("乒乓球"), new CpnConfigurer.CpnOption("羽毛球"))                 )
                 .defaultValue("[\"足球\", \"篮球\"]")
                 .validatorList(checkboxValidatorList)
                 .build();

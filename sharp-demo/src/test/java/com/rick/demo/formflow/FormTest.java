@@ -1,5 +1,6 @@
 package com.rick.demo.formflow;
 
+import com.rick.common.util.JsonUtils;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.service.support.Params;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.BindException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class FormTest {
 
     private static Long formId = 487677232379494400L;
 
-    private static Long instanceId = 487684156282011648L;
+    private static Long instanceId = 667878193193070592L;
 
     private static Long[] configIds = new Long[] {487671506907070464L, 487671506907070465L,487671506907070466L,487671506907070468L,
             487671506907070470L,487671506907070469L,487671506907070471L,487671506907070473L,
@@ -69,11 +71,11 @@ public class FormTest {
     @Test
     public void testAddInstanceToForm() throws BindException {
         formService.post(formId,  Params.builder()
-                .pv("name", "Jkxyx205")
+                .pv("name", "Rick")
                 .pv("age", "32")
-                .pv("hobby", "足球")
+                .pv("native_place", "江苏")
                 .pv("info", Arrays.asList(Arrays.asList("rick", 32))) //table
-                .pv("hobby2", Arrays.asList("足球", "篮球"))
+                .pv("hobby", Arrays.asList("足球", "篮球"))
                 .pv("agree", Arrays.asList("同意"))
                 .pv("remark", "简介")
                 .pv("sex", "男")
@@ -87,12 +89,13 @@ public class FormTest {
     }
 
     @Test
-    public void testFindInstanceToForm() {
+    public void testFindInstanceToForm() throws IOException {
         FormBO form1 = formService.getFormBOById(formId);
         if (form1.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
-            FormBO form2 = formService.getFormBOByIdAndInstanceId(formId, instanceId);
+            FormBO form = formService.getFormBOByIdAndInstanceId(formId, instanceId);
+            System.out.println(JsonUtils.toJson(form));
         } else if (form1.getForm().getStorageStrategy() == Form.StorageStrategyEnum.NONE) {
-            FormBO form2 = formService.getFormBOByIdAndInstanceId(formId, 665628482239229955L);
+//            FormBO form2 = formService.getFormBOByIdAndInstanceId(formId, 665628482239229955L);
         }
 
     }

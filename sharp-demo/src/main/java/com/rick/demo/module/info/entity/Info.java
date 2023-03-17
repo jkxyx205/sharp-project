@@ -28,9 +28,9 @@ public class Info extends BaseEntity {
 
     private Integer age;
 
-    private String hobby;
+    private String nativePlace;
 
-    private List<String> hobby2;
+    private List<String> hobby;
 
     private List<String> agree;
 

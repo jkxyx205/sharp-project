@@ -45,7 +45,6 @@ public class ReportTest {
                         new QueryField("sex", "性别", QueryField.Type.SELECT, "sex")
                 ))
                 .pageable(true)
-                .summary(false)
                 .sidx("title")
                 .sord(SordEnum.ASC)
                 .build());

@@ -2,6 +2,7 @@ package com.rick.demo.module.info.service;
 
 import com.rick.demo.module.info.dao.InfoDAO;
 import com.rick.formflow.form.service.FormAdvice;
+import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +19,12 @@ public class InfoFormAdvice implements FormAdvice {
     private final InfoDAO infoDAO;
 
     @Override
-    public void beforeInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
+    public void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
 
     }
 
     @Override
-    public void afterInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
+    public void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
 //        infoDAO.insertOrUpdate(values);
     }
 

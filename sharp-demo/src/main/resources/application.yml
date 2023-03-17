@@ -37,6 +37,16 @@ dict:
       sql: "select username, name from sys_user order by id asc"
     - type: grade
       map: {g1: "一年级", g2: "二年级"}
+    - type: bol
+      map: { "1" : "是", "0": "否" }
+    - type: status
+      map: {LOCKED: "锁定", NORMAL: "正常"}
+    - type: nativePlace #  有中文不能使用 map: { "江苏": "江苏", "四川": "四川", "陕西": "陕西", "上海": "上海" }
+      list:
+        - "江苏"
+        - "四川"
+        - "陕西"
+        - "上海"
 
 fileupload:
   tmp: /Users/rick/jkxyx205/tmp/fastdfs/tmp # 下载的临时目录

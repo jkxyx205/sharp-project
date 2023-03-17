@@ -1,6 +1,7 @@
 package com.rick.demo.module.form;
 
 import com.rick.formflow.form.service.FormAdvice;
+import com.rick.formflow.form.service.bo.FormBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +16,13 @@ import java.util.Map;
 public class ProjectFormSaveAdvice implements FormAdvice {
 
     @Override
-    public void beforeInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
+    public void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
 
     }
 
     @Override
-    public void afterInstanceHandle(Long formId, Long instanceId, Map<String, Object> values) {
-        log.info("formId: {}, instance: {}, \r\nvalues:{}", formId, instanceId, values);
+    public void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
+        log.info("formId: {}, instance: {}, \r\nvalues:{}", form.getForm().getId(), instanceId, values);
     }
 
 }
