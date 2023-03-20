@@ -28,7 +28,8 @@ public class DatabaseMetaData {
         try {
             databaseMetaData = jdbcTemplate.getDataSource().getConnection().getMetaData();
 
-            try(ResultSet resultSet = databaseMetaData.getTables("", null, "%", new String[]{})){
+            // mysql 8.0 catalog "" => null
+            try(ResultSet resultSet = databaseMetaData.getTables(databaseMetaData.getDatabaseMajorVersion() == 8 ? null : "", null, "%", new String[]{"TABLE"})){
                 while(resultSet.next()) {
                     tableColumnMap.put(resultSet.getString("TABLE_NAME"), null);
                     tablePrimaryKeyMap.put(resultSet.getString("TABLE_NAME"), null);
