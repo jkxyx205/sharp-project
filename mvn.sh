@@ -14,7 +14,7 @@ sharp-database
 #sharp-security
 )
 
-for p in $PROJECTS
+for p in ${PROJECTS[@]}
 do
   mvn clean install -f $p
 done

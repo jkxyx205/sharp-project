@@ -7,6 +7,12 @@
     <groupId>com.rick.meta</groupId>
     <artifactId>sharp-meta</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <parent>
+        <artifactId>sharp-dependencies</artifactId>
+        <groupId>com.rick</groupId>
+        <version>2.5.4</version>
+        <relativePath>../sharp-dependencies</relativePath>
+    </parent>
 
     <dependencies>
         <dependency>
