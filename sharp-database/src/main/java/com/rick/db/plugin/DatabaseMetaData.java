@@ -28,7 +28,7 @@ public class DatabaseMetaData {
         try {
             databaseMetaData = jdbcTemplate.getDataSource().getConnection().getMetaData();
 
-            try(ResultSet resultSet = databaseMetaData.getTables(null, null, "%", new String[]{})){
+            try(ResultSet resultSet = databaseMetaData.getTables("", null, "%", new String[]{})){
                 while(resultSet.next()) {
                     tableColumnMap.put(resultSet.getString("TABLE_NAME"), null);
                     tablePrimaryKeyMap.put(resultSet.getString("TABLE_NAME"), null);
@@ -36,7 +36,7 @@ public class DatabaseMetaData {
             }
 
             for (String tableName : tableColumnMap.keySet()) {
-                try(ResultSet columns = databaseMetaData.getColumns("",null, tableName, null)){
+                try(ResultSet columns = databaseMetaData.getColumns("",null, tableName, "%")){
                     List<String> columnNameList = new ArrayList<>();
 
                     while(columns.next()) {
