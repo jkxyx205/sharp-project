@@ -130,8 +130,12 @@ public class TableGenerator {
             return "bit";
         } else if (type == BigDecimal.class) {
             return "decimal(10,3)";
-        } else if (type == Instant.class || type == LocalDateTime.class) {
+        } else if (type == LocalDateTime.class) {
             return "datetime";
+        } else if (type == Instant.class) {
+            // mysql 5.7 也是对应 datetime
+            // mysql 8.0 对应 timestamp
+            return "timestamp";
         } else if (type == LocalDate.class) {
             return "date";
         } else if (type == LocalTime.class) {
@@ -139,7 +143,7 @@ public class TableGenerator {
         } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type)) {
 //            return "text";
             return "json";
-        } else if(BaseEntity.class.isAssignableFrom(type)) {
+        } else if (BaseEntity.class.isAssignableFrom(type)) {
             return "bigint";
         }
 
