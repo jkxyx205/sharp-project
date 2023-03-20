@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 数据库表和字段信息
  * @author Rick
  * @createdAt 2023-03-13 14:05:00
  */
