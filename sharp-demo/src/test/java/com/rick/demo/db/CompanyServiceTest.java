@@ -46,7 +46,7 @@ class CompanyServiceTest {
     @Test
     public void testUpdate() {
         companyDAO.update(Company.builder()
-                .id(664271916529364992L)
+                .id(670076483951153152L)
                 .name("点")
                 .phone("110")
                 .address("Nanjing")
@@ -65,7 +65,7 @@ class CompanyServiceTest {
 
     @Test
     public void testFindById() {
-        List<Company> list = companyDAO.selectByIds(664271916529364992L, 664272777510924288L);
+        List<Company> list = companyDAO.selectByIds(670076483951153152L);
         list.forEach(System.out::println);
 
     }

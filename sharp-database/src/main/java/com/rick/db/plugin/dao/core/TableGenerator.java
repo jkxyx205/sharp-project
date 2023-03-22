@@ -71,6 +71,8 @@ public class TableGenerator {
                     createTableSql.append(determineSqlType(field.getType()));
                     if (!column.nullable()) {
                         createTableSql.append(" not null");
+                    } else {
+                        createTableSql.append(" null");
                     }
 
                     if (StringUtils.isNotBlank(column.comment())) {
@@ -78,7 +80,7 @@ public class TableGenerator {
                     }
                 }
             } else {
-                createTableSql.append(determineSqlType(field.getType()));
+                createTableSql.append(determineSqlType(field.getType())).append(" null");
             }
 
             createTableSql.append(",");
@@ -89,6 +91,8 @@ public class TableGenerator {
         if (Objects.nonNull(tableMeta.getTable()) && StringUtils.isNotBlank(tableMeta.getTable().comment())) {
             createTableSql.append(" comment '"+tableMeta.getTable().comment()+"'");
         }
+
+        createTableSql.append(" ENGINE=InnoDB  DEFAULT CHARSET=utf8");
         log.info(createTableSql.toString());
 
         createManyToManyTable(tableMeta.getManyToManyAnnotationList());
@@ -110,7 +114,7 @@ public class TableGenerator {
                         "                        is_deleted bit default b'0' not null,\n" +
                         "                        constraint "+manyToMany.thirdPartyTable()+"_pk\n" +
                         "                unique ("+manyToMany.columnDefinition()+", "+manyToMany.referenceColumnName()+")\n" +
-                        "                )");
+                        "                ) ENGINE=InnoDB  DEFAULT CHARSET=utf8");
 
                 tableNameCreatedContainer.get().add(manyToMany.thirdPartyTable());
             }

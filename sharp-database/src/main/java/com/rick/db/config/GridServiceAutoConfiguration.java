@@ -81,8 +81,10 @@ public class GridServiceAutoConfiguration {
 
 
         @Bean
-        public GridService gridService(JdbcTemplate jdbcTemplate) {
-            DatabaseMetaData.initTableMapping(jdbcTemplate);
+        public GridService gridService(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
+            if (Constants.DB_MYSQL.equals(sharpDatabaseProperties.getType())) {
+                DatabaseMetaData.initTableMapping(jdbcTemplate);
+            }
             return new GridService();
         }
 

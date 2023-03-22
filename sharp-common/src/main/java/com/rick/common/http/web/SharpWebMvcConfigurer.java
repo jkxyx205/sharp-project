@@ -99,7 +99,7 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
                 final Map<String, String[]> formattedParams = new ConcurrentHashMap<>();
 
                 for (String param : request.getParameterMap().keySet()) {
-                    String formattedParam = StringUtils.snakeToCamel(param);
+                    String formattedParam = StringUtils.stringToCamel(param);
                     formattedParams.put(formattedParam, request.getParameterValues(param));
                 }
 

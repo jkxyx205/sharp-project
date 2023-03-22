@@ -57,7 +57,6 @@ public class DatabaseMetaData {
                 }
             }
 
-
         } catch (SQLException exception) {
             throw new RuntimeException(exception);
         }

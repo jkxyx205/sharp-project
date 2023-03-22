@@ -12,10 +12,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -144,7 +147,7 @@ public class SharpService {
         }
 
         // 添加嵌套查询
-        NestedRowMapper<T> beanPropertyRowMapper = new NestedRowMapper<>(clazz);
+        RowMapper<T> beanPropertyRowMapper = new NestedRowMapper<>(clazz);
         List<T> query = jdbcTemplate.query(sql, paramMap, beanPropertyRowMapper);
         return query;
     }
@@ -153,8 +156,25 @@ public class SharpService {
 
         private Class<T> mappedClass;
 
+        private Map<String, PropertyDescriptor> mappedFields;
+
         public NestedRowMapper(Class<T> mappedClass) {
             this.mappedClass = mappedClass;
+            this.mappedFields = new HashMap<>();
+            initMappedValues(mappedClass, null);
+
+        }
+
+        private void initMappedValues(Class<?> mappedClass, String propertyPrefix) {
+            for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
+                if (pd.getWriteMethod() != null) {
+                    if (SqlTypeValue.TYPE_UNKNOWN != StatementCreatorUtils.javaTypeToSqlParameterType(pd.getPropertyType())) {
+                        this.mappedFields.put((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName(), pd);
+                    } else {
+                        initMappedValues(pd.getPropertyType(), pd.getName());
+                    }
+                }
+            }
         }
 
         @Override
@@ -169,16 +189,57 @@ public class SharpService {
 
             for (int index = 1; index <= columnCount; index++) {
                 String column = JdbcUtils.lookupColumnName(rsmd, index);
-                try {
-                    Object value = JdbcUtils.getResultSetValue(rs, index, Class.forName(rsmd.getColumnClassName(index)));
-                    bw.setPropertyValue(StringUtils.snakeToCamel(column), value);
-                } catch (TypeMismatchException | NotWritablePropertyException | ClassNotFoundException e) {
-//                    log.warn("Unable to map column '" + column + "' to property");
-                    throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property", e);
+                String propertyName = StringUtils.stringToCamel(column);
+                PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(propertyName) : null);
+
+                if (pd != null) {
+                    try {
+                        Object value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
+                        bw.setPropertyValue(propertyName, value);
+                    } catch (TypeMismatchException | NotWritablePropertyException e) {
+                        throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property" + pd.getName(), e);
+                    }
                 }
             }
 
             return mappedObject;
+        }
+
+        /**
+         * Convert the given name to lower case.
+         * By default, conversions will happen within the US locale.
+         * @param name the original name
+         * @return the converted name
+         * @since 4.2
+         */
+        protected String lowerCaseName(String name) {
+            return name.toLowerCase(Locale.US);
+        }
+
+        /**
+         * Convert a name in camelCase to an underscored name in lower case.
+         * Any upper case letters are converted to lower case with a preceding underscore.
+         * @param name the original name
+         * @return the converted name
+         * @since 4.2
+         * @see #lowerCaseName
+         */
+        protected String underscoreName(String name) {
+            if (!org.springframework.util.StringUtils.hasLength(name)) {
+                return "";
+            }
+
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < name.length(); i++) {
+                char c = name.charAt(i);
+                if (Character.isUpperCase(c)) {
+                    result.append('_').append(Character.toLowerCase(c));
+                }
+                else {
+                    result.append(c);
+                }
+            }
+            return result.toString();
         }
 
     }

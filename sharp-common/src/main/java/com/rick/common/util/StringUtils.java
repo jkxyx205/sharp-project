@@ -1,8 +1,10 @@
 package com.rick.common.util;
 
+import com.google.common.base.CaseFormat;
 import com.rick.common.constant.Constants;
 import org.springframework.lang.Nullable;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -308,22 +310,28 @@ public final class StringUtils {
     // found at https://www.geeksforgeeks.org/convert-snake-case-string-to-camel-case-in-java/#:~:text=replaceFirst()%20method%20to%20convert,next%20letter%20of%20the%20underscore.
     // Function to convert the string
     // from snake case to camel case
-    public static String snakeToCamel(String str) {
+    public static String stringToCamel(String str) {
         // Run a loop till string
         // string contains underscore
-        while (str.contains("_")) {
+        if (str.contains("_")) {
+            while (str.contains("_")) {
 
-            // Replace the first occurrence
-            // of letter that present after
-            // the underscore, to capitalize
-            // form of next letter of underscore
-            str = str
-                    .replaceFirst(
-                            "_[a-z]",
-                            String.valueOf(
-                                    Character.toUpperCase(
-                                            str.charAt(
-                                                    str.indexOf("_") + 1))));
+                // Replace the first occurrence
+                // of letter that present after
+                // the underscore, to capitalize
+                // form of next letter of underscore
+                str = str.toLowerCase(Locale.US)
+                        .replaceFirst(
+                                "_[a-z]",
+                                String.valueOf(
+                                        Character.toUpperCase(
+                                                str.charAt(
+                                                        str.indexOf("_") + 1))));
+            }
+        } else if(str.matches("[A-Z]+")) {
+            return str.toLowerCase();
+        } else if (str.charAt(0)>= 'A' && str.charAt(0) <= 'Z'){
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, str);
         }
 
         // Return string

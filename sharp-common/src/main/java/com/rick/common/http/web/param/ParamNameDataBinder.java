@@ -32,7 +32,7 @@ public class ParamNameDataBinder extends ExtendedServletRequestDataBinder {
         for (Map.Entry<String, String> entry : renameMapping.entrySet()) {
             String from = entry.getKey();
             String to = entry.getValue();
-            from = StringUtils.snakeToCamel(from);
+            from = StringUtils.stringToCamel(from);
             if (mpvs.contains(from)) {
                 mpvs.add(to, mpvs.getPropertyValue(from).getValue());
             }
