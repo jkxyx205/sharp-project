@@ -169,7 +169,7 @@ public class SharpService {
             for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
                 if (pd.getWriteMethod() != null) {
                     if (SqlTypeValue.TYPE_UNKNOWN != StatementCreatorUtils.javaTypeToSqlParameterType(pd.getPropertyType())) {
-                        this.mappedFields.put((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName(), pd);
+                        this.mappedFields.put(lowerCaseName((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName()), pd);
                     } else {
                         initMappedValues(pd.getPropertyType(), pd.getName());
                     }
@@ -190,7 +190,7 @@ public class SharpService {
             for (int index = 1; index <= columnCount; index++) {
                 String column = JdbcUtils.lookupColumnName(rsmd, index);
                 String propertyName = StringUtils.stringToCamel(column);
-                PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(propertyName) : null);
+                PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(lowerCaseName(propertyName)) : null);
 
                 if (pd != null) {
                     try {
@@ -205,41 +205,8 @@ public class SharpService {
             return mappedObject;
         }
 
-        /**
-         * Convert the given name to lower case.
-         * By default, conversions will happen within the US locale.
-         * @param name the original name
-         * @return the converted name
-         * @since 4.2
-         */
         protected String lowerCaseName(String name) {
             return name.toLowerCase(Locale.US);
-        }
-
-        /**
-         * Convert a name in camelCase to an underscored name in lower case.
-         * Any upper case letters are converted to lower case with a preceding underscore.
-         * @param name the original name
-         * @return the converted name
-         * @since 4.2
-         * @see #lowerCaseName
-         */
-        protected String underscoreName(String name) {
-            if (!org.springframework.util.StringUtils.hasLength(name)) {
-                return "";
-            }
-
-            StringBuilder result = new StringBuilder();
-            for (int i = 0; i < name.length(); i++) {
-                char c = name.charAt(i);
-                if (Character.isUpperCase(c)) {
-                    result.append('_').append(Character.toLowerCase(c));
-                }
-                else {
-                    result.append(c);
-                }
-            }
-            return result.toString();
         }
 
     }
