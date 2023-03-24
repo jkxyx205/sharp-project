@@ -9,10 +9,10 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 fileupload:
-  tmp: /Users/rick/jkxyx205/tmp/fastdfs/tmp # 下载的临时目录
+  tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
   local:
     server-url: http://localhost:7892/ # 映射到tmp目录
-    root-path: /Users/rick/jkxyx205/tmp/fileupload
+    root-path: /Users/rick/Space/tmp/fileupload
   oss:
     endpoint: oss-cn-beijing.aliyuncs.com
     accessKeyId: xxx

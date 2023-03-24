@@ -3,6 +3,7 @@
 <head>
     <title th:text="${report.name}"></title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
         .ms-parent {
@@ -31,13 +32,33 @@
                             <sp:dict th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
                             <sp:dict th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem/>
                         </div>
-                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
-                            <input class="form-control" th:id="${f.name + '0'}" type="date" th:name="${f.name + '0'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">
-                            <span style="position: absolute;top: 7px;right: -8px;">-</span>
+<!--                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">-->
+<!--                            <input class="form-control" th:id="${f.name + '0'}" type="date" th:name="${f.name + '0'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">-->
+<!--                            <span style="position: absolute;top: 7px;right: -8px;">-</span>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">-->
+<!--                            <input class="form-control" th:id="${f.name + '1'}" type="date" th:name="${f.name + '1'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">-->
+<!--                        </div>-->
+                        <div class="col-md-4" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                            <div class="input-group input-daterange" th:classappend="${f.name}">
+<!--                                <div class="input-group-prepend">-->
+<!--                                  <span class="input-group-text">-->
+<!--                                    <i class="fa fa-calendar"></i>-->
+<!--                                  </span>-->
+<!--                                </div>-->
+                                <input class="form-control" th:id="${f.name + '0'}" th:name="${f.name + '0'}" type="text" placeholder="开始时间"
+                                       autocomplete="off"><label
+                                    class="col-form-label" style="padding-left: 0;">～</label>
+<!--                                <div class="input-group-prepend">-->
+<!--                                  <span class="input-group-text">-->
+<!--                                    <i class="fa fa-calendar"></i>-->
+<!--                                  </span>-->
+<!--                                </div>-->
+                                <input class="form-control" th:id="${f.name + '1'}" th:name="${f.name + '1'}" type="text" placeholder="结束时间"
+                                       autocomplete="off">
+                            </div>
                         </div>
-                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
-                            <input class="form-control" th:id="${f.name + '1'}" type="date" th:name="${f.name + '1'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">
-                        </div>
+
                     </th:block>
                     <div class="col-md-4 col-form-btn">
                         <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList.size() > 0}">
@@ -108,6 +129,8 @@
 <script type="text/javascript" th:src="@{/js/table/jquery.table.js}"></script>
 <script type="text/javascript" th:src="@{/js/table/jquery.pageTable.js}"></script>
 <script type="text/javascript" th:src="@{/js/table/jquery.formautofill.min.js}"></script>
+<script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+<script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
 <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
 <script th:src="@{/plugins/math.min.js}"></script>
 <!-- test -->
@@ -144,6 +167,19 @@
             placeholder: '请输入' + f.label
         }).multipleSelect('setSelects', !value ? '' : value.split(','))
     })
+
+    var dateRange = fz.filter(f => f.type == 'DATE_RANGE')
+    dateRange.forEach(f => {
+        $('.'+f.name+'.input-daterange').datepicker({
+            language: "zh-CN",
+            autoclose: true,
+            clearBtn: true,
+            todayBtn: 'linked',
+            todayHighlight: true,
+            format: 'yyyy-mm-dd'
+        })
+    })
+
     /*]]>*/
 
     $('#report-list').table({

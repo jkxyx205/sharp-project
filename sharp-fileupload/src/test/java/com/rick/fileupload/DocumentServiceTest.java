@@ -31,7 +31,7 @@ public class DocumentServiceTest {
     @Test
     @Order(1)
     public void testStore() throws IOException {
-        File file = new File("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg");
+        File file = new File("/Users/rick/Space/tmp/fileupload/demo/1.jpg");
         FileMeta fileMeta = FileMetaUtils.parse(file);
         Document store = documentService.store(fileMeta, "document");
         id = store.getId();
