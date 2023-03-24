@@ -4,7 +4,7 @@ spring:
       max-file-size: 5MB
       max-request-size: 50MB
   datasource:
-    url: jdbc:mysql://localhost:3306/sharp-demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://localhost:3306/sharp-demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
     username: root
     password: jkxyx205
   mail:  # SMTP 发邮件
@@ -27,9 +27,10 @@ logging:
     com.rick.demo: DEBUG
     com.rick.db: DEBUG
 
-#sharp:
-#  database:
-#    select-cache: true
+sharp:
+  database:
+    select-cache: false
+    init-database-meta-data: true
 
 dict:
   items:
@@ -49,9 +50,9 @@ dict:
         - "上海"
 
 fileupload:
-  tmp: /Users/rick/jkxyx205/tmp/fastdfs/tmp # 下载的临时目录
-  local: # cd /Users/rick/jkxyx205/tmp/fileupload && http-server -p 7892
-    root-path: /Users/rick/jkxyx205/tmp/fileupload
+  tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
+  local: # cd /Users/rick/Space/tmp/fileupload && http-server -p 7892
+    root-path: /Users/rick/Space/tmp/fileupload
     server-url: http://localhost:7892/ # 映射到tmp目录
   oss:
     endpoint: oss-cn-beijing.aliyuncs.com

@@ -1,0 +1,1 @@
+INSERT INTO `sharp-demo`.sys_user (username, name, id) VALUES ('jkxyx205', 'Rick', 1);

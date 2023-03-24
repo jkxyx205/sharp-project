@@ -1,0 +1,2 @@
+INSERT INTO `sharp-demo`.t_project_detail2 (id, title, project_id, group_id, created_by, created_at, updated_by, updated_at, is_deleted) VALUES (1, '11', 479723663504343042, 0, 0, '2021-10-30 00:30:55', 0, '2023-03-13 23:46:09', false);
+INSERT INTO `sharp-demo`.t_project_detail2 (id, title, project_id, group_id, created_by, created_at, updated_by, updated_at, is_deleted) VALUES (2, '22', 479723663504343043, 0, 0, '2021-10-30 00:30:55', 0, '2023-03-13 23:46:09', false);

@@ -49,7 +49,7 @@ public class ImageServiceTest {
     @Test
     @Order(1)
     public void testCropPic() throws IOException {
-        File file = new File("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg");
+        File file = new File("/Users/rick/Space/tmp/fileupload/demo/1.jpg");
         FileMeta fileMeta = FileMetaUtils.parse(file);
 
         // 裁剪9：5

@@ -23,7 +23,7 @@ public class FileUploadTest {
 
     @Test
     public void testCrop() throws IOException {
-        File file = new File("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg");
+        File file = new File("/Users/rick/Space/tmp/fileupload/demo/1.jpg");
         FileMeta fileMeta = FileMetaUtils.parse(file);
 
         // 裁剪9：5
@@ -32,16 +32,16 @@ public class FileUploadTest {
         imageParam.setRh(5);
 
         imageService.write(fileMeta, imageParam,
-                new FileOutputStream(new File("/Users/rick/jkxyx205/tmp/fileupload/pdf/2.png")));
+                new FileOutputStream(new File("/Users/rick/Space/tmp/fileupload/pdf/2.png")));
     }
 
     @Test
     public void testPdf2Image1() throws IOException {
-        File file = new File("/Users/rick/jkxyx205/tmp/fileupload/pdf/1.pdf");
+        File file = new File("/Users/rick/Space/tmp/fileupload/pdf/1.pdf");
         FileMeta fileMeta = FileMetaUtils.parse(file);
 
         List<byte[]> list = FileConvertUtils.pdf2Image(fileMeta.getData(), 150);
-        File folder = new File("/Users/rick/jkxyx205/tmp/fileupload/pdf");
+        File folder = new File("/Users/rick/Space/tmp/fileupload/pdf");
         for (int i = 0; i < list.size(); i++) {
             FileUtils.writeByteArrayToFile(new File(folder, i + ".png"), list.get(i));
         }
@@ -49,11 +49,11 @@ public class FileUploadTest {
 
     @Test
     public void testPdf2Image2() throws IOException {
-        File file = new File("/Users/rick/jkxyx205/tmp/fileupload/pdf/1.pdf");
+        File file = new File("/Users/rick/Space/tmp/fileupload/pdf/1.pdf");
         FileMeta fileMeta = FileMetaUtils.parse(file);
 
         FileConvertUtils.pdf2Image(fileMeta.getData(),
-                new FileOutputStream("/Users/rick/jkxyx205/tmp/fileupload/pdf/full.png"),
+                new FileOutputStream("/Users/rick/Space/tmp/fileupload/pdf/full.png"),
                 150);
     }
 

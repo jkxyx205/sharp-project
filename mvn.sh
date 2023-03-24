@@ -4,14 +4,13 @@ PROJECTS=(
 sharp-dependencies
 sharp-common
 sharp-database
-#sharp-mail
-#sharp-report
-#sharp-formflow
-#sharp-fileupload
-#sharp-meta
-#sharp-excel
-#sharp-sms
-#sharp-security
+sharp-meta
+sharp-excel
+sharp-fileupload
+sharp-formflow
+sharp-mail
+sharp-report
+sharp-sms
 )
 
 for p in ${PROJECTS[@]}

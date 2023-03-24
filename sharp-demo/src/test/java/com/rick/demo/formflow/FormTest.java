@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,32 +38,53 @@ public class FormTest {
 
     private static Long[] configIds = new Long[] {487671506907070464L, 487671506907070465L,487671506907070466L,487671506907070468L,
             487671506907070470L,487671506907070469L,487671506907070471L,487671506907070473L,
-            487671506907070474L,487671506907070475L,487671506907070476L,
-            487671506907070467L};
+            487671506907070474L,487671506907070475L,487671506907070476L, 487671506907070467L
+    };
 
     @AfterAll
     public static void init() {
-        SQLUtils.deleteNotIn("sys_form", "id", Arrays.asList(formId));
-        SQLUtils.deleteNotIn("sys_form_configurer", "id", Arrays.asList(configIds));
-        SQLUtils.deleteNotIn("sys_form_cpn_configurer", "form_id", Arrays.asList(formId));
+        SQLUtils.deleteNotIn("sys_form", "id", Arrays.asList(formId, 670604125091708928L));
+
+        List<Long> configIdList = new ArrayList<>();
+        configIdList.addAll(Arrays.asList(configIds));
+        configIdList.addAll(Arrays.asList(new Long[] {
+                670609451929092096L,
+                670609451933286400L,
+                670609451933286401L,
+                670609451933286402L,
+                670609451933286403L,
+                670609451933286404L,
+                670609451933286405L,
+                670609451933286406L,
+                670609451933286407L,
+                670609451933286408L,
+                670609451937480704L,
+                670609451937480705L,
+                670609451937480706L,
+                670609451937480707L
+
+        }));
+
+        SQLUtils.deleteNotIn("sys_form_configurer", "id", configIdList);
+        SQLUtils.deleteNotIn("sys_form_cpn_configurer", "form_id", Arrays.asList(formId, 670604125091708928L));
         SQLUtils.deleteNotIn("sys_form_cpn_value", "instance_id", Arrays.asList(instanceId));
     }
 
     @Test
     public void testSaveForm() {
-        formService.save(Form.builder().code("001" + System.currentTimeMillis()).name("我的第一个表单").build());
+        formService.saveOrUpdate(Form.builder().code("001" + System.currentTimeMillis()).name("我的第一个表单").build());
     }
 
     @Test
     public void testAddConfigurerToForm() {
         formCpnService.saveOrUpdateByConfigIds(formId, configIds);
-        formService.save(Form.builder().code("first"+ System.currentTimeMillis()).name("我的第一个表单").build());
+        formService.saveOrUpdate(Form.builder().code("first"+ System.currentTimeMillis()).name("我的第一个表单").build());
     }
 
     @Test
     public void testAddConfigurerToForm2() {
         Form form = Form.builder().name("我的第二个表单").code("second").build();
-        formService.save(form);
+        formService.saveOrUpdate(form);
 
         List<CpnConfigurer> cpnConfigurerList = new CpnTest().createCpnConfigurerList();
         formCpnService.saveOrUpdateByConfigurer(form.getId(), cpnConfigurerList);

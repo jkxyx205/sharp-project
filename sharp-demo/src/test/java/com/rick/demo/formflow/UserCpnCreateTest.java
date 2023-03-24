@@ -59,7 +59,8 @@ public class UserCpnCreateTest {
         cpnConfigurerService.saveOrUpdate(cpnConfigurerList);
 
         // 创建表
-        Form form = formService.save(Form.builder()
+        Form form = formService.saveOrUpdate(Form.builder()
+//                .id(670604125091708928L)
                 .code("t_user")
                 .tableName("t_user")
                 .name("人员信息表")
@@ -170,12 +171,23 @@ public class UserCpnCreateTest {
         ageValidatorList.add(new Size(18, 100));
         ageValidatorList.add(new Required(true));
         CpnConfigurer ageCpn = CpnConfigurer.builder()
-                .cpnType(CpnTypeEnum.NUMBER_TEXT)
+                .cpnType(CpnTypeEnum.INTEGER_NUMBER)
                 .name("age")
                 .label("年龄")
                 .placeholder("请输入年龄")
                 .defaultValue("28")
                 .validatorList(ageValidatorList)
+                .build();
+
+        Set<Validator> scoreValidatorList = Sets.newHashSetWithExpectedSize(1);
+        scoreValidatorList.add(new Size(0, 100));
+        CpnConfigurer scoreCpn = CpnConfigurer.builder()
+                .cpnType(CpnTypeEnum.NUMBER_TEXT)
+                .name("score")
+                .label("成绩")
+                .placeholder("请输入成绩")
+                .defaultValue("99.5")
+                .validatorList(scoreValidatorList)
                 .build();
 
         CpnConfigurer birthdayCpn = CpnConfigurer.builder()
@@ -216,7 +228,7 @@ public class UserCpnCreateTest {
                 .cpnType(CpnTypeEnum.CHECKBOX)
                 .name("hobby")
                 .label("兴趣爱好")
-                .options(Arrays.asList(new CpnConfigurer.CpnOption("BASKETBALL", "篮球"), new CpnConfigurer.CpnOption("FOOTBALL", "足球"), new CpnConfigurer.CpnOption("BADMINTON", "羽毛球"), new CpnConfigurer.CpnOption("VOLLEYBALL", "排球"))                 )
+                .options(Arrays.asList(new CpnConfigurer.CpnOption("BASKETBALL", "篮球"), new CpnConfigurer.CpnOption("FOOTBALL", "足球"), new CpnConfigurer.CpnOption("BADMINTON", "羽毛球"), new CpnConfigurer.CpnOption("VOLLEYBALL", "排球")))
                 .defaultValue("[\"BASKETBALL\", \"FOOTBALL\"]")
                 .validatorList(requiredValidatorList)
                 .build();
@@ -226,7 +238,7 @@ public class UserCpnCreateTest {
                 .name("marriage")
                 .label("婚否")
 //                .options(Arrays.asList(new CpnConfigurer.CpnOption("true", "")) )
-                .options(Arrays.asList(new CpnConfigurer.CpnOption("1", "")) )
+                .options(Arrays.asList(new CpnConfigurer.CpnOption("1", "")))
                 .defaultValue("true")
                 .build();
 
@@ -267,7 +279,7 @@ public class UserCpnCreateTest {
                 .name("school_experience")
                 .label("学习经历")
                 .additionalInfo(Params.builder()
-                          .pv("columns", Arrays.asList(yearCpn, schoolNameCpn))
+                        .pv("columns", Arrays.asList(yearCpn, schoolNameCpn))
                         .build())
                 .defaultValue("[[\"2021-2022\", \"四川大学\"], [\"2012-2015\", \"永安高中\"]]")
                 .build();
@@ -280,7 +292,7 @@ public class UserCpnCreateTest {
                 .defaultValue("LOCKED")
                 .build();
 
-        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(nameCpn, genderCpn, ageCpn, birthdayCpn,
+        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(nameCpn, genderCpn, ageCpn, scoreCpn, birthdayCpn,
                 mobileCpn, emailCpn, nativePlaceCpn, hobbyCpn, marriageCpn, introduceCpn, attachmentCpn, schoolExperienceCpn, statusCpn);
         return cpnConfigurerList;
     }

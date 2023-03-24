@@ -33,7 +33,7 @@ public class InputStreamStoreTest {
     @Order(1)
     public void testPropertyStore() throws IOException {
         StoreResponse response = inputStreamStore.store("group", "jpeg",
-                new FileInputStream("/Users/rick/jkxyx205/tmp/fileupload/demo/1.jpg"));
+                new FileInputStream("/Users/rick/Space/tmp/fileupload/demo/1.jpg"));
         System.out.println(response.getGroupName());
         System.out.println(response.getPath());
         System.out.println(response.getFullPath());
@@ -52,7 +52,7 @@ public class InputStreamStoreTest {
     @Order(3)
     public void getInputStream() throws IOException {
         InputStream is = inputStreamStore.getInputStream("group", path);
-        FileUtils.copyInputStreamToFile(is, new File("/Users/rick/jkxyx205/tmp/fileupload/download/1.png"));
+        FileUtils.copyInputStreamToFile(is, new File("/Users/rick/Space/tmp/fileupload/download/1.png"));
         is.close();
     }
 

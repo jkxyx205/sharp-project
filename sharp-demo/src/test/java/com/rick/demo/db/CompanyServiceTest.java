@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Rick
  * @createdAt 2023-03-06 14:17:00
@@ -46,7 +48,7 @@ class CompanyServiceTest {
     @Test
     public void testUpdate() {
         companyDAO.update(Company.builder()
-                .id(670076483951153152L)
+                .id(664989107511951360L)
                 .name("点")
                 .phone("110")
                 .address("Nanjing")
@@ -65,8 +67,14 @@ class CompanyServiceTest {
 
     @Test
     public void testFindById() {
-        List<Company> list = companyDAO.selectByIds(670076483951153152L);
+        List<Company> list = companyDAO.selectByIds(664989107511951360L);
         list.forEach(System.out::println);
+    }
 
+    @Test
+    public void testFindById2() {
+        Company company = companyDAO.selectById(664989107511951360L).get();
+        assertThat(company.getContactPerson().getFirstName()).isEqualTo("Jim");
+        assertThat(company.getContactPerson().getVendorList().get(0).getName()).isEqualTo("BUILD");
     }
 }
