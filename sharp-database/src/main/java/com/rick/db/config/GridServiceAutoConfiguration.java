@@ -82,7 +82,7 @@ public class GridServiceAutoConfiguration {
 
         @Bean
         public GridService gridService(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
-            if (Constants.DB_MYSQL.equals(sharpDatabaseProperties.getType())) {
+            if (sharpDatabaseProperties.isInitDatabaseMetaData()) {
                 DatabaseMetaData.initTableMapping(jdbcTemplate);
             }
             return new GridService();
@@ -136,6 +136,8 @@ public class GridServiceAutoConfiguration {
             dbConversionService.addConverter(new JsonStringToCollectionConverter());
             dbConversionService.addConverter(new JsonStringToSetMapConverter());
             dbConversionService.addConverterFactory(new IdToEntityConverterFactory());
+            dbConversionService.addConverter(new LocalDateTimeToInstantConverter());
+
             return dbConversionService;
         }
 

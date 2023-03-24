@@ -21,4 +21,6 @@ public class SharpDatabaseProperties {
 
     private boolean selectCache = false;
 
+    private boolean initDatabaseMetaData = false;
+
 }

@@ -161,17 +161,19 @@ public class SharpService {
         public NestedRowMapper(Class<T> mappedClass) {
             this.mappedClass = mappedClass;
             this.mappedFields = new HashMap<>();
-            initMappedValues(mappedClass, null);
-
+            List<Class> classList = new ArrayList<>();
+            initMappedValues(mappedClass, null, classList);
         }
 
-        private void initMappedValues(Class<?> mappedClass, String propertyPrefix) {
+        private void initMappedValues(Class<?> mappedClass, String propertyPrefix, List<Class> classList) {
             for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
                 if (pd.getWriteMethod() != null) {
-                    if (SqlTypeValue.TYPE_UNKNOWN != StatementCreatorUtils.javaTypeToSqlParameterType(pd.getPropertyType())) {
-                        this.mappedFields.put(lowerCaseName((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName()), pd);
-                    } else {
-                        initMappedValues(pd.getPropertyType(), pd.getName());
+                    this.mappedFields.put(lowerCaseName((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName()), pd);
+                    if (SqlTypeValue.TYPE_UNKNOWN == StatementCreatorUtils.javaTypeToSqlParameterType(pd.getPropertyType())) {
+                        if (!classList.contains(pd.getPropertyType())) {
+                            classList.add(pd.getPropertyType());
+                            initMappedValues(pd.getPropertyType(), pd.getName(), classList);
+                        }
                     }
                 }
             }
@@ -197,7 +199,7 @@ public class SharpService {
                         Object value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
                         bw.setPropertyValue(propertyName, value);
                     } catch (TypeMismatchException | NotWritablePropertyException e) {
-                        throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property" + pd.getName(), e);
+                        throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property " + pd.getName(), e);
                     }
                 }
             }

@@ -29,8 +29,11 @@ public class DatabaseMetaData {
         try {
             databaseMetaData = jdbcTemplate.getDataSource().getConnection().getMetaData();
 
-            // mysql 8.0 catalog "" => null
-            try(ResultSet resultSet = databaseMetaData.getTables(databaseMetaData.getDatabaseMajorVersion() == 8 ? null : "", null, "%", new String[]{"TABLE"})){
+            // mysql 8.0 catalog => null
+            // mysql 5.7 catalog => ""
+            String catalog = databaseMetaData.getDatabaseMajorVersion() == 8 ? null : "";
+
+            try(ResultSet resultSet = databaseMetaData.getTables(catalog, null, "%", new String[]{"TABLE"})){
                 while(resultSet.next()) {
                     tableColumnMap.put(resultSet.getString("TABLE_NAME"), null);
                     tablePrimaryKeyMap.put(resultSet.getString("TABLE_NAME"), null);
@@ -38,7 +41,7 @@ public class DatabaseMetaData {
             }
 
             for (String tableName : tableColumnMap.keySet()) {
-                try(ResultSet columns = databaseMetaData.getColumns("",null, tableName, "%")){
+                try(ResultSet columns = databaseMetaData.getColumns(catalog,null, tableName, "%")){
                     List<String> columnNameList = new ArrayList<>();
 
                     while(columns.next()) {
@@ -48,7 +51,7 @@ public class DatabaseMetaData {
                     tableColumnMap.put(tableName, columnNameList);
                 }
 
-                try(ResultSet primaryKeys = databaseMetaData.getPrimaryKeys("", null, tableName)){
+                try(ResultSet primaryKeys = databaseMetaData.getPrimaryKeys(catalog, null, tableName)){
                     while(primaryKeys.next()){
                         String primaryKeyColumnName = primaryKeys.getString("COLUMN_NAME");
                         tablePrimaryKeyMap.put(tableName, primaryKeyColumnName);
