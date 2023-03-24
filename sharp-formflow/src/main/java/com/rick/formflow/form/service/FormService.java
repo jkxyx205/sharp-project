@@ -52,8 +52,8 @@ public class FormService {
 
     private final ApplicationContext applicationContext;
 
-    public Form save(@Valid Form form) {
-        formDAO.insert(form);
+    public Form saveOrUpdate(@Valid Form form) {
+        formDAO.insertOrUpdate(form);
         return form;
     }
 

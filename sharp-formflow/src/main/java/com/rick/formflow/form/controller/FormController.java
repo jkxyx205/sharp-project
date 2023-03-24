@@ -29,7 +29,7 @@ public class FormController {
 
     @PostMapping
     public Result save(@RequestBody Form form) {
-        return ResultUtils.success(FormService.save(form));
+        return ResultUtils.success(FormService.saveOrUpdate(form));
     }
 
     @PostMapping("configs")
