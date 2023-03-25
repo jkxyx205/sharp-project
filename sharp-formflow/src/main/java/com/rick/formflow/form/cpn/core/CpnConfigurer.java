@@ -23,6 +23,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -58,7 +59,7 @@ public class CpnConfigurer extends BaseEntity {
     /**
      * 手动装配validatorsMap到validatorList
      */
-    @Column("validators")
+    @Column(value = "validators", columnDefinition = "varchar(512)")
     private Set<Map<String, ?>> validators;
 
     @Column("options")
@@ -124,7 +125,7 @@ public class CpnConfigurer extends BaseEntity {
 
     @Getter
     @NoArgsConstructor
-    public static class CpnOption {
+    public static class CpnOption implements Serializable {
 
         private String name;
 
