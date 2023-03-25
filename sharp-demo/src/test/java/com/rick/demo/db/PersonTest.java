@@ -135,4 +135,23 @@ public class PersonTest {
         System.out.println("2. -------------------");
         personDAO.update("name", new Object[]{person.getName(), person.getId()}, "id = ?");
     }
+
+    @Test
+    @Order(11)
+    public void savePersonWithManyToOneNull() {
+        Person person = Person.builder()
+                .name("Tomcat11")
+                .roleList(Arrays.asList(Role.builder().id(530861443353075712L).build()))
+                .idCard(IdCard.builder().id(665551747804065792L).idNum("42128787988762110x").address("江苏").build())
+                .build();
+        personDAO.insert(person);
+
+        person.setIdCard(null);
+        person.setRoleList(null);
+        personDAO.update(person);
+
+        Person person1 = personDAO.selectById(person.getId()).get();
+        assertThat(person1.getIdCard()).isNull();
+        assertThat(person1.getRoleList().size()).isEqualTo(0);
+    }
 }
