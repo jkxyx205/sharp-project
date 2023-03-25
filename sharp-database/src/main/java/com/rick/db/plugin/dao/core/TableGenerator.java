@@ -48,9 +48,10 @@ public class TableGenerator {
             strategy =  tableMeta.getId().strategy();
         }
 
+        Field idField = tableMeta.getColumnNameFieldMap().get(tableMeta.getIdColumnName());
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
-                .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" bigint")+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
+                .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" " + determineSqlType(idField.getType()))+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
         List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX));
 

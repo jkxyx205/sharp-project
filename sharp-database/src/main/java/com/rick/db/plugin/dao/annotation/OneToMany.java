@@ -29,7 +29,7 @@ public @interface OneToMany {
     boolean oneToOne() default false;
 
     /**
-     * 仅插入，场景物料凭证修改的时候，不会更新item数据
+     * 仅插入，使用场景：物料凭证修改的时候，不会更新item数据
      * @return
      */
     boolean cascadeInsert() default false;

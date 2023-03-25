@@ -110,8 +110,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         Object[] params = handleAutoFill(entity, instanceToParamsArray(entity), columnNameList, ColumnFillType.INSERT);
+        int count = SQLUtils.insert(this.tableName, this.columnNames, params);
 
-        int count  = SQLUtils.insert(this.tableName, this.columnNames, params);
         cascadeInsertOrUpdate(entity, true);
         EntityDAOThreadLocalValue.removeAll();
         return count;
@@ -177,6 +177,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * 通过主键逻辑id刪除
+     *
      * @param id
      */
     @Override
@@ -188,6 +189,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * 通过主键id批量逻辑刪除 eg：ids -> [1, 2, 3, 4]
+     *
      * @param
      */
     @Override
@@ -268,8 +270,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * 更新entity
+     *
      * @param entity
-     * @param params   where语句后面的参数
+     * @param params       where语句后面的参数
      * @param conditionSQL 这里的条件优先级高，可以覆盖condition
      * @return
      */
@@ -281,7 +284,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         int size = this.updateColumnNameList.size();
 
-        params = ArrayUtils.isEmpty(params) ? new Object[] {} : params;
+        params = ArrayUtils.isEmpty(params) ? new Object[]{} : params;
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
@@ -294,13 +297,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * 批量更新
+     *
      * @param collection
      * @return
      */
     @Override
     public int[] update(Collection<T> collection) {
         if (CollectionUtils.isEmpty(collection)) {
-            return new int[] {};
+            return new int[]{};
         }
 
         List<Object[]> paramsList = Lists.newArrayListWithExpectedSize(collection.size());
@@ -342,7 +346,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public Map<ID, T> selectByIdsAsMap(ID ...ids) {
+    public Map<ID, T> selectByIdsAsMap(ID... ids) {
         return listToIdMap(selectByIds(ids));
     }
 
@@ -371,7 +375,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public List<T> selectByIds(ID ...ids) {
+    public List<T> selectByIds(ID... ids) {
         Assert.notEmpty(ids, "ids cannot be empty");
         return selectByIdsWithSpecifiedValue(ids);
     }
@@ -467,6 +471,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * 根据条件获取id，如果有多条会抛出异常
+     *
      * @param example
      * @param conditionSQL
      * @return
@@ -536,13 +541,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     public <M> Map<ID, List<M>> groupByColumnName(String refColumnName, Collection<?> refValues, String columnNames, Function<T, M> function) {
         List<T> list = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(), columnNames, refColumnName + " IN (:refColumnName)", this.entityClass);
 
-        return list.stream().collect(Collectors.groupingBy(t-> {
+        return list.stream().collect(Collectors.groupingBy(t -> {
             Object propertyValue = EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));
             if (this.idClass.isAssignableFrom(propertyValue.getClass())) {
-                return (ID)propertyValue;
+                return (ID) propertyValue;
             }
 
-            return (ID)getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), tableMeta.getIdPropertyName()));
+            return (ID) getPropertyValue(propertyValue, ReflectionUtils.findField(propertyValue.getClass(), tableMeta.getIdPropertyName()));
 
         }, Collectors.mapping(function, Collectors.toList())));
     }
@@ -554,7 +559,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         Set<String> fieldNames = tableMeta.getFieldMap().keySet();
-        
+
         Map<String, Object> params;
         params = Maps.newHashMapWithExpectedSize(fieldNames.size());
         for (String fieldName : fieldNames) {
@@ -628,7 +633,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             propertyNameToColumnNameMap = Maps.newHashMapWithExpectedSize(columnNameList.size());
             for (int i = 0; i < columnNameList.size(); i++) {
                 columnNameToPropertyNameMap.put(columnNameList.get(i), propertyList.get(i));
-                propertyNameToColumnNameMap.put(propertyList.get(i),  columnNameList.get(i));
+                propertyNameToColumnNameMap.put(propertyList.get(i), columnNameList.get(i));
             }
         }
 
@@ -641,10 +646,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return SQLUtils.resolveValue(value, v -> {
             if (EntityDAOManager.isEntityClass((value.getClass()))) {
                 // 实体对象
-                return new Object[] {Boolean.TRUE, EntityDAOManager.getIdValue(value)};
+                return new Object[]{Boolean.TRUE, EntityDAOManager.getIdValue(value)};
             }
 
-            return new Object[] {Boolean.FALSE};
+            return new Object[]{Boolean.FALSE};
         });
     }
 
@@ -662,7 +667,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             strategy = tableMeta.getId().strategy();
         }
 
-        ID id = strategy == SEQUENCE ? (ID)IdGenerator.getSequenceId() : getIdValue(t);
+        ID id = strategy == SEQUENCE ? (ID) IdGenerator.getSequenceId() : getIdValue(t);
         if (strategy == ASSIGN && Objects.isNull(id)) {
             throw new RuntimeException("Strategy is assign, id cannot be null!");
         }
@@ -729,7 +734,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         params = instanceToParamsArray(t,
                 updatePropertyList.stream().filter(property -> updateColumnNameList.contains(propertyNameToColumnNameMap.get(property))).collect(Collectors.toList()));
 
-        return new Object[] {params, id};
+        return new Object[]{params, id};
     }
 
     private void cascadeSelect(List<T> list) {
@@ -748,9 +753,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = selectProperty.getSelect().table();
-            EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
             if (subTableEntityDAO == null) {
-                throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
+                throw new RuntimeException("Table [" + targetTable + "] lost DAOImpl");
             }
 
             Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
@@ -759,7 +764,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             for (T t : list) {
                 Object data = subTableData.get(getValue(t, referencePropertyName));
                 if (selectProperty.getSelect().oneToOne()) {
-                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? null : ((Collection)data).iterator().next());
+                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? null : ((Collection) data).iterator().next());
                 } else {
                     setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
                 }
@@ -777,9 +782,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
             if (subTableEntityDAO == null) {
-                throw new RuntimeException("Table ["+targetTable+"] lost DAOImpl");
+                throw new RuntimeException("Table [" + targetTable + "] lost DAOImpl");
             }
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
@@ -796,7 +801,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             for (T t : list) {
                 Object data = subTableData.get(getIdValue(t));
                 if (oneToManyProperty.getOneToMany().oneToOne()) {
-                    setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? null : ((Collection)data).iterator().next());
+                    setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? null : ((Collection) data).iterator().next());
                 } else {
                     setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
                 }
@@ -859,7 +864,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String thirdPartyTable = manyToManyProperty.getManyToMany().thirdPartyTable();
             String referenceTable = manyToManyProperty.getManyToMany().referenceTable();
 
-            EntityDAO referenceTableDAO =  EntityDAOManager.baseDAOTableNameMap.get(referenceTable);
+            EntityDAO referenceTableDAO = EntityDAOManager.baseDAOTableNameMap.get(referenceTable);
 
             List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value)",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
@@ -903,7 +908,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     /**
-     *
      * @param t
      * @param insert One的一段是否是新增
      */
@@ -921,7 +925,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            EntityDAO subTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
 
             List<?> subDataList;
             Class subClass;
@@ -957,7 +961,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 } else {
                     // 删除 除id之外的其他记录
                     SQLUtils.deleteNotIn(subTableEntityDAO.getTableName(), subTableEntityDAO.getIdColumnName(),
-                            deletedIds, new Object[] {refId} , refColumnName + " = ?");
+                            deletedIds, new Object[]{refId}, refColumnName + " = ?");
                 }
             }
 
@@ -988,7 +992,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             String refColumnName = manyToOneProperty.getManyToOne().value();
-            String storeKey =  getTableName() + ":" + refColumnName + ":InsertOrUpdate";
+            String storeKey = getTableName() + ":" + refColumnName + ":InsertOrUpdate";
 
             if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
@@ -996,7 +1000,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            EntityDAO parentTableEntityDAO =  EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO parentTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 ID refId = getIdValue(targetObject);
@@ -1007,7 +1011,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 }
 
                 if (refId == null) { // 添加外键
-                    updateById(manyToOneProperty.getManyToOne().value(), new Object[] {getIdValue(targetObject)}, getIdValue(t));
+                    updateById(manyToOneProperty.getManyToOne().value(), new Object[]{getIdValue(targetObject)}, getIdValue(t));
                 }
             }
         }
