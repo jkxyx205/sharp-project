@@ -254,7 +254,11 @@ public final class SQLUtils {
     public static void updateRefTable(String refTableName, String keyColumn, String guestColumn, Object keyInstance, Collection<?> guestInstanceIds) {
         // 删除
         if (CollectionUtils.isEmpty(guestInstanceIds)) {
-            SQLUtils.JDBC_TEMPLATE.update(String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn), keyInstance);
+            String deleteSql = String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn);
+            if (log.isDebugEnabled()) {
+                log.debug("SQL => [{}], args:=> [{}, {}]", deleteSql, refTableName, keyColumn);
+            }
+            SQLUtils.JDBC_TEMPLATE.update(deleteSql, keyInstance);
             return;
         }
 
@@ -262,7 +266,11 @@ public final class SQLUtils {
         deleteParams.put("guestInstanceIds", guestInstanceIds);
         deleteParams.put("keyInstance", keyInstance);
         // 1. 删除
-        SQLUtils.NAMED_JDBC_TEMPLATE.update(String.format("DELETE FROM %s WHERE %s = :keyInstance AND %s NOT IN (:guestInstanceIds)", refTableName, keyColumn, guestColumn), deleteParams);
+        String deleteSql = String.format("DELETE FROM %s WHERE %s = :keyInstance AND %s NOT IN (:guestInstanceIds)", refTableName, keyColumn, guestColumn);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args:=> [{}, {}]", deleteSql, deleteParams);
+        }
+        SQLUtils.NAMED_JDBC_TEMPLATE.update(deleteSql, deleteParams);
 
         // 2. 插入新增
         // 2.1 库中
@@ -276,6 +284,10 @@ public final class SQLUtils {
 
         String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
         List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args:=> [{}, {}]", insertSQL, addParams);
+        }
+
         SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
     }
 
