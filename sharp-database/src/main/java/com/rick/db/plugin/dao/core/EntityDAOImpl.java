@@ -62,6 +62,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     private boolean hasCascadeDelete = false;
 
+    /**
+     * id 生成策略
+     */
+    private Id.GenerationType strategy;
+
     public EntityDAOImpl() {
         this.init();
     }
@@ -72,7 +77,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         if (Objects.isNull(getIdValue(entity))) {
             return insert(entity);
         } else {
-            return update(entity);
+            int count =  update(entity);
+            if (strategy == ASSIGN && count == 0) {
+                return insert(entity);
+            }
+
+            return count;
         }
     }
 
@@ -637,6 +647,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
         }
 
+        strategy = tableMeta.getId() == null ? SEQUENCE : tableMeta.getId().strategy();
+
         super.init(tableMeta.getTableName(), tableMeta.getColumnNames(), tableMeta.getIdColumnName(), (Class<ID>) actualTypeArgument[1]);
         log.debug("tableName: {}, this.columnNames: {}", this.tableName, this.columnNames);
     }
@@ -660,13 +672,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     protected ID generatorId(Object t) {
-        Id.GenerationType strategy;
-        if (tableMeta.getId() == null) {
-            strategy = SEQUENCE;
-        } else {
-            strategy = tableMeta.getId().strategy();
-        }
-
         ID id = strategy == SEQUENCE ? (ID) IdGenerator.getSequenceId() : getIdValue(t);
         if (strategy == ASSIGN && Objects.isNull(id)) {
             throw new RuntimeException("Strategy is assign, id cannot be null!");
