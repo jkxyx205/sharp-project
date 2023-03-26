@@ -715,12 +715,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
-        if (t != null && t.getClass() == getEntityClass()) {
+        int count = super.update(tableName, t, updateColumnNames, params, conditionSQL);
+        if (count > 0 && t != null && t.getClass() == getEntityClass()) {
             cascadeInsertOrUpdate((T) t, false);
             EntityDAOThreadLocalValue.removeAll();
         }
 
-        return super.update(tableName, t, updateColumnNames, params, conditionSQL);
+        return count;
     }
 
     private Map<ID, T> listToIdMap(List<T> list) {
