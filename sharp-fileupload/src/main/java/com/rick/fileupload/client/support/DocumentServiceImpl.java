@@ -94,27 +94,27 @@ public class DocumentServiceImpl implements DocumentService {
 
             Path path = Files.createTempDirectory(Paths.get(fileUploadProperties.getTmp()),null);
 
-            File _home = path.toFile();
+            File home = path.toFile();
 
-            File root = new File(_home, document.getFullName());
+            File root = new File(home, document.getFullName());
             root.mkdir();
 
             //4.创建
             downloadDocument2Folder(root, subDocuments);
 
             String zipName = document.getFullName() + ".zip";
-            File zipFile = new File(_home, zipName);
+            File zipFile = new File(home, zipName);
 
             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile));
 
-            ZipUtils.zipDirectoryToZipFile(_home.getAbsolutePath(), root, zipOut);
+            ZipUtils.zipDirectoryToZipFile(home.getAbsolutePath(), root, zipOut);
 
             os = HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, zipName);
 
             zipOut.close();
 
             FileCopyUtils.copy(new FileInputStream(zipFile), os);
-            FileUtils.deleteQuietly(_home);
+            FileUtils.deleteQuietly(home);
         } else { //单文件下载
             os = HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, document.getFullName());
             FileCopyUtils.copy(fileStore.getInputStream(document.getGroupName(), document.getPath()),  os);

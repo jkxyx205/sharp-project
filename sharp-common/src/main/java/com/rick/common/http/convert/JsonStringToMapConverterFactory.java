@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -28,13 +27,7 @@ final public class JsonStringToMapConverterFactory implements ConverterFactory<S
                 return null;
             }
 
-            try {
-                return (T) JsonUtils.toObject(source, Map.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
+            return (T) JsonUtils.toObject(source, Map.class);
         }
     }
 

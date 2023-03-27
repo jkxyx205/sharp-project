@@ -43,18 +43,18 @@ public final class HttpServletResponseUtils {
     }
 
     public static OutputStream getOutputStream(HttpServletRequest request, HttpServletResponse response, String fileName, String type) throws IOException {
-        String _fileName = fileName.replaceAll("[/:*?\"<>[|]]", "");
-        String encodeFileName = java.net.URLEncoder.encode(_fileName,StandardCharsets.UTF_8.name());
+        String formatedFileName = fileName.replaceAll("[/:*?\"<>[|]]", "");
+        String encodeFileName = java.net.URLEncoder.encode(formatedFileName,StandardCharsets.UTF_8.name());
         String browserType = request.getHeader("User-Agent").toLowerCase();
 
         if(browserType.indexOf("firefox") > -1) { //FF
-            _fileName = "=?"+ StandardCharsets.UTF_8+"?B?"+(new String(Base64.encodeBase64(_fileName.getBytes(StandardCharsets.UTF_8))))+"?=";
+            formatedFileName = "=?"+ StandardCharsets.UTF_8+"?B?"+(new String(Base64.encodeBase64(formatedFileName.getBytes(StandardCharsets.UTF_8))))+"?=";
         } else {
             if(fileName.matches(".*[^\\x00-\\xff]+.*")) { // 是否包含中文
                 if(isMSBrowser(request)) { //IE Edge
-                    _fileName = java.net.URLEncoder.encode(_fileName,StandardCharsets.UTF_8.name());
+                    formatedFileName = java.net.URLEncoder.encode(formatedFileName,StandardCharsets.UTF_8.name());
                 } else  { //其他
-                    _fileName = new String(_fileName.getBytes(StandardCharsets.UTF_8), "ISO-8859-1");
+                    formatedFileName = new String(formatedFileName.getBytes(StandardCharsets.UTF_8), "ISO-8859-1");
                 }
             }
         }
@@ -62,8 +62,8 @@ public final class HttpServletResponseUtils {
         response.reset();// 清空输出流
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setHeader("filename", encodeFileName);
-        response.setHeader("Content-disposition", ""+type+"; filename="+_fileName+"");// 设定输出文件头
-        response.setContentType(StringUtils.getContentType(_fileName));// 定义输出类型
+        response.setHeader("Content-disposition", ""+type+"; filename="+formatedFileName+"");// 设定输出文件头
+        response.setContentType(StringUtils.getContentType(formatedFileName));// 定义输出类型
         OutputStream os = response.getOutputStream(); // 取得输出流Files
         return os;
     }

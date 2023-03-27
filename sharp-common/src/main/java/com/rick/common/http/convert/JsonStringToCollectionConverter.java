@@ -6,7 +6,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -40,12 +39,7 @@ public class JsonStringToCollectionConverter implements ConditionalGenericConver
         if (StringUtils.isBlank((String) source)) {
             return null;
         }
-        try {
-            return JsonUtils.toList(source.toString(), targetType.getResolvableType().getGeneric(0).resolve());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+        return JsonUtils.toList(source.toString(), targetType.getResolvableType().getGeneric(0).resolve());
     }
 }

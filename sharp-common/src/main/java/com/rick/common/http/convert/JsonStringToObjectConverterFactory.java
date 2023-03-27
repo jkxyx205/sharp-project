@@ -5,8 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
-import java.io.IOException;
-
 /**
  * 对象必须实现 JsonStringToObjectConverterFactory.JsonValue
  * string(json) => Object(JsonValue)
@@ -36,13 +34,7 @@ final public class JsonStringToObjectConverterFactory implements ConverterFactor
                 return null;
             }
 
-            try {
-                return JsonUtils.toObject(source, clazz);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
+            return JsonUtils.toObject(source, clazz);
         }
     }
 

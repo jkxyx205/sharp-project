@@ -1,7 +1,6 @@
 package com.rick.formflow.form.cpn;
 
 
-import com.google.common.collect.Lists;
 import com.rick.common.util.JsonUtils;
 import com.rick.formflow.form.cpn.core.AbstractCpn;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
@@ -11,7 +10,6 @@ import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,11 +43,8 @@ public class CheckBox extends AbstractCpn<List<String>> {
             if (StringUtils.isBlank((CharSequence) value)) {
                 return Collections.emptyList();
             }
-            try {
-                return JsonUtils.toList((String) value, String.class);
-            } catch (IOException e) {
-                 return Lists.newArrayList((String) value);
-            }
+
+            return JsonUtils.toList((String) value, String.class);
         }
 
         return (List<String>) value;

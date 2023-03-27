@@ -9,7 +9,6 @@ import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -31,17 +30,12 @@ public class Attachment extends AbstractCpn<List<Map<String, Object>>> {
             if (StringUtils.isBlank((CharSequence) value)) {
                 return null;
             }
-            try {
-                List<Map> list = JsonUtils.toList((String) value, Map.class);
-                List<Map<String,  Object>> result = Lists.newArrayListWithExpectedSize(list.size());
-                for (Map map : list) {
-                    result.add(Maps.newHashMap(map));
-                }
-                return result;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
+            List<Map> list = JsonUtils.toList((String) value, Map.class);
+            List<Map<String,  Object>> result = Lists.newArrayListWithExpectedSize(list.size());
+            for (Map map : list) {
+                result.add(Maps.newHashMap(map));
             }
+            return result;
         }
 
         return (List<Map<String, Object>>) value;

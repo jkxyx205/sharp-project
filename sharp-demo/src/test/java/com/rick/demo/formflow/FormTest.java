@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.BindException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -111,7 +110,7 @@ public class FormTest {
     }
 
     @Test
-    public void testFindInstanceToForm() throws IOException {
+    public void testFindInstanceToForm() {
         FormBO form1 = formService.getFormBOById(formId);
         if (form1.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
             FormBO form = formService.getFormBOByIdAndInstanceId(formId, instanceId);

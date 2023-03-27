@@ -9,7 +9,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -66,16 +65,12 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
                 return (T) new BigDecimal((String) value);
             }
 
-            try {
-                // 当个字符
-                if (!(stringVal.startsWith("[") || stringVal.startsWith("{"))) {
-                    stringVal = "[\""+value+"\"]";
-                }
-
-                return (T) JsonUtils.toObject(stringVal, cpnClass);
-            } catch (IOException e) {
-                e.printStackTrace();
+            // 非json字符串
+            if (!(stringVal.startsWith("[") || stringVal.startsWith("{"))) {
+                stringVal = "[\""+value+"\"]";
             }
+
+            return (T) JsonUtils.toObject(stringVal, cpnClass);
         }
 
         return null;
@@ -91,13 +86,7 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
             return (String) value;
         }
 
-        try {
-            return JsonUtils.toJson(value);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return JsonUtils.toJson(value);
     }
 
     @Override

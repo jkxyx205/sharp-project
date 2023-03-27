@@ -1,13 +1,16 @@
 package com.rick.common.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,63 +38,74 @@ public final class JsonUtils {
     private JsonUtils() {
     }
 
-    public static String toJson(Object obj) throws IOException {
+    @SneakyThrows
+    public static String toJson(Object obj) {
         StringWriter writer = new StringWriter();
         objectMapper.writeValue(writer, obj);
         return writer.toString();
     }
 
-    public static <T> T toObject(InputStream is, Class<T> clazz) throws IOException {
+    @SneakyThrows
+    public static <T> T toObject(InputStream is, Class<T> clazz) {
         return  objectMapper.readValue(is, clazz);
     }
 
-    public static <T> T toObject(String json, Class<T> clazz) throws IOException {
+    @SneakyThrows
+    public static <T> T toObject(String json, Class<T> clazz) {
         T t;
         InputStream is = new ByteArrayInputStream(json.getBytes("UTF-8"));
         t = objectMapper.readValue(is, clazz);
         return t;
     }
 
+    @SneakyThrows
     public static <T> T toObject(String json, TypeReference<T> typeRef)
-            throws IOException {
+            {
         InputStream is = new ByteArrayInputStream(json.getBytes("UTF-8"));
         return objectMapper.readValue(is, typeRef);
     }
 
-    public static <T> T toObject(JsonNode node, Class<T> clazz)
-            throws JsonProcessingException {
+    @SneakyThrows
+    public static <T> T toObject(JsonNode node, Class<T> clazz) {
         return objectMapper.treeToValue(node, clazz);
     }
 
-    public static <T> List<T> toList(JsonNode node, Class<T> clazz) throws IOException {
+    @SneakyThrows
+    public static <T> List<T> toList(JsonNode node, Class<T> clazz) {
         return objectMapper.readerForListOf(clazz).readValue(node);
     }
 
-    public static <T> List<T> toList(String json, Class<T> clazz) throws IOException {
+    @SneakyThrows
+    public static <T> List<T> toList(String json, Class<T> clazz) {
         return objectMapper.readerForListOf(clazz).readValue(json);
     }
 
-    public static <T> Set<T> toSet(String json, Class<T> clazz) throws IOException {
+    @SneakyThrows
+    public static <T> Set<T> toSet(String json, Class<T> clazz) {
         JavaType javaType = getCollectionType(HashSet.class, clazz);
         return objectMapper.readValue(json, javaType);
     }
 
-    public static <T> Set<T> toSet(JsonNode node) throws IOException {
+    @SneakyThrows
+    public static <T> Set<T> toSet(JsonNode node) {
         return objectMapper.readerFor(new TypeReference<Set<T>>(){}).readValue(node);
     }
 
-    public static <T> Object toObjectFromFile(String fileName, Class<T> clazz) throws IOException {
+    @SneakyThrows
+    public static <T> Object toObjectFromFile(String fileName, Class<T> clazz) {
         T obj;
         File file = new File(fileName);
         obj = objectMapper.readValue(file, clazz);
         return obj;
     }
+    @SneakyThrows
 
     public static JsonNode toJsonNode(Object object) {
         return objectMapper.valueToTree(object);
     }
 
-    public static JsonNode toJsonNode(String json) throws IOException {
+    @SneakyThrows
+    public static JsonNode toJsonNode(String json) {
         JsonNode jsonNode = null;
         if (StringUtils.isNotEmpty(json)) {
             jsonNode = objectMapper.readValue(json, JsonNode.class);

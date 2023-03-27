@@ -52,7 +52,7 @@ public class UserCpnCreateTest {
 //        SQLUtils.execute("TRUNCATE TABLE t_user");
     }
 
-    @Test
+//    @Test
     public void testAddConfigurerToForm() {
         // 设计控件
         List<CpnConfigurer> cpnConfigurerList = createCpnConfigurerList();

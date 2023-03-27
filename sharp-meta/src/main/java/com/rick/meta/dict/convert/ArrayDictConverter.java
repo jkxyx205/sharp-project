@@ -5,7 +5,6 @@ import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,13 +24,7 @@ public class ArrayDictConverter implements ValueConverter<String>  {
             return null;
         }
 
-        try {
-            List<String> valueList = JsonUtils.toList(values, String.class);
-            return valueList.stream().map(value -> dictService.getDictByTypeAndName((String) dictType, value).get().getLabel()).collect(Collectors.joining(","));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        List<String> valueList = JsonUtils.toList(values, String.class);
+        return valueList.stream().map(value -> dictService.getDictByTypeAndName((String) dictType, value).get().getLabel()).collect(Collectors.joining(","));
     }
 }

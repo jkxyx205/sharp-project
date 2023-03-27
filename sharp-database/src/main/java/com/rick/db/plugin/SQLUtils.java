@@ -19,7 +19,6 @@ import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.sql.Timestamp;
@@ -475,13 +474,13 @@ public final class SQLUtils {
         } else if (value.getClass() == Instant.class) {
             return Timestamp.from((Instant) value);
         } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(value.getClass())) {
-            return toJson(value);
+            return JsonUtils.toJson(value);
         } else if (Collection.class.isAssignableFrom(value.getClass())) {
             Collection<?> coll = (Collection<?>) value;
             if (coll.size() == 0) {
                 return "[]";
             } else {
-                return toJson(value);
+                return JsonUtils.toJson(value);
             }/*else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(coll.iterator().next().getClass())) {
                 return toJson(value);
             }*/
@@ -490,7 +489,7 @@ public final class SQLUtils {
             if (map.size() == 0) {
                 return "{}";
             } else {
-                return toJson(value);
+                return JsonUtils.toJson(value);
             }
         } else if (value.getClass().isArray()) {
             int length = Array.getLength(value);
@@ -520,14 +519,6 @@ public final class SQLUtils {
             return value;
         } else {
             return String.valueOf(value);
-        }
-    }
-
-    private static String toJson(Object value) {
-        try {
-            return JsonUtils.toJson(value);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
         }
     }
 

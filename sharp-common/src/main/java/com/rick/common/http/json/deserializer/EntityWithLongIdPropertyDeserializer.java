@@ -32,10 +32,10 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
 
         if (node.isNumber()) {
             Long id = node.asLong();
-            return invokeSetIdMethods(id, this.javaType.getRawClass());
+            return invokeSetIdMethod(id, this.javaType.getRawClass());
         } else if (node.isTextual()) {
             Long id = Long.valueOf(node.asText());
-            return invokeSetIdMethods(id, this.javaType.getRawClass());
+            return invokeSetIdMethod(id, this.javaType.getRawClass());
         }
 
         if (List.class.isAssignableFrom(this.javaType.getRawClass())) {
@@ -48,7 +48,7 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
 
                 List list = Lists.newArrayListWithExpectedSize(ids.size());
                 for (Long id : ids) {
-                    list.add(invokeSetIdMethods(id, contentClass));
+                    list.add(invokeSetIdMethod(id, contentClass));
                 }
                 return (T) list;
             } else {
@@ -59,7 +59,7 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
         return (T) JsonUtils.toObject(node, this.javaType.getRawClass());
     }
 
-    private T invokeSetIdMethods(Long id, Class<?> clazz) {
+    private T invokeSetIdMethod(Long id, Class<?> clazz) {
         try {
             Object o = clazz.newInstance();
             ReflectionUtils.invokeMethod(clazz.getMethod("setId", Long.class), o, id);

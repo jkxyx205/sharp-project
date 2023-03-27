@@ -5,7 +5,6 @@ import com.rick.common.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -13,7 +12,7 @@ import java.util.Objects;
  * @author Rick
  * @createdAt 2021-09-24 09:42:00
  */
-public abstract class PojoObjectAttributeConverter<T> implements AttributeConverter<T, String> {
+public abstract class AbstractPojoObjectAttributeConverter<T> implements AttributeConverter<T, String> {
 
     @Override
     public String convertToDatabaseColumn(T t) {
@@ -21,11 +20,7 @@ public abstract class PojoObjectAttributeConverter<T> implements AttributeConver
             return null;
         }
 
-        try {
-            return JsonUtils.toJson(t);
-        } catch (IOException e) {
-            return null;
-        }
+        return JsonUtils.toJson(t);
     }
 
     @Override
@@ -35,11 +30,6 @@ public abstract class PojoObjectAttributeConverter<T> implements AttributeConver
             return null;
         }
 
-        try {
-            return (T) JsonUtils.toObject(json, clazz);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return (T) JsonUtils.toObject(json, clazz);
     }
 }

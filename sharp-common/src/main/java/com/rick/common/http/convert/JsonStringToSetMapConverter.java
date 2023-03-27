@@ -6,7 +6,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -42,12 +41,7 @@ public class JsonStringToSetMapConverter implements ConditionalGenericConverter 
         if (StringUtils.isBlank((String) source)) {
             return null;
         }
-        try {
-            return JsonUtils.toSet(source.toString(), Map.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+        return JsonUtils.toSet(source.toString(), Map.class);
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class PageInstanceController {
      * @return
      */
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
-    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) throws IOException {
+    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) {
         FormBO formBO = getFormBO(formId, instanceId);
 
         model.addAttribute("formBO", formBO);

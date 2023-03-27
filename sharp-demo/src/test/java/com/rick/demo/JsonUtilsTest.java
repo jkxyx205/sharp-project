@@ -8,7 +8,6 @@ import com.rick.demo.module.project.domain.entity.Dept;
 import com.rick.demo.module.project.domain.enums.TestCodeEnum;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JsonUtilsTest {
 
     @Test
-    public void testListList() throws IOException {
+    public void testListList() {
         List<List<String>> list = new ArrayList<>();
         list.add(Arrays.asList("1", "2"));
         list.add(Arrays.asList("3", "4"));
@@ -32,7 +31,7 @@ public class JsonUtilsTest {
 
 
     @Test
-    public void testToJson() throws IOException {
+    public void testToJson() {
         Dept dept = new Dept();
         dept.setId(1L);
         dept.setName("Dev");
@@ -42,47 +41,50 @@ public class JsonUtilsTest {
     }
 
     @Test
-    public void testToPOJO() throws IOException {
-        Dept dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parentId\":2}", Dept.class);
+    public void testToPOJO() {
+        Dept dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}", Dept.class);
         assertThat(dept.getId().longValue()).isEqualTo(1L);
     }
 
     @Test
-    public void testToMap() throws IOException {
-        Map dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parentId\":2}", Map.class);
+    public void testToMap() {
+        Map dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}", Map.class);
         // dept.get("id") Integer类型
         assertThat(dept.get("id")).isEqualTo(1);
     }
 
     @Test
-    public void testToList() throws IOException {
-        List list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]", List.class);
+    public void testToList() {
+        List list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]", List.class);
         // dept.get("id") Integer类型
         assertThat(((Map)list.get(0)).get("id")).isEqualTo(1);
+
     }
 
     @Test
-    public void testToListWithGenerics1() throws IOException {
+    public void testToListWithGenerics1() {
         TypeReference<List<Dept>> typeRef = new TypeReference<List<Dept>>() {};
-        List<Dept> list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]", typeRef);
+        List<Dept> list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]", typeRef);
+        assertThat(list.get(0).getId().longValue()).isEqualTo(1L);
+        assertThat(list.get(0).getName()).isEqualTo("Dev");
+        assertThat(list.get(0).getParentId()).isEqualTo(2L);
+    }
+
+    @Test
+    public void testToListWithGenerics2() {
+        List<Dept> list = JsonUtils.toList("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]", Dept.class);
         assertThat(list.get(0).getId().longValue()).isEqualTo(1L);
     }
 
     @Test
-    public void testToListWithGenerics2() throws IOException {
-        List<Dept> list = JsonUtils.toList("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]", Dept.class);
-        assertThat(list.get(0).getId().longValue()).isEqualTo(1L);
-    }
-
-    @Test
-    public void testListStringToJsonNode() throws IOException {
-        JsonNode jsonNode = JsonUtils.toJsonNode("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]");
+    public void testListStringToJsonNode() {
+        JsonNode jsonNode = JsonUtils.toJsonNode("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]");
         assertThat(jsonNode.get(0).get("id").longValue()).isEqualTo(1L);
     }
 
     @Test
-    public void testObjectStringToJsonNode() throws IOException {
-        JsonNode jsonNode = JsonUtils.toJsonNode("{\"id\":1,\"name\":\"Dev\",\"parentId\":2}");
+    public void testObjectStringToJsonNode() {
+        JsonNode jsonNode = JsonUtils.toJsonNode("{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}");
         assertThat(jsonNode.get("id").longValue()).isEqualTo(1L);
     }
 
@@ -106,7 +108,7 @@ public class JsonUtilsTest {
     }
 
     @Test
-    public void testCodeEnum() throws IOException {
+    public void testCodeEnum() {
         List<TestCodeEnum> TestCodeList1 = JsonUtils.toList("[\"11\", \"10\"]", TestCodeEnum.class);
         System.out.println(TestCodeList1);
 

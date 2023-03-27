@@ -9,7 +9,9 @@ package com.rick.fileupload.core;
  * @date: 10/19/18 14:26
  * @Copyright: 2018 www.yodean.com. All rights reserved.
  */
-public abstract class Constants {
+public final class Constants {
+
+    private Constants() {}
 
     /**
      * 图片自动压缩的阀值 300KB

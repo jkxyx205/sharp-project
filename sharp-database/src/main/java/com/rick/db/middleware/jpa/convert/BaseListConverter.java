@@ -6,7 +6,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,11 +22,8 @@ public abstract class BaseListConverter<T> implements AttributeConverter<List<T>
             return null;
         }
 
-        try {
-            return JsonUtils.toJson(list);
-        } catch (IOException e) {
-            return null;
-        }
+
+        return JsonUtils.toJson(list);
     }
 
     @Override
@@ -38,11 +34,6 @@ public abstract class BaseListConverter<T> implements AttributeConverter<List<T>
             return Collections.emptyList();
         }
 
-        try {
-            return (List<T>) JsonUtils.toList(json, clazz);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
+        return (List<T>) JsonUtils.toList(json, clazz);
     }
 }

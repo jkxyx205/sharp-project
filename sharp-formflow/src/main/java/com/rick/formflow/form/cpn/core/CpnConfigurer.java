@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -88,13 +87,9 @@ public class CpnConfigurer extends BaseEntity {
     public Set<Validator> getValidatorList() {
         if (Objects.isNull(validatorList) && Objects.nonNull(validators)) {
             validatorList = Sets.newHashSetWithExpectedSize(validators.size());
-            try {
-                for (Map<String, ?> validatorInfo : validators) {
-                    Class<? extends Validator> validatorType = ValidatorManager.getValidatorByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validator_type")));
-                    validatorList.add(JsonUtils.toObject(JsonUtils.toJson(validatorInfo), validatorType));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Map<String, ?> validatorInfo : validators) {
+                Class<? extends Validator> validatorType = ValidatorManager.getValidatorByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validator_type")));
+                validatorList.add(JsonUtils.toObject(JsonUtils.toJson(validatorInfo), validatorType));
             }
         }
 
