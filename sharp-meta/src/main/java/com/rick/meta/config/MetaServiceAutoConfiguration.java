@@ -6,10 +6,12 @@ import com.rick.meta.dict.convert.ArrayDictConverter;
 import com.rick.meta.dict.convert.DictConverter;
 import com.rick.meta.dict.convert.SqlDateConverter;
 import com.rick.meta.dict.model.DictProperties;
+import com.rick.meta.dict.service.DictDOSupplier;
 import com.rick.meta.dict.service.DictService;
 import com.rick.meta.dict.service.DictServiceImpl;
 import com.rick.meta.props.service.PropertyService;
 import com.rick.meta.props.service.PropertyServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,8 +40,9 @@ public class MetaServiceAutoConfiguration {
     static class MetaGridServiceConfiguration {
 
         @Bean
-        public DictService getDictService(GridService gridService, DictProperties dictProperties) {
-            return new DictServiceImpl(gridService, dictProperties);
+        public DictService getDictService(GridService gridService, DictProperties dictProperties,
+                                          @Autowired(required = false) DictDOSupplier dictDOSupplier) {
+            return new DictServiceImpl(gridService, dictProperties, dictDOSupplier);
         }
 
         @Bean

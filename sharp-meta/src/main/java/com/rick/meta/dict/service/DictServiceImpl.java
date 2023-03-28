@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -28,8 +27,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private final DictProperties dictProperties;
 
-    @Autowired(required = false)
-    private DictDOSupplier dictDOSupplier;
+    private final DictDOSupplier dictDOSupplier;
 
     private static final String SELECT_SQL = "SELECT type, name, label, sort FROM sys_dict WHERE type = :type";
 
