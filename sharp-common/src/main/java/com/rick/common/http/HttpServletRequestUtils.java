@@ -83,11 +83,10 @@ public final class HttpServletRequestUtils {
             String name = en.nextElement();
             String[] values = request.getParameterValues(name);
 
-            //多选 会在name后面加[]
-            name = name.replace("[]", "");
-
             if (Objects.nonNull(values)) {
-                if (values.length > 1) {
+                //多选 会在name后面加[]
+                String property = name.replace("[]", "");
+                if (values.length > 1 || name.endsWith("[]")) {
                     List<String> array = Lists.newArrayListWithExpectedSize(values.length);
                     for (String value : values) {
                         if (skipBlink && StringUtils.isBlank(value)) {
@@ -95,14 +94,13 @@ public final class HttpServletRequestUtils {
                         }
                         array.add(value);
                     }
-
-                    map.put(name, array);
+                    map.put(property, array);
                 } else {
                     String value = values[0];
                     if (skipBlink && StringUtils.isBlank(value)) {
                         continue;
                     }
-                    map.put(name, value);
+                    map.put(property, value);
                 }
             }
         }

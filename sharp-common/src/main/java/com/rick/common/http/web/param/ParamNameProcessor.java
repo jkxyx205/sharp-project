@@ -1,5 +1,7 @@
 package com.rick.common.http.web.param;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
@@ -62,8 +64,12 @@ public class ParamNameProcessor extends ServletModelAttributeMethodProcessor {
         Map<String, String> paramMappings = new HashMap<>(32);
         for (Field field : fields) {
             ParamName paramName = field.getAnnotation(ParamName.class);
-            if (paramName != null && !paramName.value().isEmpty()) {
-                paramMappings.put(paramName.value(), field.getName());
+            if (paramName != null && ArrayUtils.isNotEmpty(paramName.value())) {
+                for (String name : paramName.value()) {
+                    if (StringUtils.isNotEmpty(name)) {
+                        paramMappings.put(name, field.getName());
+                    }
+                }
             }
         }
         PARAM_MAPPINGS_CACHE.put(targetClass, paramMappings);

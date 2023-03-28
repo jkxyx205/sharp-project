@@ -5,7 +5,6 @@ package com.rick.common.http.web.param;
  * @createdAt 2023-03-15 17:20:00
  */
 
-import com.rick.common.util.StringUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder;
 
@@ -32,7 +31,6 @@ public class ParamNameDataBinder extends ExtendedServletRequestDataBinder {
         for (Map.Entry<String, String> entry : renameMapping.entrySet()) {
             String from = entry.getKey();
             String to = entry.getValue();
-            from = StringUtils.stringToCamel(from);
             if (mpvs.contains(from)) {
                 mpvs.add(to, mpvs.getPropertyValue(from).getValue());
             }

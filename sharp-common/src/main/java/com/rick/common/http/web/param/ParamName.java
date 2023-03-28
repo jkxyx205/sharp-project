@@ -15,6 +15,6 @@ public @interface ParamName {
     /**
      * The name of the request parameter to bind to.
      */
-    String value();
+    String[] value() default {};
 
 }
