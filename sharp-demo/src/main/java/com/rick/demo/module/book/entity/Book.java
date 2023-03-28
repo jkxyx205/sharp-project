@@ -34,7 +34,7 @@ public class Book extends BaseEntity {
     /**
      * 书的拥有者
      */
-    @ParamName("person_id")
+    @ParamName({"person_id", "personId"})
     @JsonAlias("personId")
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @ManyToOne(value = "person_id", parentTable = "t_person")

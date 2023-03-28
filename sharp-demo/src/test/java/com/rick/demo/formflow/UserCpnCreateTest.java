@@ -12,6 +12,7 @@ import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.valid.Length;
 import com.rick.formflow.form.valid.Required;
 import com.rick.formflow.form.valid.Size;
+import com.rick.formflow.form.valid.TextNumberSize;
 import com.rick.formflow.form.valid.core.Validator;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.QueryField;
@@ -180,7 +181,7 @@ public class UserCpnCreateTest {
                 .build();
 
         Set<Validator> scoreValidatorList = Sets.newHashSetWithExpectedSize(1);
-        scoreValidatorList.add(new Size(0, 100));
+        scoreValidatorList.add(new TextNumberSize(0, 100));
         CpnConfigurer scoreCpn = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.NUMBER_TEXT)
                 .name("score")

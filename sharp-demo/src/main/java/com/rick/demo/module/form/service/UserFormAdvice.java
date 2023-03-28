@@ -18,7 +18,14 @@ public class UserFormAdvice implements FormAdvice {
     @Override
     public void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {
         // checkbox List => boolean
-        if (CollectionUtils.isEmpty((Collection<?>) values.get("marriage"))) {
+        Object marriage = values.get("marriage");
+        if (marriage instanceof Collection) {
+            if (CollectionUtils.isEmpty((Collection<?>) marriage)) {
+                values.put("marriage", false);
+            } else {
+                values.put("marriage", true);
+            }
+        } else if (marriage == null){
             values.put("marriage", false);
         } else {
             values.put("marriage", true);

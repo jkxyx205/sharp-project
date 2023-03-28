@@ -23,10 +23,10 @@ public class DictDOSupplierImpl implements DictDOSupplier {
 //        list.add(new DictDO("status", "LOCKED", "锁定", 0 ));
 //        list.add(new DictDO("status", "NORMAL", "正常", 1 ));
 
-        List<DictDO> list = Lists.newArrayListWithExpectedSize( User.HobbyEnum.values().length);
+        List<DictDO> list = Lists.newArrayListWithExpectedSize(User.HobbyEnum.values().length);
         int i = 0;
         for (User.HobbyEnum value : User.HobbyEnum.values()) {
-            list.add(new DictDO("hobbyList", value.name(), value.getLabel(), i++ ));
+            list.add(new DictDO("hobbyList", value.name(), value.getLabel(), i++));
         }
 
         return list;
