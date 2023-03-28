@@ -91,10 +91,7 @@ public class FormService {
 
         for (FormCpn formCpn : formCpnList) {
             CpnConfigurer cpnConfigurer = configIdMap.get(formCpn.getConfigId());
-            Cpn cpn = cpnManager.getCpnByType(cpnConfigurer.getCpnType());
-
-            // 可配置验证 和 控件验证 合并
-            cpnConfigurer.getValidatorList().addAll(cpn.cpnValidators());
+            Cpn cpn = CpnManager.getCpnByType(cpnConfigurer.getCpnType());
 
             Object value = null;
 
@@ -145,7 +142,7 @@ public class FormService {
         BindingResult bindingResult = new MapBindingResult(map, getClass().getName());
 
         for (FormBO.Property property : form.getPropertyList()) {
-            CpnInstanceProcessor processor = new CpnInstanceProcessor(property, cpnManager, values.get(property.getName()), bindingResult);
+            CpnInstanceProcessor processor = new CpnInstanceProcessor(property, values.get(property.getName()), bindingResult);
             processor.valid();
             if (bindingResult.hasErrors()) {
                 continue;
@@ -187,7 +184,6 @@ public class FormService {
         if (formAdvice != null) {
             formAdvice.afterInstanceHandle(form, instanceId, values);
         }
-
     }
 
     public int delete(Long instanceId) {

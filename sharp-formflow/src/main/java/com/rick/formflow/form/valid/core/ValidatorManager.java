@@ -24,13 +24,13 @@ public class ValidatorManager implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        validatorMap = Maps.newHashMapWithExpectedSize(16);
+        validatorMap = Maps.newHashMapWithExpectedSize(validatorSet.size());
         for (Validator validator : validatorSet) {
             validatorMap.put(validator.getValidatorType(), validator.getClass());
         }
     }
 
-    public static Class getValidatorByType(ValidatorTypeEnum validatorTypeEnum) {
+    public static Class getValidatorClassByType(ValidatorTypeEnum validatorTypeEnum) {
         return validatorMap.get(validatorTypeEnum);
     }
 

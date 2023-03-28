@@ -1,8 +1,6 @@
 package com.rick.formflow.form.cpn.core;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -13,21 +11,21 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2021-11-02 21:32:00
  */
-@Getter
 @Component
-@RequiredArgsConstructor
-public class CpnManager implements InitializingBean {
+public class CpnManager {
 
-    private final Set<Cpn> cpnList;
+    private static Map<CpnTypeEnum, Cpn> cpnMap;
 
-    private Map<CpnTypeEnum, Cpn> cpnMap;
+    @Autowired
+    public void setCpnList(Set<Cpn> cpnList) {
+        if (CpnManager.cpnMap != null) {
+            throw new IllegalArgumentException("cpnMap has been init");
+        }
+        CpnManager.cpnMap = cpnList.stream().collect(Collectors.toMap(cpn -> cpn.getCpnType(), v -> v));
+    }
 
-    public Cpn getCpnByType(CpnTypeEnum cpnType) {
+    public static Cpn getCpnByType(CpnTypeEnum cpnType) {
         return cpnMap.get(cpnType);
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        cpnMap = cpnList.stream().collect(Collectors.toMap(Cpn::getCpnType, v -> v));
-    }
 }

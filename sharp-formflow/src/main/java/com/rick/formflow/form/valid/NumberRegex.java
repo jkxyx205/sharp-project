@@ -18,12 +18,12 @@ import java.util.regex.Pattern;
 @Component
 public class NumberRegex extends AbstractValidator<String> {
 
-    private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+    private static final Pattern PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
 
     @Override
     public void valid(String value) {
         if (StringUtils.isNotBlank(value)) {
-            if (!pattern.matcher(value).matches()) {
+            if (!PATTERN.matcher(value).matches()) {
                 throw new IllegalArgumentException(getMessage());
             }
         }

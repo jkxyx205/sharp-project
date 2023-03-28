@@ -26,10 +26,10 @@ public class CpnInstanceProcessor {
 
     private BindingResult bindingResult;
 
-    public CpnInstanceProcessor(FormBO.Property property, CpnManager cpnManager, Object paramValue, BindingResult bindingResult) {
+    public CpnInstanceProcessor(FormBO.Property property, Object paramValue, BindingResult bindingResult) {
         this.property = property;
         this.configurer = property.getConfigurer();
-        this.cpn = cpnManager.getCpnByType(configurer.getCpnType());
+        this.cpn = CpnManager.getCpnByType(configurer.getCpnType());
         this.paramValue = paramValue;
         this.cpnValue = cpn.httpConverter(paramValue);
         this.stringValue = cpn.getStringValue(cpnValue);
@@ -38,13 +38,13 @@ public class CpnInstanceProcessor {
 
     public void valid() {
         try {
-            // 常规验证
+            // 选项验证
             cpn.valid(cpnValue, configurer.getOptions());
         } catch (IllegalArgumentException e) {
             bindingResult.addError(new FieldError("form", property.getName(), paramValue, false, null, null, configurer.getLabel() + e.getMessage()));
         }
 
-        // 数据库验证
+        // 逻辑验证
         for (Validator validator : configurer.getValidatorList()) {
             if (this.cpn.hasValidator(validator)) {
                 try {

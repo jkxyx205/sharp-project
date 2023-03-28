@@ -23,8 +23,6 @@ public class CpnConfigurerService {
 
     private final CpnConfigurerDAO cpnConfigurerDAO;
 
-    private final CpnManager cpnManager;
-
     public int[] saveOrUpdate(List<CpnConfigurer> configurers) {
         return cpnConfigurerDAO.insertOrUpdate(configurers);
     }
@@ -48,7 +46,7 @@ public class CpnConfigurerService {
     }
 
     private void checkIfAvailable(CpnConfigurer configurer) {
-        Cpn cpn = cpnManager.getCpnByType(configurer.getCpnType());
+        Cpn cpn = CpnManager.getCpnByType(configurer.getCpnType());
 
         for (Validator validator : configurer.getValidatorList()) {
             if (!cpn.hasValidator(validator)) {

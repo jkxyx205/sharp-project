@@ -29,6 +29,7 @@ public class TextNumberSize extends AbstractValidator<String> {
 
     @Override
     public void valid(String value) {
+        new NumberRegex().valid(value);
         if (StringUtils.isNotBlank(value)) {
             BigDecimal bigDecimalValue = NumberUtils.createBigDecimal(value);
             if (bigDecimalValue.compareTo(BigDecimal.valueOf(min)) == -1 || bigDecimalValue.compareTo(BigDecimal.valueOf(max)) == 1 ) {

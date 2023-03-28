@@ -39,9 +39,17 @@ public class CheckBox extends AbstractCpn<List<String>> {
 
     @Override
     public List<String> httpConverter(Object value) {
+        if (value == null) {
+            return Collections.emptyList();
+        }
+
         if (value instanceof String) {
             if (StringUtils.isBlank((CharSequence) value)) {
                 return Collections.emptyList();
+            }
+
+            if (!value.toString().startsWith("[")) {
+                value = "[\""+value+"\"]";
             }
 
             return JsonUtils.toList((String) value, String.class);

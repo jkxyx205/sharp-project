@@ -1,8 +1,8 @@
 package com.rick.formflow.form.cpn.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.dto.BaseEntity;
@@ -53,7 +53,7 @@ public class CpnConfigurer extends BaseEntity {
 
     @JsonIgnore
     @Transient
-    private Set<Validator> validatorList;
+    private List<Validator> validatorList;
 
     /**
      * 手动装配validatorsMap到validatorList
@@ -72,32 +72,23 @@ public class CpnConfigurer extends BaseEntity {
 
     private Map<String, Object> additionalInfo;
 
-    public Set<Map<String, ?>> getValidators() {
-        if (Objects.isNull(validators) && Objects.nonNull(validatorList)) {
-            validators = Sets.newHashSetWithExpectedSize(validatorList.size());
-            for (Validator validator : validatorList) {
-                validators.add(JsonUtils.objectToMap(validator));
-            }
-
-            return validators;
-        }
-        return Objects.isNull(validators) ? Collections.emptySet() : validators;
-    }
-
-    public Set<Validator> getValidatorList() {
+    public List<Validator> getValidatorList() {
         if (Objects.isNull(validatorList) && Objects.nonNull(validators)) {
-            validatorList = Sets.newHashSetWithExpectedSize(validators.size());
+            Cpn cpnByType = CpnManager.getCpnByType(cpnType);
+            validatorList = Lists.newArrayListWithExpectedSize(validators.size() + cpnByType.cpnValidators().size());
+            validatorList.addAll(cpnByType.cpnValidators());
+
             for (Map<String, ?> validatorInfo : validators) {
-                Class<? extends Validator> validatorType = ValidatorManager.getValidatorByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validator_type")));
+                Class<? extends Validator> validatorType = ValidatorManager.getValidatorClassByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validator_type")));
                 validatorList.add(JsonUtils.toObject(JsonUtils.toJson(validatorInfo), validatorType));
             }
         }
 
-        return Objects.isNull(validatorList) ? Collections.emptySet() : validatorList;
+        return Objects.isNull(validatorList) ? Collections.emptyList() : validatorList;
     }
 
     public Map<String, Object> getValidatorProperties() {
-        Set<Validator> validatorList = getValidatorList();
+        List<Validator> validatorList = getValidatorList();
         Map<String, Object> map = Maps.newHashMap();
         for (Validator validator : validatorList) {
             Method[] methods = validator.getClass().getMethods();

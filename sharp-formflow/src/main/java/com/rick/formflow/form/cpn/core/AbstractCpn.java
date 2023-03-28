@@ -37,10 +37,6 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
             }
         }
 
-        // 验证控件特性
-        for (Validator cpnValidator : cpnValidators()) {
-            cpnValidator.valid(value);
-        }
     }
 
     /**
@@ -73,7 +69,7 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
             return (T) JsonUtils.toObject(stringVal, cpnClass);
         }
 
-        return null;
+        throw new IllegalArgumentException();
     }
 
     @Override

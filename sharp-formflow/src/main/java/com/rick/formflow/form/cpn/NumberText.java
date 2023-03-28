@@ -8,6 +8,7 @@ import com.rick.formflow.form.valid.core.Validator;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -38,10 +39,11 @@ public class NumberText extends AbstractCpn<String> {
             return null;
         }
 
-        if (value instanceof Integer) {
-            return value.toString();
+        if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).stripTrailingZeros().toPlainString();
         }
-        return super.parseValue(value);
+
+        return value.toString();
     }
 
 }
