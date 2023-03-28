@@ -1,5 +1,6 @@
 package com.rick.db.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.plugin.dao.annotation.Column;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class BaseEntity extends SimpleEntity {
 
     private Instant updatedAt;
 
+    @JsonIgnore
     @Column(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME)
     private Boolean deleted;
 
