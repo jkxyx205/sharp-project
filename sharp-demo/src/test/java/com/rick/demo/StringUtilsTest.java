@@ -16,6 +16,7 @@ public class StringUtilsTest {
         assertThat(StringUtils.stringToCamel("role_type")).isEqualTo("roleType");
         assertThat(StringUtils.stringToCamel("ROLE_TYPE")).isEqualTo("roleType");
         assertThat(StringUtils.stringToCamel("ROLE_TYpE")).isEqualTo("roleType");
+        assertThat(StringUtils.stringToCamel("document_extend_reference_id")).isEqualTo("documentExtendReferenceId");
 
 //        assertThat(StringUtils.snakeToCamel("tom.OPEN")).isEqualTo("tom.open");
 //        assertThat(StringUtils.snakeToCamel("tomNew.OPEN")).isEqualTo("tomNew.open");

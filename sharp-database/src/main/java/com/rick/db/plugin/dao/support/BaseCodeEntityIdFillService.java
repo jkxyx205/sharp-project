@@ -108,7 +108,7 @@ public class BaseCodeEntityIdFillService {
         return ((EntityCodeDAOImpl) EntityDAOManager.baseDAOEntityMap.get(clazz)).selectIdByCodeOrThrowException(code);
     }
 
-    private <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {
+    public  <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             return Collections.emptyMap();
         }

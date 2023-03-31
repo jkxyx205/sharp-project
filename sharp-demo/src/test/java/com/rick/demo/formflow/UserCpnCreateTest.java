@@ -1,7 +1,6 @@
 package com.rick.demo.formflow;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.rick.db.service.support.Params;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
@@ -26,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +51,7 @@ public class UserCpnCreateTest {
 //        SQLUtils.execute("TRUNCATE TABLE t_user");
     }
 
-//    @Test
+    //    @Test
     public void testAddConfigurerToForm() {
         // 设计控件
         List<CpnConfigurer> cpnConfigurerList = createCpnConfigurerList();
@@ -103,12 +101,12 @@ public class UserCpnCreateTest {
                         "FROM t_user left JOIN sys_dict sd ON t_user.gender = sd.name" +
                         " WHERE is_deleted = 0 AND t_user.name like :name AND t_user.gender = :gender AND t_user.mobile = :mobile " +
                         "AND t_user.native_place IN (:nativePlace) AND t_user.status = :status AND t_user.hobby like :hobbyList" +
-                                " AND t_user.birthday >= :birthday0 AND t_user.birthday <= :birthday1 AND marriage = :marriage")
+                        " AND t_user.birthday >= :birthday0 AND t_user.birthday <= :birthday1 AND marriage = :marriage")
                 .reportColumnList(Arrays.asList(
                         new ReportColumn("name", "姓名", true),
                         new ReportColumn("gender", "性别"),
                         new ReportColumn("age", "年龄"),
-                        new ReportColumn("birthday", "出生日期",true, null, Arrays.asList("localDateConverter")),
+                        new ReportColumn("birthday", "出生日期", true, null, Arrays.asList("localDateConverter")),
                         new ReportColumn("mobile", "手机号码"),
                         new ReportColumn("score", "得分"),
                         new ReportColumn("email", "邮箱"),
@@ -143,11 +141,11 @@ public class UserCpnCreateTest {
 
     public List<CpnConfigurer> createCpnConfigurerList() {
         // 文本校验器
-        Set<Validator> textValidatorList = Sets.newHashSetWithExpectedSize(2);
+        List<Validator> textValidatorList = Lists.newArrayListWithExpectedSize(2);
         textValidatorList.add(new Required(true));
         textValidatorList.add(new Length(16));
 
-        Set<Validator> requiredValidatorList = Sets.newHashSetWithExpectedSize(1);
+        List<Validator> requiredValidatorList = Lists.newArrayListWithExpectedSize(1);
         requiredValidatorList.add(new Required(true));
 
         CpnConfigurer nameCpn = CpnConfigurer.builder()
@@ -168,7 +166,7 @@ public class UserCpnCreateTest {
                 .validatorList(requiredValidatorList)
                 .build();
 
-        Set<Validator> ageValidatorList = Sets.newHashSetWithExpectedSize(1);
+        List<Validator> ageValidatorList = Lists.newArrayListWithExpectedSize(1);
         ageValidatorList.add(new Size(18, 100));
         ageValidatorList.add(new Required(true));
         CpnConfigurer ageCpn = CpnConfigurer.builder()
@@ -180,7 +178,7 @@ public class UserCpnCreateTest {
                 .validatorList(ageValidatorList)
                 .build();
 
-        Set<Validator> scoreValidatorList = Sets.newHashSetWithExpectedSize(1);
+        List<Validator> scoreValidatorList = Lists.newArrayListWithExpectedSize(1);
         scoreValidatorList.add(new TextNumberSize(0, 100));
         CpnConfigurer scoreCpn = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.NUMBER_TEXT)

@@ -4,7 +4,6 @@ import com.google.common.base.CaseFormat;
 import com.rick.common.constant.Constants;
 import org.springframework.lang.Nullable;
 
-import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -311,23 +310,35 @@ public final class StringUtils {
     // Function to convert the string
     // from snake case to camel case
     public static String stringToCamel(String str) {
-        // Run a loop till string
-        // string contains underscore
         if (str.contains("_")) {
-            while (str.contains("_")) {
+            // Capitalize first letter of string
+            str = str.toLowerCase();
+            str = str.substring(0, 1)
+                    + str.substring(1);
 
-                // Replace the first occurrence
-                // of letter that present after
-                // the underscore, to capitalize
-                // form of next letter of underscore
-                str = str.toLowerCase(Locale.US)
-                        .replaceFirst(
-                                "_[a-z]",
-                                String.valueOf(
-                                        Character.toUpperCase(
-                                                str.charAt(
-                                                        str.indexOf("_") + 1))));
+            // Convert to StringBuilder
+            StringBuilder builder
+                    = new StringBuilder(str);
+
+            // Traverse the string character by
+            // character and remove underscore
+            // and capitalize next letter
+            for (int i = 0; i < builder.length(); i++) {
+
+                // Check char is underscore
+                if (builder.charAt(i) == '_') {
+
+                    builder.deleteCharAt(i);
+                    builder.replace(
+                            i, i + 1,
+                            String.valueOf(
+                                    Character.toUpperCase(
+                                            builder.charAt(i))));
+                }
             }
+
+            // Return in String type
+            return builder.toString();
         } else if(str.matches("[A-Z]+")) {
             return str.toLowerCase();
         } else if (str.charAt(0)>= 'A' && str.charAt(0) <= 'Z'){
