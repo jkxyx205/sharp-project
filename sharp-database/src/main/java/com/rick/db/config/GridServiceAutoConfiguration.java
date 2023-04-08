@@ -52,8 +52,7 @@ import java.util.List;
 @EnableConfigurationProperties({SharpDatabaseProperties.class})
 public class GridServiceAutoConfiguration {
 
-    public GridServiceAutoConfiguration() {
-    }
+    public GridServiceAutoConfiguration() {}
 
     @Configuration
     static class GridServiceConfiguration {
@@ -79,7 +78,6 @@ public class GridServiceAutoConfiguration {
             return new MysqlSqlFormatter();
         }
 
-
         @Bean
         public GridService gridService(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
             if (sharpDatabaseProperties.isInitDatabaseMetaData()) {
@@ -89,8 +87,8 @@ public class GridServiceAutoConfiguration {
         }
 
         @Bean
-        public BaseCodeEntityIdFillService getBaseCodeEntityIdFillService() {
-            return new BaseCodeEntityIdFillService();
+        public EntityCodeIdFillService getEntityCodeIdFillService() {
+            return new EntityCodeIdFillService();
         }
     }
 

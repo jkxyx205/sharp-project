@@ -1,7 +1,7 @@
 package com.rick.demo.db;
 
 import com.rick.common.http.exception.BizException;
-import com.rick.db.plugin.dao.support.BaseCodeEntityIdFillService;
+import com.rick.db.plugin.dao.support.EntityCodeIdFillService;
 import com.rick.demo.module.code.dao.SerialNumberDAO;
 import com.rick.demo.module.code.entity.SerialNumber;
 import org.junit.jupiter.api.MethodOrderer;
@@ -28,7 +28,7 @@ public class SerialNumberDAOTest {
     private SerialNumberDAO serialNumberDAO;
 
     @Autowired
-    private BaseCodeEntityIdFillService idFillService;
+    private EntityCodeIdFillService idFillService;
 
     @Test
     public void testSave() {

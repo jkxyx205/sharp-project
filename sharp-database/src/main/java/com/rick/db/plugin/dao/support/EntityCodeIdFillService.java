@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2023-03-08 22:17:00
  */
-public class BaseCodeEntityIdFillService {
+public class EntityCodeIdFillService {
 
     public <T extends BaseCodeEntity> void fill(T t) {
         if (t == null || t.getId() != null || StringUtils.isBlank(t.getCode())) {
@@ -78,7 +78,7 @@ public class BaseCodeEntityIdFillService {
 
     public <T extends BaseCodeEntity> T fill(Class<T> clazz, T t, String code) {
         if (StringUtils.isBlank(code)) {
-            return  t;
+            return t;
         }
 
         if (t == null) {
