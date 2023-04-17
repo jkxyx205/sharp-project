@@ -20,18 +20,20 @@ import java.time.Instant;
 @NoArgsConstructor
 public class BaseEntity extends SimpleEntity {
 
-    @Column(updatable = false)
-    private Long createdBy;
+    @Column(updatable = false, comment = "创建人")
+    private Long create_id;
 
-    @Column(updatable = false)
-    private Instant createdAt;
+    @Column(updatable = false, comment = "创建时间")
+    private Instant create_time;
 
-    private Long updatedBy;
+    @Column(comment = "修改人")
+    private Long update_id;
 
-    private Instant updatedAt;
+    @Column(comment = "修改时间")
+    private Instant update_time;
 
     @JsonIgnore
-    @Column(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME)
+    @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")
     private Boolean deleted;
 
 }
