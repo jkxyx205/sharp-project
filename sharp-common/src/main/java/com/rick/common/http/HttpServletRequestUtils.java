@@ -72,10 +72,10 @@ public final class HttpServletRequestUtils {
     /**
      * 将参数放到map中，数组value用,分隔
      * @param request
-     * @param skipBlink 忽略空白
+     * @param skipBlank 忽略空白
      * @return
      */
-    public static Map<String, Object> getParameterMap(HttpServletRequest request, boolean skipBlink) {
+    public static Map<String, Object> getParameterMap(HttpServletRequest request, boolean skipBlank) {
         Enumeration<String> en = request.getParameterNames();
         Map<String, Object> map = new HashMap<>(request.getParameterMap().size());
 
@@ -89,7 +89,7 @@ public final class HttpServletRequestUtils {
                 if (values.length > 1 || name.endsWith("[]")) {
                     List<String> array = Lists.newArrayListWithExpectedSize(values.length);
                     for (String value : values) {
-                        if (skipBlink && StringUtils.isBlank(value)) {
+                        if (skipBlank && StringUtils.isBlank(value)) {
                             continue;
                         }
                         array.add(value);
@@ -97,7 +97,7 @@ public final class HttpServletRequestUtils {
                     map.put(property, array);
                 } else {
                     String value = values[0];
-                    if (skipBlink && StringUtils.isBlank(value)) {
+                    if (skipBlank && StringUtils.isBlank(value)) {
                         continue;
                     }
                     map.put(property, value);
