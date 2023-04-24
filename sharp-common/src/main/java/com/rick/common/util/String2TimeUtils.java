@@ -36,9 +36,9 @@ public final class String2TimeUtils {
 
     private static final String HOUR_END = "59:59";
 
-    private static final DateTimeFormatter SQL_TIME_FORMATTER = DateTimeFormatter.ofPattern(SQL_TIME);
+    private static final DateTimeFormatter SQL_TIME_FORMATTER = DateTimeFormatter.ofPattern(SQL_TIME).withZone(ZoneId.systemDefault());
 
-    private static final DateTimeFormatter TIME_SHORT_FORMATTER = DateTimeFormatter.ofPattern(TIME_SHORT);
+    private static final DateTimeFormatter TIME_SHORT_FORMATTER = DateTimeFormatter.ofPattern(TIME_SHORT).withZone(ZoneId.systemDefault());
 
     /**
      * 将yyyy-MM-dd[ HH:mm:ss]转成日期类型
