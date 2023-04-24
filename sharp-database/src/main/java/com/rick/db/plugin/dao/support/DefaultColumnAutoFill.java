@@ -17,8 +17,8 @@ public class DefaultColumnAutoFill implements ColumnAutoFill {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(4);
         Instant now = Instant.now();
         fillMap.put(idPropertyName, id);
-        fillMap.put(SharpDbConstants.create_time_COLUMN_NAME, now);
-        fillMap.put(SharpDbConstants.update_time_COLUMN_NAME, now);
+        fillMap.put(SharpDbConstants.CREATE_TIME_COLUMN_NAME, now);
+        fillMap.put(SharpDbConstants.UPDATE_TIME_COLUMN_NAME, now);
         fillMap.put(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return fillMap;
     }
@@ -27,7 +27,7 @@ public class DefaultColumnAutoFill implements ColumnAutoFill {
     public Map<String, Object> updateFill() {
         Map<String, Object> fillMap = Maps.newHashMapWithExpectedSize(2);
         Instant now = Instant.now();
-        fillMap.put(SharpDbConstants.update_time_COLUMN_NAME, now);
+        fillMap.put(SharpDbConstants.UPDATE_TIME_COLUMN_NAME, now);
         fillMap.put(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return fillMap;
     }

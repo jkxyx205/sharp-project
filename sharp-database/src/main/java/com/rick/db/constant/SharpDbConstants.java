@@ -6,17 +6,19 @@ package com.rick.db.constant;
  */
 public class SharpDbConstants {
 
-    public static final String LOGIC_DELETE_COLUMN_NAME = "is_deleted";
-
     public static final String ID_COLUMN_NAME = "id";
 
-    public static final String create_time_COLUMN_NAME = "create_time";
+    public static final String CODE_COLUMN_NAME = "code";
 
-    public static final String update_time_COLUMN_NAME = "update_time";
+    public static final String CREATE_ID_COLUMN_NAME = "create_id";
 
-    public static final String create_id_COLUMN_NAME = "create_id";
+    public static final String CREATE_TIME_COLUMN_NAME = "create_time";
 
-    public static final String update_id_COLUMN_NAME = "update_id";
+    public static final String UPDATE_ID_COLUMN_NAME = "update_id";
+
+    public static final String UPDATE_TIME_COLUMN_NAME = "update_time";
+
+    public static final String LOGIC_DELETE_COLUMN_NAME = "is_deleted";
 
     public static final String COLUMN_NAME_SEPARATOR_REGEX = "\\s*,\\s*";
 
