@@ -1,5 +1,6 @@
 package com.rick.db.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.constant.SharpDbConstants;
@@ -27,17 +28,20 @@ public class BaseEntityWithAssign {
     @JsonSerialize(using = ToStringSerializer.class)
     private String id;
 
-    @Column(updatable = false)
-    private Long createdBy;
+    @Column(updatable = false, comment = "创建人")
+    private Long createId;
 
-    @Column(updatable = false)
-    private Instant createdAt;
+    @Column(updatable = false, comment = "创建时间")
+    private Instant createTime;
 
-    private Long updatedBy;
+    @Column(comment = "修改人")
+    private Long updateId;
 
-    private Instant updatedAt;
+    @Column(comment = "修改时间")
+    private Instant updateTime;
 
-    @Column(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME)
+    @JsonIgnore
+    @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")
     private Boolean deleted;
 
     @Override

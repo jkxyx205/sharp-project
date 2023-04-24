@@ -21,16 +21,16 @@ import java.time.Instant;
 public class BaseEntity extends SimpleEntity {
 
     @Column(updatable = false, comment = "创建人")
-    private Long create_id;
+    private Long createId;
 
     @Column(updatable = false, comment = "创建时间")
-    private Instant create_time;
+    private Instant createTime;
 
     @Column(comment = "修改人")
-    private Long update_id;
+    private Long updateId;
 
     @Column(comment = "修改时间")
-    private Instant update_time;
+    private Instant updateTime;
 
     @JsonIgnore
     @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")

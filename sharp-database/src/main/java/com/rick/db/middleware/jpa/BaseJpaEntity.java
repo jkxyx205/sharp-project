@@ -33,19 +33,19 @@ public class BaseJpaEntity {
     private Long id;
 
     @CreatedBy
-    @Column(name = "created_by", nullable = false, updatable = false)
+    @Column(name = "create_id", nullable = false, updatable = false)
     private Long createdBy;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "create_time", nullable = false, updatable = false)
     private Instant createdAt;
 
     @LastModifiedBy
-    @Column(name = "updated_by", nullable = false)
+    @Column(name = "update_id", nullable = false)
     private Long updatedBy;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "update_time", nullable = false)
     private Instant updatedAt;
 
     @JsonIgnore

@@ -13,10 +13,10 @@ public class BaseEntityUtils {
 
     public void resetAdditionalFields(BaseEntity entity) {
         entity.setId(null);
-        entity.setUpdatedAt(null);
-        entity.setUpdatedBy(null);
-        entity.setUpdatedAt(null);
-        entity.setUpdatedAt(null);
+        entity.setCreateId(null);
+        entity.setCreateTime(null);
+        entity.setUpdateId(null);
+        entity.setUpdateTime(null);
         entity.setDeleted(null);
     }
 

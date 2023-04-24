@@ -24,10 +24,10 @@ DROP TABLE IF EXISTS `sys_form`;
 CREATE TABLE `sys_form` (
   `id` bigint(20) NOT NULL,
   `name` varchar(32) NOT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `create_id` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_id` bigint(20) NOT NULL,
+  `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -52,10 +52,10 @@ CREATE TABLE `sys_form_configurer` (
   `default_value` varchar(32) DEFAULT NULL,
   `placeholder` varchar(32) DEFAULT NULL,
   `additional_info` varchar(1024) DEFAULT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `create_id` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_id` bigint(20) NOT NULL,
+  `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -77,10 +77,10 @@ CREATE TABLE `sys_form_cpn_configurer` (
   `name` varchar(16) NOT NULL,
   `config_id` bigint(20) NOT NULL,
   `order_num` int(11) DEFAULT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `create_id` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_id` bigint(20) NOT NULL,
+  `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -103,10 +103,10 @@ CREATE TABLE `sys_form_cpn_value` (
   `form_id` bigint(20) NOT NULL,
   `config_id` bigint(20) NOT NULL,
   `instance_id` bigint(20) NOT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `create_id` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_id` bigint(20) NOT NULL,
+  `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

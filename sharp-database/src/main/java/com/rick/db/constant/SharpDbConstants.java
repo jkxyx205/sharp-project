@@ -10,13 +10,13 @@ public class SharpDbConstants {
 
     public static final String ID_COLUMN_NAME = "id";
 
-    public static final String CREATED_AT_COLUMN_NAME = "created_at";
+    public static final String create_time_COLUMN_NAME = "create_time";
 
-    public static final String UPDATED_AT_COLUMN_NAME = "updated_at";
+    public static final String update_time_COLUMN_NAME = "update_time";
 
-    public static final String CREATED_BY_COLUMN_NAME = "created_by";
+    public static final String create_id_COLUMN_NAME = "create_id";
 
-    public static final String UPDATED_BY_COLUMN_NAME = "updated_by";
+    public static final String update_id_COLUMN_NAME = "update_id";
 
     public static final String COLUMN_NAME_SEPARATOR_REGEX = "\\s*,\\s*";
 

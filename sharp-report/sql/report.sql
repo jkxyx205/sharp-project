@@ -10,10 +10,10 @@ create table sys_report
     summary bit default b'0' null,
     report_column_list text null,
     query_field_list text null,
-    created_by bigint null,
-    created_at datetime null,
-    updated_by bigint null,
-    updated_at datetime null,
+    create_id bigint null,
+    create_time datetime null,
+    update_id bigint null,
+    update_time datetime null,
     is_deleted bit null
 )
     comment '报表';

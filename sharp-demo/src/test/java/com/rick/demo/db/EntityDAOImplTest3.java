@@ -54,7 +54,7 @@ public class EntityDAOImplTest3 {
     @Order(3)
     @Test
     public void testSaveParams() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,created_by,created_at,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,create_id,create_time,update_id,update_time,is_deleted
         projectDAO.insert(new Object[] {
                 "title-params", "description", "http://", 1, "0", "{}", "LOCKED", "[]","816-18898876654", null, null, null, null, null, null
         });
@@ -63,7 +63,7 @@ public class EntityDAOImplTest3 {
     @Order(4)
     @Test
     public void testMapSaveParams() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,created_by,created_at,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,create_id,create_time,update_id,update_time,is_deleted
         projectDAO.insert(new Object[] {
                 "title-map", "description", "http://", 1, "1", "{}", "LOCKED", "[]","232-17787823",null, null, null, null, null, null
         });
@@ -72,7 +72,7 @@ public class EntityDAOImplTest3 {
     @Order(5)
     @Test
     public void testSaveParamsBatch() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,created_by,created_at,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,id,create_id,create_time,update_id,update_time,is_deleted
         List<Object[]> paramsList = Lists.newArrayList(
                 new Object[]{
                         "title-save-params-batch-1", "description", "http://", 1, "1", "{}", "LOCKED", "[]","23-233223223",null, null, null, null, null, null
@@ -104,7 +104,7 @@ public class EntityDAOImplTest3 {
     @Order(9)
     @Test
     public void testUpdate() {
-        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,updated_by,updated_at,is_deleted
+        // title,description,cover_url,owner_id,sex,address,status,list,phone_number,update_id,update_time,is_deleted
         int count = projectDAO.update(new Object[]{
                 "title-update", "description", "http://", 1, "1", "{}", "LOCKED", "[{\"code\":\"001\",\"detail\":\"苏州\"}]", "2311-223323", null, null, false
         }, 479723134929764352L);
@@ -115,7 +115,7 @@ public class EntityDAOImplTest3 {
     @Order(10)
     @Test
     public void testUpdate2() {
-        int count = projectDAO.updateById("title, sex, status, updated_at, updated_by", new Object[]{
+        int count = projectDAO.updateById("title, sex, status, update_time, update_id", new Object[]{
                 "title-update2", 0, "NORMAL", null, null
         }, 479723134929764352L);
 

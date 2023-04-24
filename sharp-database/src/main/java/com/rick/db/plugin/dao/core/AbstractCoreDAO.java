@@ -289,7 +289,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      *
      * @param updateColumnNames name, age
      * @param params            {"Rick", 23, LocalDateTime.now, 1}
-     * @param conditionSQL      created_at > ? AND created_by = ?
+     * @param conditionSQL      create_time > ? AND create_id = ?
      */
     @Override
     public int update(String updateColumnNames, Object[] params, String conditionSQL) {
@@ -491,7 +491,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     /**
      * 指定更新字段
      *
-     * @param updateColumnNames name, age, updated_at
+     * @param updateColumnNames name, age, update_time
      * @param params            update && where 语句后面的参数 {"Rick", 23, null}
      * @param id                1
      */

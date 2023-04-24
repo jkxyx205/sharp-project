@@ -29,7 +29,7 @@ CREATE TABLE `sys_document` (
   `size` int(11) DEFAULT NULL,
   `group_name` varchar(255) NOT NULL,
   `path` varchar(255) NOT NULL,
-  `created_at` datetime NOT NULL,
+  `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

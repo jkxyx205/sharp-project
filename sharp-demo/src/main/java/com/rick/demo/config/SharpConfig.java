@@ -34,8 +34,8 @@ public class SharpConfig {
             @Override
             public Map<String, Object> insertFill(String idPropertyName, Object id) {
                 Map<String, Object> fill = new DefaultColumnAutoFill().insertFill(idPropertyName, id);
-                fill.put("created_by", 0L);
-                fill.put("updated_by", 0L);
+                fill.put("create_id", 0L);
+                fill.put("update_id", 0L);
                 fill.put("group_id", 99L);
                 return fill;
             }
@@ -43,7 +43,7 @@ public class SharpConfig {
             @Override
             public Map<String, Object> updateFill() {
                 Map<String, Object> fill = new DefaultColumnAutoFill().updateFill();
-                fill.put("updated_by", 0L);
+                fill.put("update_id", 0L);
                 return fill;
             }
         };

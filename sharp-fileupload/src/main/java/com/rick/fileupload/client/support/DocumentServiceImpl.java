@@ -170,7 +170,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private Object[] parseParams(Document document) {
-        // id,created_at,name,extension,content_type,size,group_name,path
+        // id,create_time,name,extension,content_type,size,group_name,path
         long sequenceId = IdGenerator.getSequenceId();
         document.setId(sequenceId);
         document.setCreatedAt(Instant.now());

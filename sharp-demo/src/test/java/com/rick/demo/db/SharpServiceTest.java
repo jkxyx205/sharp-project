@@ -30,13 +30,13 @@ public class SharpServiceTest {
     @Test
     public void testListAsMap() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, create_time, is_deleted, create_id, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
-                "  AND created_at > :createTime\n" +
+                "  AND create_time > :createTime\n" +
                 "  AND is_deleted = :deleted" +
-                "  AND created_by = ${createBy}";
+                "  AND create_id = ${createBy}";
 
         Map<String, Object> params = new HashMap<>();
 //        params.put("id", "1341369230607347714,1341299740150394882,1341734037772668930,1341313565406904322,1341368363682439169");
@@ -58,11 +58,11 @@ public class SharpServiceTest {
     @Test
     public void testListAsClass() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted AS deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, create_time, is_deleted AS deleted, create_id, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
-                "  AND created_at > :createTime\n" +
+                "  AND create_time > :createTime\n" +
                 "  AND is_deleted = :deleted" +
                 "  ${createBy}";
 
@@ -79,11 +79,11 @@ public class SharpServiceTest {
     @Test
     public void testListAsCustom() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, create_time, is_deleted, create_id, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
-                "  AND created_at > :createTime\n" +
+                "  AND create_time > :createTime\n" +
                 "  AND is_deleted = :deleted" +
                 "  ${createBy}";
 
@@ -107,11 +107,11 @@ public class SharpServiceTest {
     @Test
     public void testKeyValue() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, create_time, is_deleted, create_id, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
-                "  AND created_at > :createTime\n" +
+                "  AND create_time > :createTime\n" +
                 "  AND is_deleted = :deleted" +
                 "  ${createBy}";
 
@@ -125,11 +125,11 @@ public class SharpServiceTest {
     @Test
     public void testQueryObject() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted AS deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, create_time, is_deleted AS deleted, create_id, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id = :id\n" +
                 "  AND title LIKE :title\n" +
-                "  AND created_at > :createTime\n" +
+                "  AND create_time > :createTime\n" +
                 "  AND is_deleted = :deleted" +
                 "  ${createBy}";
 
@@ -146,17 +146,17 @@ public class SharpServiceTest {
     @Test
     public void testQueryBean() {
         // language=SQL
-        String sql = "SELECT id, title, description, created_at, is_deleted AS deleted, created_by, sex, status\n" +
+        String sql = "SELECT id, title, description, create_time, is_deleted AS deleted, create_id, sex, status\n" +
                 "FROM t_project1\n" +
                 "WHERE id IN (:id)\n" +
                 "  AND title LIKE :title\n" +
-                "  AND created_at > :createTime\n" +
+                "  AND create_time > :createTime\n" +
                 "  AND is_deleted = :deleted ${hello}" +
                 " ${createdBy}";
 
         Map<String, Object> params = new HashMap<>();
         params.put("id", new Long[] { 479723134929764352L, 479723663504343041L});
-        params.put("createdBy", "AND created_by = 156629745675451");
+        params.put("createdBy", "AND create_id = 156629745675451");
 
         Optional<Project> optionalMap = gridService.queryForObject(sql, params, Project.class);
         if (optionalMap.isPresent()) {
@@ -170,8 +170,8 @@ public class SharpServiceTest {
         // language=SQL
         String sql = "UPDATE t_project1 SET title = :title, description = :description, is_deleted = :deleted\n" +
                 "WHERE id IN (:id)\n" +
-                "  AND created_at > :createdTime\n" +
-                "AND created_by = ${createdBy}";
+                "  AND create_time > :createdTime\n" +
+                "AND create_id = ${createdBy}";
 
         Map<String, Object> params = new HashMap<>();
         // 条件
