@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * @author Rick
@@ -24,13 +24,13 @@ public class BaseEntity extends SimpleEntity {
     private Long createId;
 
     @Column(updatable = false, comment = "创建时间")
-    private Instant createTime;
+    private LocalDateTime createTime;
 
     @Column(comment = "修改人")
     private Long updateId;
 
     @Column(comment = "修改时间")
-    private Instant updateTime;
+    private LocalDateTime updateTime;
 
     @JsonIgnore
     @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")
