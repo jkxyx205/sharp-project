@@ -553,13 +553,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return com.rick.common.util.StringUtils.camelToSnake(columnName);
     }
 
-    /**
-     * 将id合并到参数中
-     * @param params
-     * @param id
-     * @return
-     */
-    protected Object[] mergeIdParam(Object[] params, ID id) {
+    protected Object[] mergeParam(Object[] params, Object id, String columnName) {
         Object[] mergedParams;
         if (ArrayUtils.isEmpty(params)) {
             mergedParams = new Object[]{id};
@@ -569,7 +563,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
             System.arraycopy(params, 0, mergedParams, 0, params.length);
         }
 
-        return new Object[] {mergedParams, ""+getIdColumnName()+" = ?"};
+        return new Object[]{mergedParams, "" + columnName + " = ?"};
     }
 
     protected Object[] resolveParams(Object[] params) {
@@ -620,6 +614,24 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     protected Object[] handleAutoFill(Object t, Object[] params, List<String> columnNameList, ColumnFillType fillType) {
+        // handle version
+        if (t != null && t != params && EntityDAOManager.isEntityClass(t.getClass()) &&
+         StringUtils.isNotBlank(EntityDAOManager.getTableMeta(t.getClass()).getVersionProperty().getPropertyName())) {
+            int index = columnNameList.indexOf(EntityDAOManager.getTableMeta(t.getClass()).getVersionProperty().getColumnName());
+
+            if (params[index] == null) {
+                params[index] = 1;
+            } else {
+                params[index] = (Integer)params[index] + 1;
+            }
+
+            // 将auto值回写到实体中
+            EntityDAOManager.setPropertyValue(t,
+                    EntityDAOManager.getTableMeta(t.getClass()).getVersionProperty().getPropertyName(),
+                    params[index]);
+
+        }
+
         if (Objects.nonNull(columnAutoFill)) {
             Map<String, Object> fill = (ColumnFillType.INSERT == fillType) ? columnAutoFill.insertFill(this.idColumnName, generatorId(t)) : columnAutoFill.updateFill();
 
@@ -639,9 +651,9 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
                         ((Map)t).put(fillColumnName, fillColumnValue);
                     } else if (EntityDAOManager.isEntityClass(t.getClass())) {
                         // 将auto值回写到实体中
-                        EntityDAOManager.setPropertyValue(t
-                                , EntityDAOManager.getTableMeta(t.getClass()).getColumnNameFieldMap().get(fillColumnName).getName()
-                                , fillColumnValue);
+                        EntityDAOManager.setPropertyValue(t,
+                                EntityDAOManager.getTableMeta(t.getClass()).getColumnNameFieldMap().get(fillColumnName).getName(),
+                                fillColumnValue);
                     }
 
                 }
@@ -687,7 +699,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     protected int updateById(Object t, String updateColumnNames, Object[] params, ID id) {
         Assert.notNull(id, "id不能为空");
-        Object[] objects = mergeIdParam(params, id);
+        Object[] objects = mergeParam(params, id, getIdColumnName());
         return update(t, updateColumnNames, (Object[]) objects[0], (String) objects[1]);
     }
 

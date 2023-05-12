@@ -58,12 +58,17 @@ public class TableGenerator {
         columnNames = sortColumnNames(columnNames);
 
         for (String columnName : columnNames) {
-            if (tableMeta.getIdColumnName().equals(columnName)) {
+            if (tableMeta.getIdColumnName().equals(columnName) ) {
                 continue;
             }
 
             Field field = tableMeta.getColumnNameFieldMap().get(columnName);
             createTableSql.append(columnName).append(" ");
+
+            if (columnName.equals(tableMeta.getVersionProperty().getColumnName())) {
+                createTableSql.append(determineSqlType(field.getType())).append(" not null comment '版本号',");
+                continue;
+            }
 
             Column column = tableMeta.getColumnNameMap().get(columnName);
 

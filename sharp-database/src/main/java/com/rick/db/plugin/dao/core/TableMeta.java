@@ -20,6 +20,8 @@ public class TableMeta {
 
     private Id id;
 
+    private VersionProperty versionProperty;
+
     /**
      * 类名，约定优于配置，它的子表的外键用"name_id"表示
      */
@@ -112,5 +114,13 @@ public class TableMeta {
         private ManyToMany manyToMany;
 
         private Field field;
+    }
+
+    @Value
+    public static class VersionProperty {
+
+        private String columnName;
+
+        private String propertyName;
     }
 }

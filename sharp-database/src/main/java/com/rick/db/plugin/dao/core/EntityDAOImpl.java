@@ -62,6 +62,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     private boolean hasCascadeDelete = false;
 
+    private boolean hasVersionManagement = false;
+
     /**
      * id 生成策略
      */
@@ -259,9 +261,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * 更新所有字段
-     *
      * @param entity
-     * @return
+     * @return 返回影响的行。返回0，有两种情况，id不存在；如果版本管理，版本滞后。
      */
     @Override
     public int update(T entity) {
@@ -306,7 +307,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     /**
-     * 批量更新
+     * 批量更新。
+     * 批量更新忽略版本管理，如果想要版本管理，请单个更新！
      *
      * @param collection
      * @return
@@ -322,7 +324,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         String conditionSQL = null;
         for (T entity : collection) {
             Object[] resolverParamsAndIdObjects = resolveUpdateParamsAndId(entity, updateColumnNameList);
-            Object[] mergeIdParamObjects = mergeIdParam((Object[]) resolverParamsAndIdObjects[0], (ID) resolverParamsAndIdObjects[1]);
+            Object[] mergeIdParamObjects = mergeParam((Object[]) resolverParamsAndIdObjects[0], resolverParamsAndIdObjects[1], getIdColumnName());
             Object[] finalObjects = handleConditionAdvice(handleAutoFill(entity, (Object[]) mergeIdParamObjects[0], updateColumnNameList, ColumnFillType.UPDATE), null, (String) mergeIdParamObjects[1], false);
             paramsList.add((Object[]) finalObjects[0]);
             conditionSQL = (String) finalObjects[1];
@@ -630,6 +632,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         hasCascadeDelete = CollectionUtils.isNotEmpty(tableMeta.getManyToManyAnnotationList()) ||
                 tableMeta.getOneToManyAnnotationList().stream().anyMatch(s -> s.getOneToMany().cascadeDelete());
 
+        hasVersionManagement = StringUtils.isNotBlank(tableMeta.getVersionProperty().getPropertyName());
+
         this.subTableRefColumnName = tableMeta.getName() + "_" + tableMeta.getIdColumnName();
 
         this.propertyList = convertToList(tableMeta.getProperties());
@@ -715,6 +719,16 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
+        if (hasVersionManagement) {
+            Integer version = (Integer) getValue(t, tableMeta.getVersionProperty().getPropertyName());
+            Assert.notNull(version, "version不能为空");
+
+            String columnName = tableMeta.getVersionProperty().getColumnName();
+            Object[] objects = mergeParam(params, version, columnName);
+            params = (Object[]) objects[0];
+            conditionSQL += " AND " + objects[1];
+        }
+
         int count = super.update(tableName, t, updateColumnNames, params, conditionSQL);
         if (count > 0 && t != null && t.getClass() == getEntityClass()) {
             cascadeInsertOrUpdate((T) t, false);

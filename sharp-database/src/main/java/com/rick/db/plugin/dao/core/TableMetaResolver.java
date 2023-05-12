@@ -20,7 +20,7 @@ import static com.rick.common.util.StringUtils.camelToSnake;
 
 /**
  * @author Rick
- * @createdAt 2021-09-27 11:41:00
+ * @date 2021-09-27 11:41:00
  */
 @UtilityClass
 @Slf4j
@@ -62,7 +62,8 @@ class TableMetaResolver {
         Map<String, Column> columnNameMap = Maps.newHashMap();
 
         IdCollector idCollector = new IdCollector();
-        resolveFields(fields, "", idCollector, embeddedPropertyList, selectAnnotationList,
+        VersionCollector versionCollector = new VersionCollector();
+        resolveFields(fields, "", idCollector, versionCollector, embeddedPropertyList, selectAnnotationList,
                 oneToManyAnnotationList, manyToOneAnnotationList,
                 manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                 columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
@@ -75,17 +76,16 @@ class TableMetaResolver {
             updatePropertiesBuilder.deleteCharAt(updatePropertiesBuilder.length() - 1);
         }
 
-
         if (Objects.isNull(idCollector.id)) {
             idCollector.columnName = idCollector.propertyName = DEFAULT_PRIMARY_COLUMN;
         }
 
-        return new TableMeta(tableAnnotation, idCollector.id, name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+        return new TableMeta(tableAnnotation, idCollector.id, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
                 updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, fieldMap, columnNameMap);
     }
 
-    private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
+    private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
      List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
                                List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap, Map<String, Field> fieldMap,
                                StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder) {
@@ -117,7 +117,7 @@ class TableMetaResolver {
             if (embedded != null) {
                 embeddedPropertyList.add(new TableMeta.EmbeddedProperty(embedded, field));
                 Field[] embeddedFields = getAllFields(field.getType());
-                resolveFields(embeddedFields, propertyName + ".", idCollector, embeddedPropertyList,
+                resolveFields(embeddedFields, propertyName + ".", idCollector, versionCollector, embeddedPropertyList,
                         selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
                         manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                         columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
@@ -131,7 +131,7 @@ class TableMetaResolver {
                 idCollector.id = field.getAnnotation(Id.class);
                 if (Objects.nonNull(idCollector.id)) {
                     idCollector.columnName = StringUtils.isNotBlank(idCollector.id.value()) ? idCollector.id.value() : camelToSnake(field.getName());
-                    idCollector.propertyName = field.getName();
+                    idCollector.propertyName = propertyName;
                 }
             }
 
@@ -141,6 +141,12 @@ class TableMetaResolver {
 
             columnNameFieldMap.put(columnName, field);
             columnNameMap.put(columnName, annotation);
+
+            Version version = field.getAnnotation(Version.class);
+            if (version != null) {
+                versionCollector.propertyName = propertyName;
+                versionCollector.columnName =columnName;
+            }
 
             propertiesBuilder.append(propertyName).append(",");
             columnNamesBuilder.append(columnName).append(",");
@@ -157,6 +163,14 @@ class TableMetaResolver {
     private class IdCollector {
 
         private Id id;
+
+        private String columnName;
+
+        private String propertyName;
+
+    }
+
+    private class VersionCollector {
 
         private String columnName;
 

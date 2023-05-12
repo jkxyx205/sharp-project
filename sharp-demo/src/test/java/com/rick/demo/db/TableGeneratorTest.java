@@ -40,8 +40,7 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(SerialNumber.class);
 //        tableGenerator.createTable(Info.class);
 //        tableGenerator.createTable(User.class);
+//        tableGenerator.createTable(Notice.class);
     }
-
-
 
 }
