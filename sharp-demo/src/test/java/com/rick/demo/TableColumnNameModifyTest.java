@@ -29,9 +29,9 @@ public class TableColumnNameModifyTest {
 
     private String generatorSql(String tableName) {
         String sql = "alter table %s\n" +
-                "        change create_by create_by bigint null;\n" +
+                "        change create_id create_by bigint null;\n" +
                 "        alter table %s\n" +
-                "        change update_by update_by bigint null;";
+                "        change update_id update_by bigint null;";
 
 
         return String.format(sql, tableName, tableName, tableName, tableName);

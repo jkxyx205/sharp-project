@@ -22,7 +22,7 @@ public class VersionTest {
 
     @Order(0)
     @Test
-    public void testNotice() {
+    public void testNoticeInsert() {
         noticeDAO.insert(Notice.builder()
                         .name("hello new version")
                 .build());
@@ -31,10 +31,9 @@ public class VersionTest {
     @Order(1)
     @Test
     public void testNoticeUpdate() {
-        Notice notice = noticeDAO.selectById(688436409735868416L).get();
+        Notice notice = noticeDAO.selectById(688975459802681344L).get();
         notice.setName("new didi");
         noticeDAO.update(notice);
     }
-
 
 }
