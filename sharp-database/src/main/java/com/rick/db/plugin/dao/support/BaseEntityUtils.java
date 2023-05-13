@@ -13,9 +13,9 @@ public class BaseEntityUtils {
 
     public void resetAdditionalFields(BaseEntity entity) {
         entity.setId(null);
-        entity.setCreateId(null);
+        entity.setCreateBy(null);
         entity.setCreateTime(null);
-        entity.setUpdateId(null);
+        entity.setUpdateBy(null);
         entity.setUpdateTime(null);
         entity.setDeleted(null);
     }

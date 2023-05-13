@@ -4,9 +4,9 @@ create table mm_serial_number
         primary key,
     code varchar(32) not null comment '外部可见，唯一code',
     status varchar(16) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -46,9 +46,9 @@ create table sys_form
     table_name varchar(32) null,
     repository_name varchar(32) null,
     storage_strategy varchar(16) null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -66,9 +66,9 @@ create table sys_form_configurer
     default_value varchar(64) null,
     placeholder varchar(32) null,
     additional_info varchar(1024) null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -81,9 +81,9 @@ create table sys_form_cpn_configurer
     form_id bigint not null,
     config_id bigint not null,
     order_num int null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -98,9 +98,9 @@ create table sys_form_cpn_value
     form_id bigint not null,
     config_id bigint not null,
     instance_id bigint not null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -122,9 +122,9 @@ create table sys_form_instance_first
     email varchar(32) null,
     date date null,
     info json null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -150,9 +150,9 @@ create table sys_report
     summary_column_names varchar(128) null,
     report_column_list text null,
     query_field_list text null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -172,9 +172,9 @@ create table t_book
         primary key,
     title varchar(32) not null,
     person_id bigint null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null,
     constraint t_book_title_uindex
@@ -222,9 +222,9 @@ create table t_demo
     start_time timestamp null comment '开始时间',
     end_time timestamp null comment '结束时间',
     demo_type varchar(16) not null comment '任务类型',
-    create_id bigint not null comment '创建人',
+    create_by bigint not null comment '创建人',
     create_time timestamp null comment '创建时间',
-    update_id bigint not null comment '更新人',
+    update_by bigint not null comment '更新人',
     update_time timestamp null comment '更新时间',
     is_deleted bit not null comment '是否删除',
     version int null,
@@ -237,9 +237,9 @@ create table t_farmer
     id bigint not null comment '主键'
         primary key,
     name varchar(32) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -269,9 +269,9 @@ create table t_info
     email varchar(32) null,
     date date null,
     info json null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -282,9 +282,9 @@ create table t_material
     id varchar(32) not null comment '主键'
         primary key,
     name varchar(32) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -313,9 +313,9 @@ create table t_person_id_card
         primary key,
     id_num varchar(32) null,
     address varchar(32) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 );
@@ -326,9 +326,9 @@ create table t_person
         primary key,
     name varchar(32) null,
     id_card_id bigint null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null,
     sex char null,
@@ -352,9 +352,9 @@ create table t_project1
     title varchar(255) not null,
     description varchar(255) null,
     map text null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null,
     cover_url varchar(500) null,
@@ -373,9 +373,9 @@ create table t_project2
         primary key,
     title varchar(255) not null,
     description varchar(255) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null,
     cover_url varchar(500) null,
@@ -394,9 +394,9 @@ create table t_project3
         primary key,
     title varchar(255) not null,
     description varchar(255) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null,
     cover_url varchar(500) null,
@@ -416,9 +416,9 @@ create table t_project_detail1
     title varchar(32) not null,
     project_id bigint not null,
     group_id bigint not null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -431,9 +431,9 @@ create table t_project_detail2
     title varchar(32) not null,
     project_id bigint not null,
     group_id bigint not null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -446,9 +446,9 @@ create table t_project_detail3
     title varchar(32) not null,
     project_id bigint not null,
     group_id bigint not null,
-    create_id bigint not null,
+    create_by bigint not null,
     create_time datetime null,
-    update_id bigint not null,
+    update_by bigint not null,
     update_time datetime null,
     is_deleted bit not null
 )
@@ -459,9 +459,9 @@ create table t_role
     id bigint not null comment '主键'
         primary key,
     name varchar(32) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 );
@@ -472,9 +472,9 @@ create table t_school_license
         primary key,
     number varchar(32) null comment '证书编号',
     remark varchar(32) null comment '备注',
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -496,9 +496,9 @@ create table t_school
     score_list json null comment '历届学校评分',
     evaluate varchar(128) null comment '学校评价',
     school_license_id bigint null comment '证书信息',
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null,
     constraint t_school_t_school_license_id_fk
@@ -514,9 +514,9 @@ create table t_school_student
     grade int null comment '年级',
     sex varchar(16) null comment '性别',
     school_id bigint null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -531,9 +531,9 @@ create table t_school_teacher
         primary key,
     name varchar(32) null comment '姓名',
     age int null comment '年龄',
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -557,9 +557,9 @@ create table t_tag
     id bigint not null comment '主键'
         primary key,
     title varchar(32) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -583,9 +583,9 @@ create table t_task
     num_list json null,
     str_list json null,
     dept text not null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -609,9 +609,9 @@ create table t_user
     attachment text null,
     school_experience text null,
     status varchar(16) null comment '用户状态',
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )
@@ -622,9 +622,9 @@ create table t_worker
     id bigint auto_increment comment '主键'
         primary key,
     name varchar(32) null,
-    create_id bigint null,
+    create_by bigint null,
     create_time datetime null,
-    update_id bigint null,
+    update_by bigint null,
     update_time datetime null,
     is_deleted bit null
 )

@@ -1,11 +1,11 @@
-INSERT INTO `sharp-demo`.sys_report (id, pageable, sidx, sord, name, query_sql, summary_column_names, report_column_list, query_field_list, create_id, create_time, update_id, update_time, is_deleted) VALUES (619541501440958464, true, 'title', 'ASC', '图书报表', 'SELECT t_book.id, t_book.title, t_person.name, sys_dict.label "sexLabel"
+INSERT INTO `sharp-demo`.sys_report (id, pageable, sidx, sord, name, query_sql, summary_column_names, report_column_list, query_field_list, create_by, create_time, update_by, update_time, is_deleted) VALUES (619541501440958464, true, 'title', 'ASC', '图书报表', 'SELECT t_book.id, t_book.title, t_person.name, sys_dict.label "sexLabel"
 FROM t_book,
      t_person LEFT JOIN sys_dict on t_person.sex = sys_dict.name AND type = \'sex\'
 WHERE t_book.person_id = t_person.id
   AND t_book.title LIKE :title
   AND t_person.name = :name
   AND t_person.sex = :sex', null, '[{"name":"title","label":"书名","sortable":true,"align":"left","tooltip":false},{"name":"name","label":"作者","sortable":true,"align":"left","tooltip":false},{"name":"sexLabel","label":"性别","sortable":false,"align":"left","tooltip":false}]', '[{"name":"title","label":"书名","type":"TEXT"},{"name":"name","label":"作者","type":"TEXT"},{"name":"sex","label":"性别","type":"SELECT","extra_data":"sex"}]', 0, '2022-11-03 12:49:42', 0, '2023-03-28 21:07:36', false);
-INSERT INTO `sharp-demo`.sys_report (id, pageable, sidx, sord, name, query_sql, summary_column_names, report_column_list, query_field_list, create_id, create_time, update_id, update_time, is_deleted) VALUES (668074769748373504, true, 'name', 'ASC', '人员信息表', 'SELECT t_user.name              AS "name",
+INSERT INTO `sharp-demo`.sys_report (id, pageable, sidx, sord, name, query_sql, summary_column_names, report_column_list, query_field_list, create_by, create_time, update_by, update_time, is_deleted) VALUES (668074769748373504, true, 'name', 'ASC', '人员信息表', 'SELECT t_user.name              AS "name",
 #        t_user.gender            AS "gender",
        sd.label AS "gender",
        t_user.age               AS "age",
@@ -20,9 +20,9 @@ INSERT INTO `sharp-demo`.sys_report (id, pageable, sidx, sord, name, query_sql, 
        t_user.attachment        AS "attachmentList",
        t_user.school_experience AS "schoolExperienceList",
        t_user.status            AS "status",
-       t_user.create_id        AS "createdBy",
+       t_user.create_by        AS "createdBy",
        t_user.create_time        AS "createdAt",
-       t_user.update_id        AS "updatedBy",
+       t_user.update_by        AS "updatedBy",
        t_user.update_time        AS "updatedAt",
        t_user.is_deleted        AS "deleted",
        t_user.id                AS "id"

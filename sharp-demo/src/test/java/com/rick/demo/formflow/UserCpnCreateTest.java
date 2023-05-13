@@ -92,9 +92,9 @@ public class UserCpnCreateTest {
                         "       t_user.attachment        AS \"attachmentList\",\n" +
                         "       t_user.school_experience AS \"schoolExperienceList\",\n" +
                         "       t_user.status            AS \"status\",\n" +
-                        "       t_user.create_id        AS \"createdBy\",\n" +
+                        "       t_user.create_by        AS \"createdBy\",\n" +
                         "       t_user.create_time        AS \"createdAt\",\n" +
-                        "       t_user.update_id        AS \"updatedBy\",\n" +
+                        "       t_user.update_by        AS \"updatedBy\",\n" +
                         "       t_user.update_time        AS \"updatedAt\",\n" +
                         "       t_user.is_deleted        AS \"deleted\",\n" +
                         "       t_user.id                AS \"id\"\n" +

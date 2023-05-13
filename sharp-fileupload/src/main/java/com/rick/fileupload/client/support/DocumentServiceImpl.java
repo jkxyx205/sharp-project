@@ -2,7 +2,6 @@ package com.rick.fileupload.client.support;
 
 import com.google.common.collect.Lists;
 import com.rick.common.http.HttpServletResponseUtils;
-import com.rick.common.util.DateConvertUtils;
 import com.rick.common.util.IdGenerator;
 import com.rick.common.util.ZipUtils;
 import com.rick.fileupload.core.FileStore;
@@ -23,7 +22,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -173,10 +172,10 @@ public class DocumentServiceImpl implements DocumentService {
         // id,create_time,name,extension,content_type,size,group_name,path
         long sequenceId = IdGenerator.getSequenceId();
         document.setId(sequenceId);
-        document.setCreatedAt(Instant.now());
+        document.setCreateTime(LocalDateTime.now());
         return new Object[] {
                 document.getId()
-                , DateConvertUtils.unixTimeToLocalDateTime(document.getCreatedAt().toEpochMilli()), document.getName(), document.getExtension(), document.getContentType(), document.getSize(),document.getGroupName(),
+                , document.getCreateTime(), document.getName(), document.getExtension(), document.getContentType(), document.getSize(),document.getGroupName(),
                 document.getPath(),
         };
     }

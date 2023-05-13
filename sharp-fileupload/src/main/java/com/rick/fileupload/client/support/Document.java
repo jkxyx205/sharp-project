@@ -6,7 +6,7 @@ import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.fileupload.core.model.FileMeta;
 import lombok.Data;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * @author Rick
@@ -19,6 +19,6 @@ public class Document extends FileMeta {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
-    private Instant createdAt;
+    private LocalDateTime createTime;
 
 }

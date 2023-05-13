@@ -29,15 +29,15 @@ public class BaseEntityWithAssign {
     private String id;
 
     @Column(updatable = false, comment = "创建人")
-    private Long createId;
+    private Long createBy;
 
     @Column(updatable = false, comment = "创建时间")
     private LocalDateTime createTime;
 
-    @Column(comment = "修改人")
-    private Long updateId;
+    @Column(comment = "更新人")
+    private Long updateBy;
 
-    @Column(comment = "修改时间")
+    @Column(comment = "更新时间")
     private LocalDateTime updateTime;
 
     @JsonIgnore

@@ -29,18 +29,28 @@ public class TableColumnNameModifyTest {
 
     private String generatorSql(String tableName) {
         String sql = "alter table %s\n" +
-                "        change created_by create_id bigint null;\n" +
-                "\n" +
+                "        change create_by create_by bigint null;\n" +
                 "        alter table %s\n" +
-                "        change created_at create_time timestamp null;\n" +
-                "\n" +
-                "        alter table %s\n" +
-                "        change updated_by update_id bigint null;\n" +
-                "\n" +
-                "        alter table %s\n" +
-                "        change updated_at update_time timestamp null;";
+                "        change update_by update_by bigint null;";
 
 
         return String.format(sql, tableName, tableName, tableName, tableName);
     }
+
+//    private String generatorSql(String tableName) {
+//        String sql = "alter table %s\n" +
+//                "        change create_by create_by bigint null;\n" +
+//                "\n" +
+//                "        alter table %s\n" +
+//                "        change created_at create_time timestamp null;\n" +
+//                "\n" +
+//                "        alter table %s\n" +
+//                "        change update_by update_by bigint null;\n" +
+//                "\n" +
+//                "        alter table %s\n" +
+//                "        change updated_at update_time timestamp null;";
+//
+//
+//        return String.format(sql, tableName, tableName, tableName, tableName);
+//    }
 }
