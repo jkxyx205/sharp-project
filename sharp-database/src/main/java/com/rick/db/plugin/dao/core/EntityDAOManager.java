@@ -62,10 +62,10 @@ public class EntityDAOManager {
             try {
                 propertyDescriptorMap.put(field.getName(), new PropertyDescriptor(field.getName(), clazz));
 
-                Embedded annotation = field.getAnnotation(Embedded.class);
-                if (annotation != null) {
-                    Field[] embeddedFields = getAllFields(field.getType());
-                    handleFields(embeddedFields, entityPropertyDescriptorMap, field.getType());
+                Embedded embeddedAnnotation = field.getAnnotation(Embedded.class);
+                if (embeddedAnnotation != null) {
+                    Field[] embeddedTypeFields = getAllFields(field.getType());
+                    handleFields(embeddedTypeFields, entityPropertyDescriptorMap, field.getType());
                 }
             } catch (IntrospectionException e) {
                 throw new BeanInitializationException(field.getType() + "初始化异常", e);
@@ -155,9 +155,10 @@ public class EntityDAOManager {
         String[] split = propertyName.split("\\.");
 
         try {
-            Object propertyNameValue = null;
+            Object propertyNameValue;
             Map<String, PropertyDescriptor> propertyDescriptorMapping = EntityDAOManager.entityPropertyDescriptorMap.get(entityClass);
-            if (propertyDescriptorMapping.get(split[0]) == null) {
+            PropertyDescriptor propertyDescriptor = propertyDescriptorMapping.get(split[0]);
+            if (propertyDescriptor == null) {
                 // embedded
                 List<Field> embeddedFields = entityEmbeddedMap.get(entityClass);
                 if (CollectionUtils.isNotEmpty(embeddedFields)) {
@@ -169,9 +170,10 @@ public class EntityDAOManager {
                     }
                 }
 
-            } else {
-                propertyNameValue = propertyDescriptorMapping.get(split[0]).getReadMethod().invoke(value);
+                throw new RuntimeException(entityClass.getName() + " don't has propertyName " + propertyName);
             }
+
+            propertyNameValue = propertyDescriptor.getReadMethod().invoke(value);
 
             if (split.length == 1) {
                 return propertyNameValue;
