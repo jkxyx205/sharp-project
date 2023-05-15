@@ -6,7 +6,6 @@ import com.rick.db.dto.PageModel;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -23,10 +22,7 @@ public class GridService {
 
     private static final int DEFAULT_PAGE_MAX_SIZE = 1000;
 
-    @Autowired
-    protected AbstractSqlFormatter sqlFormatter;
-
-    private SharpService sharpService;
+    private final SharpService sharpService;
 
     public GridService(SharpService sharpService) {
         this.sharpService = sharpService;
@@ -65,6 +61,8 @@ public class GridService {
     public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, SharpService.JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
         long records = 0;
         long totalPages = 0;
+        AbstractSqlFormatter sqlFormatter = sharpService.getSqlFormatter();
+
         if (model.isPageQueryModel()) {
             countSQL = StringUtils.isBlank(countSQL) ? sqlFormatter.formatSqlCount(sql) : countSQL;
             records = sharpService.query(countSQL, params, Long.class).get(0);

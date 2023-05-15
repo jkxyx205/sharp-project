@@ -37,7 +37,8 @@ public class SharpService {
     private NamedParameterJdbcTemplate namedJdbcTemplate;
 
     @Autowired
-    protected AbstractSqlFormatter sqlFormatter;
+    @Getter
+    private AbstractSqlFormatter sqlFormatter;
 
     @Autowired
     @Qualifier("dbConversionService")
@@ -137,7 +138,7 @@ public class SharpService {
         return Optional.of(list.get(0));
     }
 
-    protected <T> List<T> toClass(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap, Class<T> clazz) {
+    <T> List<T> toClass(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap, Class<T> clazz) {
         if (clazz == String.class || Number.class.isAssignableFrom(clazz) || Character.class == clazz || Boolean.class == clazz || clazz.isEnum()) {
             return jdbcTemplate.queryForList(sql, paramMap, clazz);
         }
@@ -150,6 +151,10 @@ public class SharpService {
         RowMapper<T> beanPropertyRowMapper = new NestedRowMapper<>(clazz);
         List<T> query = jdbcTemplate.query(sql, paramMap, beanPropertyRowMapper);
         return query;
+    }
+
+    List<Map<String, Object>> toMap(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap) {
+        return jdbcTemplate.queryForList(sql, paramMap);
     }
 
     private class NestedRowMapper<T> implements RowMapper<T> {
@@ -210,11 +215,6 @@ public class SharpService {
         protected String lowerCaseName(String name) {
             return name.toLowerCase(Locale.US);
         }
-
-    }
-
-    protected List<Map<String, Object>> toMap(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap) {
-        return jdbcTemplate.queryForList(sql, paramMap);
     }
 
     private SqlFormatter getSQLFormatter(String sql, Map<String, ?> params) {

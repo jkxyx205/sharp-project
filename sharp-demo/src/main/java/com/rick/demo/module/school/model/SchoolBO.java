@@ -18,7 +18,7 @@ public class SchoolBO {
 
     private LocalDate buildDate;
 
-    private SchoolLicenseBO sl;
+    private SchoolLicenseBO schoolLicense;
 
     private List<StudentBO> studentList;
 

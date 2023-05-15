@@ -1,11 +1,14 @@
 package com.rick.demo.db;
 
+import com.rick.common.util.JsonUtils;
 import com.rick.db.plugin.QueryUtils;
 import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import com.rick.demo.module.project.domain.entity.Project;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
+import com.rick.demo.module.school.dao.SchoolDAO;
+import com.rick.demo.module.school.entity.School;
 import com.rick.demo.module.school.model.SchoolBO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -28,6 +31,9 @@ public class SharpServiceTest {
 
     @Autowired
     private SharpService sharpService;
+
+    @Autowired
+    private SchoolDAO schoolDAO;
 
     @Test
     public void testListAsMap() {
@@ -211,9 +217,9 @@ public class SharpServiceTest {
         String parentSql = "select s.id,\n" +
                 "       s.name,\n" +
                 "       s.build_date as \"buildDate\",\n" +
-                "       sl.id as \"sl.id\",\n" +
-                "       sl.number as \"sl.number\",\n" +
-                "       sl.remark as \"sl.remark\"\n" +
+                "       sl.id as \"schoolLicense.id\",\n" +
+                "       sl.number as \"schoolLicense.number\",\n" +
+                "       sl.remark as \"schoolLicense.remark\"\n" +
                 "from t_school s\n" +
                 "         LEFT JOIN t_school_license sl on sl.id = s.school_license_id\n" +
                 "where s.id IN (:id)";
@@ -238,6 +244,27 @@ public class SharpServiceTest {
             t.setStudentList(ObjectUtils.defaultIfNull(schoolStudentMap.get(t.getId()), Collections.emptyList()));
             t.setTeacherList(ObjectUtils.defaultIfNull(schoolTeacherMap.get(t.getId()), Collections.emptyList()));
         });
+
+        System.out.println(schoolBOList);
+    }
+
+    @Test
+    public void testQueryDAO() {
+        List<School> schoolList = schoolDAO.selectByIds(552173736070144000L, 552181593272410112L);
+        System.out.println(schoolList);
+    }
+
+    @Test
+    public void testQueryDAO2() {
+        List<School> schoolList = schoolDAO.selectByIds(552173736070144000L, 552181593272410112L);
+        List<SchoolBO> schoolBOList = JsonUtils.toList(JsonUtils.toJson(schoolList), SchoolBO.class);
+
+//        List<SchoolBO> schoolBOList = new ArrayList<>(2);
+//        for (School school : schoolList) {
+//            SchoolBO schoolBO = new SchoolBO();
+//            BeanUtils.copyProperties(school, schoolBO);
+//            schoolBOList.add(schoolBO);
+//        }
 
         System.out.println(schoolBOList);
     }
