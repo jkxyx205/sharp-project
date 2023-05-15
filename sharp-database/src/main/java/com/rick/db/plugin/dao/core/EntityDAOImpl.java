@@ -545,13 +545,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues) {
-        return groupByColumnName(refColumnName, refValues, this.selectColumnNames, Function.identity());
+    public Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValue) {
+        return groupByColumnName(refColumnName, refValue, this.selectColumnNames, Function.identity());
     }
 
     @Override
-    public <M> Map<ID, List<M>> groupByColumnName(String refColumnName, Collection<?> refValues, String columnNames, Function<T, M> function) {
-        List<T> list = selectByParams(Params.builder(1).pv("refColumnName", refValues).build(), columnNames, refColumnName + " IN (:refColumnName)", this.entityClass);
+    public <M> Map<ID, List<M>> groupByColumnName(String refColumnName, Collection<?> refValue, String columnNames, Function<T, M> function) {
+        List<T> list = selectByParams(Params.builder(1).pv("refColumnName", refValue).build(), columnNames, refColumnName + " IN (:refColumnName)", this.entityClass);
 
         return list.stream().collect(Collectors.groupingBy(t -> {
             Object propertyValue = EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName));

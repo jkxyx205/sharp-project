@@ -3,8 +3,10 @@ package com.rick.db.service;
 
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
+import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -15,18 +17,27 @@ import java.util.Map;
  * @date 2018/3/16
  */
 @Slf4j
-public class GridService extends SharpService {
+public class GridService {
 
     private static final int DEFAULT_PAGE_SIZE = 15;
 
     private static final int DEFAULT_PAGE_MAX_SIZE = 1000;
+
+    @Autowired
+    protected AbstractSqlFormatter sqlFormatter;
+
+    private SharpService sharpService;
+
+    public GridService(SharpService sharpService) {
+        this.sharpService = sharpService;
+    }
 
     public Grid<Map<String, Object>> query(String sql, PageModel model, Map<String, ?> params) {
         return query(sql, model, params, "");
     }
 
     public Grid<Map<String, Object>> query(String sql, PageModel model, Map<String, ?> params, String countSQL) {
-        return query(sql, model, params, (jdbcTemplate, sql2, args) -> toMap(jdbcTemplate, sql2, args), countSQL);
+        return query(sql, model, params, (jdbcTemplate, sql2, args) -> sharpService.toMap(jdbcTemplate, sql2, args), countSQL);
     }
 
     public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, Class<T> clazz) {
@@ -34,10 +45,10 @@ public class GridService extends SharpService {
     }
 
     public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, Class<T> clazz, String countSQL) {
-        return query(sql, model, params, (jdbcTemplate, sql2, args) -> toClass(jdbcTemplate, sql2, args, clazz), countSQL);
+        return query(sql, model, params, (jdbcTemplate, sql2, args) -> sharpService.toClass(jdbcTemplate, sql2, args, clazz), countSQL);
     }
 
-    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback) {
+    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, SharpService.JdbcTemplateCallback<T> jdbcTemplateCallback) {
         return query(sql, model, params, jdbcTemplateCallback, null);
     }
 
@@ -51,12 +62,12 @@ public class GridService extends SharpService {
      * @param <T>
      * @return
      */
-    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
+    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, SharpService.JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
         long records = 0;
         long totalPages = 0;
         if (model.isPageQueryModel()) {
             countSQL = StringUtils.isBlank(countSQL) ? sqlFormatter.formatSqlCount(sql) : countSQL;
-            records = query(countSQL, params, Long.class).get(0);
+            records = sharpService.query(countSQL, params, Long.class).get(0);
 
             if (records == 0) {
                 return Grid.emptyInstance(model.getSize());
@@ -66,7 +77,7 @@ public class GridService extends SharpService {
             totalPages = validatePageModelAndReturnTotalPages(model, records);
         }
 
-        List<T> rows = query(sql, params, (jdbcTemplate, sql2, args) -> {
+        List<T> rows = sharpService.query(sql, params, (jdbcTemplate, sql2, args) -> {
             //change add 20170223
             if(model.isPageQueryModel()) { // 分页排序
                 sql2 = sqlFormatter.pageSql(sql2, model);
@@ -90,6 +101,10 @@ public class GridService extends SharpService {
                 .pageSize(model.getSize())
                 .build();
         return grid;
+    }
+
+    public SharpService getSharpService() {
+        return sharpService;
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.rick.db.middleware.mybatis;
 
-import com.rick.db.service.GridService;
+import com.rick.db.service.SharpService;
 import com.rick.db.service.SharpServiceHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -33,7 +33,7 @@ public class MappedSharpService {
 
     private final SqlSessionFactory sqlSessionFactory;
 
-    private final GridService gridService;
+    private final SharpService sharpService;
 
     public <T> T handle(String selectId, Map<String, Object> params, SharpServiceHandler<T> sharpServiceHandler) {
         MappedStatement mappedStatement = sqlSessionFactory.getConfiguration()
@@ -41,6 +41,6 @@ public class MappedSharpService {
 
         BoundSql boundSql = mappedStatement.getBoundSql(params);
         String sql = boundSql.getSql();
-        return sharpServiceHandler.handle(gridService, sql, params);
+        return sharpServiceHandler.handle(sharpService, sql, params);
     }
 }

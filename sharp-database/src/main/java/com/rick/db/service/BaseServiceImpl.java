@@ -12,11 +12,13 @@ import javax.validation.Valid;
 import java.util.*;
 
 /**
+ * Service不需要继承任何父类
  * @author Rick
  * @createdAt 2022-04-09 10:10:00
  */
 @RequiredArgsConstructor
 @Slf4j
+@Deprecated
 public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
 
     protected final D baseDAO;

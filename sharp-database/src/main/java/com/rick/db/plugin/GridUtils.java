@@ -60,6 +60,6 @@ public final class GridUtils {
      * @return
      */
     public static List<BigDecimal> numericObject(String sql, Map<String, ?> params) {
-        return Arrays.asList(GridUtils.GRID_SERVICE.queryForObject(sql, params).get().values().toArray(new BigDecimal[] {}));
+        return Arrays.asList(GridUtils.GRID_SERVICE.getSharpService().queryForObject(sql, params).get().values().toArray(new BigDecimal[] {}));
     }
 }

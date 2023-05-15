@@ -8,12 +8,14 @@ import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
 import com.rick.db.plugin.DatabaseMetaData;
 import com.rick.db.plugin.GridUtils;
+import com.rick.db.plugin.QueryUtils;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
 import com.rick.db.plugin.dao.support.*;
 import com.rick.db.service.GridService;
+import com.rick.db.service.SharpService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -79,11 +81,16 @@ public class GridServiceAutoConfiguration {
         }
 
         @Bean
-        public GridService gridService(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
+        public SharpService sharpService(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
             if (sharpDatabaseProperties.isInitDatabaseMetaData()) {
                 DatabaseMetaData.initTableMapping(jdbcTemplate);
             }
-            return new GridService();
+            return new SharpService();
+        }
+
+        @Bean
+        public GridService gridService(SharpService sharpService) {
+            return new GridService(sharpService);
         }
 
         @Bean
@@ -150,8 +157,10 @@ public class GridServiceAutoConfiguration {
             gridUtils.setGridService(gridService);
 
             SQLUtils sqlUtils = new SQLUtils();
-            sqlUtils.setNamedJdbcTemplate(gridService.getNamedJdbcTemplate());
+            sqlUtils.setNamedJdbcTemplate(gridService.getSharpService().getNamedJdbcTemplate());
             sqlUtils.setSharpDatabaseProperties(sharpDatabaseProperties);
+
+            QueryUtils.setSharpService(gridService.getSharpService());
         }
     }
 
@@ -164,8 +173,8 @@ public class GridServiceAutoConfiguration {
 
         @Bean
         @Order
-        public MappedSharpService getMappedSharpService(GridService gridService) {
-            MappedSharpService mappedSharpService = new MappedSharpService(sqlSessionFactory, gridService);
+        public MappedSharpService getMappedSharpService(SharpService sharpService) {
+            MappedSharpService mappedSharpService = new MappedSharpService(sqlSessionFactory, sharpService);
             return mappedSharpService;
         }
     }
