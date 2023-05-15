@@ -164,9 +164,7 @@ public class EntityDAOManager {
                 if (CollectionUtils.isNotEmpty(embeddedFields)) {
                     for (Field embeddedField : embeddedFields) {
                         propertyNameValue = getPropertyValue(value, embeddedField.getName() + "." + propertyName, entityClass);
-                        if (propertyNameValue != null) {
-                            return propertyNameValue;
-                        }
+                        return propertyNameValue;
                     }
                 }
 

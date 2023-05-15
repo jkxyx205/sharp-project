@@ -4,6 +4,7 @@ import com.rick.demo.module.embedded.dao.CompanyDAO;
 import com.rick.demo.module.embedded.entity.Company;
 import com.rick.demo.module.embedded.entity.Vendor;
 import com.rick.demo.module.embedded.model.ContactPerson;
+import com.rick.demo.module.project.domain.entity.Role;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -41,6 +42,26 @@ class CompanyServiceTest {
 //                                )
 //                        )
 //                        .role(Role.builder().name("Admin").build())
+                        .build())
+                .build());
+    }
+
+    @Test
+    public void testSave2() {
+        companyDAO.insert(Company.builder()
+                .name("点")
+                .phone("119")
+                .address("Nanjing")
+                .contactPerson(ContactPerson.builder()
+                        .firstName("Rick")
+                        .lastName("Xu")
+                        .phone("120")
+                        .vendorList(Arrays.asList(
+                                Vendor.builder().name("VE_CO").build(),
+                                Vendor.builder().name("BUILD").build()
+                                )
+                        )
+                        .role(Role.builder().name("Admin").build())
                         .build())
                 .build());
     }
