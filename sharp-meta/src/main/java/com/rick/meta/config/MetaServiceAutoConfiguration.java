@@ -1,7 +1,7 @@
 package com.rick.meta.config;
 
 import com.rick.db.config.GridServiceAutoConfiguration;
-import com.rick.db.service.GridService;
+import com.rick.db.service.SharpService;
 import com.rick.meta.dict.convert.ArrayDictConverter;
 import com.rick.meta.dict.convert.DictConverter;
 import com.rick.meta.dict.convert.SqlDateConverter;
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * @Copyright: 2019 www.yodean.com. All rights reserved.
  */
 @Configuration
-@ConditionalOnSingleCandidate(GridService.class)
+@ConditionalOnSingleCandidate(SharpService.class)
 @AutoConfigureAfter({GridServiceAutoConfiguration.class})
 public class MetaServiceAutoConfiguration {
 
@@ -40,14 +40,14 @@ public class MetaServiceAutoConfiguration {
     static class MetaGridServiceConfiguration {
 
         @Bean
-        public DictService getDictService(GridService gridService, DictProperties dictProperties,
+        public DictService getDictService(SharpService sharpService, DictProperties dictProperties,
                                           @Autowired(required = false) DictDOSupplier dictDOSupplier) {
-            return new DictServiceImpl(gridService, dictProperties, dictDOSupplier);
+            return new DictServiceImpl(sharpService, dictProperties, dictDOSupplier);
         }
 
         @Bean
-        public PropertyService getPropertyService(GridService gridService) {
-            return new PropertyServiceImpl(gridService);
+        public PropertyService getPropertyService(SharpService sharpService) {
+            return new PropertyServiceImpl(sharpService);
         }
 
         @Bean
