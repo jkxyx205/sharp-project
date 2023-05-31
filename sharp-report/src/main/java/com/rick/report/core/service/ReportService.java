@@ -176,6 +176,10 @@ public class ReportService {
         List<MapTableColumn> mapTableColumnList = Lists.newArrayListWithExpectedSize(reportColumnList.size());
 
         for (ReportColumn reportColumn : reportColumnList) {
+            if (reportColumn.getHidden()) {
+                continue;
+            }
+
             MapTableColumn mapTableColumn = new MapTableColumn(reportColumn.getName(), reportColumn.getLabel());
             if (Objects.nonNull(reportColumn.getColumnWidth())) {
                 mapTableColumn.setColumnWidth(reportColumn.getColumnWidth() * 50);
