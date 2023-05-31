@@ -1,6 +1,8 @@
 package com.rick.meta.dict.service;
 
-import com.rick.meta.dict.dao.dataobject.DictDO;
+
+
+import com.rick.meta.dict.entity.Dict;
 
 import java.util.List;
 
@@ -10,5 +12,5 @@ import java.util.List;
  */
 public interface DictDOSupplier {
 
-    List<DictDO> get();
+    List<Dict> get();
 }

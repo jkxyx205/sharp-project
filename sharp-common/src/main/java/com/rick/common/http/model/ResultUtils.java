@@ -16,7 +16,7 @@ public final class ResultUtils {
     }
 
     public static <T> Result<T> success(T data) {
-        return new Result(true, ResultCode.OK.getCode(), ResultCode.OK.getMsg(), data);
+        return new Result(true, ResultCode.OK.getCode(), ResultCode.OK.getMessage(), data);
     }
 
     public static Result fail() {
@@ -24,7 +24,7 @@ public final class ResultUtils {
     }
 
     public static <T> Result<T> fail(T data) {
-        return new Result(false, ResultCode.ERROR.getCode(), ResultCode.ERROR.getMsg(), data);
+        return new Result(false, ResultCode.ERROR.getCode(), ResultCode.ERROR.getMessage(), data);
     }
 
     public static Result fail(String message) {

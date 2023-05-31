@@ -1,7 +1,7 @@
 package com.rick.demo.config.dialect;
 
 import com.google.common.collect.Lists;
-import com.rick.meta.dict.dao.dataobject.DictDO;
+import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import org.apache.commons.lang3.StringUtils;
 import org.thymeleaf.context.ITemplateContext;
@@ -72,7 +72,7 @@ public class DictTagProcessor extends AbstractElementTagProcessor {
         Map<String, String> attrMap = iProcessableElementTag.getAttributeMap();
 
         // 进行数据的查询 根据 type 查询
-        List<DictDO> dictList = dictService.getDictByType(key);
+        List<Dict> dictList = dictService.getDictByType(key);
         if (StringUtils.isNotBlank(excludeValues)) {
             List<String> excludeValueArr = Lists.newArrayList(excludeValues.split(","));
             dictList = dictList.stream().filter(dict -> !excludeValueArr.contains(dict.getName())).collect(Collectors.toList());
@@ -98,7 +98,7 @@ public class DictTagProcessor extends AbstractElementTagProcessor {
             model.add(modelFactory.createCloseElementTag("option"));
         }
 
-        for (DictDO dict : dictList) {
+        for (Dict dict : dictList) {
             model.add(modelFactory.createOpenElementTag(String.format("option value='%s'%s", dict.getName(),(Objects.equals(dict.getName(), selected) ? " selected" : ""))));
             model.add(modelFactory.createText(dict.getLabel()));
             model.add(modelFactory.createCloseElementTag("option"));

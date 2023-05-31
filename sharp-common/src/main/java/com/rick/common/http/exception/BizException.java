@@ -53,25 +53,25 @@ public class BizException extends RuntimeException {
     }
 
     public BizException(Result result) {
-        super(result.getMsg());
+        super(result.getMessage());
         this.result = result;
     }
 
     public BizException(Result result, Object[] params) {
-        super(String.format(result.getMsg(), params));
-        result.setMsg(getMessage());
+        super(String.format(result.getMessage(), params));
+        result.setMessage(getMessage());
         this.result = result;
         this.params = params;
     }
 
     public BizException(Result result , Throwable t) {
-        super(result.getMsg(), t);
+        super(result.getMessage(), t);
         this.result = result;
     }
 
     public BizException(Result result, Object[] params, Throwable t) {
-        super(String.format(result.getMsg(), params), t);
-        result.setMsg(getMessage());
+        super(String.format(result.getMessage(), params), t);
+        result.setMessage(getMessage());
         this.params = params;
         this.result = result;
     }

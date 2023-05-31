@@ -1,6 +1,7 @@
 package com.rick.meta.dict.service;
 
-import com.rick.meta.dict.dao.dataobject.DictDO;
+
+import com.rick.meta.dict.entity.Dict;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 
@@ -20,19 +21,19 @@ import java.util.Optional;
  */
 final class DictUtils {
 
-    public static Map<String, List<DictDO>> dictMap;
+    public static Map<String, List<Dict>> dictMap;
 
-    public static List<DictDO> getDict(String key) {
+    public static List<Dict> getDict(String key) {
         return ListUtils.unmodifiableList(ListUtils.emptyIfNull(dictMap.get(key)));
     }
 
-    public static Optional<DictDO> getDictLabel(String key, String name) {
-        List<DictDO> dictList = getDict(key);
+    public static Optional<Dict> getDictLabel(String key, String name) {
+        List<Dict> dictList = getDict(key);
         if (CollectionUtils.isEmpty(dictList)) {
             return Optional.empty();
         }
 
-        for (DictDO dict : dictList) {
+        for (Dict dict : dictList) {
             if (Objects.equals(dict.getName(), name)) {
                 return Optional.of(dict);
             }

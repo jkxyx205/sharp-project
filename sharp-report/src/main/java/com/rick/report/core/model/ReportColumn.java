@@ -30,13 +30,15 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
 
     private String context;
 
-    private Boolean sortable = false;
+    private Boolean sortable;
 
     private Integer columnWidth;
 
-    private AlignEnum align = AlignEnum.LEFT;
+    private Boolean hidden;
 
-    private Boolean tooltip = false;
+    private AlignEnum align;
+
+    private Boolean tooltip;
 
     public ReportColumn(String name, String label) {
         this(name, label, false);
@@ -47,19 +49,33 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
     }
 
     public ReportColumn(String name, String label, Boolean sortable, List<String> valueConverterNameList) {
-        this.name = name;
-        this.label = label;
-        this.valueConverterNameList = valueConverterNameList;
-        this.sortable = sortable;
+        this(name, label, sortable, null, valueConverterNameList);
     }
 
     public ReportColumn(String name, String label, Boolean sortable, String context, List<String> valueConverterNameList) {
+        this(name, label, sortable, context, valueConverterNameList, null, AlignEnum.LEFT, false, false);
+    }
+
+    public ReportColumn(String name, String label, Boolean sortable, String context, List<String> valueConverterNameList, Integer columnWidth,
+                        AlignEnum align,  Boolean hidden, Boolean tooltip) {
         this.name = name;
         this.label = label;
         this.context = context;
         this.valueConverterNameList = valueConverterNameList;
         this.sortable = sortable;
-
+        this.align = align;
+        this.columnWidth = columnWidth;
+        this.hidden = hidden;
+        this.tooltip = tooltip;
     }
 
+    public ReportColumn setColumnWidth(Integer columnWidth) {
+        this.columnWidth = columnWidth;
+        return this;
+    }
+
+    public ReportColumn setAlign(AlignEnum align) {
+        this.align = align;
+        return this;
+    }
 }

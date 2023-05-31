@@ -221,7 +221,7 @@
         var search = location.search
 
         if (!search)
-            return "?" + url
+            return !url ? "" : "?" + url
 
         if (!url) {
             return search

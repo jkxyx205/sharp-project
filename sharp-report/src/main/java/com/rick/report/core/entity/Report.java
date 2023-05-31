@@ -63,9 +63,18 @@ public class Report extends BaseEntity {
     @Column(columnDefinition = "text")
     private List<QueryField> queryFieldList;
 
+    @Column(comment = "模版名称")
+    private String tplName;
+
+    @Column(comment = "其他信息")
+    private String extraData;
 
     public String getUrl() {
         return "/report/" + this.getId() + "/?" + getParams();
+    }
+
+    public long getVisibleColumnSize() {
+        return this.getReportColumnList().stream().filter(reportColumn -> !reportColumn.getHidden()).count();
     }
 
     /**

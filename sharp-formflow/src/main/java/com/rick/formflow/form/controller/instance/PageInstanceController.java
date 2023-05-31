@@ -8,6 +8,7 @@ import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
@@ -59,7 +60,7 @@ public class PageInstanceController {
             }
         }
 
-        return "form";
+        return StringUtils.defaultString(formBO.getForm().getTplName(),"form");
     }
 
     @PostMapping( {"{formId}/{instanceId}", "{formId}"})
@@ -82,8 +83,8 @@ public class PageInstanceController {
             }
 
             model.addAttribute("model", getDataModel(formBO.getPropertyList()));
+            return StringUtils.defaultString(formBO.getForm().getTplName(),"form");
         }
-        return "form";
     }
 
     private FormBO getFormBO(Long formId, Long instanceId) {

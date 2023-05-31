@@ -5,6 +5,7 @@ import com.rick.db.service.SharpService;
 import com.rick.meta.dict.convert.ArrayDictConverter;
 import com.rick.meta.dict.convert.DictConverter;
 import com.rick.meta.dict.convert.SqlDateConverter;
+import com.rick.meta.dict.dao.DictDAO;
 import com.rick.meta.dict.model.DictProperties;
 import com.rick.meta.dict.service.DictDOSupplier;
 import com.rick.meta.dict.service.DictService;
@@ -38,6 +39,11 @@ public class MetaServiceAutoConfiguration {
     @Configuration
     @EnableConfigurationProperties(DictProperties.class)
     static class MetaGridServiceConfiguration {
+
+        @Bean
+        public DictDAO dictDAO() {
+            return new DictDAO();
+        }
 
         @Bean
         public DictService getDictService(SharpService sharpService, DictProperties dictProperties,

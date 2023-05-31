@@ -869,8 +869,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         for (TableMeta.ManyToManyProperty manyToManyProperty : tableMeta.getManyToManyAnnotationList()) {
             String referenceColumnName = manyToManyProperty.getManyToMany().referenceColumnName();
             String columnDefinition = manyToManyProperty.getManyToMany().columnDefinition();
-            String storeKey1 = getTableName() + ":" + referenceColumnName;
-            String storeKey2 = getTableName() + ":" + columnDefinition;
+            String storeKey1 = getTableName() + ":" + manyToManyProperty.getManyToMany().thirdPartyTable() + ":" + referenceColumnName;
+            String storeKey2 = getTableName() + ":" + manyToManyProperty.getManyToMany().thirdPartyTable() + ":" + columnDefinition;
 
             if (EntityDAOThreadLocalValue.remove(storeKey1) || EntityDAOThreadLocalValue.remove(storeKey2)) {
                 continue;
@@ -886,7 +886,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
             EntityDAO referenceTableDAO = EntityDAOManager.baseDAOTableNameMap.get(referenceTable);
 
-            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value)",
+            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value) AND is_deleted = 0",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
             ), Params.builder(1).pv("value", columnIds).build());
 

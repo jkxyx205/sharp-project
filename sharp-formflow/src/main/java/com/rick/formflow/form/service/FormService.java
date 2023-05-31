@@ -3,6 +3,8 @@ package com.rick.formflow.form.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
+import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.BaseEntityWithAssign;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.MapDAO;
 import com.rick.db.plugin.dao.core.MapDAOImpl;
@@ -12,6 +14,8 @@ import com.rick.formflow.form.dao.FormCpnDAO;
 import com.rick.formflow.form.dao.FormCpnValueDAO;
 import com.rick.formflow.form.dao.FormDAO;
 import com.rick.formflow.form.service.bo.FormBO;
+import com.rick.meta.dict.entity.Dict;
+import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
@@ -52,6 +56,8 @@ public class FormService {
 
     private final ApplicationContext applicationContext;
 
+    private final DictService dictService;
+
     public Form saveOrUpdate(@Valid Form form) {
         formDAO.insertOrUpdate(form);
         return form;
@@ -91,6 +97,12 @@ public class FormService {
 
         for (FormCpn formCpn : formCpnList) {
             CpnConfigurer cpnConfigurer = configIdMap.get(formCpn.getConfigId());
+
+            if (StringUtils.isNotBlank(cpnConfigurer.getDatasource())) {
+                List<Dict> dictList = dictService.getDictByType(cpnConfigurer.getDatasource());
+                cpnConfigurer.setOptions(dictList.stream().map(dictDO -> new CpnConfigurer.CpnOption(dictDO.getName(), dictDO.getLabel())).collect(Collectors.toList()));
+            }
+
             Cpn cpn = CpnManager.getCpnByType(cpnConfigurer.getCpnType());
 
             Object value = null;
@@ -123,7 +135,6 @@ public class FormService {
 
     @Transactional(rollbackFor = Exception.class)
     public void post(Long formId, Long instanceId, Map<String, Object> values) throws BindException {
-        formCpnValueDAO.deleteByInstanceId(instanceId);
         handle(formId, instanceId, values);
     }
 
@@ -149,6 +160,7 @@ public class FormService {
             }
 
             String value = processor.getParamValue();
+            values.put(property.getName(), value);
 
             FormCpnValueList.add(FormCpnValue.builder()
                     .value(value)
@@ -169,6 +181,7 @@ public class FormService {
         }
 
         if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
+            formCpnValueDAO.deleteByInstanceId(instanceId);
             formCpnValueDAO.insert(FormCpnValueList);
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
             if (StringUtils.isNotBlank(form.getForm().getRepositoryName())) {
@@ -186,7 +199,23 @@ public class FormService {
         }
     }
 
-    public int delete(Long instanceId) {
-        return formCpnValueDAO.deleteByInstanceId(instanceId);
+    public int delete(Long formId, Long instanceId) {
+        Form form =  formDAO.selectById(formId).get();
+
+        if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
+            return formCpnValueDAO.deleteByInstanceId(instanceId);
+        } else if (form.getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
+            if (StringUtils.isNotBlank(form.getRepositoryName())) {
+                EntityDAO entityDAO = applicationContext.getBean(form.getRepositoryName(), EntityDAO.class);
+
+                if (BaseEntity.class.isAssignableFrom(entityDAO.getEntityClass()) || BaseEntityWithAssign.class.isAssignableFrom(entityDAO.getEntityClass())) {
+                    return entityDAO.deleteLogicallyById(instanceId);
+                }
+
+                return entityDAO.deleteById(instanceId);
+            }
+        }
+
+        return 0;
     }
 }

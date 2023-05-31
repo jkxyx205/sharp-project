@@ -1,6 +1,6 @@
 package com.rick.demo;
 
-import com.rick.meta.dict.dao.dataobject.DictDO;
+import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import com.rick.meta.props.service.PropertyService;
 import org.junit.jupiter.api.Test;
@@ -25,13 +25,13 @@ public class MetaTest {
 
     @Test
     public void testList() {
-        List<DictDO> sexList = dictService.getDictByType("sex");
+        List<Dict> sexList = dictService.getDictByType("sex");
         assertThat(sexList.size()).isEqualTo(2);
     }
 
     @Test
     public void testGetOne() {
-        DictDO dictDO = dictService.getDictByTypeAndName("sex", "F").get();
+        Dict dictDO = dictService.getDictByTypeAndName("sex", "F").get();
         assertThat(dictDO.getLabel()).isEqualTo("女");
     }
 

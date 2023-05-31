@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -26,7 +27,6 @@ import javax.validation.ConstraintViolationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,8 +55,8 @@ public class ApiExceptionHandler {
     public Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, BizException ex) throws IOException, ServletException {
         Result result = ex.getResult();
         // resolve i18n
-        String message = MessageUtils.getMessage(result.getMsg(), ex.getParams());
-        result.setMsg(message);
+        String message = MessageUtils.getMessage(result.getMessage(), ex.getParams());
+        result.setMessage(message);
 
         if (log.isErrorEnabled()) {
             log.error(result.getCode() + "," + message, ex.getCause());
@@ -127,7 +127,7 @@ public class ApiExceptionHandler {
     }
 
     private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, ResultCode resultCode, Object data) throws ServletException, IOException {
-        return exceptionHandler(request, response, ex, resultCode.getCode(), resultCode.getMsg(), data);
+        return exceptionHandler(request, response, ex, resultCode.getCode(), resultCode.getMessage(), data);
     }
 
     private Result exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex, int code, String message, Object data) throws ServletException, IOException {
@@ -135,11 +135,11 @@ public class ApiExceptionHandler {
             this.logStackTrace(ex);
         }
 
+        response.setStatus(code);
+
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
-            response.setStatus(code);
             return ResultUtils.fail(code, message, data);
         }
-
         request.getRequestDispatcher("/error").forward(request, response);
         return null;
     }

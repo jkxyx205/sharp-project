@@ -36,6 +36,8 @@ public class Form extends BaseCodeEntity {
 
     private StorageStrategyEnum storageStrategy;
 
+    private String tplName;
+
     @AllArgsConstructor
     @Getter
     public enum StorageStrategyEnum {

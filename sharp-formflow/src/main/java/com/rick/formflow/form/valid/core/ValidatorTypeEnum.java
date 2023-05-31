@@ -17,6 +17,7 @@ public enum ValidatorTypeEnum {
     NUMBER("number"),
     REQUIRED("Required"),
     SIZE("Size"),
+    REGEX("Regex"),
     TEXT_NUMBER_SIZE("TextNumberSize"),
     DATE("Date"),
     TIME("Time"),

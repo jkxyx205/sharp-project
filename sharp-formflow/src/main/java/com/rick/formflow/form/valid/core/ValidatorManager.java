@@ -1,6 +1,7 @@
 package com.rick.formflow.form.valid.core;
 
 import com.google.common.collect.Maps;
+import com.rick.formflow.form.valid.CustomizeRegex;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,6 +29,9 @@ public class ValidatorManager implements InitializingBean {
         for (Validator validator : validatorSet) {
             validatorMap.put(validator.getValidatorType(), validator.getClass());
         }
+
+        // 手动添加
+        validatorMap.put(ValidatorTypeEnum.REGEX, CustomizeRegex.class);
     }
 
     public static Class getValidatorClassByType(ValidatorTypeEnum validatorTypeEnum) {

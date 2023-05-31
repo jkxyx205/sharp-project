@@ -69,6 +69,10 @@ public class CheckBox extends AbstractCpn<List<String>> {
             return null;
         }
 
+        if (value instanceof List) {
+            return (List<String>) value;
+        }
+
         if (value instanceof Boolean) {
             if (value == Boolean.TRUE) {
                 return Arrays.asList(Boolean.TRUE.toString(), "1");

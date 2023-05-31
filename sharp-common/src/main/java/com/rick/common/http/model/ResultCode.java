@@ -24,10 +24,10 @@ public enum ResultCode {
 
     private int code;
 
-    private String msg;
+    private String message;
 
-    ResultCode(int code, String msg) {
+    ResultCode(int code, String message) {
         this.code = code;
-        this.msg = msg;
+        this.message = message;
     }
 }

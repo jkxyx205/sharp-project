@@ -175,7 +175,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     public void checkCodeIfExists(String code) {
         Assert.notNull(code, "code cannot be null");
         if (existsByParams(Params.builder(1 ).pv("code", code).build(), "code = :code")) {
-            throw new BizException(ResultUtils.fail(400, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + " 已经存在", code));
+            throw new BizException(ResultUtils.fail(4000, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + " 已经存在", code));
         }
     }
 
@@ -186,7 +186,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     public void checkCodesIfNotExists(String code, Map<String, Object> conditionParams, String condition) {
         Assert.notNull(code, "code cannot be null");
         if (!existsByParams(Params.builder(1 + conditionParams.size()).pv("code", code).pvAll(conditionParams).build(), "code = :code" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
-            throw new BizException(ResultUtils.fail(404, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + "不存在", code));
+            throw new BizException(ResultUtils.fail(4040, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + "不存在", code));
         }
     }
 
@@ -203,7 +203,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
         SetUtils.SetView<String> difference = SetUtils.difference(Sets.newHashSet(codes), Sets.newHashSet(codesInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
-            throw new BizException(ResultUtils.fail(404, this.getEntityClass().getAnnotation(Table.class).comment() + " code="+StringUtils.join(difference.toArray(), ",")+"不存在", difference.toArray()));
+            throw new BizException(ResultUtils.fail(4040, this.getEntityClass().getAnnotation(Table.class).comment() + " code="+StringUtils.join(difference.toArray(), ",")+"不存在", difference.toArray()));
         }
     }
 

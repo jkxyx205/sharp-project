@@ -3,6 +3,7 @@ package com.rick.formflow.form.cpn.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.util.ReflectUtils;
 import com.rick.db.dto.BaseEntity;
@@ -64,6 +65,9 @@ public class CpnConfigurer extends BaseEntity {
     @Column("options")
     private List<CpnOption> options;
 
+    @Column("data_source")
+    private String datasource;
+
     @Column("default_value")
     private String defaultValue;
 
@@ -71,6 +75,18 @@ public class CpnConfigurer extends BaseEntity {
     private String placeholder;
 
     private Map<String, Object> additionalInfo;
+
+    public Set<Map<String, ?>> getValidators() {
+        if (Objects.isNull(validators) && Objects.nonNull(validatorList)) {
+            validators = Sets.newHashSetWithExpectedSize(validatorList.size());
+            for (Validator validator : validatorList) {
+                validators.add(JsonUtils.objectToMap(validator));
+            }
+
+            return validators;
+        }
+        return Objects.isNull(validators) ? Collections.emptySet() : validators;
+    }
 
     public List<Validator> getValidatorList() {
         if (Objects.isNull(validatorList) && Objects.nonNull(validators)) {

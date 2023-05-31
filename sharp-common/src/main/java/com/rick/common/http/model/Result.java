@@ -23,7 +23,7 @@ public class Result<T> implements Serializable {
 
     private int code;
 
-    private String msg;
+    private String message;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T data;

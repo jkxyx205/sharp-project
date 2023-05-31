@@ -1,6 +1,7 @@
 package com.rick.meta.dict.service;
 
-import com.rick.meta.dict.dao.dataobject.DictDO;
+
+import com.rick.meta.dict.entity.Dict;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +12,9 @@ import java.util.Optional;
  */
 public interface DictService {
 
-    Optional<DictDO> getDictByTypeAndName(String type, String name);
+    Optional<Dict> getDictByTypeAndName(String type, String name);
 
-    List<DictDO> getDictByType(String type);
+    List<Dict> getDictByType(String type);
 
     void rebuild(String type);
 }

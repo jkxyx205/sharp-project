@@ -255,7 +255,7 @@ public final class SQLUtils {
         if (CollectionUtils.isEmpty(guestInstanceIds)) {
             String deleteSql = String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn);
             if (log.isDebugEnabled()) {
-                log.debug("SQL => [{}], args:=> [{}, {}]", deleteSql, refTableName, keyColumn);
+                log.debug("SQL => [{}], args:=> [{}, {}]", deleteSql, keyInstance);
             }
             SQLUtils.JDBC_TEMPLATE.update(deleteSql, keyInstance);
             return;

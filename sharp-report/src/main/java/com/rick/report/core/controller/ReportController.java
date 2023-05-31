@@ -10,6 +10,7 @@ import com.rick.report.core.model.ReportDTO;
 import com.rick.report.core.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,7 @@ public class ReportController {
         model.addAttribute("grid", gird);
         model.addAttribute("id", id);
         model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), gird.getPageSize(), gird.getPage()));
-        return "list";
+        return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 
     @GetMapping("{id}/export")

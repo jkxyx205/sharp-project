@@ -68,7 +68,7 @@ public abstract class AbstractSqlFormatter {
 	
 	private static final Map<String,String> DATE_FORMAT_MAP;
 
-    private static final Pattern orderSQLPattern = Pattern.compile("order\\s*by\\s+(" + COLUMN_REGEX + ")+(\\s+(desc|asc)(?!\\w+))?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern orderSQLPattern = Pattern.compile("order\\s*by\\s+(" + COLUMN_REGEX + ")(\\s*,\\s*" + COLUMN_REGEX + ")*(\\s+(desc|asc)(?!\\w+))?", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern inFullPattern = Pattern.compile(IN_FULL_REGEX);
     private static final Pattern columnPattern = Pattern.compile("^" + COLUMN_REGEX);
