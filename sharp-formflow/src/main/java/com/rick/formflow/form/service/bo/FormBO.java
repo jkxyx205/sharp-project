@@ -8,7 +8,9 @@ import lombok.Setter;
 import lombok.Value;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -36,6 +38,10 @@ public class FormBO {
         @Setter
         private Object value;
 
+    }
+
+    public Map<String, Property> getPropertyMap() {
+        return propertyList.stream().collect(Collectors.toMap(Property::getName, p -> p));
     }
 
     public String getActionUrl() {

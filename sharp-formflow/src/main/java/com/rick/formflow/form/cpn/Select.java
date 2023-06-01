@@ -35,6 +35,10 @@ public class Select extends AbstractCpn<String> {
             return value.toString();
         }
 
+        if (Number.class.isAssignableFrom(value.getClass())) {
+            return String.valueOf(value);
+        }
+
         return super.parseValue(value);
     }
 
