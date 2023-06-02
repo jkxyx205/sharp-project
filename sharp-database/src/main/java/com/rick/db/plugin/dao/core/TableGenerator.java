@@ -100,7 +100,7 @@ public class TableGenerator {
             createTableSql.append(" comment '"+tableMeta.getTable().comment()+"'");
         }
 
-        createTableSql.append(" ENGINE=InnoDB  DEFAULT CHARSET=utf8");
+        createTableSql.append(" ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4");
         log.info(createTableSql.toString());
 
         createManyToManyTable(tableMeta.getManyToManyAnnotationList());

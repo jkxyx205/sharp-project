@@ -160,7 +160,7 @@ public class FormService {
             }
 
             String value = processor.getParamValue();
-            values.put(property.getName(), value);
+            values.put(property.getName(), processor.getCpnValue());
 
             FormCpnValueList.add(FormCpnValue.builder()
                     .value(value)

@@ -92,7 +92,7 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
         }
 
         if (value instanceof String) {
-            return parseValue((String) value);
+            return parseValue(value);
         }
 
         return (T) value;

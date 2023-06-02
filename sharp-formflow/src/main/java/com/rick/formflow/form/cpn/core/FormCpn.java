@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * @author Rick
@@ -32,5 +33,7 @@ public class FormCpn extends BaseEntity {
     private Long configId;
 
     private Integer orderNum;
+
+    private Map<String, Object> additionalInfo;
     
 }

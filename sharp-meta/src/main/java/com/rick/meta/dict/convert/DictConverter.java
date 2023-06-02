@@ -10,16 +10,16 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class DictConverter implements ValueConverter<String> {
+public class DictConverter implements ValueConverter<Object> {
 
     private final DictService dictService;
 
     @Override
-    public String convert(Object dictType, String value) {
+    public String convert(Object dictType, Object value) {
         if (value == null) {
             return null;
         }
 
-        return dictService.getDictByTypeAndName((String) dictType, value).get().getLabel();
+        return dictService.getDictByTypeAndName((String) dictType, String.valueOf(value)).get().getLabel();
     }
 }

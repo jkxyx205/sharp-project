@@ -61,4 +61,7 @@ public class CpnInstanceProcessor {
         return stringValue;
     }
 
+    public Object getCpnValue() {
+        return cpnValue;
+    }
 }

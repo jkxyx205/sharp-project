@@ -67,7 +67,7 @@ public class FormCpnService {
         int i = 0;
         for (CpnConfigurer cpnConfigurer : configurerList) {
 //            formCpnList.add(new FormCpn(formId, StringUtils.isBlank(cpnConfigurer.getName()) ? RandomStringUtils.randomAlphabetic(10) : cpnConfigurer.getName(), cpnConfigurer.getId(), i++));
-            formCpnList.add(new FormCpn(formId, cpnConfigurer.getId(), i++));
+            formCpnList.add(new FormCpn(formId, cpnConfigurer.getId(), i++, null));
         }
 
         saveOrUpdateByConfigIds(formId, formCpnList);
@@ -79,6 +79,7 @@ public class FormCpnService {
 
         for (int i = 0; i < formCpnList.size(); i++) {
             FormCpn formCpn = formCpnList.get(i);
+            formCpn.setFormId(formId);
 
             FormCpn existsFormCpn = configIdMap.get(formCpn.getConfigId());
             if (Objects.nonNull(existsFormCpn)) {

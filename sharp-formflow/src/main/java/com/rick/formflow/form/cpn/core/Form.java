@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotBlank;
+import java.util.Map;
 
 /**
  * @author Rick
@@ -37,6 +38,8 @@ public class Form extends BaseCodeEntity {
     private StorageStrategyEnum storageStrategy;
 
     private String tplName;
+
+    private Map<String, Object> additionalInfo;
 
     @AllArgsConstructor
     @Getter

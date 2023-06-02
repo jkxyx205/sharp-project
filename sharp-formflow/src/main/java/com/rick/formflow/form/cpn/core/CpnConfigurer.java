@@ -74,6 +74,9 @@ public class CpnConfigurer extends BaseEntity {
     @Column("placeholder")
     private String placeholder;
 
+    @Column("is_disabled")
+    private Boolean disabled;
+
     private Map<String, Object> additionalInfo;
 
     public Set<Map<String, ?>> getValidators() {
