@@ -1,6 +1,6 @@
 package com.rick.report.core.dao;
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
 import com.rick.report.core.entity.Report;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class ReportDAO extends EntityDAOImpl<Report, Long> {
+public class ReportDAO extends EntityCodeDAOImpl<Report, Long> {
 
 }

@@ -41,11 +41,12 @@ public class PageInstanceController {
      * @return
      */
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
-    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model) {
+    public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model, HttpServletRequest request) {
         FormBO formBO = getFormBO(formId, instanceId);
 
         model.addAttribute("formBO", formBO);
         model.addAttribute("model", getDataModel(formBO.getPropertyList()));
+        model.addAttribute("query", HttpServletRequestUtils.getParameterMap(request));
 
         // table
         for (FormBO.Property property : formBO.getPropertyList()) {

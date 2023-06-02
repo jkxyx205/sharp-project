@@ -1,6 +1,6 @@
 package com.rick.report.core.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.report.core.model.QueryField;
@@ -32,7 +32,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_report", comment = "报表")
-public class Report extends BaseEntity {
+public class Report extends BaseCodeEntity {
 
     /**
      * 是否分页
