@@ -60,13 +60,21 @@ public class DictServiceImpl implements DictService, InitializingBean {
         List<Dict> list = getDbDictList(params);
         if (CollectionUtils.isNotEmpty(list)) {
             DictUtils.dictMap.put(type, list);
+            return;
         }
+
+        if (dictDOSupplier != null) {
+            list.addAll(dictDOSupplier.get());
+        }
+
     }
 
     @Override
     public void afterPropertiesSet() {
         // sys_dict
         List<Dict> list = getDbDictList(null);
+
+        // 程序提供
         if (dictDOSupplier != null) {
             list.addAll(dictDOSupplier.get());
         }
