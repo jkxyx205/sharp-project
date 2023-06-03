@@ -105,7 +105,15 @@ public class DictServiceImpl implements DictService, InitializingBean {
     }
 
     private void initSQL(String type, String sql) {
-        initMap(type, sharpService.queryForKeyValue(sql, null));
+        Map<Object, Object> keyValue = sharpService.queryForKeyValue(sql, null);
+
+        // 类型转换 Object -> String
+        Map<String, String> stringKeyValue = Maps.newLinkedHashMapWithExpectedSize(keyValue.size());
+        for (Map.Entry<Object, Object> entry : keyValue.entrySet()) {
+            stringKeyValue.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+        }
+
+        initMap(type, stringKeyValue);
     }
 
     private void initMap(String type, Map<String, String> map) {
