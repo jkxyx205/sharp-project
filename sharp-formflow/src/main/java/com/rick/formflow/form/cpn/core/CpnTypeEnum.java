@@ -11,6 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum CpnTypeEnum {
+    LABEL("标签"),
     TEXT("短文本"),
     TEXTAREA("长文本"),
     SELECT("选项"),

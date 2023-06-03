@@ -13,12 +13,23 @@ public interface FormAdvice {
     /**
      * 表单实例数据保存之后
      */
-    void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values);
+    default void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values){}
 
     /**
      * 表单实例数据保存之后
      */
-    void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values);
+    default void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {}
 
-//    Map<String, Object> getValue(Long formId, Long instanceId);
+    /**
+     * 获取实例之前
+     * @param instanceId
+     * @param values
+     */
+    default void beforeGetInstance(Long instanceId, Map<String, Object> values) {}
+
+    /**
+     * 删除实例之前
+     * @param instanceId
+     */
+    default void beforeDeleteInstance(Long instanceId) {}
 }

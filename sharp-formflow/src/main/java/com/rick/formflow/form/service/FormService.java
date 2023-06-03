@@ -50,9 +50,9 @@ public class FormService {
 
     private final FormCpnValueDAO formCpnValueDAO;
 
-    private final CpnManager cpnManager;
-
     private final Map<String, FormAdvice> formAdviceMap;
+
+    private final Map<String, CpnValueConverter> cpnValueConverterMap;
 
     private final ApplicationContext applicationContext;
 
@@ -93,6 +93,11 @@ public class FormService {
                     valueMap = mapOptional.get();
                 }
             }
+
+            FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
+            if (formAdvice != null) {
+                formAdvice.beforeGetInstance(instanceId, valueMap);
+            }
         }
 
         for (FormCpn formCpn : formCpnList) {
@@ -119,6 +124,12 @@ public class FormService {
 
             } else {
                 value = cpnConfigurer.getDefaultValue();
+            }
+
+            CpnValueConverter cpnValueConverter = cpnValueConverterMap.get(cpnConfigurer.getCpnValueConverterName());
+
+            if (cpnValueConverter != null) {
+                value = cpnValueConverter.convert(value);
             }
 
             value = value == null ? null : cpn.parseValue(value);
@@ -201,6 +212,11 @@ public class FormService {
 
     public int delete(Long formId, Long instanceId) {
         Form form =  formDAO.selectById(formId).get();
+
+        FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
+        if (formAdvice != null) {
+            formAdvice.beforeDeleteInstance(instanceId);
+        }
 
         if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
             return formCpnValueDAO.deleteByInstanceId(instanceId);

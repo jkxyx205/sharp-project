@@ -3,14 +3,14 @@
 PROJECTS=(
 sharp-dependencies
 sharp-common
-sharp-database
+#sharp-database
 sharp-meta
-sharp-excel
-sharp-fileupload
+#sharp-excel
+#sharp-fileupload
 sharp-formflow
-sharp-mail
+#sharp-mail
 sharp-report
-sharp-sms
+#sharp-sms
 )
 
 for p in ${PROJECTS[@]}

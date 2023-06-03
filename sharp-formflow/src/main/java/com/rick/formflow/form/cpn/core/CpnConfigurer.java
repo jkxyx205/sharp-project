@@ -77,6 +77,8 @@ public class CpnConfigurer extends BaseEntity {
     @Column("is_disabled")
     private Boolean disabled;
 
+    private String cpnValueConverterName;
+
     private Map<String, Object> additionalInfo;
 
     public Set<Map<String, ?>> getValidators() {
@@ -126,6 +128,14 @@ public class CpnConfigurer extends BaseEntity {
 
         }
         return map;
+    }
+
+    public Map<String, String> getOptionMap() {
+        if (options == null) {
+            return Collections.emptyMap();
+        }
+
+        return options.stream().collect(Collectors.toMap(CpnOption::getName, CpnOption::getLabel));
     }
 
     @Getter

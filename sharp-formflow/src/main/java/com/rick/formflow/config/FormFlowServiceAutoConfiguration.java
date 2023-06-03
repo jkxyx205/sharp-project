@@ -4,6 +4,7 @@ import com.rick.db.config.GridServiceAutoConfiguration;
 import com.rick.db.service.GridService;
 import com.rick.formflow.form.service.FormAdvice;
 import com.rick.formflow.form.service.bo.FormBO;
+import com.rick.formflow.form.service.convert.DateTimeToStringConverter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
@@ -33,6 +34,12 @@ public class FormFlowServiceAutoConfiguration {
     @Configuration
     @ComponentScan(value = "com.rick.formflow.form")
     static class FormServiceConfiguration {
+
+        @Bean
+        public DateTimeToStringConverter dateTimeToStringConverter() {
+            return new DateTimeToStringConverter();
+        }
+
         @Bean
         @ConditionalOnMissingBean
         public FormAdvice formAdvice() {

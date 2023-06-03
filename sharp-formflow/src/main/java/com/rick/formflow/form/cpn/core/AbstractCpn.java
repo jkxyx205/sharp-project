@@ -69,7 +69,11 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
             return (T) JsonUtils.toObject(stringVal, cpnClass);
         }
 
-        throw new IllegalArgumentException();
+        if (cpnClass == String.class) {
+            return (T) String.valueOf(value);
+        }
+
+        return (T) value;
     }
 
     @Override
