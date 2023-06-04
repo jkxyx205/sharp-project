@@ -13,7 +13,7 @@ public class HiddenReportColumn extends ReportColumn {
 
     public HiddenReportColumn(String name) {
         super(name,null, false, null, null, null,
-                AlignEnum.LEFT,  true, false);
+                AlignEnum.LEFT,  true, false, TypeEnum.TEXT);
     }
 
 }

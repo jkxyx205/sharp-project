@@ -35,9 +35,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * All rights Reserved, Designed By www.xhope.top
- *
- * @version V1.0
  * @author Rick.Xu
  * @date 6/18/20 3:34 PM
  */
@@ -54,6 +51,8 @@ public class ReportService {
 
     private final Map<String, ValueConverter> valueConverterMap;
 
+    private final  Map<String, ReportAdvice> reportAdviceMap;
+
     /**
      * 创建报表
      */
@@ -64,7 +63,7 @@ public class ReportService {
 
     /**
      * 删除报表
-     * @param id
+     * @param id 报表id
      */
     public int delete(Long id) {
         return reportDAO.deleteById(id);
@@ -135,6 +134,11 @@ public class ReportService {
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        if (reportAdvice != null) {
+            reportAdvice.beforeSetRow(report, paramGrid.getRows());
+        }
+
         List<ReportColumn> reportColumnList = report.getReportColumnList();
 
         return Grid.<Object[]>builder()

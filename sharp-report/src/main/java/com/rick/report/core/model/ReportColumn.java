@@ -1,5 +1,6 @@
 package com.rick.report.core.model;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,6 +41,8 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
 
     private Boolean tooltip;
 
+    private TypeEnum type;
+
     public ReportColumn(String name, String label) {
         this(name, label, false);
     }
@@ -53,11 +56,11 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
     }
 
     public ReportColumn(String name, String label, Boolean sortable, String context, List<String> valueConverterNameList) {
-        this(name, label, sortable, context, valueConverterNameList, null, AlignEnum.LEFT, false, false);
+        this(name, label, sortable, context, valueConverterNameList, null, AlignEnum.LEFT, false, false, TypeEnum.TEXT);
     }
 
     public ReportColumn(String name, String label, Boolean sortable, String context, List<String> valueConverterNameList, Integer columnWidth,
-                        AlignEnum align,  Boolean hidden, Boolean tooltip) {
+                        AlignEnum align,  Boolean hidden, Boolean tooltip, TypeEnum type) {
         this.name = name;
         this.label = label;
         this.context = context;
@@ -67,6 +70,7 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
         this.columnWidth = columnWidth;
         this.hidden = hidden;
         this.tooltip = tooltip;
+        this.type = type;
     }
 
     public ReportColumn setColumnWidth(Integer columnWidth) {
@@ -77,5 +81,24 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
     public ReportColumn setAlign(AlignEnum align) {
         this.align = align;
         return this;
+    }
+
+    public ReportColumn setType(TypeEnum type) {
+        this.type = type;
+        return this;
+    }
+
+    public enum TypeEnum {
+        TEXT, NUMERIC;
+
+        @JsonValue
+        public String jsonValue() {
+            return this.name().toLowerCase();
+        }
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 }

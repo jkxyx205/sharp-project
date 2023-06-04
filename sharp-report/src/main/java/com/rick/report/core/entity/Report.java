@@ -69,6 +69,8 @@ public class Report extends BaseCodeEntity {
     @Column(comment = "其他信息")
     private String extraData;
 
+    private String reportAdviceName;
+
     public String getUrl() {
         return "/report/" + this.getId() + "/?" + getParams();
     }
