@@ -23,7 +23,9 @@ public class ReportDTO {
 
     private Report report;
 
-    private Grid<Object[]> grid;
+    private Grid<Object[]> gridArray;
+
+    private Grid<Map<String, Object>> gridMap;
 
     private Map<String, BigDecimal> summaryMap;
 }

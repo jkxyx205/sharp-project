@@ -3,6 +3,8 @@ package com.rick.report.core.controller;
 
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.HttpServletResponseUtils;
+import com.rick.common.http.model.Result;
+import com.rick.common.http.model.ResultUtils;
 import com.rick.db.dto.Grid;
 import com.rick.db.util.PaginationHelper;
 import com.rick.excel.table.HtmlExcelTable;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -35,10 +38,27 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    @GetMapping("{id}/json")
+    @ResponseBody
+    public Result<Grid<Map<String, Object>>> value(@PathVariable  Long id, HttpServletRequest request) {
+        ReportDTO reportDTO = reportService.list(id, HttpServletRequestUtils.getParameterMap(request));
+        for (Map<String, Object> row : reportDTO.getGridMap().getRows()) {
+            for (Map.Entry<String, Object> entry : row.entrySet()) {
+                if (entry.getValue() != null && entry.getKey().equals("id")) {
+                    // id 需要序列成字符串
+                    row.put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+            }
+        }
+
+        return ResultUtils.success(reportDTO.getGridMap());
+    }
+
     @GetMapping("{id}")
     public String index(@PathVariable  Long id, Model model, HttpServletRequest request) {
         ReportDTO reportDTO = reportService.list(id, HttpServletRequestUtils.getParameterMap(request));
-        Grid gird = reportDTO.getGrid();
+
+        Grid gird = reportDTO.getGridArray();
         model.addAttribute("report", reportDTO.getReport());
         model.addAttribute("summary", reportDTO.getSummaryMap());
         model.addAttribute("grid", gird);

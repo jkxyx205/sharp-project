@@ -85,6 +85,7 @@ public class ReportService {
         }
 
         Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
+        handleReportAdvice(report, grid.getRows());
 
         Map<String, BigDecimal> summaryMap = null;
         if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
@@ -97,7 +98,7 @@ public class ReportService {
             }
         }
 
-        return new ReportDTO(report, convert(grid, report), summaryMap);
+        return new ReportDTO(report, convert(grid, report), grid, summaryMap);
     }
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
@@ -114,6 +115,7 @@ public class ReportService {
         QueryResultExportTable exportTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
             @Override
             public void setRows(List<?> rows) {
+                handleReportAdvice(report, (List<Map<String, Object>>) rows);
                 toObjectArrayListAndConvert((List<Map<String, Object>>) rows, report.getReportColumnList());
                 super.setRows(rows);
             }
@@ -134,11 +136,6 @@ public class ReportService {
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
-        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
-        if (reportAdvice != null) {
-            reportAdvice.beforeSetRow(report, paramGrid.getRows());
-        }
-
         List<ReportColumn> reportColumnList = report.getReportColumnList();
 
         return Grid.<Object[]>builder()
@@ -199,6 +196,13 @@ public class ReportService {
         boolean isNullOrDeleteSql = Objects.isNull(sql) || sql.matches("(?i).*delete\\s+from*.");
         if (isNullOrDeleteSql) {
             throw new BizException(ResultUtils.fail("Report sql error!"));
+        }
+    }
+
+    private void handleReportAdvice(Report report, List<Map<String, Object>> rows) {
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        if (reportAdvice != null) {
+            reportAdvice.beforeSetRow(report, rows);
         }
     }
 }
