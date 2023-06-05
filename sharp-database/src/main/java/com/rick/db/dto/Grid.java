@@ -1,5 +1,6 @@
 package com.rick.db.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 
@@ -22,6 +23,7 @@ public class Grid<T> implements Serializable {
     /**
      * 一页显示记录条数
      */
+    @JsonProperty("pageSize")
     private int pageSize;
 
     /***
@@ -32,6 +34,7 @@ public class Grid<T> implements Serializable {
     /***
      * 总页数
      */
+    @JsonProperty("totalPages")
     private long totalPages;
 
     /***
