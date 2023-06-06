@@ -19,8 +19,8 @@ head.appendChild(style)
                 _renderTable(this.$tbody, this.options.value)
             }
 
-            _bindEvent(this.options.columns, this.$tbody)
-            _addEmptyLine(this.options.columns, this.$tbody)
+            _bindEvent(this.options.columns, this.$tbody, this.options.addEmptyLineCallback)
+            _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback)
         },
         getValue: function() {
             let list = []
@@ -42,7 +42,7 @@ head.appendChild(style)
             tbodyHTML.push('<tr>')
 
             for(v of arr) {
-                tbodyHTML.push('<td><input class="form-control" value="'+v+'"/></td>')
+                tbodyHTML.push('<td><input class="form-control" type="text" value="'+v+'"/></td>')
             }
 
             tbodyHTML.push('<td class="operator">x</td></tr>')
@@ -50,29 +50,30 @@ head.appendChild(style)
         $tbody.append(tbodyHTML.join(''))
     }
 
-    function input_focus(e, columns, $tbody) {
+    function input_focus(e, columns, $tbody, addEmptyLineCallback) {
         let isLastChild = ($(e.target).parent().parent().next().length == 0)
         if (isLastChild) {
-            _addEmptyLine(columns, $tbody)
+            _addEmptyLine(columns, $tbody, addEmptyLineCallback)
         }
     }
 
-    function _addEmptyLine(columns, $tbody) {
+    function _addEmptyLine(columns, $tbody, addEmptyLineCallback) {
         var lineHTML = []
         lineHTML.push('<tr>')
         for(var i = 0; i < columns; i++) {
-            lineHTML.push('<td><input class="form-control" value=""/></td>')
+            lineHTML.push('<td><input class="form-control" type="text" value=""/></td>')
         }
         lineHTML.push('<td class="operator">x</td></tr>')
 
         $tbody.append(lineHTML.join(''))
-        _bindEvent(columns, $tbody)
+        _bindEvent(columns, $tbody, addEmptyLineCallback)
+        addEmptyLineCallback && addEmptyLineCallback($tbody.find('tr:last-child'))
     }
 
-    function _bindEvent(columns, $tbody) {
+    function _bindEvent(columns, $tbody, addEmptyLineCallback) {
         $tbody.find('input').each(function() {
             this.addEventListener("input", function(e) {
-                input_focus(e, columns, $tbody)
+                input_focus(e, columns, $tbody, addEmptyLineCallback)
             });
         })
 
