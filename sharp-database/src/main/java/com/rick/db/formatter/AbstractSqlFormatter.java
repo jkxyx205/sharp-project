@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.rick.db.config.Constants.GROUP_DUMMY_TABLE_NAME;
+
 
 /**
  * @author Rick.Xu
@@ -329,7 +331,7 @@ public abstract class AbstractSqlFormatter {
 
     public String wrapSordString(String sql, String sidx, String sord) {
         StringBuilder sb = new StringBuilder("SELECT * FROM (");
-        sb.append(sql).append(") temp");
+        sb.append(sql).append(") " + GROUP_DUMMY_TABLE_NAME);
         if (StringUtils.isNotBlank(sidx) && StringUtils.isNotBlank(sord)) {
             sb.append(" ORDER BY ").append(sidx).append(" ").append(sord);
             return sb.toString();
