@@ -64,7 +64,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
         }
 
         if (dictDOSupplier != null) {
-            list.addAll(dictDOSupplier.get());
+            DictUtils.dictMap.put(type, dictDOSupplier.get().stream().filter(dict -> dict.getType().equals(type)).collect(Collectors.toList()));
         }
 
     }
