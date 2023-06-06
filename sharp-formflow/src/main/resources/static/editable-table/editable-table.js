@@ -1,5 +1,5 @@
 ;var style = document.createElement("style")
-style.appendChild(document.createTextNode("tr:last-child .operator {display: none; }  .operator {cursor: pointer;}"))
+style.appendChild(document.createTextNode("tr:last-child .operator {display: none; }  table .operator {cursor: pointer;vertical-align: middle!important;}"))
 var head = document.getElementsByTagName("head")[0]
 head.appendChild(style)
 
@@ -45,7 +45,7 @@ head.appendChild(style)
                 tbodyHTML.push('<td><input class="form-control" type="text" value="'+v+'"/></td>')
             }
 
-            tbodyHTML.push('<td class="operator">x</td></tr>')
+            tbodyHTML.push('<td class="operator btn-link">X</td></tr>')
         }
         $tbody.append(tbodyHTML.join(''))
     }
@@ -63,7 +63,7 @@ head.appendChild(style)
         for(var i = 0; i < columns; i++) {
             lineHTML.push('<td><input class="form-control" type="text" value=""/></td>')
         }
-        lineHTML.push('<td class="operator">x</td></tr>')
+        lineHTML.push('<td class="operator btn-link">X</td></tr>')
 
         $tbody.append(lineHTML.join(''))
         _bindEvent(columns, $tbody, addEmptyLineCallback)
