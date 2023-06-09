@@ -89,7 +89,7 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
     }
 
     public enum TypeEnum {
-        TEXT, NUMERIC;
+        TEXT, NUMERIC, DECIMAL;
 
         @JsonValue
         public String jsonValue() {
