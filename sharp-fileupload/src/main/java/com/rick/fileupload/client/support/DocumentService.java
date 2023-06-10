@@ -39,7 +39,7 @@ public interface DocumentService {
      * 文件删除
      * @param ids
      */
-    void delete(Long ...ids);
+    void delete(Long... ids);
 
     /**
      * 文件重命名

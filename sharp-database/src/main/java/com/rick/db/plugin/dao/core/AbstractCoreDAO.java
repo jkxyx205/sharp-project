@@ -159,7 +159,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int deleteByIds(ID ...ids) {
+    public int deleteByIds(ID... ids) {
         Assert.notEmpty(ids, "id不能为空");
         return deleteByIds(Arrays.asList(ids));
     }

@@ -16,7 +16,7 @@ public interface MapDAO<ID> extends CoreDAO<ID> {
 
     Map<ID, Map<String, Object>> selectByIdsAsMap(String ids);
 
-    Map<ID, Map<String, Object>> selectByIdsAsMap(ID ...ids);
+    Map<ID, Map<String, Object>> selectByIdsAsMap(ID... ids);
 
     Map<ID, Map<String, Object>> selectByIdsAsMap(Collection<?> ids);
 
@@ -24,7 +24,7 @@ public interface MapDAO<ID> extends CoreDAO<ID> {
 
     List<Map<String, Object>> selectByIds(String ids);
 
-    List<Map<String, Object>> selectByIds(ID ...ids);
+    List<Map<String, Object>> selectByIds(ID... ids);
 
     List<Map<String, Object>> selectByIds(Collection<?> ids);
 

@@ -199,11 +199,11 @@ public final class SQLUtils {
      * @param subTables t_article
      * @return
      */
-    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> deleteValues, String ...subTables) {
+    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> deleteValues, String... subTables) {
         return deleteCascade(masterTable, refColumnName, deleteValues, null, null, subTables);
     }
 
-    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL, String ...subTables) {
+    public static int deleteCascade(String masterTable, String refColumnName, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL, String... subTables) {
         Assert.notNull(masterTable, "主表不能为空");
         Assert.notNull(refColumnName, "从表外键不能为空");
         Assert.notNull(deleteValues, "masterTableIds不能为空");

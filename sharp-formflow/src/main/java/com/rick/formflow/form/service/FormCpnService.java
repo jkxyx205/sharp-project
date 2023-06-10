@@ -39,7 +39,7 @@ public class FormCpnService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void saveOrUpdateByConfigIds(Long formId, Long ...configIds) {
+    public void saveOrUpdateByConfigIds(Long formId, Long... configIds) {
         saveOrUpdateByConfigIds(formId, ArrayUtils.isEmpty(configIds) ? Collections.emptyList() : Arrays.asList(configIds));
     }
 

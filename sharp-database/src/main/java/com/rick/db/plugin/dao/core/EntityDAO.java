@@ -30,7 +30,7 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     Map<ID, T> selectByIdsAsMap(String ids);
 
-    Map<ID, T> selectByIdsAsMap(ID ...ids);
+    Map<ID, T> selectByIdsAsMap(ID... ids);
 
     Map<ID, T> selectByIdsAsMap(Collection<?> ids);
 
@@ -38,7 +38,7 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     List<T> selectByIds(String ids);
 
-    List<T> selectByIds(ID ...ids);
+    List<T> selectByIds(ID... ids);
 
     List<T> selectByIds(Collection<?> ids);
 
