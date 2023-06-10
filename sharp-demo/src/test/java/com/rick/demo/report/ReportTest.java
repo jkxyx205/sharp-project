@@ -26,6 +26,7 @@ public class ReportTest {
     public void test0() {
         reportService.saveOrUpdate(Report.builder()
                 .id(619541501440958464L)
+                .code("t_book")
                 .name("图书报表")
                 .querySql("SELECT t_book.id, t_book.title, t_person.name, sys_dict.label \"sexLabel\"\n" +
                         "FROM t_book,\n" +

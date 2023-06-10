@@ -76,6 +76,7 @@ public class UserCpnCreateTest {
     public void testAddReport() {
         reportService.saveOrUpdate(Report.builder()
                 .id(668074769748373504L)
+                .code("t_user")
                 .name("人员信息表")
                 .querySql("SELECT t_user.name              AS \"name\",\n" +
                         "#        t_user.gender            AS \"gender\",\n" +
