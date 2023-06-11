@@ -12,7 +12,9 @@ import java.util.Map;
  */
 public interface ReportAdvice {
 
-    void beforeSetRow(Report report, List<Map<String, Object>> rows);
+    default void beforeQuery(Report report, Map<String, Object> requestMap) {};
 
-    default void combineSummaryList(List<BigDecimal> summaryList, Map<String, Object> requestMap, String conditionSql){}
+    default void beforeSetRow(Report report, List<Map<String, Object>> rows) {};
+
+    default void combineSummaryList(Report report, List<BigDecimal> summaryList, Map<String, Object> requestMap, String conditionSql){}
 }

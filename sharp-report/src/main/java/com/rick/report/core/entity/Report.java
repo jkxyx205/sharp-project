@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -67,7 +68,7 @@ public class Report extends BaseCodeEntity {
     private String tplName;
 
     @Column(comment = "其他信息")
-    private String extraData;
+    private Map<String, Object> additionalInfo;
 
     private String reportAdviceName;
 

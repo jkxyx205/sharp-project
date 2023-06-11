@@ -109,6 +109,11 @@ public class ReportService {
             }
         }
 
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        if (reportAdvice != null) {
+            reportAdvice.beforeQuery(report, requestMap);
+        }
+
         Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
         handleReportAdvice(report, grid.getRows());
 
@@ -123,9 +128,8 @@ public class ReportService {
                     summaryList = new ArrayList<>();
                 }
 
-                ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
                 if (reportAdvice != null) {
-                    reportAdvice.combineSummaryList(summaryList, requestMap, StringUtils.substringAfter(report.getQuerySql(), "WHERE "));
+                    reportAdvice.combineSummaryList(report, summaryList, requestMap, StringUtils.substringAfter(report.getQuerySql(), "WHERE "));
                 }
 
                 summaryMap = Maps.newLinkedHashMapWithExpectedSize(summaryColumnNameList.size());
