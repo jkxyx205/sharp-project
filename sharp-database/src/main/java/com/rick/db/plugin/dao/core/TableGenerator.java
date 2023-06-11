@@ -167,7 +167,7 @@ public class TableGenerator {
         } else if (type == Boolean.class) {
             return "bit";
         } else if (type == BigDecimal.class) {
-            return "decimal(10,3)";
+            return "decimal(10,2)";
         } else if (type == LocalDateTime.class) {
             return "datetime";
         } else if (type == Instant.class) {
