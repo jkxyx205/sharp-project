@@ -75,13 +75,38 @@ public class ReportService {
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
         Report report = getReport(id);
+        // format sql
+        report.setQuerySql(report.getQuerySql()
+                .replaceFirst("(?i)(select)\\s+", "SELECT ")
+                .replaceFirst("(?i)\\s+(from)\\s+", " FROM ")
+                .replaceFirst("(?i)\\s+(WHERE)\\s+", " WHERE "));
+
 
         String summarySQL = null;
         List<String> summaryColumnNameList = null;
+        List<String> summaryQueryColumnNameList;
         if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
+            // query columns
+            List<String> queryColumnNameList = Arrays.stream(StringUtils.substringBetween(report.getQuerySql(), "SELECT ", " FROM").split("\\s*,\\s*")).collect(Collectors.toList());
+
             summaryColumnNameList = Arrays.stream(report.getSummaryColumnNames().split("\\s*,\\s*")).collect(Collectors.toList());
-            summarySQL = "SELECT " + summaryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(10,3))").collect(Collectors.joining(", ")) +
-                    report.getQuerySql().substring(report.getQuerySql().toUpperCase().indexOf("FROM"));
+
+            summaryQueryColumnNameList = Lists.newArrayListWithExpectedSize(summaryColumnNameList.size());
+
+            for (String columnName : queryColumnNameList) {
+                for (String summaryColumnName : summaryColumnNameList) {
+                    if (columnName.equalsIgnoreCase(summaryColumnName)) {
+                        summaryQueryColumnNameList.add(columnName);
+                    } else if (columnName.endsWith(" " + summaryColumnName)) {
+                        summaryQueryColumnNameList.add(StringUtils.substringBefore(columnName, " " + summaryColumnName));
+                    }
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(summaryQueryColumnNameList)) {
+                summarySQL = "SELECT " + summaryQueryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(10,3))").collect(Collectors.joining(", ")) +
+                        report.getQuerySql().substring(report.getQuerySql().indexOf("FROM"));
+            }
         }
 
         Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
@@ -89,9 +114,21 @@ public class ReportService {
 
         Map<String, BigDecimal> summaryMap = null;
         if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
-            List<BigDecimal> summaryList = GridUtils.numericObject(summarySQL, requestMap);
             if (grid.getRecords() > 0) {
-                summaryMap = Maps.newHashMapWithExpectedSize(summaryColumnNameList.size());
+                List<BigDecimal> summaryList;
+
+                if (StringUtils.isNotBlank(summarySQL)) {
+                    summaryList = GridUtils.numericObject(summarySQL, requestMap);
+                } else {
+                    summaryList = new ArrayList<>();
+                }
+
+                ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+                if (reportAdvice != null) {
+                    reportAdvice.combineSummaryList(summaryList, requestMap, StringUtils.substringAfter(report.getQuerySql(), "WHERE "));
+                }
+
+                summaryMap = Maps.newLinkedHashMapWithExpectedSize(summaryColumnNameList.size());
                 for (int i = 0; i < summaryColumnNameList.size(); i++) {
                     summaryMap.put(summaryColumnNameList.get(i), summaryList.get(i));
                 }
