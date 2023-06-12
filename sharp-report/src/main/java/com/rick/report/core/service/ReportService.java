@@ -75,6 +75,7 @@ public class ReportService {
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
         Report report = getReport(id);
+        mergeParams(report, requestMap);
         // format sql
         report.setQuerySql(report.getQuerySql()
                 .replaceFirst("(?i)(select)\\s+", "SELECT ")
@@ -140,6 +141,20 @@ public class ReportService {
         }
 
         return new ReportDTO(report, convert(grid, report), grid, summaryMap);
+    }
+
+    private void mergeParams(Report report, Map<String, Object> requestMap) {
+        if (requestMap.get(PageModel.PARAM_SIDX) == null) {
+            requestMap.put(PageModel.PARAM_SIDX,  report.getSidx());
+        }
+
+        if (requestMap.get(PageModel.PARAM_SORD) == null) {
+            requestMap.put(PageModel.PARAM_SORD,  report.getSord().name());
+        }
+
+        if (!report.getPageable()) {
+            requestMap.put(PageModel.PARAM_SIZE,  -1);
+        }
     }
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
@@ -242,7 +257,7 @@ public class ReportService {
 
     private void handleReportAdvice(Report report, List<Map<String, Object>> rows) {
         ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
-        if (reportAdvice != null) {
+        if (reportAdvice != null && CollectionUtils.isNotEmpty(rows)) {
             reportAdvice.beforeSetRow(report, rows);
         }
     }

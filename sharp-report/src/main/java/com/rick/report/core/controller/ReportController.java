@@ -7,6 +7,8 @@ import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.db.dto.Grid;
+import com.rick.db.dto.PageModel;
+import com.rick.db.service.support.Params;
 import com.rick.db.util.PaginationHelper;
 import com.rick.excel.table.HtmlExcelTable;
 import com.rick.report.core.model.ReportDTO;
@@ -91,6 +93,12 @@ public class ReportController {
         model.addAttribute("id", id);
         model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), gird.getPageSize(), gird.getPage()));
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
+    }
+
+    @GetMapping("{id}/{instanceId}")
+    @ResponseBody
+    public Map<String, Object> detail(@PathVariable Long id, @PathVariable Long instanceId) {
+        return reportService.list(id, Params.builder(2).pv("id", instanceId).pv(PageModel.PARAM_SIZE, -1).build()).getGridMap().getRows().get(0);
     }
 
     @GetMapping("{id}/export")
