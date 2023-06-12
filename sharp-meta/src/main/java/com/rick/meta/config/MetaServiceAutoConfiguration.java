@@ -4,6 +4,7 @@ import com.rick.db.config.GridServiceAutoConfiguration;
 import com.rick.db.service.SharpService;
 import com.rick.meta.dict.convert.ArrayDictConverter;
 import com.rick.meta.dict.convert.DictConverter;
+import com.rick.meta.dict.convert.LocalDateTimeConverter;
 import com.rick.meta.dict.convert.SqlDateConverter;
 import com.rick.meta.dict.dao.DictDAO;
 import com.rick.meta.dict.model.DictProperties;
@@ -62,8 +63,13 @@ public class MetaServiceAutoConfiguration {
         }
 
         @Bean
-        public SqlDateConverter localDateConverter() {
+        public SqlDateConverter sqlDateConverter() {
             return new SqlDateConverter();
+        }
+
+        @Bean
+        public LocalDateTimeConverter localDateTimeConverter() {
+            return new LocalDateTimeConverter();
         }
 
         @Bean
