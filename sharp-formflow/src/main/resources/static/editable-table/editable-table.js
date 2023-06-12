@@ -33,6 +33,9 @@ head.appendChild(style)
             })
             return list
         },
+        addEmptyLine: function () {
+            _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback)
+        }
     }
 
     function _renderTable($tbody, list) {
