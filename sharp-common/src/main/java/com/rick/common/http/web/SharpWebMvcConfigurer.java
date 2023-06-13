@@ -2,13 +2,17 @@ package com.rick.common.http.web;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.rick.common.http.convert.CodeToEnumConverterFactory;
 import com.rick.common.http.web.param.ParamNameProcessor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.format.FormatterRegistry;
@@ -16,6 +20,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +33,9 @@ import java.util.List;
  * @createdAt 2023-03-15 14:14:00
  */
 public class SharpWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Resource
+    private JacksonProperties jacksonProperties;
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -38,6 +50,7 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     public List<ConverterFactory> converterFactories() {
+        // 子类实现
         return null;
     }
 
@@ -45,11 +58,17 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
     public void register(ObjectMapper objectMapper) {
         if (objectMapper != null) {
             // jackson 自带的 EnumDeserializer 代替 EnumJsonDeserializer
-//            SimpleModule simpleModule = new SimpleModule();
+            String pattern = jacksonProperties.getDateFormat() == null ? "yyyy-MM-dd HH:mm:ss" : jacksonProperties.getDateFormat();
+            SimpleModule simpleModule = new SimpleModule();
+            simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
+            simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+            simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(pattern)));
+            simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 //            simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
-//            objectMapper.registerModule(simpleModule);
+            objectMapper.registerModule(simpleModule);
+            objectMapper.setDateFormat(new SimpleDateFormat(pattern));
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+//            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         }
     }
 
@@ -79,5 +98,4 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
             }
         };
     }
-
 }
