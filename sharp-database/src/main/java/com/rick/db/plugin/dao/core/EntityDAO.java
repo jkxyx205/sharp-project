@@ -97,4 +97,6 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     T mapToEntity(Map<String, ?> map);
 
+    String getSelectConditionSQL(Map<String, ?> params);
+
 }

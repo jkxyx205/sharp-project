@@ -59,13 +59,13 @@ public class GridService {
      * @return
      */
     public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, SharpService.JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
-        long records = 0;
-        long totalPages = 0;
+        int records = 0;
+        int totalPages = 0;
         AbstractSqlFormatter sqlFormatter = sharpService.getSqlFormatter();
 
         if (model.isPageQueryModel()) {
             countSQL = StringUtils.isBlank(countSQL) ? sqlFormatter.formatSqlCount(sql) : countSQL;
-            records = sharpService.query(countSQL, params, Long.class).get(0);
+            records = sharpService.query(countSQL, params, Integer.class).get(0);
 
             if (records == 0) {
                 return Grid.emptyInstance(model.getSize());
@@ -111,7 +111,7 @@ public class GridService {
      * @param records
      * @return
      */
-    private long validatePageModelAndReturnTotalPages(PageModel model, long records) {
+    private int validatePageModelAndReturnTotalPages(PageModel model, int records) {
         if (model.isPageQueryModel()) {
             if (model.getSize() < 1) {
                 model.setSize(DEFAULT_PAGE_SIZE);
@@ -119,7 +119,7 @@ public class GridService {
                 model.setSize(DEFAULT_PAGE_MAX_SIZE);
             }
 
-            long totalPages = totalPages(records, model.getSize());
+            int totalPages = totalPages(records, model.getSize());
 
             if (model.getPage() > totalPages) {
                 model.setPage((int) totalPages);
@@ -139,8 +139,8 @@ public class GridService {
      * @param pageSize
      * @return
      */
-    private long totalPages(long records, int pageSize) {
-        long totalPages;
+    private int totalPages(int records, int pageSize) {
+        int totalPages;
 
         if (records % pageSize == 0) {
             totalPages = records / pageSize;

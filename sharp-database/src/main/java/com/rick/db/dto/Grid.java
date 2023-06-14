@@ -29,13 +29,13 @@ public class Grid<T> implements Serializable {
     /***
      * 总纪录数
      */
-    private long records;
+    private int records;
 
     /***
      * 总页数
      */
     @JsonProperty("totalPages")
-    private long totalPages;
+    private int totalPages;
 
     /***
      * 数据项

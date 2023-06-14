@@ -612,6 +612,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
+    public String getSelectConditionSQL(Map<String, ?> params) {
+        return getSelectSQL() + " WHERE " + getConditionSQL(params);
+    }
+
+    @Override
     public Class<T> getEntityClass() {
         return entityClass;
     }
@@ -655,6 +660,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         super.init(tableMeta.getTableName(), tableMeta.getColumnNames(), tableMeta.getIdColumnName(), (Class<ID>) actualTypeArgument[1]);
         log.debug("tableName: {}, this.columnNames: {}", this.tableName, this.columnNames);
+    }
+
+    @Override
+    protected void appendParamHolder0(StringBuilder sb, String columnName, Object value) {
+        String propertyName = columnNameToPropertyNameMap.get(columnName);
+        if (!columnName.equals(propertyName)) {
+            sb.append(columnName).append(decideParamHolder(propertyName, value)).append(" AND ");
+        }
     }
 
     @Override

@@ -745,7 +745,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
 
             if (MapUtils.isNotEmpty(conditionParams)) {
                 Collection<String> filteredConditionParams = conditionParams.keySet().stream().filter(key -> this.columnNameList.contains(key) && !isConditionSQLContainsColumnName(finalConditionSQL, key)).collect(Collectors.toList());
-                String additionCondition = getConditionSQL(filteredConditionParams, conditionParams);
+                String additionCondition = getConditionSQL(filteredConditionParams, conditionParams, true);
                 if (StringUtils.isNotBlank(additionCondition)) {
                     if (!isParamHolder) {
                         additionCondition = SQLUtils.paramsHolderToQuestionHolder(additionCondition);
@@ -770,35 +770,52 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         return new Object[]{mergedParams, conditionSQL};
     }
 
-    private String getConditionSQL(Map<String, ?> params) {
-        return getConditionSQL(this.columnNameList, params);
+    protected String getConditionSQL(Map<String, ?> params) {
+        return getConditionSQL(this.columnNameList, params, false);
     }
 
     private String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params) {
+        return getConditionSQL(paramNameList, params, false);
+    }
+
+    private String getConditionSQL(Collection<String> paramNameList, Map<String, ?> params, boolean onlyColumnNameHolder) {
         StringBuilder sb = new StringBuilder();
         for (String columnName : paramNameList) {
             Object value = params.get(columnName);
-            sb.append(columnName).append(decideParamHolder(columnName, value)).append(" AND ");
+            if (onlyColumnNameHolder) {
+                // 字段名做参数
+                appendParamHolder(sb, columnName, value);
+            } else {
+                appendParamHolder(sb, columnName, value);
+                appendParamHolder0(sb, columnName, value);
+            }
         }
 
         return StringUtils.isBlank(sb) ? "" : sb.substring(0, sb.length() - 5);
     }
 
-    private String decideParamHolder(String columnName, Object value) {
+    private void appendParamHolder(StringBuilder sb, String columnName, Object value) {
+        String paramHolder = decideParamHolder(columnName, value);
+        sb.append(columnName).append(paramHolder).append(" AND ");
+    }
+
+    protected void appendParamHolder0(StringBuilder sb, String columnName, Object value){}
+
+    protected String decideParamHolder(String paramHolderName, Object value) {
         if (Objects.isNull(value)) {
-            return " = :" + columnName;
+            return " = :" + paramHolderName;
         }
 
         if (value instanceof Iterable
                 || value.getClass().isArray()
                 || (value.getClass() == String.class && ((String) value).split(Constants.PARAM_IN_SEPARATOR).length > 1)) {
-            return " IN (:" + columnName + ")";
+            return " IN (:" + paramHolderName + ")";
         } /*else if (((String) value).startsWith(Constants.PARAM_LIKE_SEPARATOR)) {
-            params.put(columnName, ((String) value).substring(1));
-            return " LIKE :" + columnName;
+            params.put(paramHolderName, ((String) value).substring(1));
+            return " LIKE :" + paramHolderName;
         }*/
 
-        return " = :" + columnName;
+        return " = :" + paramHolderName;
     }
 
 }

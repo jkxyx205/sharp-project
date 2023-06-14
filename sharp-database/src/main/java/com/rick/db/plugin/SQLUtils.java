@@ -437,11 +437,11 @@ public final class SQLUtils {
 
     /**
      * name = :name AND age = : age
-     * @param sql
+     * @param condition
      * @return name = ? AND age = ?
      */
-    public static String paramsHolderToQuestionHolder(String sql) {
-        return sql.replaceAll(AbstractSqlFormatter.PARAM_REGEX, "?");
+    public static String paramsHolderToQuestionHolder(String condition) {
+        return condition.replaceAll(AbstractSqlFormatter.PARAM_REGEX, "?");
     }
 
     public static Object[] convertToArray(Map<String, ?> map) {
