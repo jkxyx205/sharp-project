@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  */
 public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOImpl<T, ID> {
 
+
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
         if (CollectionUtils.isNotEmpty(entities)) {
@@ -40,13 +41,14 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
                 t.setId(option.get());
             }
         }
+
         return super.insertOrUpdate(t);
     }
 
     @Override
     public int insert(T t) {
         // check code if unique
-        this.checkCodeIfExists(t.getCode());
+        this.assertCodeNotExists(t.getCode());
         return super.insert(t);
     }
 
@@ -98,8 +100,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         if (idOptional.isPresent()) {
             return idOptional.get();
         }
-
-        throw new BizException("%s code「%s」不存在", new Object[]{getEntityClass().getAnnotation(Table.class).comment(), code});
+        throw new BizException(ResultUtils.fail(4040, entityComment() + " code="+code+" 不存在"));
     }
 
     /**
@@ -172,29 +173,28 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         return list.stream().collect(Collectors.toMap(t -> t.getCode(), v -> v));
     }
 
-    public void checkCodeIfExists(String code) {
-        Assert.notNull(code, "code cannot be null");
+    public void assertCodeNotExists(String code) {
         if (existsByParams(Params.builder(1 ).pv("code", code).build(), "code = :code")) {
-            throw new BizException(ResultUtils.fail(4000, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + " 已经存在", code));
+            throw new BizException(ResultUtils.fail(400, entityComment() + " code=" + code + " 已经存在", code));
         }
     }
 
-    public void checkCodesIfNotExists(String code) {
-        checkCodesIfNotExists(code, Collections.emptyMap(), null);
+    public void assertCodeExists(String code) {
+        assertCodeExists(code, Collections.emptyMap(), null);
     }
 
-    public void checkCodesIfNotExists(String code, Map<String, Object> conditionParams, String condition) {
+    public void assertCodeExists(String code, Map<String, Object> conditionParams, String condition) {
         Assert.notNull(code, "code cannot be null");
         if (!existsByParams(Params.builder(1 + conditionParams.size()).pv("code", code).pvAll(conditionParams).build(), "code = :code" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
-            throw new BizException(ResultUtils.fail(4040, this.getEntityClass().getAnnotation(Table.class).comment() + " code=" + code + "不存在", code));
+            throw new BizException(ResultUtils.fail(404, entityComment() + " code=" + code + "不存在", code));
         }
     }
 
-    public void checkCodesIfNotExists(Collection<String> codes) {
-        checkCodesIfNotExists(codes, Collections.emptyMap(), null);
+    public void assertCodesExists(Collection<String> codes) {
+        assertCodesExists(codes, Collections.emptyMap(), null);
     }
 
-    public void checkCodesIfNotExists(Collection<String> codes, Map<String, Object> conditionParams, String condition) {
+    public void assertCodesExists(Collection<String> codes, Map<String, Object> conditionParams, String condition) {
         Assert.notEmpty(codes, "code cannot be empty");
 
         List<String> codesInDB = selectByParams(Params.builder(1 + conditionParams.size())
@@ -203,15 +203,51 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
         SetUtils.SetView<String> difference = SetUtils.difference(Sets.newHashSet(codes), Sets.newHashSet(codesInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
-            throw new BizException(ResultUtils.fail(4040, this.getEntityClass().getAnnotation(Table.class).comment() + " code="+StringUtils.join(difference.toArray(), ",")+"不存在", difference.toArray()));
+            throw new BizException(ResultUtils.fail(404, entityComment() + " code="+StringUtils.join(difference.toArray(), ",")+"不存在", difference.toArray()));
         }
     }
 
-    public Set<String> selectErrorCodes(Collection<String> codes) {
+    public Set<String> selectNotExistsCodes(Collection<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             Collections.emptySet();
         }
 
         return SetUtils.difference(Sets.newHashSet(codes), selectCodeIdMap(codes).keySet());
+    }
+
+    /**
+     * 检查code
+     * 1. 不重复
+     * 2. 存在code
+     * @param codes 待检查的code集合
+     */
+    public void assertCodesExistsAndUnDuplicate(Collection<String> codes) {
+        if (CollectionUtils.isEmpty(codes)) {
+            return;
+        }
+
+        assertCodesUnDuplicate(codes);
+
+        Set<String> notExistsCodes = selectNotExistsCodes(codes);
+        if (notExistsCodes.size() > 0) {
+            throw new BizException(ResultUtils.fail(4040, entityComment() + " code="+StringUtils.join(notExistsCodes, ",")+" 不存在"));
+        }
+    }
+
+    /**
+     * 检查是否重复
+     * @param codes 待检查的code集合
+     */
+    public void assertCodesUnDuplicate(Collection<String> codes) {
+        Map<String, Long> codeOccurrenceMap = codes.stream().collect(Collectors.groupingBy(code -> code, Collectors.counting()));
+        Set<String> codeOccurrenceErrors = codeOccurrenceMap.keySet().stream().filter(m -> codeOccurrenceMap.get(m) > 1).collect(Collectors.toSet());
+
+        if (codeOccurrenceErrors.size() > 0) {
+            throw new BizException(ResultUtils.fail(4040, entityComment() + " code="+StringUtils.join(codeOccurrenceErrors, ",")+" 已经重复"));
+        }
+    }
+
+    private String entityComment() {
+        return this.getEntityClass().getAnnotation(Table.class).comment();
     }
 }

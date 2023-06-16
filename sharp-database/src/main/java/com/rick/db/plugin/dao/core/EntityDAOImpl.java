@@ -445,7 +445,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public List<T> selectByParams(Map<String, ?> params, String conditionSQL) {
-        return selectByParams(params, selectColumnNames, conditionSQL, null, entityClass);
+        return selectByParams(params, selectColumnNames, conditionSQL, null, getEntityClass());
+    }
+
+    @Override
+    public List<T> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL) {
+        return selectByParams(params, columnNames, conditionSQL, null, getEntityClass());
     }
 
     /**

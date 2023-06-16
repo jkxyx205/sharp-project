@@ -66,6 +66,8 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     List<T> selectByParams(Map<String, ?> params, String conditionSQL);
 
+    List<T> selectByParams(Map<String, ?> params, String columnNames, String conditionSQL);
+
     List<T> selectByParamsWithoutCascade(T example);
 
     List<T> selectByParamsWithoutCascade(T example, String conditionSQL);
