@@ -24,6 +24,10 @@ public class CpnConfigurerService {
     private final CpnConfigurerDAO cpnConfigurerDAO;
 
     public int[] saveOrUpdate(List<CpnConfigurer> configurers) {
+        for (CpnConfigurer configurer : configurers) {
+            CpnManager.getCpnByType(configurer.getCpnType()).check(configurer);
+        }
+
         return cpnConfigurerDAO.insertOrUpdate(configurers);
     }
 
@@ -54,7 +58,7 @@ public class CpnConfigurerService {
             }
         }
 
-        cpn.check(configurer.getOptions());
+        cpn.check(configurer);
     }
 
 }

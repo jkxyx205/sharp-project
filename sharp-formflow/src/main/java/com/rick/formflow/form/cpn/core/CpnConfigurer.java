@@ -154,5 +154,9 @@ public class CpnConfigurer extends BaseEntity {
             this.name = name;
             this.label = label;
         }
+
+        public String getName() {
+            return StringUtils.defaultString(name, label);
+        }
     }
 }

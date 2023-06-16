@@ -59,11 +59,6 @@ public class CheckBox extends AbstractCpn<List<String>> {
     }
 
     @Override
-    public void check(List<CpnConfigurer.CpnOption> options) {
-        // TODO 选项不能重复
-    }
-
-    @Override
     public List<String> parseValue(Object value) {
         if (value == null) {
             return null;

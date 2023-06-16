@@ -2,11 +2,9 @@ package com.rick.formflow.form.cpn;
 
 
 import com.rick.formflow.form.cpn.core.AbstractCpn;
-import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,11 +17,6 @@ public class Switch extends AbstractCpn<String> {
     @Override
     public CpnTypeEnum getCpnType() {
         return CpnTypeEnum.SWITCH;
-    }
-
-    @Override
-    public void check(List<CpnConfigurer.CpnOption> options) {
-        // TODO 选项不能重复
     }
 
     @Override

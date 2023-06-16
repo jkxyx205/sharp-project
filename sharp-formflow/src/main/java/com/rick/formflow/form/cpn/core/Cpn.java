@@ -33,7 +33,7 @@ public interface Cpn<T> {
 
     void valid(T value, List<CpnConfigurer.CpnOption> options);
 
-    void check(List<CpnConfigurer.CpnOption> options);
+    void check(CpnConfigurer configurer);
 
     /**
      * 控件支持的验证类型

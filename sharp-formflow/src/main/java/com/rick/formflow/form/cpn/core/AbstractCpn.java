@@ -103,7 +103,15 @@ public abstract class AbstractCpn<T> implements Cpn<T>, InitializingBean {
     }
 
     @Override
-    public void check(List<CpnConfigurer.CpnOption> options) {}
+    public void check(CpnConfigurer configurer) {
+        if (CollectionUtils.isNotEmpty(configurer.getOptions())) {
+            // 选项不能重复
+            int unDuplicateSize = configurer.getOptions().stream().map(CpnConfigurer.CpnOption::getLabel).collect(Collectors.toSet()).size();
+            if (configurer.getOptions().size() != unDuplicateSize) {
+                throw new IllegalArgumentException("选项不能重复");
+            }
+        }
+    }
 
     @Override
     public Set<ValidatorTypeEnum> validatorSupports() {
