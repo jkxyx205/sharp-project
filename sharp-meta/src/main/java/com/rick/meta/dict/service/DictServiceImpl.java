@@ -72,7 +72,9 @@ public class DictServiceImpl implements DictService, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         // sys_dict
-        List<Dict> list = getDbDictList(null);
+        List<Dict> list = Lists.newArrayList();
+
+        list.addAll(getDbDictList(null));
 
         // 程序提供
         if (dictDOSupplier != null) {
