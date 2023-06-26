@@ -80,7 +80,7 @@ public final class SQLUtils {
         if (log.isDebugEnabled()) {
             log.debug("SQL => [{}], args:=> [{}]", insertSQL, params);
         }
-        return SQLUtils.JDBC_TEMPLATE.update(insertSQL,params);
+        return SQLUtils.JDBC_TEMPLATE.update(insertSQL, params);
     }
 
     /**
@@ -223,7 +223,11 @@ public final class SQLUtils {
      * @return
      */
     public static int delete(String tableName, Object[] params, String conditionSQL) {
-        return SQLUtils.JDBC_TEMPLATE.update("DELETE FROM " + tableName + " WHERE " + conditionSQL, params);
+        String deleteSql = "DELETE FROM " + tableName + " WHERE " + conditionSQL;
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args:=> [{}, {}]", deleteSql, params);
+        }
+        return SQLUtils.JDBC_TEMPLATE.update(deleteSql, params);
     }
 
     /**

@@ -4,7 +4,7 @@ spring:
       max-file-size: 5MB
       max-request-size: 50MB
   datasource:
-    url: jdbc:mysql://localhost:3306/sharp-demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
+    url: jdbc:mysql://localhost:3306/sharp-demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: jkxyx205
   mail:  # SMTP 发邮件

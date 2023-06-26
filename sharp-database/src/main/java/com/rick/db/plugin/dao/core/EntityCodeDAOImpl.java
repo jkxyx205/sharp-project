@@ -174,6 +174,8 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     }
 
     public void assertCodeNotExists(String code) {
+        Assert.notNull(code, "code cannot be null");
+
         if (existsByParams(Params.builder(1 ).pv("code", code).build(), "code = :code")) {
             throw new BizException(ResultUtils.fail(400, entityComment() + " code=" + code + " 已经存在", code));
         }
@@ -221,7 +223,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * 2. 存在code
      * @param codes 待检查的code集合
      */
-    public void assertCodesExistsAndUnDuplicate(Collection<String> codes) {
+    public void assertCodesExistsAndUnDuplicate(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             return;
         }
@@ -238,7 +240,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * 检查是否重复
      * @param codes 待检查的code集合
      */
-    public void assertCodesUnDuplicate(Collection<String> codes) {
+    public void assertCodesUnDuplicate(List<String> codes) {
         Map<String, Long> codeOccurrenceMap = codes.stream().collect(Collectors.groupingBy(code -> code, Collectors.counting()));
         Set<String> codeOccurrenceErrors = codeOccurrenceMap.keySet().stream().filter(m -> codeOccurrenceMap.get(m) > 1).collect(Collectors.toSet());
 

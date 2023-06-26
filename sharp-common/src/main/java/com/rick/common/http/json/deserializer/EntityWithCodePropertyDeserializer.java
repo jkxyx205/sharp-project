@@ -18,24 +18,19 @@ import java.util.List;
  * @createdAt 2022-10-27 14:14:00
  */
 @NoArgsConstructor
-public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T> implements ContextualDeserializer {
+public class EntityWithCodePropertyDeserializer<T> extends JsonDeserializer<T> implements ContextualDeserializer {
 
     private JavaType javaType;
 
-    public EntityWithLongIdPropertyDeserializer(JavaType javaType) {
+    public EntityWithCodePropertyDeserializer(JavaType javaType) {
         this.javaType = javaType;
     }
 
     @Override
     public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-
-        if (node.isNumber()) {
-            Long id = node.asLong();
-            return invokeSetIdMethod(id, this.javaType.getRawClass());
-        } else if (node.isTextual()) {
-            Long id = Long.valueOf(node.asText());
-            return invokeSetIdMethod(id, this.javaType.getRawClass());
+        if (node.isTextual()) {
+            return invokeSetCodeMethod(node.asText(), this.javaType.getRawClass());
         }
 
         if (List.class.isAssignableFrom(this.javaType.getRawClass())) {
@@ -44,15 +39,15 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
             }
 
             Class<?> contentClass = javaType.getContentType().getRawClass();
-            if (node.get(0).isNumber()) {
-                List<Long> ids = JsonUtils.toList(node, Long.class);
-                if (CollectionUtils.isEmpty(ids)) {
+            if (node.get(0).isTextual()) {
+                List<String> codes = JsonUtils.toList(node, String.class);
+                if (CollectionUtils.isEmpty(codes)) {
                     return (T) Collections.emptyList();
                 }
 
-                List list = Lists.newArrayListWithExpectedSize(ids.size());
-                for (Long id : ids) {
-                    list.add(invokeSetIdMethod(id, contentClass));
+                List list = Lists.newArrayListWithExpectedSize(codes.size());
+                for (String code : codes) {
+                    list.add(invokeSetCodeMethod(code, contentClass));
                 }
                 return (T) list;
             } else {
@@ -63,10 +58,10 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
         return (T) JsonUtils.toObject(node, this.javaType.getRawClass());
     }
 
-    private T invokeSetIdMethod(Long id, Class<?> clazz) {
+    private T invokeSetCodeMethod(String code, Class<?> clazz) {
         try {
             Object o = clazz.newInstance();
-            ReflectionUtils.invokeMethod(clazz.getMethod("setId", Long.class), o, id);
+            ReflectionUtils.invokeMethod(clazz.getMethod("setCode", String.class), o, code);
             return (T) o;
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,6 +72,6 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
 
     @Override
     public JsonDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) {
-        return new EntityWithLongIdPropertyDeserializer<>(beanProperty.getType());
+        return new EntityWithCodePropertyDeserializer<>(beanProperty.getType());
     }
 }

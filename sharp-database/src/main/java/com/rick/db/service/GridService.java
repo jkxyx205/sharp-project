@@ -122,7 +122,7 @@ public class GridService {
             int totalPages = totalPages(records, model.getSize());
 
             if (model.getPage() > totalPages) {
-                model.setPage((int) totalPages);
+                model.setPage(totalPages);
             } else if (model.getPage() < 1) {
                 model.setPage(1);
             }
