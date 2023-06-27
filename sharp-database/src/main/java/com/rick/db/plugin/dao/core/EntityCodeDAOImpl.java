@@ -54,17 +54,17 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int update(T t) {
-        handleEntityIdBeforeInsert(t);
+        handleEntityIdBeforeUpdate(t);
         return super.update(t);
     }
 
     @Override
     public int update(T t, Object[] params, String conditionSQL) {
-        handleEntityIdBeforeInsert(t);
+        handleEntityIdBeforeUpdate(t);
         return super.update(t, params, conditionSQL);
     }
 
-    private void handleEntityIdBeforeInsert(T t) {
+    private void handleEntityIdBeforeUpdate(T t) {
         if (Objects.isNull(t.getId())) {
             Optional<Long> option = this.selectIdByCode(t.getCode());
             if (option.isPresent()) {
