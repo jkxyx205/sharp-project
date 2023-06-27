@@ -29,11 +29,11 @@ public class EntityDAOManager {
 
     public static Map<String, EntityDAO> baseDAOTableNameMap;
 
-    public static Map<Class, EntityDAO> baseDAOEntityMap;
+    private static Map<Class, EntityDAO> baseDAOEntityMap;
 
-    public static Map<Class, List<Field>> entityEmbeddedMap;
+    private static Map<Class, List<Field>> entityEmbeddedMap;
 
-    public static Map<Class, Map<String, PropertyDescriptor>> entityPropertyDescriptorMap;
+    private static Map<Class, Map<String, PropertyDescriptor>> entityPropertyDescriptorMap;
 
     private static boolean hasAutowired = false;
 
@@ -75,13 +75,16 @@ public class EntityDAOManager {
         entityPropertyDescriptorMap.put(clazz, propertyDescriptorMap);
     }
 
-    public static boolean isEntityClass(Class clazz) {
-        return getEntityClass(clazz) != null;
-
+    public static boolean isEntityClass(Class entityClass) {
+        return getEntityClass(entityClass) != null;
     }
 
-    public static TableMeta getTableMeta(Class clazz) {
-        return baseDAOEntityMap.get(getEntityClass(clazz)).getTableMeta();
+    public static TableMeta getTableMeta(Class entityClass) {
+        return getEntityDAO(entityClass).getTableMeta();
+    }
+
+    public static EntityDAO getEntityDAO(Class entityClass) {
+        return baseDAOEntityMap.get(getEntityClass(entityClass));
     }
 
     public static void setPropertyValue(Object value, String propertyName, Object propertyValue) {

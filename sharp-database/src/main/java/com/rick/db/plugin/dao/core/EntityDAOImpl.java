@@ -748,7 +748,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         int count = super.update(tableName, t, updateColumnNames, params, conditionSQL);
-        if (count > 0 && t != null && t.getClass() == getEntityClass()) {
+        if (count > 0 && t != null && getEntityClass().isAssignableFrom(t.getClass())) {
             cascadeInsertOrUpdate((T) t, false);
             EntityDAOThreadLocalValue.removeAll();
         }

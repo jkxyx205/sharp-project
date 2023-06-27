@@ -73,7 +73,7 @@ public class EntityCodeIdFillService {
             return;
         }
 
-        fill((Class<T>)t.getClass(), t, code);
+        fill((Class<T>) t.getClass(), t, code);
     }
 
     public <T extends BaseCodeEntity> T fill(Class<T> clazz, T t, String code) {
@@ -91,7 +91,7 @@ public class EntityCodeIdFillService {
             }
         }
 
-        if (t.getId() != null ) {
+        if (t.getId() != null) {
             return t;
         }
 
@@ -105,15 +105,15 @@ public class EntityCodeIdFillService {
             return id;
         }
 
-        return ((EntityCodeDAOImpl) EntityDAOManager.baseDAOEntityMap.get(clazz)).selectIdByCodeOrThrowException(code);
+        return ((EntityCodeDAOImpl) EntityDAOManager.getEntityDAO(clazz)).selectIdByCodeOrThrowException(code);
     }
 
-    public  <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {
+    public <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             return Collections.emptyMap();
         }
 
-        Map<String, Long> codeIdMap = ((EntityCodeDAOImpl) EntityDAOManager.baseDAOEntityMap.get(clazz)).selectCodeIdMap(codes);
+        Map<String, Long> codeIdMap = ((EntityCodeDAOImpl) EntityDAOManager.getEntityDAO(clazz)).selectCodeIdMap(codes);
 
         SetUtils.SetView<String> difference = SetUtils.difference(Sets.newHashSet(codes), codeIdMap.keySet());
         if (CollectionUtils.isNotEmpty(difference)) {
