@@ -25,15 +25,15 @@ import static com.rick.common.util.ReflectUtils.getAllFields;
 @Slf4j
 public class EntityDAOManager {
 
-    public static List<EntityDAO> entityDAOList;
+    private static List<EntityDAO> entityDAOList;
 
-    public static Map<String, EntityDAO> baseDAOTableNameMap;
+    static Map<String, EntityDAO> tableNameEntityDAOMap;
 
-    private static Map<Class, EntityDAO> baseDAOEntityMap;
+    private static Map<Class, EntityDAO> entityClassEntityDAOMap;
 
-    private static Map<Class, List<Field>> entityEmbeddedMap;
+    private static Map<Class, List<Field>> entityClassEmbeddedFieldMap;
 
-    private static Map<Class, Map<String, PropertyDescriptor>> entityPropertyDescriptorMap;
+    private static Map<Class, Map<String, PropertyDescriptor>> entityClassPropertyDescriptorMap;
 
     private static boolean hasAutowired = false;
 
@@ -41,15 +41,15 @@ public class EntityDAOManager {
         if (!hasAutowired) {
             entityDAOList = Objects.isNull(entityDAOList) ? Collections.emptyList() : entityDAOList;
             EntityDAOManager.entityDAOList = entityDAOList;
-            EntityDAOManager.baseDAOTableNameMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getTableName(), v -> v)) : Collections.emptyMap();
-            EntityDAOManager.baseDAOEntityMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getEntityClass(), v -> v)) : Collections.emptyMap();
-            EntityDAOManager.entityEmbeddedMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getEntityClass(), v -> v.getTableMeta().getEmbeddedPropertyList().stream().map(TableMeta.EmbeddedProperty::getField).collect(Collectors.toList()))) : Collections.emptyMap();
-            EntityDAOManager.entityPropertyDescriptorMap = Maps.newHashMapWithExpectedSize(entityDAOList.size());
+            EntityDAOManager.tableNameEntityDAOMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getTableName(), v -> v)) : Collections.emptyMap();
+            EntityDAOManager.entityClassEntityDAOMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getEntityClass(), v -> v)) : Collections.emptyMap();
+            EntityDAOManager.entityClassEmbeddedFieldMap = Objects.nonNull(entityDAOList) ? EntityDAOManager.entityDAOList.stream().collect(Collectors.toMap(d -> d.getEntityClass(), v -> v.getTableMeta().getEmbeddedPropertyList().stream().map(TableMeta.EmbeddedProperty::getField).collect(Collectors.toList()))) : Collections.emptyMap();
+            EntityDAOManager.entityClassPropertyDescriptorMap = Maps.newHashMapWithExpectedSize(entityDAOList.size());
 
 
             for (EntityDAO entityDAO : entityDAOList) {
                 Field[] entityFields = getAllFields(entityDAO.getEntityClass());
-                handleFields(entityFields,  entityPropertyDescriptorMap, entityDAO.getEntityClass());
+                handleFields(entityFields, entityClassPropertyDescriptorMap, entityDAO.getEntityClass());
             }
 
             EntityDAOManager.hasAutowired = true;
@@ -84,7 +84,7 @@ public class EntityDAOManager {
     }
 
     public static EntityDAO getEntityDAO(Class entityClass) {
-        return baseDAOEntityMap.get(getEntityClass(entityClass));
+        return entityClassEntityDAOMap.get(getEntityClass(entityClass));
     }
 
     public static void setPropertyValue(Object value, String propertyName, Object propertyValue) {
@@ -101,10 +101,10 @@ public class EntityDAOManager {
         }
 
         try {
-            Map<String, PropertyDescriptor> propertyDescriptorMapping = EntityDAOManager.entityPropertyDescriptorMap.get(entityClass);
+            Map<String, PropertyDescriptor> propertyDescriptorMapping = EntityDAOManager.entityClassPropertyDescriptorMap.get(entityClass);
             if (propertyDescriptorMapping.get(propertyName) == null) {
                 // embedded
-                List<Field> embeddedFields = entityEmbeddedMap.get(entityClass);
+                List<Field> embeddedFields = entityClassEmbeddedFieldMap.get(entityClass);
                 if (CollectionUtils.isNotEmpty(embeddedFields)) {
                     for (Field embeddedField : embeddedFields) {
                         if (setPropertyValue(getPropertyValue(value, embeddedField.getName()), propertyName, propertyValue, embeddedField.getType())) {
@@ -159,11 +159,11 @@ public class EntityDAOManager {
 
         try {
             Object propertyNameValue;
-            Map<String, PropertyDescriptor> propertyDescriptorMapping = EntityDAOManager.entityPropertyDescriptorMap.get(entityClass);
+            Map<String, PropertyDescriptor> propertyDescriptorMapping = EntityDAOManager.entityClassPropertyDescriptorMap.get(entityClass);
             PropertyDescriptor propertyDescriptor = propertyDescriptorMapping.get(split[0]);
             if (propertyDescriptor == null) {
                 // embedded
-                List<Field> embeddedFields = entityEmbeddedMap.get(entityClass);
+                List<Field> embeddedFields = entityClassEmbeddedFieldMap.get(entityClass);
                 if (CollectionUtils.isNotEmpty(embeddedFields)) {
                     for (Field embeddedField : embeddedFields) {
                         propertyNameValue = getPropertyValue(value, embeddedField.getName() + "." + propertyName, entityClass);

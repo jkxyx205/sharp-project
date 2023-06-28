@@ -791,7 +791,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = selectProperty.getSelect().table();
-            EntityDAO subTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             if (subTableEntityDAO == null) {
                 throw new RuntimeException("Table [" + targetTable + "] lost DAOImpl");
             }
@@ -820,7 +820,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            EntityDAO subTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             if (subTableEntityDAO == null) {
                 throw new RuntimeException("Table [" + targetTable + "] lost DAOImpl");
             }
@@ -864,7 +864,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            EntityDAO parentTableDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO parentTableDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(refColumnName))))
                     .filter(Objects::nonNull)
@@ -902,7 +902,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String thirdPartyTable = manyToManyProperty.getManyToMany().thirdPartyTable();
             String referenceTable = manyToManyProperty.getManyToMany().referenceTable();
 
-            EntityDAO referenceTableDAO = EntityDAOManager.baseDAOTableNameMap.get(referenceTable);
+            EntityDAO referenceTableDAO = EntityDAOManager.tableNameEntityDAOMap.get(referenceTable);
 
             List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value) AND is_deleted = 0",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
@@ -963,7 +963,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
-            EntityDAO subTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
 
             List<?> subDataList;
             Class subClass;
@@ -1038,7 +1038,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAOThreadLocalValue.add(storeKey);
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
-            EntityDAO parentTableEntityDAO = EntityDAOManager.baseDAOTableNameMap.get(targetTable);
+            EntityDAO parentTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             Object targetObject = getPropertyValue(t, manyToOneProperty.getField());
             if (Objects.nonNull(targetObject)) {
                 ID refId = getIdValue(targetObject);
