@@ -719,7 +719,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      * @param <E>
      * @return
      */
-    public <E> Optional<E> expectedAsOptional(List<E> list) {
+    protected <E> Optional<E> expectedAsOptional(List<E> list) {
         if (CollectionUtils.isEmpty(list)) {
             return Optional.empty();
         }

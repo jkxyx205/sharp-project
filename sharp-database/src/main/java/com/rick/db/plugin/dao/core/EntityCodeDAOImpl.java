@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.db.dto.BaseCodeEntity;
-import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.service.support.Params;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
@@ -250,6 +249,6 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     }
 
     private String entityComment() {
-        return this.getEntityClass().getAnnotation(Table.class).comment();
+        return EntityDAOManager.getTableMeta(getEntityClass()).getTable().comment();
     }
 }
