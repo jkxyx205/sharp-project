@@ -71,7 +71,8 @@ public class ReportController {
 
     @GetMapping("{id}")
     public String index(@PathVariable  Long id, Model model, HttpServletRequest request) {
-        ReportDTO reportDTO = reportService.list(id, HttpServletRequestUtils.getParameterMap(request));
+        Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
+        ReportDTO reportDTO = reportService.list(id, params);
 
         Grid gird = reportDTO.getGridArray();
         model.addAttribute("report", reportDTO.getReport());
@@ -91,14 +92,21 @@ public class ReportController {
 
         model.addAttribute("grid", gird);
         model.addAttribute("id", id);
+        model.addAttribute("params", params);
         model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), gird.getPageSize(), gird.getPage()));
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 
     @GetMapping("{id}/{instanceId}")
     @ResponseBody
-    public Map<String, Object> detail(@PathVariable Long id, @PathVariable Long instanceId) {
+    public Map<String, Object> detailById(@PathVariable Long id, @PathVariable Long instanceId) {
         return reportService.list(id, Params.builder(2).pv("id", instanceId).pv(PageModel.PARAM_SIZE, -1).build()).getGridMap().getRows().get(0);
+    }
+
+    @GetMapping("{id}/more/{instanceIds}")
+    @ResponseBody
+    public List<Map<String, Object>> detailByIds(@PathVariable Long id, @PathVariable String instanceIds) {
+        return reportService.list(id, Params.builder(2).pv("ids", instanceIds).pv(PageModel.PARAM_SIZE, -1).build()).getGridMap().getRows();
     }
 
     @GetMapping("{id}/export")
