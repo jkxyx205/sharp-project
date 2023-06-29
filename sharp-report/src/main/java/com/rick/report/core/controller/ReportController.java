@@ -83,7 +83,7 @@ public class ReportController {
             List<String> visibleReportColumnList = reportDTO.getReport().getReportColumnList().stream().filter(reportColumn -> !reportColumn.getHidden()).map(reportColumn -> reportColumn.getName()).collect(Collectors.toList());
             List<Integer> summaryIndexList = Lists.newArrayListWithExpectedSize(reportDTO.getSummaryMap().size());
             for (Map.Entry<String, BigDecimal> en : reportDTO.getSummaryMap().entrySet()) {
-                summaryIndexList.add(visibleReportColumnList.indexOf(en.getKey()) + 1);
+                summaryIndexList.add(visibleReportColumnList.indexOf(en.getKey()) + 1 + ("multiple".equals(params.get("mode")) ? 1 : 0));
             }
             model.addAttribute("summaryIndex", summaryIndexList);
         } else {
