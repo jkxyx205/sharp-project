@@ -17,4 +17,6 @@ public interface DictService {
     List<Dict> getDictByType(String type);
 
     void rebuild(String type);
+
+    void rebuild();
 }

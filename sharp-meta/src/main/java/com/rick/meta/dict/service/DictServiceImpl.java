@@ -71,6 +71,11 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
+        rebuild();
+    }
+
+    @Override
+    public void rebuild() {
         // sys_dict
         List<Dict> list = Lists.newArrayList();
 
@@ -93,6 +98,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
             initYml(item);
         }
     }
+
 
     private List<Dict> getDbDictList(Map<String, Object> params) {
         try {
