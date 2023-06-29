@@ -45,6 +45,11 @@ public class AjaxInstanceController {
         return ResultUtils.success();
     }
 
+    @DeleteMapping("{formId}")
+    public Result delete(@PathVariable Long formId, Long[] ids) {
+        return ResultUtils.success(formService.delete(formId, ids));
+    }
+
     @DeleteMapping("{formId}/{instanceId}")
     public Result delete(@PathVariable Long formId, @PathVariable Long instanceId) {
         return ResultUtils.success(formService.delete(formId, instanceId));

@@ -210,6 +210,14 @@ public class FormService {
         }
     }
 
+    public int delete(Long formId, Long[] instanceIds) {
+        for (Long instanceId : instanceIds) {
+            delete(formId, instanceId);
+        }
+
+        return 1;
+    }
+
     public int delete(Long formId, Long instanceId) {
         Form form =  formDAO.selectById(formId).get();
 
