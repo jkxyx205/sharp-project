@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,12 +96,31 @@ class TableMetaResolver {
 
             Select selectAnnotation = field.getAnnotation(Select.class);
             if (selectAnnotation != null) {
-                selectAnnotationList.add(new TableMeta.SelectProperty(selectAnnotation, field));
+                Class<?> subEntityClass;
+
+                if (selectAnnotation.oneToOne()) {
+                    subEntityClass = field.getType();
+                } else {
+                    ParameterizedType subEntityListType = (ParameterizedType) field.getGenericType();
+                    subEntityClass = (Class<?>) subEntityListType.getActualTypeArguments()[0];
+                }
+
+                selectAnnotationList.add(new TableMeta.SelectProperty(selectAnnotation, field, subEntityClass));
             }
 
             OneToMany oneToManyAnnotation = field.getAnnotation(OneToMany.class);
             if (oneToManyAnnotation != null) {
-                oneToManyAnnotationList.add(new TableMeta.OneToManyProperty(oneToManyAnnotation, field));
+                Class<?> subEntityClass;
+
+                if (oneToManyAnnotation.oneToOne()) {
+                    subEntityClass = field.getType();
+                } else {
+                    ParameterizedType subEntityListType = (ParameterizedType) field.getGenericType();
+                    subEntityClass = (Class<?>) subEntityListType.getActualTypeArguments()[0];
+                }
+
+                oneToManyAnnotationList.add(new TableMeta.OneToManyProperty(oneToManyAnnotation, field,
+                        oneToManyAnnotation.subEntityClass() == Void.class ? subEntityClass : oneToManyAnnotation.subEntityClass()));
             }
 
             ManyToOne manyToOneAnnotation = field.getAnnotation(ManyToOne.class);

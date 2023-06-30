@@ -14,6 +14,8 @@ public @interface Select {
 
     String table();
 
+    Class subEntityClass() default Void.class;
+
     String joinValue() default "";
 
     String referencePropertyName() default "";

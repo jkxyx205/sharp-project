@@ -3,11 +3,18 @@ package com.rick.db.plugin.dao.core;
 import com.google.common.collect.Sets;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
+import com.rick.common.validate.ValidatorHelper;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.dto.BaseCodeEntity;
+import com.rick.db.plugin.dao.support.ColumnAutoFill;
+import com.rick.db.plugin.dao.support.ConditionAdvice;
+import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -19,11 +26,44 @@ import java.util.stream.Collectors;
  */
 public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOImpl<T, ID> {
 
+    public EntityCodeDAOImpl() {
+        super();
+    }
+
+    public EntityCodeDAOImpl(Class<T> entityClass, Class<ID> idClass) {
+        super(entityClass, idClass);
+    }
+
+    /**
+     * 全部由外部指定
+     *
+     * @param entityClass
+     * @param idClass
+     * @param context
+     * @param conversionService
+     * @param sharpService
+     * @param conditionAdvice
+     * @param columnAutoFill
+     * @param validatorHelper
+     * @param sharpDatabaseProperties
+     */
+    public EntityCodeDAOImpl(Class<T> entityClass, Class<ID> idClass,
+                             ApplicationContext context,
+                             ConversionService conversionService,
+                             SharpService sharpService,
+                             ConditionAdvice conditionAdvice,
+                             ColumnAutoFill columnAutoFill,
+                             ValidatorHelper validatorHelper,
+                             SharpDatabaseProperties sharpDatabaseProperties) {
+
+
+        super(entityClass, idClass, context, conversionService, sharpService, conditionAdvice, columnAutoFill, validatorHelper, sharpDatabaseProperties);
+    }
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
         if (CollectionUtils.isNotEmpty(entities)) {
-            Map<String, Long> codeIdMap =this.selectCodeIdMap(entities.stream().map(T::getCode).collect(Collectors.toSet()));
+            Map<String, Long> codeIdMap = this.selectCodeIdMap(entities.stream().map(T::getCode).collect(Collectors.toSet()));
             for (T t : entities) {
                 t.setId(codeIdMap.get(t.getCode()));
             }
@@ -74,6 +114,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     /**
      * 根据code查询
+     *
      * @param code
      * @return
      */
@@ -85,6 +126,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     /**
      * 根据多个code查询
+     *
      * @param codes
      * @return
      */
@@ -99,11 +141,12 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         if (idOptional.isPresent()) {
             return idOptional.get();
         }
-        throw new BizException(ResultUtils.fail(4040, entityComment() + " code="+code+" 不存在"));
+        throw new BizException(ResultUtils.fail(4040, entityComment() + " code=" + code + " 不存在"));
     }
 
     /**
      * 根据code获取id
+     *
      * @param code
      * @return
      */
@@ -113,6 +156,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     /**
      * 根据code获取description
+     *
      * @param code
      * @return
      */
@@ -128,6 +172,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     /**
      * 根据codes获取ids
+     *
      * @param codes
      * @return
      */
@@ -139,6 +184,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     /**
      * 根据id获取code
+     *
      * @param id
      * @return
      */
@@ -151,6 +197,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     /**
      * key: code
      * value: id
+     *
      * @param codes
      * @return
      */
@@ -175,7 +222,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     public void assertCodeNotExists(String code) {
         Assert.notNull(code, "code cannot be null");
 
-        if (existsByParams(Params.builder(1 ).pv("code", code).build(), "code = :code")) {
+        if (existsByParams(Params.builder(1).pv("code", code).build(), "code = :code")) {
             throw new BizException(ResultUtils.fail(400, entityComment() + " code=" + code + " 已经存在", code));
         }
     }
@@ -204,7 +251,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
         SetUtils.SetView<String> difference = SetUtils.difference(Sets.newHashSet(codes), Sets.newHashSet(codesInDB));
         if (CollectionUtils.isNotEmpty(difference)) {
-            throw new BizException(ResultUtils.fail(404, entityComment() + " code="+StringUtils.join(difference.toArray(), ",")+"不存在", difference.toArray()));
+            throw new BizException(ResultUtils.fail(404, entityComment() + " code=" + StringUtils.join(difference.toArray(), ",") + "不存在", difference.toArray()));
         }
     }
 
@@ -220,6 +267,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * 检查code
      * 1. 不重复
      * 2. 存在code
+     *
      * @param codes 待检查的code集合
      */
     public void assertCodesExistsAndUnDuplicate(List<String> codes) {
@@ -231,12 +279,13 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
         Set<String> notExistsCodes = selectNotExistsCodes(codes);
         if (notExistsCodes.size() > 0) {
-            throw new BizException(ResultUtils.fail(4040, entityComment() + " code="+StringUtils.join(notExistsCodes, ",")+" 不存在"));
+            throw new BizException(ResultUtils.fail(4040, entityComment() + " code=" + StringUtils.join(notExistsCodes, ",") + " 不存在"));
         }
     }
 
     /**
      * 检查是否重复
+     *
      * @param codes 待检查的code集合
      */
     public void assertCodesUnDuplicate(List<String> codes) {
@@ -244,7 +293,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         Set<String> codeOccurrenceErrors = codeOccurrenceMap.keySet().stream().filter(m -> codeOccurrenceMap.get(m) > 1).collect(Collectors.toSet());
 
         if (codeOccurrenceErrors.size() > 0) {
-            throw new BizException(ResultUtils.fail(4040, entityComment() + " code="+StringUtils.join(codeOccurrenceErrors, ",")+" 已经重复"));
+            throw new BizException(ResultUtils.fail(4040, entityComment() + " code=" + StringUtils.join(codeOccurrenceErrors, ",") + " 已经重复"));
         }
     }
 

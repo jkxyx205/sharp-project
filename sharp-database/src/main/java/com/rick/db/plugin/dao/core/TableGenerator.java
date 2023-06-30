@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -50,6 +51,7 @@ public class TableGenerator {
         }
 
         Field idField = tableMeta.getColumnNameFieldMap().get(tableMeta.getIdColumnName());
+        Assert.notNull(idField, "cannot find id field, forgot to extends BaseEntity??");
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
                 .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" " + determineSqlType(idField.getType()))+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");

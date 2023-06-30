@@ -6,10 +6,7 @@ import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
 import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
-import com.rick.db.plugin.DatabaseMetaData;
-import com.rick.db.plugin.GridUtils;
-import com.rick.db.plugin.QueryUtils;
-import com.rick.db.plugin.SQLUtils;
+import com.rick.db.plugin.*;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
@@ -144,6 +141,12 @@ public class GridServiceAutoConfiguration {
             dbConversionService.addConverter(new LocalDateTimeToInstantConverter());
 
             return dbConversionService;
+        }
+
+        @Bean
+        public EntityHandler entityHandler() {
+            EntityHandler entityHandler = new EntityHandler();
+            return entityHandler;
         }
 
     }

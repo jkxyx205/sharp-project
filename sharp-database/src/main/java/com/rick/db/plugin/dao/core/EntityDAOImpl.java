@@ -5,10 +5,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.IdGenerator;
+import com.rick.common.validate.ValidatorHelper;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.SimpleEntity;
+import com.rick.db.plugin.EntityHandler;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
+import com.rick.db.plugin.dao.support.ColumnAutoFill;
+import com.rick.db.plugin.dao.support.ConditionAdvice;
+import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,11 +25,13 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
@@ -40,6 +48,9 @@ import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
 @Slf4j
 public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityDAO<T, ID> {
 
+    @Resource
+    private ApplicationContext context;
+
     @Autowired
     @Qualifier("dbConversionService")
     private ConversionService conversionService;
@@ -53,6 +64,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     private List<String> updatePropertyList;
 
     private Class<T> entityClass;
+
+    private Class<ID> idClass;
 
     private String subTableRefColumnName;
 
@@ -70,6 +83,46 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     private Id.GenerationType strategy;
 
     public EntityDAOImpl() {
+        this.init();
+    }
+
+    public EntityDAOImpl(Class<T> entityClass, Class<ID> idClass) {
+        this.entityClass = entityClass;
+        this.idClass = idClass;
+        this.init();
+    }
+
+    /**
+     * 全部由外部指定
+     * @param entityClass
+     * @param idClass
+     * @param context
+     * @param conversionService
+     * @param sharpService
+     * @param conditionAdvice
+     * @param columnAutoFill
+     * @param validatorHelper
+     * @param sharpDatabaseProperties
+     */
+    public EntityDAOImpl(Class<T> entityClass, Class<ID> idClass,
+                         ApplicationContext context,
+                         ConversionService conversionService,
+                         SharpService sharpService,
+                         ConditionAdvice conditionAdvice,
+                         ColumnAutoFill columnAutoFill,
+                         ValidatorHelper validatorHelper,
+                         SharpDatabaseProperties sharpDatabaseProperties) {
+        this.entityClass = entityClass;
+        this.idClass = idClass;
+
+        this.context = context;
+        this.conversionService = conversionService;
+        this.sharpService = sharpService;
+        this.conditionAdvice = conditionAdvice;
+        this.columnAutoFill = columnAutoFill;
+        this.validatorHelper = validatorHelper;
+        this.sharpDatabaseProperties = sharpDatabaseProperties;
+
         this.init();
     }
 
@@ -632,9 +685,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     private void init() {
-        Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
-
-        this.entityClass = (Class<T>) actualTypeArgument[0];
+        if (this.entityClass == null || this.idClass == null) {
+            Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
+            this.entityClass = (Class<T>) actualTypeArgument[0];
+            this.idClass = (Class<ID>) actualTypeArgument[1];
+        }
 
         this.tableMeta = TableMetaResolver.resolve(this.entityClass);
         log.debug("properties: {}", tableMeta.getProperties());
@@ -663,7 +718,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         strategy = tableMeta.getId() == null ? SEQUENCE : tableMeta.getId().strategy();
 
-        super.init(tableMeta.getTableName(), tableMeta.getColumnNames(), tableMeta.getIdColumnName(), (Class<ID>) actualTypeArgument[1]);
+        super.init(tableMeta.getTableName(), tableMeta.getColumnNames(), tableMeta.getIdColumnName(), idClass);
         log.debug("tableName: {}, this.columnNames: {}", this.tableName, this.columnNames);
     }
 
@@ -793,7 +848,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String targetTable = selectProperty.getSelect().table();
             EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             if (subTableEntityDAO == null) {
-                throw new RuntimeException("Table [" + targetTable + "] lost DAOImpl");
+                log.warn("Table [" + targetTable + "] lost DAOImpl, will auto generate it!");
+                subTableEntityDAO = context.getBean(EntityHandler.class).entityDAO(selectProperty.getSubEntityClass());
             }
 
             Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
@@ -822,7 +878,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             if (subTableEntityDAO == null) {
-                throw new RuntimeException("Table [" + targetTable + "] lost DAOImpl");
+                log.warn("Table [" + targetTable + "] lost DAOImpl, will auto generate it!");
+                subTableEntityDAO = context.getBean(EntityHandler.class).entityDAO(oneToManyProperty.getSubEntityClass());
             }
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());

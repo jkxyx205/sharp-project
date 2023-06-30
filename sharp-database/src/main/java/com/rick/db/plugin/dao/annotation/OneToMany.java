@@ -14,6 +14,8 @@ public @interface OneToMany {
 
     String subTable();
 
+    Class subEntityClass() default Void.class;
+
     /**
      * 级联操作的时候需要该值
      * @return

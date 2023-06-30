@@ -82,6 +82,8 @@ public class TableMeta {
 
         private Field field;
 
+        private Class subEntityClass;
+
     }
 
     @Value
@@ -98,6 +100,8 @@ public class TableMeta {
         private Select select;
 
         private Field field;
+
+        private Class subEntityClass;
     }
 
     @Value
