@@ -94,7 +94,7 @@ public class ApiExceptionHandler {
      * @throws IOException
      * @throws ServletException
      */
-    @ExceptionHandler({BindException.class, ConstraintViolationException.class, IllegalArgumentException.class})
+    @ExceptionHandler({BindException.class, ConstraintViolationException.class, IllegalArgumentException.class, MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result methodArgumentNotValidExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
         if (ex instanceof ConstraintViolationException) {
