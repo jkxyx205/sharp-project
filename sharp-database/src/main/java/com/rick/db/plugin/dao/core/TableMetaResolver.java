@@ -11,10 +11,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.rick.common.util.StringUtils.camelToSnake;
@@ -38,14 +35,12 @@ class TableMetaResolver {
 
         Table tableAnnotation = clazz.getAnnotation(Table.class);
 
-        String name = (TABLE_PREFIX + camelToSnake(clazz.getSimpleName()));
-
-        String tableName;
-        if (Objects.nonNull(tableAnnotation)) {
-            tableName = tableAnnotation.value();
-        } else {
-            tableName = name;
+        if (Objects.isNull(tableAnnotation)) {
+            throw new IllegalArgumentException("Lost @Table annotation");
         }
+
+        String name = (TABLE_PREFIX + camelToSnake(clazz.getSimpleName()));
+        String tableName = StringUtils.isBlank(tableAnnotation.value()) ? name : tableAnnotation.value();
 
         Field[] fields = getAllFields(clazz);
         StringBuilder columnNamesBuilder = new StringBuilder();
@@ -79,15 +74,16 @@ class TableMetaResolver {
 
         if (Objects.isNull(idCollector.id)) {
             idCollector.columnName = idCollector.propertyName = DEFAULT_PRIMARY_COLUMN;
+            idCollector.field = Arrays.stream(fields).filter(field -> field.getName().equals(DEFAULT_PRIMARY_COLUMN)).findFirst().get();
         }
 
-        return new TableMeta(tableAnnotation, idCollector.id, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+        return new TableMeta(tableAnnotation, idCollector.id, idCollector.field, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
                 updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, fieldMap, columnNameMap);
     }
 
     private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
-     List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
+                               List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
                                List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap, Map<String, Field> fieldMap,
                                StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder) {
         for (Field field : fields) {
@@ -152,6 +148,7 @@ class TableMetaResolver {
                 if (Objects.nonNull(idCollector.id)) {
                     idCollector.columnName = StringUtils.isNotBlank(idCollector.id.value()) ? idCollector.id.value() : camelToSnake(field.getName());
                     idCollector.propertyName = propertyName;
+                    idCollector.field = field;
                 }
             }
 
@@ -187,6 +184,8 @@ class TableMetaResolver {
         private String columnName;
 
         private String propertyName;
+
+        private Field field;
 
     }
 

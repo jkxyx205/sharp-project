@@ -9,7 +9,6 @@ import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.SimpleEntity;
-import com.rick.db.plugin.EntityHandler;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
@@ -849,7 +848,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             if (subTableEntityDAO == null) {
                 log.warn("Table [" + targetTable + "] lost DAOImpl, will auto generate it!");
-                subTableEntityDAO = context.getBean(EntityHandler.class).entityDAO(selectProperty.getSubEntityClass());
+                subTableEntityDAO = context.getBean(EntityDAOSupport.class).getEntityDAO(selectProperty.getSubEntityClass());
             }
 
             Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
@@ -879,7 +878,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
             if (subTableEntityDAO == null) {
                 log.warn("Table [" + targetTable + "] lost DAOImpl, will auto generate it!");
-                subTableEntityDAO = context.getBean(EntityHandler.class).entityDAO(oneToManyProperty.getSubEntityClass());
+                subTableEntityDAO = context.getBean(EntityDAOSupport.class).getEntityDAO(oneToManyProperty.getSubEntityClass());
             }
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());

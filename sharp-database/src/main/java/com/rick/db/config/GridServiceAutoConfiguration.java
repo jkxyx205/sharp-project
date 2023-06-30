@@ -6,9 +6,13 @@ import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
 import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
-import com.rick.db.plugin.*;
+import com.rick.db.plugin.DatabaseMetaData;
+import com.rick.db.plugin.GridUtils;
+import com.rick.db.plugin.QueryUtils;
+import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
+import com.rick.db.plugin.dao.core.EntityDAOSupport;
 import com.rick.db.plugin.dao.core.TableGenerator;
 import com.rick.db.plugin.dao.support.*;
 import com.rick.db.service.GridService;
@@ -144,9 +148,9 @@ public class GridServiceAutoConfiguration {
         }
 
         @Bean
-        public EntityHandler entityHandler() {
-            EntityHandler entityHandler = new EntityHandler();
-            return entityHandler;
+        public EntityDAOSupport entityHandler() {
+            EntityDAOSupport entityDAOSupport = new EntityDAOSupport();
+            return entityDAOSupport;
         }
 
     }

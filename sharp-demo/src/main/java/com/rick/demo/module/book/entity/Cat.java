@@ -36,7 +36,7 @@ public class Cat extends BaseEntity {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @SuperBuilder
     @Table(value = "cat_reward", comment = "猫的证书")
-    public static class Reward extends BaseEntity{
+    public static class Reward extends BaseEntity {
         String title;
 
         Long catId;

@@ -1,8 +1,9 @@
 package com.rick.demo.db;
 
-import com.rick.db.plugin.EntityHandler;
 import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.plugin.dao.core.EntityDAOSupport;
 import com.rick.demo.module.book.entity.Cat;
+import com.rick.demo.module.book.entity.Dog;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -24,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class EntityHandlerTest {
+public class EntityDAOSupportTest {
 
     @Autowired
-    private EntityHandler entityHandler;
+    private EntityDAOSupport entityDAOSupport;
 
     @Autowired(required = false)
     @Qualifier("catDAO")
@@ -39,20 +40,20 @@ public class EntityHandlerTest {
     @Order(1)
     @Test
     public void testEntityHandlerInsert() {
-        EntityDAO<Cat, Long> catDAO = entityHandler.entityDAO(Cat.class);
+        EntityDAO<Cat, Long> catDAO = entityDAOSupport.getEntityDAO(Cat.class);
         catDAO.insert(Cat.builder().name("Tomcat").age(10).build());
 
         List<Cat> catList = catDAO.selectAll();
         catList.forEach(System.out::println);
 
-        EntityDAO<Cat, Long> catDAO2 = entityHandler.entityDAO(Cat.class);
+        EntityDAO<Cat, Long> catDAO2 = entityDAOSupport.getEntityDAO(Cat.class);
         catDAO2.insert(Cat.builder().name("TomcatND").age(1).build());
     }
 
     @Order(2)
     @Test
     public void testEntityHandlerCascadeInsert() {
-        EntityDAO<Cat, Long> catDAO = entityHandler.entityDAO(Cat.class);
+        EntityDAO<Cat, Long> catDAO = entityDAOSupport.getEntityDAO(Cat.class);
         catDAO.insert(Cat.builder().name("Tomcat2")
                 .age(10)
                 .rewardList(Arrays.asList(Cat.Reward.builder().title("吃饭冠军").build()))
@@ -62,7 +63,7 @@ public class EntityHandlerTest {
     @Order(3)
     @Test
     public void testEntityHandlerSelectById() {
-        EntityDAO<Cat, Long> catDAO = entityHandler.entityDAO(Cat.class);
+        EntityDAO<Cat, Long> catDAO = entityDAOSupport.getEntityDAO(Cat.class);
         Optional<Cat> optional = catDAO.selectById(706174000581087232L);
         Cat cat = optional.get();
         assertThat(cat.getName()).isEqualTo("Tomcat2");
@@ -80,6 +81,16 @@ public class EntityHandlerTest {
         assertThat(cat2.getName()).isEqualTo("Tomcat2");
         assertThat(cat2.getRewardList().size()).isEqualTo(1);
         assertThat(cat2.getRewardList().get(0).getTitle()).isEqualTo("吃饭冠军");
+    }
+
+    @Order(3)
+    @Test
+    public void testInsertDog() {
+        entityDAOSupport.getEntityDAO(Dog.class).insert(Dog.builder()
+                .id("sq" + System.currentTimeMillis())
+                .name("Tomcat2")
+                .age(10)
+                .build());
     }
 
 }

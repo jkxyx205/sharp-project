@@ -20,6 +20,8 @@ public class TableMeta {
 
     private Id id;
 
+    private Field idField;
+
     private VersionProperty versionProperty;
 
     /**

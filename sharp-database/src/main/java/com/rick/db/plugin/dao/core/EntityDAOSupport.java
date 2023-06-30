@@ -1,12 +1,10 @@
-package com.rick.db.plugin;
+package com.rick.db.plugin.dao.core;
 
 import com.rick.common.util.StringUtils;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.dto.BaseCodeEntity;
-import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.core.*;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
@@ -31,7 +29,7 @@ import java.util.Set;
  * @date 2023/6/30 11:12
  */
 @RequiredArgsConstructor
-public class EntityHandler {
+public class EntityDAOSupport {
 
     @Resource
     private ApplicationContext context;
@@ -55,12 +53,13 @@ public class EntityHandler {
     @Autowired
     private SharpDatabaseProperties sharpDatabaseProperties;
 
-    public <T extends SimpleEntity> EntityDAO<T, Long> entityDAO(@NonNull Class<?> entityClass) {
+    public <T, ID> EntityDAO<T, ID> getEntityDAO(@NonNull Class<?> entityClass) {
         EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
         boolean isNotInstance = (entityDAO == null);
 
         if (isNotInstance) {
-            entityDAO =  BaseCodeEntity.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(entityClass, Long.class,
+            Class<?> idClass = TableMetaResolver.resolve(entityClass).getIdField().getType();
+            entityDAO =  BaseCodeEntity.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(entityClass, idClass,
                     context,
                     conversionService,
                     sharpService,
@@ -69,7 +68,7 @@ public class EntityHandler {
                     validatorHelper,
                     sharpDatabaseProperties)
                     :
-                    new EntityDAOImpl(entityClass, Long.class,
+                    new EntityDAOImpl(entityClass, idClass,
                             context,
                             conversionService,
                             sharpService,
@@ -88,7 +87,7 @@ public class EntityHandler {
             }
 
             for (TableMeta.OneToManyProperty oneToManyProperty : entityDAO.getTableMeta().getOneToManyAnnotationList()) {
-                entityDAO(oneToManyProperty.getSubEntityClass());
+                getEntityDAO(oneToManyProperty.getSubEntityClass());
             }
         }
 
@@ -103,11 +102,12 @@ public class EntityHandler {
 
         ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
                 false);
+        // 只扫描注解是 @Table 的类
         provider.addIncludeFilter(new AnnotationTypeFilter(Table.class));
         Set<BeanDefinition> scanList = provider.findCandidateComponents(sharpDatabaseProperties.getEntityBasePackage());
 
         for (BeanDefinition beanDefinition : scanList) {
-            entityDAO(Class.forName(beanDefinition.getBeanClassName()));
+            getEntityDAO(Class.forName(beanDefinition.getBeanClassName()));
         }
     }
 }

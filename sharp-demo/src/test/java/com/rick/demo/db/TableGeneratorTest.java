@@ -43,6 +43,7 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Notice.class);
 //        tableGenerator.createTable(Cat.class);
 //        tableGenerator.createTable(Cat.Reward.class);
+//        tableGenerator.createTable(Dog.class);
     }
 
 }

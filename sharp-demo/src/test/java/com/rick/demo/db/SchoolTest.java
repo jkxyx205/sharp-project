@@ -107,6 +107,30 @@ public class SchoolTest {
         schoolDAO.update("name", new Object[]{school.getName(), school.getId()}, "id = ?");
     }
 
+    @Order(5)
+    @Test
+    public void testSelect() {
+//        List<School> schoolList = schoolDAO.selectByParams(Params.builder()
+////                        .pv("eq_score", 90) // 1
+////                        .pv("lt_score", 91) // 1
+//                        .pv("gt_score", 90) // 329
+////                        .pv("op", "eq")
+//                        .build(),
+//                "score > :gt_score AND score = :eq_score AND score < :lt_score");
+
+
+        List<School> schoolList = schoolDAO.selectByParams(Params.builder()
+                        .pv("score", 90) // 1
+                        .pv("op", ">")
+                        .build(),
+                "score ${op} :score");
+
+        System.out.println(schoolList.size());
+
+
+
+    }
+
     private School createSchool(SchoolLicense schoolLicense) {
         return School.builder()
                 .name("清华大学")
