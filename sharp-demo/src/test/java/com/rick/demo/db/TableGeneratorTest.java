@@ -41,6 +41,8 @@ public class TableGeneratorTest {
 //        tableGenerator.createTable(Info.class);
 //        tableGenerator.createTable(User.class);
 //        tableGenerator.createTable(Notice.class);
+//        tableGenerator.createTable(Cat.class);
+//        tableGenerator.createTable(Cat.Reward.class);
     }
 
 }

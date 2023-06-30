@@ -31,6 +31,7 @@ sharp:
   database:
     select-cache: false
     init-database-meta-data: true
+    entity-base-package: com.rick.demo.module.**.entity
 
 dict:
   items:

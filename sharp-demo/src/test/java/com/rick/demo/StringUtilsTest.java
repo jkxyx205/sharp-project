@@ -1,7 +1,11 @@
 package com.rick.demo;
 
 import com.rick.common.util.StringUtils;
+import com.rick.demo.module.book.entity.Cat;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,5 +33,17 @@ public class StringUtilsTest {
 //        new Date("1679502443913");
 
 //        System.out.println(new Date().getTime());
+    }
+
+    @Test
+    public void testList() {
+        List<Cat.Reward> list = Arrays.asList(Cat.Reward.builder().title("吃饭冠军").build());
+
+
+
+//        Class<?>[] classGenericsTypes = ClassUtils.getClassGenericsTypes(list.getClass());
+//        for (Class<?> classGenericsType : classGenericsTypes) {
+//            System.out.println(classGenericsType);
+//        }
     }
 }
