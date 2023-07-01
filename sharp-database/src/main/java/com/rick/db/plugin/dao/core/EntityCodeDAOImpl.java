@@ -30,10 +30,6 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         super();
     }
 
-    public EntityCodeDAOImpl(Class<T> entityClass, Class<ID> idClass) {
-        super(entityClass, idClass);
-    }
-
     /**
      * 全部由外部指定
      *

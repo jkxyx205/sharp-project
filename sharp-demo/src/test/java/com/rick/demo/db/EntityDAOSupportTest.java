@@ -4,6 +4,7 @@ import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOSupport;
 import com.rick.demo.module.book.entity.Cat;
 import com.rick.demo.module.book.entity.Dog;
+import com.rick.demo.module.book.service.CatService;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ public class EntityDAOSupportTest {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private CatService catService;
 
     @Order(1)
     @Test
@@ -91,6 +95,12 @@ public class EntityDAOSupportTest {
                 .name("Tomcat2")
                 .age(10)
                 .build());
+    }
+
+    @Order(3)
+    @Test
+    public void testSaveCat() {
+        catService.save(Cat.builder().name("save Tomcat").age(15).build());
     }
 
 }

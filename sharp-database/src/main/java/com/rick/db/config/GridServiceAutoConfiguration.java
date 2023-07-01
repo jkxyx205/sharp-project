@@ -30,7 +30,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -118,6 +118,13 @@ public class GridServiceAutoConfiguration {
         }
 
         @Bean
+        @DependsOn("baseDAOManager")
+        public EntityDAOSupport entityDAOSupport() {
+            EntityDAOSupport entityDAOSupport = new EntityDAOSupport();
+            return entityDAOSupport;
+        }
+
+        @Bean
         @ConditionalOnMissingBean
         @ConditionalOnBean(Validator.class)
         public ValidatorHelper validatorHelper(Validator validator) {
@@ -147,12 +154,6 @@ public class GridServiceAutoConfiguration {
             return dbConversionService;
         }
 
-        @Bean
-        public EntityDAOSupport entityHandler() {
-            EntityDAOSupport entityDAOSupport = new EntityDAOSupport();
-            return entityDAOSupport;
-        }
-
     }
 
     @Configuration
@@ -179,7 +180,6 @@ public class GridServiceAutoConfiguration {
         private final SqlSessionFactory sqlSessionFactory;
 
         @Bean
-        @Order
         public MappedSharpService getMappedSharpService(SharpService sharpService) {
             MappedSharpService mappedSharpService = new MappedSharpService(sqlSessionFactory, sharpService);
             return mappedSharpService;

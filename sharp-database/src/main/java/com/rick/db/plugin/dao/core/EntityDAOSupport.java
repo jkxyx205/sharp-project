@@ -8,11 +8,13 @@ import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -28,8 +30,9 @@ import java.util.Set;
  * @author Rick.Xu
  * @date 2023/6/30 11:12
  */
-@RequiredArgsConstructor
-public class EntityDAOSupport {
+@NoArgsConstructor
+@Slf4j
+public class EntityDAOSupport implements BeanPostProcessor {
 
     @Resource
     private ApplicationContext context;
@@ -58,8 +61,7 @@ public class EntityDAOSupport {
         boolean isNotInstance = (entityDAO == null);
 
         if (isNotInstance) {
-            Class<?> idClass = TableMetaResolver.resolve(entityClass).getIdField().getType();
-            entityDAO =  BaseCodeEntity.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(entityClass, idClass,
+            entityDAO =  BaseCodeEntity.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(entityClass, null,
                     context,
                     conversionService,
                     sharpService,
@@ -68,7 +70,7 @@ public class EntityDAOSupport {
                     validatorHelper,
                     sharpDatabaseProperties)
                     :
-                    new EntityDAOImpl(entityClass, idClass,
+                    new EntityDAOImpl(entityClass, null,
                             context,
                             conversionService,
                             sharpService,
@@ -82,10 +84,10 @@ public class EntityDAOSupport {
             ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) context).getBeanFactory();
 //        String beanName = StringUtils.stringToCamel(entityClass.getSimpleName()) + "DAO";
             String beanName = StringUtils.stringToCamel(entityClass.getName().replaceAll(entityClass.getPackage().getName() + ".", "").replace("$", "")) + "DAO";
-            if (!beanFactory.containsBean(beanName)) {
-                beanFactory.registerSingleton(beanName, entityDAO);
+            beanFactory.registerSingleton(beanName, entityDAO);
+            if (log.isDebugEnabled()) {
+                log.debug("Auto generate DAO with {}", beanName);
             }
-
             for (TableMeta.OneToManyProperty oneToManyProperty : entityDAO.getTableMeta().getOneToManyAnnotationList()) {
                 getEntityDAO(oneToManyProperty.getSubEntityClass());
             }

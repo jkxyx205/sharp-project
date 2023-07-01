@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -85,12 +86,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         this.init();
     }
 
-    public EntityDAOImpl(Class<T> entityClass, Class<ID> idClass) {
-        this.entityClass = entityClass;
-        this.idClass = idClass;
-        this.init();
-    }
-
     /**
      * 全部由外部指定
      * @param entityClass
@@ -103,7 +98,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      * @param validatorHelper
      * @param sharpDatabaseProperties
      */
-    public EntityDAOImpl(Class<T> entityClass, Class<ID> idClass,
+    public EntityDAOImpl(Class<T> entityClass, @Nullable Class<ID> idClass,
                          ApplicationContext context,
                          ConversionService conversionService,
                          SharpService sharpService,
@@ -684,13 +679,15 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     private void init() {
-        if (this.entityClass == null || this.idClass == null) {
+        if (this.entityClass == null) {
             Class<?>[] actualTypeArgument = ClassUtils.getClassGenericsTypes(this.getClass());
             this.entityClass = (Class<T>) actualTypeArgument[0];
             this.idClass = (Class<ID>) actualTypeArgument[1];
         }
 
         this.tableMeta = TableMetaResolver.resolve(this.entityClass);
+        this.idClass = (this.idClass == null) ? (Class<ID>) tableMeta.getIdField().getType() : this.idClass;
+
         log.debug("properties: {}", tableMeta.getProperties());
 
         hasCascadeDelete = CollectionUtils.isNotEmpty(tableMeta.getManyToManyAnnotationList()) ||
