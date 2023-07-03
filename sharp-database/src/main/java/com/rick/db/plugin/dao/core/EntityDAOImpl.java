@@ -15,9 +15,11 @@ import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -142,6 +144,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         int[] insertCount = insert(entities.stream().filter(t -> Objects.isNull(getIdValue(t))).collect(Collectors.toList()));
 
         return ArrayUtils.addAll(insertCount, updateCount);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities) {
+        return insertOrUpdate(null, false, true, false, this, getEntityClass(),
+                refColumnName, columnNameToPropertyNameMap.get(refColumnName), refValue, entities);
     }
 
     @Override
@@ -762,7 +771,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
-        if (field.getType() == Long.class && propertyValue != null && EntityDAOManager.isEntityClass((propertyValue.getClass()))) {
+        if (field.getType() == this.tableMeta.getIdField().getType() && propertyValue != null && EntityDAOManager.isEntityClass((propertyValue.getClass()))) {
             propertyValue = this.getIdValue(propertyValue);
         }
 
@@ -805,6 +814,53 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         return count;
+    }
+
+    private int[] insertOrUpdate(T t, boolean insert, boolean cascadeDelete, boolean cascadeInsert, EntityDAO subTableEntityDAO, Class<?> subClass,
+                                 @NonNull String refColumnName, String reversePropertyName, @NonNull Object refValue, Collection<?> subDataList) {
+        Field reverseField = ReflectionUtils.findField(subClass, reversePropertyName);
+
+        if (Objects.isNull(reverseField)) {
+            throw new IllegalArgumentException("reversePropertyName must be set");
+        }
+
+        if (!insert && cascadeDelete) { // 级联删除
+            if (CollectionUtils.isEmpty(subDataList)) {
+                // 删除所有
+                SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refValue));
+                return new int[0];
+            }
+
+            Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(deletedIds)) {
+                // 删除所有
+                SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refValue));
+            } else {
+                // 删除 除id之外的其他记录
+                SQLUtils.deleteNotIn(subTableEntityDAO.getTableName(), subTableEntityDAO.getIdColumnName(),
+                        deletedIds, new Object[]{refValue}, refColumnName + " = ?");
+            }
+        }
+
+        if (CollectionUtils.isEmpty(subDataList)) {
+            return new int[0];
+        }
+
+        for (Object subData : subDataList) {
+            setPropertyValue(subData, reverseField, ObjectUtils.defaultIfNull(t, refValue));
+        }
+
+        // 再插入或更新
+        if (cascadeInsert) {
+            List<?> updateSubDataList = subDataList.stream().filter(e -> Objects.isNull(getIdValue(e))).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(updateSubDataList)) {
+                return subTableEntityDAO.insert(updateSubDataList);
+            }
+        } else {
+            return subTableEntityDAO.insertOrUpdate(subDataList);
+        }
+
+        return new int[0];
     }
 
     private Map<ID, T> listToIdMap(List<T> list) {
@@ -1000,7 +1056,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * @param t
-     * @param insert One的一段是否是新增
+     * @param insert One的一方是否是新增
      */
     private void cascadeInsertOrUpdate(T t, boolean insert) {
         // OneToMany
@@ -1032,48 +1088,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             Object refId = getIdValue(t);
             String refColumnName = oneToManyProperty.getOneToMany().joinValue();
 
-            Field reverseField = ReflectionUtils.findField(subClass, oneToManyProperty.getOneToMany().reversePropertyName());
-
-            if (Objects.isNull(reverseField)) {
-                throw new IllegalArgumentException("reversePropertyName must be set");
-            }
-
-            if (!insert && oneToManyProperty.getOneToMany().cascadeDelete()) { // 级联删除
-                if (CollectionUtils.isEmpty(subDataList)) {
-                    // 删除所有
-                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refId));
-                    continue;
-                }
-
-                Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
-                if (CollectionUtils.isEmpty(deletedIds)) {
-                    // 删除所有
-                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refId));
-                } else {
-                    // 删除 除id之外的其他记录
-                    SQLUtils.deleteNotIn(subTableEntityDAO.getTableName(), subTableEntityDAO.getIdColumnName(),
-                            deletedIds, new Object[]{refId}, refColumnName + " = ?");
-                }
-            }
-
-            if (CollectionUtils.isEmpty(subDataList)) {
-                continue;
-            }
-
-            for (Object subData : subDataList) {
-                setPropertyValue(subData, reverseField, t);
-            }
-
-            // 再插入或更新
-            if (oneToManyProperty.getOneToMany().cascadeInsert()) {
-                List<?> updateSubDataList = subDataList.stream().filter(e -> Objects.isNull(getIdValue(e))).collect(Collectors.toList());
-                if (CollectionUtils.isNotEmpty(updateSubDataList)) {
-                    subTableEntityDAO.insert(updateSubDataList);
-                }
-            } else {
-                subTableEntityDAO.insertOrUpdate(subDataList);
-            }
-
+            insertOrUpdate(t, insert, oneToManyProperty.getOneToMany().cascadeDelete(), oneToManyProperty.getOneToMany().cascadeInsert(),
+                    subTableEntityDAO, subClass,
+                    refColumnName, oneToManyProperty.getOneToMany().reversePropertyName(), refId, subDataList);
         }
 
         // ManyToOne

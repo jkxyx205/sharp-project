@@ -1,5 +1,7 @@
 package com.rick.db.plugin.dao.core;
 
+import lombok.NonNull;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,15 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
     int insertOrUpdate(T entity);
 
     int[] insertOrUpdate(Collection<T> entities);
+
+    /**
+     * 以 refColumnName 分组的全量更新， 多用于父表不级联， 手动调用该方法处理子表的更新操作
+     * @param refColumnName
+     * @param refValue
+     * @param entities
+     * @return
+     */
+    int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities);
 
     int update(T entity);
 
