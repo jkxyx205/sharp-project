@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -32,7 +31,7 @@ import java.util.Set;
  */
 @NoArgsConstructor
 @Slf4j
-public class EntityDAOSupport implements BeanPostProcessor {
+public class EntityDAOSupport {
 
     @Resource
     private ApplicationContext context;
