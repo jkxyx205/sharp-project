@@ -24,10 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -36,12 +35,12 @@ import org.springframework.util.ReflectionUtils;
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.rick.db.plugin.dao.annotation.Id.GenerationType.ASSIGN;
-import static com.rick.db.plugin.dao.annotation.Id.GenerationType.SEQUENCE;
+import static com.rick.db.plugin.dao.annotation.Id.GenerationType.*;
 
 /**
  * @author Rick
@@ -53,9 +52,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Resource
     private ApplicationContext context;
 
-    @Autowired
-    @Qualifier("dbConversionService")
-    private ConversionService conversionService;
+    @Resource
+    private ConversionService dbConversionService;
 
     private TableMeta tableMeta;
 
@@ -93,7 +91,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      * @param entityClass
      * @param idClass
      * @param context
-     * @param conversionService
+     * @param dbConversionService
      * @param sharpService
      * @param conditionAdvice
      * @param columnAutoFill
@@ -102,7 +100,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      */
     public EntityDAOImpl(Class<T> entityClass, @Nullable Class<ID> idClass,
                          ApplicationContext context,
-                         ConversionService conversionService,
+                         ConversionService dbConversionService,
                          SharpService sharpService,
                          ConditionAdvice conditionAdvice,
                          ColumnAutoFill columnAutoFill,
@@ -112,7 +110,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         this.idClass = idClass;
 
         this.context = context;
-        this.conversionService = conversionService;
+        this.dbConversionService = dbConversionService;
         this.sharpService = sharpService;
         this.conditionAdvice = conditionAdvice;
         this.columnAutoFill = columnAutoFill;
@@ -178,10 +176,29 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         Object[] params = handleAutoFill(entity, instanceToParamsArray(entity), columnNameList, ColumnFillType.INSERT);
-        int count = SQLUtils.insert(this.tableName, this.columnNames, params);
+
+        int count = 1;
+
+        if (Objects.nonNull(tableMeta.getId()) && tableMeta.getId().strategy() == IDENTITY) {
+            // auto_increment
+            Map<String, Object> mapParams = Maps.newHashMapWithExpectedSize(params.length);
+            int length = columnNameList.size();
+
+            for (int i = 0; i < length; i++) {
+                mapParams.put(columnNameList.get(i), params[i]);
+            }
+            Number id = new SimpleJdbcInsert(sharpService.getNamedJdbcTemplate().getJdbcTemplate()).withTableName(tableName)
+                    .usingGeneratedKeyColumns(idColumnName)
+                    .executeAndReturnKey(mapParams);
+            setPropertyValue(entity, tableMeta.getIdPropertyName(), idValueResolverFromNumber(id));
+
+        } else {
+            count = SQLUtils.insert(this.tableName, this.columnNames, params);
+        }
 
         cascadeInsertOrUpdate(entity, true);
         EntityDAOThreadLocalValue.removeAll();
+
         return count;
     }
 
@@ -355,7 +372,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
-            mergedParams[i] = resolveValue(EntityDAOManager.getPropertyValue(entity, columnNameToPropertyNameMap.get(this.updateColumnNameList.get(i))));
+            mergedParams[i] = resolveEntityValueToDbValue(EntityDAOManager.getPropertyValue(entity, columnNameToPropertyNameMap.get(this.updateColumnNameList.get(i))));
         }
 
         System.arraycopy(params, 0, mergedParams, size, params.length);
@@ -642,7 +659,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 params.put(fieldName, propertyValue);
 
                 if (columnName != null && !fieldName.equals(columnName)) {
-                    params.put(columnName, resolveValue(propertyValue));
+                    params.put(columnName, resolveEntityValueToDbValue(propertyValue));
                 }
 
             }
@@ -656,7 +673,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
         bw.setAutoGrowNestedPaths(true);
-        bw.setConversionService(conversionService);
+        bw.setConversionService(dbConversionService);
 
         Set<String> fieldNames = tableMeta.getFieldMap().keySet();
 
@@ -735,8 +752,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
     }
 
-    @Override
-    protected Object resolveValue(Object value) {
+    protected Object resolveEntityValueToDbValue(Object value) {
         return SQLUtils.resolveValue(value, v -> {
             if (EntityDAOManager.isEntityClass((value.getClass()))) {
                 // 实体对象
@@ -781,7 +797,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = resolveValue(EntityDAOManager.getPropertyValue(t, includePropertyList.get(i)));
+            params[i] = resolveEntityValueToDbValue(EntityDAOManager.getPropertyValue(t, includePropertyList.get(i)));
         }
         return params;
     }
@@ -789,7 +805,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     protected Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
         for (int i = 0; i < params.length; i++) {
-            Object param = resolveValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
+            Object param = resolveEntityValueToDbValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
             params[i] = param;
         }
         return params;
@@ -1157,6 +1173,22 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     private List<T> selectByIdsWithSpecifiedValue(Object ids) {
         Map<String, Object> params = Params.builder(1).pv("ids", ids).build();
         return selectByParams(params, this.idColumnName + " IN(:ids)");
+    }
+
+    private Object idValueResolverFromNumber(Number id) {
+        if (idClass == Long.class) {
+            return id.longValue();
+        }
+
+        if (idClass == Integer.class) {
+            return id.intValue();
+        }
+
+        if (idClass == BigInteger.class || id.getClass() == BigInteger.class) {
+            return id;
+        }
+
+        return id.toString();
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
@@ -64,9 +65,25 @@ public final class SQLUtils {
     }
 
     public static int insert(String tableName, Map<String, Object> params) {
-        return insert(tableName,
-                StringUtils.join(params.keySet(), ","),
-                convertToArray(params));
+        return new SimpleJdbcInsert(SQLUtils.JDBC_TEMPLATE).withTableName(tableName)
+                .execute(params);
+    }
+
+    /**
+     *
+     * @param tableName
+     * @param params
+     * @param idColumnName ID自动生成策略的时候，需要指定 idColumnName
+     * @return 返回数据库自动生成的id
+     */
+    public static Number insertAndReturnKey(String tableName, Map<String, Object> params, String ...idColumnName) {
+        Assert.notEmpty(idColumnName, "idColumnName cannot be empty");
+//        return insert(tableName,
+//                StringUtils.join(params.keySet(), ","),
+//                convertToArray(params));
+        return new SimpleJdbcInsert(SQLUtils.JDBC_TEMPLATE).withTableName(tableName)
+                .usingGeneratedKeyColumns(idColumnName)
+                .executeAndReturnKey(params);
     }
 
     /**
