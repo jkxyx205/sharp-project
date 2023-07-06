@@ -71,8 +71,8 @@ public final class SQLUtils {
 
     /**
      *
-     * @param tableName
-     * @param params
+     * @param tableName 表名
+     * @param params 列名和参数的Map
      * @param idColumnName ID自动生成策略的时候，需要指定 idColumnName
      * @return 返回数据库自动生成的id
      */
@@ -102,9 +102,10 @@ public final class SQLUtils {
 
     /**
      * 批量插入
-     * @param tableName
-     * @param columnNames
-     * @param paramsList
+     * 每一行都需要给出相同的参数值， 因为已经固定 columnNames
+     * @param tableName 表名
+     * @param columnNames 插入的列
+     * @param paramsList 参数列表
      * @return
      */
     public static int[] insert(String tableName, String columnNames, List<Object[]> paramsList) {
@@ -113,6 +114,18 @@ public final class SQLUtils {
             log.debug("SQL => [{}], args:=> [{}]", insertSQL, paramsList);
         }
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, paramsList);
+    }
+
+    /**
+     * 批量插入
+     * 每一行都不需要给出相同的参数值
+     * @param tableName 表名
+     * @param batch 列名和参数的Map数组
+     * @return
+     */
+    public static int[] insert(String tableName, Map<String, ?>... batch) {
+        return new SimpleJdbcInsert(SQLUtils.JDBC_TEMPLATE).withTableName(tableName)
+                .executeBatch(batch);
     }
 
     public static int update(String tableName, Map<String, Object> params, String idColumnName) {
