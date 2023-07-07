@@ -88,6 +88,11 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
         return this;
     }
 
+    public ReportColumn setTooltip(Boolean tooltip) {
+        this.tooltip = tooltip;
+        return this;
+    }
+
     public enum TypeEnum {
         TEXT, NUMERIC, DECIMAL;
 
