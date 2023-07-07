@@ -64,7 +64,6 @@ public class ApiExceptionHandler {
         }
 
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
-            response.setStatus(result.getCode());
             return result;
         }
 
@@ -135,11 +134,11 @@ public class ApiExceptionHandler {
             this.logStackTrace(ex);
         }
 
-        response.setStatus(code);
-
         if (HttpServletRequestUtils.isAjaxRequest(request)) {
             return ResultUtils.fail(code, message, data);
         }
+
+        request.setAttribute("javax.servlet.error.status_code", code);
         request.getRequestDispatcher("/error").forward(request, response);
         return null;
     }
