@@ -100,7 +100,7 @@ public class CpnConfigurer extends BaseEntity {
             validatorList.addAll(cpnByType.cpnValidators());
 
             for (Map<String, ?> validatorInfo : validators) {
-                Class<? extends Validator> validatorType = ValidatorManager.getValidatorClassByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validator_type")));
+                Class<? extends Validator> validatorType = ValidatorManager.getValidatorClassByType(ValidatorTypeEnum.valueOfCode((String) validatorInfo.get("validatorType")));
                 validatorList.add(JsonUtils.toObject(JsonUtils.toJson(validatorInfo), validatorType));
             }
         }
