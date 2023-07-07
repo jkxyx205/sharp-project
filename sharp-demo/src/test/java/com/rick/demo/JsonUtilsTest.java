@@ -42,20 +42,20 @@ public class JsonUtilsTest {
 
     @Test
     public void testToPOJO() {
-        Dept dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}", Dept.class);
+        Dept dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parentId\":2}", Dept.class);
         assertThat(dept.getId().longValue()).isEqualTo(1L);
     }
 
     @Test
     public void testToMap() {
-        Map dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}", Map.class);
+        Map dept = JsonUtils.toObject("{\"id\":1,\"name\":\"Dev\",\"parentId\":2}", Map.class);
         // dept.get("id") Integer类型
         assertThat(dept.get("id")).isEqualTo(1);
     }
 
     @Test
     public void testToList() {
-        List list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]", List.class);
+        List list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]", List.class);
         // dept.get("id") Integer类型
         assertThat(((Map)list.get(0)).get("id")).isEqualTo(1);
 
@@ -64,7 +64,7 @@ public class JsonUtilsTest {
     @Test
     public void testToListWithGenerics1() {
         TypeReference<List<Dept>> typeRef = new TypeReference<List<Dept>>() {};
-        List<Dept> list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]", typeRef);
+        List<Dept> list = JsonUtils.toObject("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]", typeRef);
         assertThat(list.get(0).getId().longValue()).isEqualTo(1L);
         assertThat(list.get(0).getName()).isEqualTo("Dev");
         assertThat(list.get(0).getParentId()).isEqualTo(2L);
@@ -72,19 +72,19 @@ public class JsonUtilsTest {
 
     @Test
     public void testToListWithGenerics2() {
-        List<Dept> list = JsonUtils.toList("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]", Dept.class);
+        List<Dept> list = JsonUtils.toList("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]", Dept.class);
         assertThat(list.get(0).getId().longValue()).isEqualTo(1L);
     }
 
     @Test
     public void testListStringToJsonNode() {
-        JsonNode jsonNode = JsonUtils.toJsonNode("[{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}]");
+        JsonNode jsonNode = JsonUtils.toJsonNode("[{\"id\":1,\"name\":\"Dev\",\"parentId\":2}]");
         assertThat(jsonNode.get(0).get("id").longValue()).isEqualTo(1L);
     }
 
     @Test
     public void testObjectStringToJsonNode() {
-        JsonNode jsonNode = JsonUtils.toJsonNode("{\"id\":1,\"name\":\"Dev\",\"parent_id\":2}");
+        JsonNode jsonNode = JsonUtils.toJsonNode("{\"id\":1,\"name\":\"Dev\",\"parentId\":2}");
         assertThat(jsonNode.get("id").longValue()).isEqualTo(1L);
     }
 
