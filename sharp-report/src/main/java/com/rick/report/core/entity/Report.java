@@ -60,7 +60,6 @@ public class Report extends BaseCodeEntity {
     @Column(value = "report_column_list", columnDefinition = "text")
     private List<ReportColumn> reportColumnList;
 
-    @NotNull
     @Column(columnDefinition = "text")
     private List<QueryField> queryFieldList;
 
