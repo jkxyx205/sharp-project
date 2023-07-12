@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @author Rick
  * @createdAt 2023-03-08 22:10:00
  */
-public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOImpl<T, ID> {
+public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOImpl<T, ID> implements EntityCodeDAO<T, ID> {
 
     public EntityCodeDAOImpl() {
         super();
@@ -114,6 +114,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param code
      * @return
      */
+    @Override
     public Optional<T> selectByCode(String code) {
         Assert.notNull(code, "code cannot be null");
         List<T> list = selectByParams(Params.builder(1).pv("code", code).build(), "code = :code");
@@ -126,11 +127,13 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param codes
      * @return
      */
+    @Override
     public List<T> selectByCodes(Collection<String> codes) {
         Assert.notEmpty(codes, "codes cannot be empty");
         return selectByParams(Params.builder(1).pv("codes", codes).build(), "code IN(:codes)");
     }
 
+    @Override
     public Long selectIdByCodeOrThrowException(String code) {
         Assert.notNull(code, "code cannot be null");
         Optional<Long> idOptional = selectIdByCode(code);
@@ -146,6 +149,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param code
      * @return
      */
+    @Override
     public Optional<Long> selectIdByCode(String code) {
         return selectSingleValueByCode(code, "id", Long.class);
     }
@@ -156,10 +160,12 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param code
      * @return
      */
+    @Override
     public Optional<String> selectDescriptionByCode(String code) {
         return selectSingleValueByCode(code, "description", String.class);
     }
 
+    @Override
     public <T> Optional<T> selectSingleValueByCode(String code, String columnName, Class<T> clazz) {
         Assert.notNull(code, "code cannot be null");
         List<T> values = selectByParams(Params.builder(1).pv("code", code).build(), columnName, "code = :code", clazz);
@@ -172,6 +178,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param codes
      * @return
      */
+    @Override
     public List<Long> selectIdsByCodes(Collection<String> codes) {
         Assert.notEmpty(codes, "codes cannot be empty");
         List<Long> ids = selectByParams(Params.builder(1).pv("codes", codes).build(), "id", "code IN (:codes)", Long.class);
@@ -184,6 +191,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param id
      * @return
      */
+    @Override
     public Optional<String> selectCodeById(Long id) {
         Assert.notNull(id, "id cannot be null");
         List<String> ids = selectByParams(Params.builder(1).pv("id", id).build(), "code", "id = :id", String.class);
@@ -197,24 +205,29 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @param codes
      * @return
      */
+    @Override
     public Map<String, Long> selectCodeIdMap(Collection<String> codes) {
         return selectByParamsAsMap(Params.builder(1).pv("codes", codes).build(), "code, id", "code IN (:codes)");
     }
 
+    @Override
     public Map<String, T> selectByCodesAsMap(String... codes) {
         return selectByCodesAsMap(Arrays.asList(codes));
     }
 
+    @Override
     public Map<String, T> selectByCodesAsMap(Collection<String> codes) {
         List<T> list = selectByCodes(codes);
         return list.stream().collect(Collectors.toMap(t -> t.getCode(), v -> v));
     }
 
+    @Override
     public Map<String, T> selectByCodesAsMap(Map<String, ?> params, String conditionSQL) {
         List<T> list = selectByParams(params, conditionSQL);
         return list.stream().collect(Collectors.toMap(t -> t.getCode(), v -> v));
     }
 
+    @Override
     public void assertCodeNotExists(String code) {
         Assert.notNull(code, "code cannot be null");
 
@@ -223,10 +236,12 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
     }
 
+    @Override
     public void assertCodeExists(String code) {
         assertCodeExists(code, Collections.emptyMap(), null);
     }
 
+    @Override
     public void assertCodeExists(String code, Map<String, Object> conditionParams, String condition) {
         Assert.notNull(code, "code cannot be null");
         if (!existsByParams(Params.builder(1 + conditionParams.size()).pv("code", code).pvAll(conditionParams).build(), "code = :code" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
@@ -234,10 +249,12 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
     }
 
+    @Override
     public void assertCodesExists(Collection<String> codes) {
         assertCodesExists(codes, Collections.emptyMap(), null);
     }
 
+    @Override
     public void assertCodesExists(Collection<String> codes, Map<String, Object> conditionParams, String condition) {
         Assert.notEmpty(codes, "code cannot be empty");
 
@@ -251,6 +268,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
     }
 
+    @Override
     public Set<String> selectNotExistsCodes(Collection<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             Collections.emptySet();
@@ -266,6 +284,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      *
      * @param codes 待检查的code集合
      */
+    @Override
     public void assertCodesExistsAndUnDuplicate(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             return;
@@ -284,6 +303,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      *
      * @param codes 待检查的code集合
      */
+    @Override
     public void assertCodesUnDuplicate(List<String> codes) {
         Map<String, Long> codeOccurrenceMap = codes.stream().collect(Collectors.groupingBy(code -> code, Collectors.counting()));
         Set<String> codeOccurrenceErrors = codeOccurrenceMap.keySet().stream().filter(m -> codeOccurrenceMap.get(m) > 1).collect(Collectors.toSet());
