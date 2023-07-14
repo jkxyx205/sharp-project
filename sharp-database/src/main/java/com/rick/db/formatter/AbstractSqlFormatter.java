@@ -374,7 +374,7 @@ public abstract class AbstractSqlFormatter {
      * @return
      */
     private String rightParentheses(String srcSql) {
-        if (srcSql.matches("(?s).*\\(\\s*\\).*")) {
+        if (srcSql.matches("(?s).*[^a-zA-z]\\(\\s*\\).*")) {
             String condition = "\\(\\s*\\)";
             String newSQL;
             if (isOnlyCause(srcSql, condition)) {

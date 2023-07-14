@@ -28,6 +28,9 @@ public class FormatSQLTest {
         String s9 = "select * from a where ((hello=:keyword and c = :h)) and ((abc = :a) or (a =1))";
         String s10 = "update sm_user set a = :a, sm.age=:ageq where sm_user.name = :name and age=:age";
         String s11 = "select * from a where name = :name2 AND hello=:keyword and hello like :keyword and age = 5";
+        String s12 = "select NOW() from a where a = :a";
+        String s13 = "select NOW() from a where (b = :b)";
+        String s14 = "select NOW() from a where ((b = :b)) and name = :name";
 
         OracleSqlFormatter oracleSqlFormatter = new OracleSqlFormatter();
 
@@ -37,8 +40,8 @@ public class FormatSQLTest {
         params.put("a", "hello");
         params.put("ageq", "hello222");
         params.put("name", "hello222");
-        params.put("keyword", "hello222");
-
+//        params.put("keyword", "hello222");
+//
 //        System.out.println(oracleSqlFormatter.formatSql(s1, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s2, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s3, params, returnMap));
@@ -49,6 +52,10 @@ public class FormatSQLTest {
 //        System.out.println(oracleSqlFormatter.formatSql(s8, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s9, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s10, params, returnMap));
-        System.out.println(oracleSqlFormatter.formatSql(s11, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s11, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s12, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s13, params, returnMap));
+//        System.out.println(oracleSqlFormatter.formatSql(s14, params, returnMap));
+
     }
 }
