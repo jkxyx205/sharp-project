@@ -103,4 +103,10 @@ public class EntityDAOSupportTest {
         catService.save(Cat.builder().name("save Tomcat").age(15).build());
     }
 
+    @Order(4)
+    @Test
+    public void testDelete() {
+        catDAO.deleteById(712508028410138624L);
+    }
+
 }
