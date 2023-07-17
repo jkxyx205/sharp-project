@@ -248,7 +248,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     SQLUtils.delete(subTableMeta.getTableName(), oneToManyProperty.getOneToMany().joinValue(), set);
                 }
             }, (manyToManyProperty, set) -> {
-                if (CollectionUtils.isNotEmpty(set)) {
+                if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && CollectionUtils.isNotEmpty(set)) {
                     SQLUtils.delete(manyToManyProperty.getManyToMany().thirdPartyTable(), manyToManyProperty.getManyToMany().columnDefinition(), set);
                 }
             });
@@ -290,7 +290,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                             oneToManyProperty.getOneToMany().joinValue() + " IN (:refIds) AND is_deleted = 0");
                 }
             }, (manyToManyProperty, set) -> {
-                if (set.size() > 0) {
+                if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && set.size() > 0) {
                     Object[] mergedParams = new Object[set.size() + 1];
                     mergedParams[0] = 1;
                     System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
@@ -300,6 +300,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             });
 
             selectByParams(Params.builder(1).pv("ids", ids).build(), idColumnName, getIdColumnName() + " IN (:ids)", null, this.entityClass);
+
             CascadeSelectThreadLocalValue.removeAll();
         }
 
