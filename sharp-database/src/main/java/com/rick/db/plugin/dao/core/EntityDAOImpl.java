@@ -748,6 +748,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     protected void appendParamHolder0(StringBuilder sb, String columnName, Object value) {
         String propertyName = columnNameToPropertyNameMap.get(columnName);
+        int dotIndex = propertyName.lastIndexOf(".");
+        if (dotIndex > -1) {
+            propertyName = com.rick.common.util.StringUtils.stringToCamel(com.rick.common.util.StringUtils.camelToSnake(propertyName).replaceAll("\\.", "_"));
+        }
+
         if (!columnName.equals(propertyName)) {
             sb.append(columnName).append(decideParamHolder(propertyName, value)).append(" AND ");
         }
