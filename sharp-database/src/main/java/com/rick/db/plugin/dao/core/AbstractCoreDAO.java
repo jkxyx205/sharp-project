@@ -728,7 +728,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
             throw new IncorrectResultSizeDataAccessException(1, list.size());
         }
 
-        return Optional.of(list.get(0));
+        return Optional.ofNullable(list.get(0));
     }
 
     /**
