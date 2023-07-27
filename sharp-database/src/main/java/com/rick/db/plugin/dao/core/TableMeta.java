@@ -65,6 +65,8 @@ public class TableMeta {
 
     private List<SelectProperty> selectAnnotationList;
 
+    private List<SqlProperty> SqlAnnotationList;
+
     private List<OneToManyProperty> oneToManyAnnotationList;
 
     private List<ManyToOneProperty> manyToOneAnnotationList;
@@ -104,6 +106,17 @@ public class TableMeta {
         private Field field;
 
         private Class subEntityClass;
+    }
+
+    @Value
+    public static class SqlProperty {
+
+        private Sql sql;
+
+        private Field field;
+
+        private Class<?> targetClass;
+
     }
 
     @Value

@@ -7,6 +7,7 @@ import com.rick.common.http.web.param.ParamName;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
+import com.rick.db.plugin.dao.annotation.Sql;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.demo.module.project.domain.entity.Person;
 import lombok.AllArgsConstructor;
@@ -49,5 +50,17 @@ public class Book extends BaseEntity {
     @ManyToMany(thirdPartyTable = "t_book_tag",
             referenceTable = "t_tag", referenceColumnName = "tag_id", columnDefinition="book_id")
     private List<Tag> tagList;
+
+    @Sql("select * from t_person")
+    private List<Person> allPerson;
+
+    @Sql("select * from t_person where id = 552098712424472576")
+    private Person p1;
+
+    @Sql(value = "select * from t_person where id = :id", params = "id@person.id")
+    private Person p2;
+
+    @Sql(value = "select * from t_person where id = :id AND name like :title", params = "id@person.id, title@title")
+    private Person p3;
 
 }

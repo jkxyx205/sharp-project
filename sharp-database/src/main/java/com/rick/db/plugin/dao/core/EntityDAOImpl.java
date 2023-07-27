@@ -11,6 +11,7 @@ import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
+import com.rick.db.plugin.dao.annotation.Sql;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
@@ -40,6 +41,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.rick.db.constant.SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX;
 import static com.rick.db.plugin.dao.annotation.Id.GenerationType.*;
 
 /**
@@ -657,7 +659,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             String columnName = propertyNameToColumnNameMap.get(fieldName);
             Object propertyValue = EntityDAOManager.getPropertyValue(entity, fieldName);
             if (Objects.nonNull(propertyValue)) {
-                params.put(fieldName, propertyValue);
+                params.put(dotValueToCamel(fieldName), propertyValue);
 
                 if (columnName != null && !fieldName.equals(columnName)) {
                     params.put(columnName, resolveEntityValueToDbValue(propertyValue));
@@ -748,10 +750,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     protected void appendParamHolder0(StringBuilder sb, String columnName, Object value) {
         String propertyName = columnNameToPropertyNameMap.get(columnName);
-        int dotIndex = propertyName.lastIndexOf(".");
-        if (dotIndex > -1) {
-            propertyName = com.rick.common.util.StringUtils.stringToCamel(com.rick.common.util.StringUtils.camelToSnake(propertyName).replaceAll("\\.", "_"));
-        }
+        propertyName = dotValueToCamel(propertyName);
 
         if (!columnName.equals(propertyName)) {
             sb.append(columnName).append(decideParamHolder(propertyName, value)).append(" AND ");
@@ -908,16 +907,19 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
+
         // region Select
         for (TableMeta.SelectProperty selectProperty : tableMeta.getSelectAnnotationList()) {
             String joinValue = StringUtils.isBlank(selectProperty.getSelect().joinValue()) ? subTableRefColumnName : selectProperty.getSelect().joinValue();
-            String referencePropertyName = StringUtils.isBlank(selectProperty.getSelect().referencePropertyName()) ? tableMeta.getIdPropertyName() : selectProperty.getSelect().referencePropertyName();
+
 
             String storeKey = selectProperty.getSelect().table() + ":" + joinValue;
             if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
             EntityDAOThreadLocalValue.add(storeKey);
+
+            String referencePropertyName = StringUtils.isBlank(selectProperty.getSelect().referencePropertyName()) ? tableMeta.getIdPropertyName() : selectProperty.getSelect().referencePropertyName();
 
             String targetTable = selectProperty.getSelect().table();
             EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
@@ -936,7 +938,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 } else {
                     setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
                 }
-
             }
         }
         // endregion
@@ -1067,6 +1068,28 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
         }
         //endregion
+
+        // region Sql
+        for (TableMeta.SqlProperty sqlProperty : tableMeta.getSqlAnnotationList()) {
+            Sql sql = sqlProperty.getSql();
+            String[] mappingKv = StringUtils.isBlank(sql.params()) ? null : sql.params().split(COLUMN_NAME_SEPARATOR_REGEX);
+
+            for (T t : list) {
+                Map<String, Object> params = null;
+                if (ArrayUtils.isNotEmpty(mappingKv)) {
+                    params = Maps.newHashMapWithExpectedSize(mappingKv.length);
+                    for (String kv : mappingKv) {
+                        String[] kvArr = kv.split("@");
+                        params.put(kvArr[0], getValue(t, kvArr[1]));
+                    }
+                }
+                List<?> queryList = sharpService.query(sql.value(), params, sqlProperty.getTargetClass());
+
+                Object value = Collection.class.isAssignableFrom(sqlProperty.getField().getType()) ? queryList : expectedAsOptional(queryList).orElse(null);
+                setPropertyValue(t, sqlProperty.getField(), value);
+            }
+        }
+        // endregion
     }
 
     private void cascadeInsertOrUpdate(List<T> instanceList, boolean insert) {
@@ -1208,5 +1231,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     interface TriConsumer<K, V, S> {
         void accept(K k, V v, S s);
+    }
+
+    private String dotValueToCamel(String value) {
+        int dotIndex = value.lastIndexOf(".");
+        if (dotIndex > -1) {
+            value = com.rick.common.util.StringUtils.stringToCamel(com.rick.common.util.StringUtils.camelToSnake(value).replaceAll("\\.", "_"));
+        }
+        return value;
     }
 }

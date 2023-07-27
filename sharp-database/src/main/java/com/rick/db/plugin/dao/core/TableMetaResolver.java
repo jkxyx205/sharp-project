@@ -50,6 +50,7 @@ class TableMetaResolver {
 
         List<TableMeta.EmbeddedProperty> embeddedPropertyList = Lists.newArrayList();
         List<TableMeta.SelectProperty> selectAnnotationList = Lists.newArrayList();
+        List<TableMeta.SqlProperty> sqlAnnotationList = Lists.newArrayList();
         List<TableMeta.OneToManyProperty> oneToManyAnnotationList = Lists.newArrayList();
         List<TableMeta.ManyToOneProperty> manyToOneAnnotationList = Lists.newArrayList();
         List<TableMeta.ManyToManyProperty> manyToManyAnnotationList = Lists.newArrayList();
@@ -59,7 +60,7 @@ class TableMetaResolver {
 
         IdCollector idCollector = new IdCollector();
         VersionCollector versionCollector = new VersionCollector();
-        resolveFields(fields, "", idCollector, versionCollector, embeddedPropertyList, selectAnnotationList,
+        resolveFields(fields, "", "", idCollector, versionCollector, embeddedPropertyList, selectAnnotationList, sqlAnnotationList,
                 oneToManyAnnotationList, manyToOneAnnotationList,
                 manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                 columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
@@ -78,11 +79,12 @@ class TableMetaResolver {
         }
 
         return new TableMeta(tableAnnotation, idCollector.id, idCollector.field, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
-                updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
+                updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, sqlAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, fieldMap, columnNameMap);
     }
 
-    private void resolveFields(Field[] fields, String propertyNamePrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
+    private void resolveFields(Field[] fields, String propertyNamePrefix, String columnPrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
+                               List<TableMeta.SqlProperty> sqlAnnotationList,
                                List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
                                List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap, Map<String, Field> fieldMap,
                                StringBuilder columnNamesBuilder, StringBuilder updateColumnNamesBuilder, StringBuilder propertiesBuilder, StringBuilder updatePropertiesBuilder) {
@@ -102,6 +104,20 @@ class TableMetaResolver {
                 }
 
                 selectAnnotationList.add(new TableMeta.SelectProperty(selectAnnotation, field, subEntityClass));
+            }
+
+            Sql sqlAnnotation = field.getAnnotation(Sql.class);
+            if (sqlAnnotation != null) {
+                Class<?> targetClass;
+
+                if (Collection.class.isAssignableFrom(field.getType())) {
+                    ParameterizedType subEntityListType = (ParameterizedType) field.getGenericType();
+                    targetClass = (Class<?>) subEntityListType.getActualTypeArguments()[0];
+                } else {
+                    targetClass = field.getType();
+                }
+
+                sqlAnnotationList.add(new TableMeta.SqlProperty(sqlAnnotation, field, targetClass));
             }
 
             OneToMany oneToManyAnnotation = field.getAnnotation(OneToMany.class);
@@ -133,8 +149,8 @@ class TableMetaResolver {
             if (embedded != null) {
                 embeddedPropertyList.add(new TableMeta.EmbeddedProperty(embedded, field));
                 Field[] embeddedFields = getAllFields(field.getType());
-                resolveFields(embeddedFields, propertyName + ".", idCollector, versionCollector, embeddedPropertyList,
-                        selectAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
+                resolveFields(embeddedFields, propertyName + ".", embedded.columnPrefix(), idCollector, versionCollector, embeddedPropertyList,
+                        selectAnnotationList, sqlAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
                         manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                         columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
             }
@@ -153,8 +169,8 @@ class TableMetaResolver {
             }
 
             Column annotation = AnnotatedElementUtils.getMergedAnnotation(field, Column.class);
-            String columnName = Objects.nonNull(annotation) && StringUtils.isNotBlank(annotation.value())
-                    ? annotation.value() : camelToSnake(Objects.nonNull(manyToOneAnnotation) ? field.getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName());
+            String columnName = columnPrefix + (Objects.nonNull(annotation) && StringUtils.isNotBlank(annotation.value())
+                    ? annotation.value() : camelToSnake(Objects.nonNull(manyToOneAnnotation) ? field.getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName()));
 
             columnNameFieldMap.put(columnName, field);
             columnNameMap.put(columnName, annotation);
