@@ -1,6 +1,7 @@
 package com.rick.db.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.constant.SharpDbConstants;
@@ -24,16 +25,20 @@ public class BaseEntity extends SimpleEntity {
 
     @Column(updatable = false, comment = "创建人")
     @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long createBy;
 
     @Column(updatable = false, comment = "创建时间")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createTime;
 
     @Column(comment = "更新人")
     @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long updateBy;
 
     @Column(comment = "更新时间")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime updateTime;
 
     @JsonIgnore
