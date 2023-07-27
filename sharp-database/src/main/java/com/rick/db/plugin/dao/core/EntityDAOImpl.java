@@ -1073,20 +1073,31 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         for (TableMeta.SqlProperty sqlProperty : tableMeta.getSqlAnnotationList()) {
             Sql sql = sqlProperty.getSql();
             String[] mappingKv = StringUtils.isBlank(sql.params()) ? null : sql.params().split(COLUMN_NAME_SEPARATOR_REGEX);
-
+            Set<String> notNullKeys = Arrays.stream( sql.nullWhenParamsIsNull()).collect(Collectors.toSet());
             for (T t : list) {
+                boolean valueNull = false;
                 Map<String, Object> params = null;
+                // 获取参数
                 if (ArrayUtils.isNotEmpty(mappingKv)) {
                     params = Maps.newHashMapWithExpectedSize(mappingKv.length);
                     for (String kv : mappingKv) {
                         String[] kvArr = kv.split("@");
-                        params.put(kvArr[0], getValue(t, kvArr[1]));
+                        Object value = getValue(t, kvArr[1]);
+                        params.put(kvArr[0], value);
+                        if (notNullKeys.contains(kvArr[0]) && Objects.isNull(value)) {
+                            valueNull = true;
+                            break;
+                        }
                     }
                 }
-                List<?> queryList = sharpService.query(sql.value(), params, sqlProperty.getTargetClass());
 
-                Object value = Collection.class.isAssignableFrom(sqlProperty.getField().getType()) ? queryList : expectedAsOptional(queryList).orElse(null);
-                setPropertyValue(t, sqlProperty.getField(), value);
+                if (valueNull) {
+                    setPropertyValue(t, sqlProperty.getField(), null);
+                } else {
+                    List<?> queryList = sharpService.query(sql.value(), params, sqlProperty.getTargetClass());
+                    Object value = Collection.class.isAssignableFrom(sqlProperty.getField().getType()) ? queryList : expectedAsOptional(queryList).orElse(null);
+                    setPropertyValue(t, sqlProperty.getField(), value);
+                }
             }
         }
         // endregion

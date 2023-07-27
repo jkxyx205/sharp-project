@@ -16,4 +16,10 @@ public @interface Sql {
 
     String params() default "";
 
+    /**
+     * 允许某个参数为null的时候， 直接返回结果null，无需数据库查询
+     * @return
+     */
+    String[] nullWhenParamsIsNull() default {};
+
 }
