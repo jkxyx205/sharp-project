@@ -166,18 +166,19 @@ public class SharpService {
         public NestedRowMapper(Class<T> mappedClass) {
             this.mappedClass = mappedClass;
             this.mappedFields = new HashMap<>();
-            List<Class> classList = new ArrayList<>();
-            initMappedValues(mappedClass, null, classList);
+            List<String> propertyNames = new ArrayList<>();
+            initMappedValues(mappedClass, null, propertyNames);
         }
 
-        private void initMappedValues(Class<?> mappedClass, String propertyPrefix, List<Class> classList) {
+        private void initMappedValues(Class<?> mappedClass, String propertyPrefix, List<String> propertyNames) {
             for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
                 if (pd.getWriteMethod() != null) {
-                    this.mappedFields.put(lowerCaseName((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName()), pd);
+                    String propertyName = lowerCaseName((propertyPrefix == null ? "" : propertyPrefix + ".") + pd.getName());
+                    this.mappedFields.put(propertyName, pd);
                     if (SqlTypeValue.TYPE_UNKNOWN == StatementCreatorUtils.javaTypeToSqlParameterType(pd.getPropertyType())) {
-                        if (!classList.contains(pd.getPropertyType())) {
-                            classList.add(pd.getPropertyType());
-                            initMappedValues(pd.getPropertyType(), pd.getName(), classList);
+                        if (!propertyNames.contains(propertyName)) {
+                            propertyNames.add(propertyName);
+                            initMappedValues(pd.getPropertyType(), pd.getName(), propertyNames);
                         }
                     }
                 }
