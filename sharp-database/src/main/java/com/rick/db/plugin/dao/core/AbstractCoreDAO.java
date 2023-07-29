@@ -12,13 +12,13 @@ import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
+import com.rick.db.util.OptionalUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -720,15 +720,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      * @return
      */
     public <E> Optional<E> expectedAsOptional(List<E> list) {
-        if (CollectionUtils.isEmpty(list)) {
-            return Optional.empty();
-        }
-
-        if (list.size() > 1) {
-            throw new IncorrectResultSizeDataAccessException(1, list.size());
-        }
-
-        return Optional.ofNullable(list.get(0));
+       return OptionalUtils.expectedAsOptional(list);
     }
 
     /**

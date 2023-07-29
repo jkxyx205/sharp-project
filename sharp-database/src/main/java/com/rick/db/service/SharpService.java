@@ -2,6 +2,7 @@ package com.rick.db.service;
 
 import com.rick.common.util.StringUtils;
 import com.rick.db.formatter.AbstractSqlFormatter;
+import com.rick.db.util.OptionalUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.util.CollectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
@@ -126,16 +126,7 @@ public class SharpService {
     }
 
     private Optional handleResult(List<?> list) {
-        if (CollectionUtils.isEmpty(list)) {
-            return Optional.empty();
-        }
-
-        int size = list.size();
-        if (size > 1) {
-            throw new IncorrectResultSizeDataAccessException(1, size);
-        }
-
-        return Optional.of(list.get(0));
+        return OptionalUtils.expectedAsOptional(list);
     }
 
     <T> List<T> toClass(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap, Class<T> clazz) {
