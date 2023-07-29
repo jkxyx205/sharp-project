@@ -6,6 +6,7 @@ import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializ
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
+import com.rick.db.plugin.dao.annotation.Sql;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,5 +39,8 @@ public class Person extends BaseEntity {
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @ManyToOne(parentTable = "t_person_id_card", value = "id_card_id", cascadeInsertOrUpdate = true)
     private IdCard idCard;
+
+    @Sql("select * from t_role")
+    private List<Role> roleAll;
 
 }
