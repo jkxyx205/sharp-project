@@ -112,4 +112,6 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     String getSelectConditionSQL(Map<String, ?> params);
 
+    void selectPropertyBySql(List<T> list);
+
 }

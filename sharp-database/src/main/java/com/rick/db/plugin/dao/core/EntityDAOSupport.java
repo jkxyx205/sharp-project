@@ -8,9 +8,11 @@ import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
+import com.rick.db.util.OptionalUtils;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -23,7 +25,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Rick.Xu
@@ -95,6 +97,36 @@ public class EntityDAOSupport {
         return entityDAO;
     }
 
+    public <T> Optional<T> queryForObject(String sql, Map<String, Object> params, Class<T> tagetClass) {
+        return OptionalUtils.expectedAsOptional(query(sql,params, tagetClass));
+    }
+
+    public <T> List<T> query(String sql, Map<String, Object> params, Class<T> tagetClass) {
+        List<T> list = sharpService.query(sql, params, tagetClass);
+        EntityDAO<T, ?> entityDAO = getEntityDAO(tagetClass);
+        entityDAO.selectPropertyBySql(list);;
+        return list;
+    }
+
+    public <T> T query(T t) {
+       if (t == null) {
+           return null;
+       }
+
+       query(Arrays.asList(t));
+       return t;
+    }
+
+    public <T> List<T> query(List<T> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return list;
+        }
+
+        EntityDAO<T, ?> entityDAO = getEntityDAO(list.get(0).getClass());
+        entityDAO.selectPropertyBySql(list);;
+        return list;
+    }
+
     @PostConstruct
     public void init() throws ClassNotFoundException {
         if (org.apache.commons.lang3.StringUtils.isBlank(sharpDatabaseProperties.getEntityBasePackage())) {
@@ -111,4 +143,5 @@ public class EntityDAOSupport {
             getEntityDAO(Class.forName(beanDefinition.getBeanClassName()));
         }
     }
+
 }

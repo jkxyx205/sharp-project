@@ -903,44 +903,46 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return new Object[]{params, id};
     }
 
-    private void cascadeSelect(List<T> list) {
-        if (CollectionUtils.isEmpty(list)) {
-            return;
-        }
-
-        // region Select
-        for (TableMeta.SelectProperty selectProperty : tableMeta.getSelectAnnotationList()) {
-            String joinValue = StringUtils.isBlank(selectProperty.getSelect().joinValue()) ? subTableRefColumnName : selectProperty.getSelect().joinValue();
-
-
-            String storeKey = selectProperty.getSelect().table() + ":" + joinValue;
-            if (EntityDAOThreadLocalValue.remove(storeKey)) {
-                continue;
-            }
-            EntityDAOThreadLocalValue.add(storeKey);
-
-            String referencePropertyName = StringUtils.isBlank(selectProperty.getSelect().referencePropertyName()) ? tableMeta.getIdPropertyName() : selectProperty.getSelect().referencePropertyName();
-
-            String targetTable = selectProperty.getSelect().table();
-            EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
-            if (subTableEntityDAO == null) {
-                log.warn("Table [" + targetTable + "] lost DAOImpl, will auto generate it!");
-                subTableEntityDAO = context.getBean(EntityDAOSupport.class).getEntityDAO(selectProperty.getSubEntityClass());
-            }
-
-            Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
-            Map<Object, List<?>> subTableData = subTableEntityDAO.groupByColumnName(joinValue, refIds);
-
+    @Override
+    public void selectPropertyBySql(List<T> list) {
+        // region Sql
+        for (TableMeta.SqlProperty sqlProperty : tableMeta.getSqlAnnotationList()) {
+            Sql sql = sqlProperty.getSql();
+            String[] mappingKv = StringUtils.isBlank(sql.params()) ? null : sql.params().split(COLUMN_NAME_SEPARATOR_REGEX);
+            Set<String> notNullKeys = Arrays.stream( sql.nullWhenParamsIsNull()).collect(Collectors.toSet());
             for (T t : list) {
-                Object data = subTableData.get(getValue(t, referencePropertyName));
-                if (selectProperty.getSelect().oneToOne()) {
-                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? null : ((Collection) data).iterator().next());
+                boolean valueNull = false;
+                Map<String, Object> params = null;
+                // 获取参数
+                if (ArrayUtils.isNotEmpty(mappingKv)) {
+                    params = Maps.newHashMapWithExpectedSize(mappingKv.length);
+                    for (String kv : mappingKv) {
+                        String[] kvArr = kv.split("@");
+                        Object value = getValue(t, kvArr[1]);
+                        params.put(kvArr[0], value);
+                        if (notNullKeys.contains(kvArr[0]) && Objects.isNull(value)) {
+                            valueNull = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (valueNull) {
+                    setPropertyValue(t, sqlProperty.getField(), null);
                 } else {
-                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
+                    List<?> queryList = sharpService.query(sql.value(), params, sqlProperty.getTargetClass());
+                    Object value = Collection.class.isAssignableFrom(sqlProperty.getField().getType()) ? queryList : expectedAsOptional(queryList).orElse(null);
+                    setPropertyValue(t, sqlProperty.getField(), value);
                 }
             }
         }
         // endregion
+    }
+
+    private void cascadeSelect(List<T> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
 
         //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
@@ -1069,38 +1071,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
         //endregion
 
-        // region Sql
-        for (TableMeta.SqlProperty sqlProperty : tableMeta.getSqlAnnotationList()) {
-            Sql sql = sqlProperty.getSql();
-            String[] mappingKv = StringUtils.isBlank(sql.params()) ? null : sql.params().split(COLUMN_NAME_SEPARATOR_REGEX);
-            Set<String> notNullKeys = Arrays.stream( sql.nullWhenParamsIsNull()).collect(Collectors.toSet());
-            for (T t : list) {
-                boolean valueNull = false;
-                Map<String, Object> params = null;
-                // 获取参数
-                if (ArrayUtils.isNotEmpty(mappingKv)) {
-                    params = Maps.newHashMapWithExpectedSize(mappingKv.length);
-                    for (String kv : mappingKv) {
-                        String[] kvArr = kv.split("@");
-                        Object value = getValue(t, kvArr[1]);
-                        params.put(kvArr[0], value);
-                        if (notNullKeys.contains(kvArr[0]) && Objects.isNull(value)) {
-                            valueNull = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (valueNull) {
-                    setPropertyValue(t, sqlProperty.getField(), null);
-                } else {
-                    List<?> queryList = sharpService.query(sql.value(), params, sqlProperty.getTargetClass());
-                    Object value = Collection.class.isAssignableFrom(sqlProperty.getField().getType()) ? queryList : expectedAsOptional(queryList).orElse(null);
-                    setPropertyValue(t, sqlProperty.getField(), value);
-                }
-            }
-        }
-        // endregion
+        selectPropertyBySql(list);
     }
 
     private void cascadeInsertOrUpdate(List<T> instanceList, boolean insert) {
