@@ -1,6 +1,7 @@
 package com.rick.common.http.web;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -68,6 +69,8 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
             objectMapper.registerModule(simpleModule);
             objectMapper.setDateFormat(new SimpleDateFormat(pattern));
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+
 //            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         }
     }
