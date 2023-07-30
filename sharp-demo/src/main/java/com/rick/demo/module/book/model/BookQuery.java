@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Rick.Xu
@@ -47,4 +48,7 @@ public class BookQuery {
 
     @Sql(value = "select * from t_person where id = :id AND name like :title", params = "id@person.id, title@title")
     Person p3;
+
+    @Sql(value = "select * from t_person where id = :id", params = "id@person.id")
+    Map<String, Object> personMap;
 }
