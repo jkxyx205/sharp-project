@@ -197,7 +197,9 @@ public class FormService {
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
             if (StringUtils.isNotBlank(form.getForm().getRepositoryName())) {
                 EntityDAO entityDAO = applicationContext.getBean(form.getForm().getRepositoryName(), EntityDAO.class);
-                entityDAO.insertOrUpdate(values);
+//                entityDAO.insertOrUpdate(values);
+                // map 转 entity，可以做级联操作
+                entityDAO.insertOrUpdate(entityDAO.mapToEntity(values));
             } else {
                 MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, form.getForm().getTableName(), Long.class);
                 mapDAO.insertOrUpdate(values);
