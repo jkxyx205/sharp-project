@@ -108,10 +108,14 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     Map<String, Object> entityToMap(T entity);
 
-    T mapToEntity(Map<String, ?> map);
+    <E> E mapToEntity(Map<String, ?> map);
+
+    <E> E mapToEntity(Map<String, ?> map, Class<E> entityClass);
 
     String getSelectConditionSQL(Map<String, ?> params);
 
     void selectPropertyBySql(List<T> list);
+
+    Map<String, String> getPropertyNameToColumnNameMap();
 
 }

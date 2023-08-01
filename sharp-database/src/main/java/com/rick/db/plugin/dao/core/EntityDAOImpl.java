@@ -332,7 +332,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public int update(Map<String, ?> params) {
-        return update(mapToEntity(params));
+        return update((T)mapToEntity(params));
     }
 
     /**
@@ -671,12 +671,20 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    public T mapToEntity(Map<String, ?> map) {
-        T mappedObject = BeanUtils.instantiateClass(this.entityClass);
+    public <E> E mapToEntity(Map<String, ?> map) {
+        return (E) mapToEntity(map, this.entityClass);
+    }
+
+    @Override
+    public <E> E mapToEntity(Map<String, ?> map, Class<E> entityClass) {
+        E mappedObject = BeanUtils.instantiateClass(entityClass);
 
         BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
         bw.setAutoGrowNestedPaths(true);
         bw.setConversionService(dbConversionService);
+
+        Map<String, String> propertyNameToColumnNameMap = EntityDAOManager.getEntityDAO(entityClass).getPropertyNameToColumnNameMap();
+        TableMeta tableMeta = EntityDAOManager.getTableMeta(entityClass);
 
         Set<String> fieldNames = tableMeta.getFieldMap().keySet();
 
@@ -685,7 +693,27 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             Object propertyValue = map.get(fieldName) == null ? map.get(columnName) : map.get(fieldName);
 
             if (Objects.nonNull(propertyValue)) {
-                bw.setPropertyValue(fieldName, propertyValue);
+                Field field = tableMeta.getFieldMap().get(fieldName);
+
+                if (Map.class.isAssignableFrom(propertyValue.getClass()) && SimpleEntity.class.isAssignableFrom(field.getType())) {
+                    bw.setPropertyValue(fieldName, mapToEntity((Map<String, ?>) propertyValue, field.getType()));
+                } else if (Collection.class.isAssignableFrom(propertyValue.getClass()) && CollectionUtils.isNotEmpty((Collection<?>) propertyValue)) {
+                    List originalList = (List) propertyValue;
+                    List distList = Lists.newArrayListWithExpectedSize(originalList.size());
+                    if (Map.class.isAssignableFrom(originalList.get(0).getClass())) {
+                        Class<?> subEntityClass = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
+                        if (SimpleEntity.class.isAssignableFrom(subEntityClass)) {
+                            for (Object object : originalList) {
+                                distList.add(mapToEntity((Map<String, ?>) object, subEntityClass));
+                            }
+                            bw.setPropertyValue(fieldName, distList);
+                        }
+                    } else {
+                        bw.setPropertyValue(fieldName, propertyValue);
+                    }
+                } else {
+                    bw.setPropertyValue(fieldName, propertyValue);
+                }
             }
         }
 
@@ -937,6 +965,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
         }
         // endregion
+    }
+
+    @Override
+    public Map<String, String> getPropertyNameToColumnNameMap() {
+        return propertyNameToColumnNameMap;
     }
 
     private void cascadeSelect(List<T> list) {
