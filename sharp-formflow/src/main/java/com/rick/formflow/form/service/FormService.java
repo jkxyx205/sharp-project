@@ -137,6 +137,13 @@ public class FormService {
             propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
         }
 
+        if (isInstanceForm) {
+            FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
+            if (formAdvice != null) {
+                formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
+            }
+        }
+
         return new FormBO(form, instanceId, propertyList);
     }
 

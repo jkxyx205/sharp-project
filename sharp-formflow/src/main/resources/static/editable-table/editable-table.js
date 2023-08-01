@@ -16,11 +16,12 @@ head.appendChild(style)
         init: function() {
             this.$tbody = this.$element.find('tbody')
             if (this.options.value) {
-                _renderTable(this.$tbody, this.options.value)
+                _renderTable(this.$tbody, this.options.value, this.options.readonly)
             }
 
-            _bindEvent(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback)
-            _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback)
+            if (!this.options.readonly) {
+                _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback, this.options.readonly)
+            }
         },
         getValue: function() {
             let list = []
@@ -34,11 +35,11 @@ head.appendChild(style)
             return list
         },
         addEmptyLine: function () {
-            _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback)
+            _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback, this.options.readonly)
         }
     }
 
-    function _renderTable($tbody, list) {
+    function _renderTable($tbody, list, readonly) {
         var tbodyHTML = []
 
         for (arr of list) {
@@ -47,37 +48,56 @@ head.appendChild(style)
             for(v of arr) {
                 tbodyHTML.push('<td><input class="form-control" type="text" value="'+v+'" autocomplete="off"/></td>')
             }
+            if (!readonly) {
+                tbodyHTML.push('<td class="operator btn-link">X</td></tr>')
+            }
 
-            tbodyHTML.push('<td class="operator btn-link">X</td></tr>')
         }
         $tbody.append(tbodyHTML.join(''))
-    }
 
-    function input_focus(e, columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback) {
-        let isLastChild = ($(e.target).parent().parent().next().length == 0)
-        if (isLastChild) {
-            _addEmptyLine(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback)
+        if (readonly) {
+            $tbody.find(':input').attr('disabled', true).attr('readonly', true)
         }
     }
 
-    function _addEmptyLine(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback) {
+    function input_focus(e, columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback, readonly) {
+        let isLastChild = ($(e.target).parent().parent().next().length == 0)
+        if (isLastChild) {
+            _addEmptyLine(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback, readonly)
+        }
+    }
+
+    function _addEmptyLine(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback, readonly) {
         var lineHTML = []
         lineHTML.push('<tr>')
         for(var i = 0; i < columns; i++) {
             lineHTML.push('<td><input class="form-control" type="text" value="" autocomplete="off"/></td>')
         }
-        lineHTML.push('<td class="operator btn-link">X</td></tr>')
+
+        if (!readonly) {
+            lineHTML.push('<td class="operator btn-link">X</td></tr>')
+        }
 
         $tbody.append(lineHTML.join(''))
-        _bindEvent(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback)
         addEmptyLineCallback && addEmptyLineCallback($tbody.find('tr:last-child'))
+        _bindEvent(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback, readonly)
     }
 
-    function _bindEvent(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback) {
-        $tbody.find('input').each(function() {
-            this.addEventListener("input", function(e) {
-                input_focus(e, columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback)
-            });
+    function _bindEvent(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback, readonly) {
+        if (readonly) {
+            return
+        }
+
+        $tbody.find('tr:last-child :input').each(function() {
+            if (this.tagName === 'INPUT') {
+                this.addEventListener("input", function(e) {
+                    input_focus(e, columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback)
+                });
+            } else if (this.tagName === 'SELECT') {
+                this.addEventListener("change", function(e) {
+                    input_focus(e, columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback)
+                });
+            }
         })
 
         $tbody.find('.operator').each((e, elem) => {
@@ -122,6 +142,6 @@ head.appendChild(style)
     };
 
     $.fn.editableTable.defaults = {
-
+        readonly: false
     };
 })(jQuery);
