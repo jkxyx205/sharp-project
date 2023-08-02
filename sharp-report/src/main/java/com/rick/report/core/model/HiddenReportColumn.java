@@ -1,5 +1,7 @@
 package com.rick.report.core.model;
 
+import java.util.List;
+
 /**
  * All rights Reserved, Designed By www.xhope.top
  *
@@ -13,6 +15,11 @@ public class HiddenReportColumn extends ReportColumn {
 
     public HiddenReportColumn(String name) {
         super(name,null, false, null, null, null,
+                AlignEnum.LEFT,  true, false, TypeEnum.TEXT);
+    }
+
+    public HiddenReportColumn(String name, String context, List<String> valueConverterNameList) {
+        super(name,null, false, context, valueConverterNameList, null,
                 AlignEnum.LEFT,  true, false, TypeEnum.TEXT);
     }
 
