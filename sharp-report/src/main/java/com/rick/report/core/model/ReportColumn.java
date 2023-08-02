@@ -93,6 +93,11 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
         return this;
     }
 
+    public ReportColumn setHidden(Boolean hidden) {
+        this.hidden = hidden;
+        return this;
+    }
+
     public enum TypeEnum {
         TEXT, NUMERIC, DECIMAL;
 
