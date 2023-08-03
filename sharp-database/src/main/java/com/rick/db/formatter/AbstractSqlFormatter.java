@@ -88,7 +88,7 @@ public abstract class AbstractSqlFormatter {
 	}
 	
 	public String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap) {
-		List<String> names = ParsedSqlHelper.get(srcSql);
+		List<String> paramNames = ParsedSqlHelper.get(srcSql);
 		
 		if(params == null) {
 			params = Collections.emptyMap();
@@ -104,7 +104,7 @@ public abstract class AbstractSqlFormatter {
 
 		for(ParamHolder h : paramList) {
 			String name = h.param;
-			names.remove(name);
+			paramNames.remove(name);
 			Object param = params.get(name);
 
             if(Objects.isNull(param)) {
@@ -183,37 +183,37 @@ public abstract class AbstractSqlFormatter {
 		}
 
         // 其他解决不了的 用''
-		for (String p : names) {
-			p = ":"+p;
-			String pp = p.substring(1);
-			Object v = formatMap.get(pp) ;
-			if (v == null || StringUtils.isBlank((String)v)) {
-				v = params.get(pp);
-				if (v == null || (v instanceof String && StringUtils.isBlank((String)v))) {
-                     StringBuilder sb  = new StringBuilder(srcSql);
-                     int len = p.length();
-                     int index = 0;
-                     int strLen = sb.length();
-                     while ((index = sb.indexOf(p,index)) > -1) {
-                         int nextLen = index + len;
-                         char nextChar = ' ';
-                         if (strLen > nextLen) {
-                             nextChar = sb.charAt(nextLen);
-                         }
+		for (String paramName : paramNames) {
+            if(formatMap.containsKey(paramName)) {
+                continue;
+            }
 
-                         if (nextChar < 'A' || nextChar > 'z') {
-                             sb.delete(index, index + len);
-                             sb.insert(index, "''");
-                             index = index + 2;
-                         } else {
-                             index = index + len;
-                         }
+			String p = ":" + paramName;
+			Object v = params.get(paramName);
+            if (v == null || (v instanceof String && StringUtils.isBlank((String)v))) {
+                 StringBuilder sb  = new StringBuilder(srcSql);
+                 int len = p.length();
+                 int index = 0;
+                 int strLen = sb.length();
+                 while ((index = sb.indexOf(p,index)) > -1) {
+                     int nextLen = index + len;
+                     char nextChar = ' ';
+                     if (strLen > nextLen) {
+                         nextChar = sb.charAt(nextLen);
                      }
-                    srcSql = sb.toString();
-				} else {
-					formatMap.put(pp, v);
-				}
-			}
+
+                     if (nextChar < 'A' || nextChar > 'z') {
+                         sb.delete(index, index + len);
+                         sb.insert(index, "''");
+                         index = index + 2;
+                     } else {
+                         index = index + len;
+                     }
+                 }
+                srcSql = sb.toString();
+            } else {
+                formatMap.put(paramName, v);
+            }
 		}
 
         //mysql变量变成?
