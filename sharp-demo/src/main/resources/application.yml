@@ -49,6 +49,8 @@ dict:
         - "四川"
         - "陕西"
         - "上海"
+props:
+  items: {"s1": "helloworld"}
 
 fileupload:
   tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
