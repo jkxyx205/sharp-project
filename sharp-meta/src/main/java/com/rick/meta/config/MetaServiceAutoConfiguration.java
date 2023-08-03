@@ -11,6 +11,7 @@ import com.rick.meta.dict.model.DictProperties;
 import com.rick.meta.dict.service.DictDOSupplier;
 import com.rick.meta.dict.service.DictService;
 import com.rick.meta.dict.service.DictServiceImpl;
+import com.rick.meta.props.model.KeyValueProperties;
 import com.rick.meta.props.service.PropertyService;
 import com.rick.meta.props.service.PropertyServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class MetaServiceAutoConfiguration {
     }
 
     @Configuration
-    @EnableConfigurationProperties(DictProperties.class)
+    @EnableConfigurationProperties({DictProperties.class, KeyValueProperties.class})
     static class MetaGridServiceConfiguration {
 
         @Bean
@@ -53,8 +54,8 @@ public class MetaServiceAutoConfiguration {
         }
 
         @Bean
-        public PropertyService getPropertyService(SharpService sharpService) {
-            return new PropertyServiceImpl(sharpService);
+        public PropertyService getPropertyService(SharpService sharpService, KeyValueProperties keyValueProperties) {
+            return new PropertyServiceImpl(sharpService, keyValueProperties);
         }
 
         @Bean

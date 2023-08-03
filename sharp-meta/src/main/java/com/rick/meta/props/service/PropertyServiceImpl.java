@@ -1,22 +1,18 @@
 package com.rick.meta.props.service;
 
-import com.google.common.collect.Maps;
 import com.rick.db.service.SharpService;
-import com.rick.meta.props.dao.dataobject.PropertyDO;
+import com.rick.meta.props.model.KeyValueProperties;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
-
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author Rick
  * @createdAt 2021-09-06 17:16:00
  */
 @RequiredArgsConstructor
-public class PropertyServiceImpl implements PropertyService {
+public class PropertyServiceImpl implements PropertyService, InitializingBean {
 
     private final SharpService sharpService;
 
@@ -26,21 +22,24 @@ public class PropertyServiceImpl implements PropertyService {
 
     private static final String SELECT_SQL = "SELECT name, value FROM sys_property WHERE name = :name";
 
+    private final KeyValueProperties keyValueProperties;
+
     @Override
     public String getProperty(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
-        params.put("name", name);
-
-        Optional<PropertyDO> optional = sharpService
-                .queryForObject(SELECT_SQL,
-                        params,
-                        PropertyDO.class);
-
-        return optional.isPresent() ? optional.get().getValue() : null;
+        return PropertyUtils.getProperty(name);
+//        if (StringUtils.isBlank(name)) {
+//            return null;
+//        }
+//
+//        Map<String, Object> params = Maps.newHashMapWithExpectedSize(1);
+//        params.put("name", name);
+//
+//        Optional<PropertyDO> optional = sharpService
+//                .queryForObject(SELECT_SQL,
+//                        params,
+//                        PropertyDO.class);
+//
+//        return optional.isPresent() ? optional.get().getValue() : null;
     }
 
     @Override
@@ -54,5 +53,18 @@ public class PropertyServiceImpl implements PropertyService {
         if (updateCount == 0) {
             jdbcTemplate.update(INSERT_SQL, name, value);
         }
+
+        // build
+        PropertyUtils.map.put(name, value);
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        // 初始化
+        // 配置文件属性
+        PropertyUtils.map.putAll(keyValueProperties.getItems());
+        // 数据库属性
+        PropertyUtils.map.putAll(sharpService.queryForKeyValue(SELECT_SQL, null));
+
     }
 }
