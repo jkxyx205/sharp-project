@@ -49,7 +49,7 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
     }
 
     public enum Type {
-        TEXT, SELECT, MULTIPLE_SELECT, DATE_RANGE;
+        TEXT, SELECT, GROUP_SELECT, MULTIPLE_SELECT, DATE_RANGE;
     }
 
 }
