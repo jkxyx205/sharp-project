@@ -8,6 +8,7 @@ import com.rick.meta.dict.model.DictProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
@@ -90,7 +91,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
         DictUtils.dictMap = Maps.newHashMapWithExpectedSize(dictProperties.getItems().size() + map.size());
 
         for (Map.Entry<String, List<Dict>> en : map.entrySet()) {
-            DictUtils.dictMap.put(en.getKey(), en.getValue().stream().sorted(Comparator.comparing(Dict::getSort)).collect(Collectors.toList()));
+            DictUtils.dictMap.put(en.getKey(), en.getValue().stream().sorted(Comparator.comparing(dict -> ObjectUtils.defaultIfNull(dict.getSort(), 0))).collect(Collectors.toList()));
         }
 
         // yml

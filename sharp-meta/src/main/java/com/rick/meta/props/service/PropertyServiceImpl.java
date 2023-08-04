@@ -3,15 +3,18 @@ package com.rick.meta.props.service;
 import com.rick.db.service.SharpService;
 import com.rick.meta.props.model.KeyValueProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
+
 
 /**
  * @author Rick
  * @createdAt 2021-09-06 17:16:00
  */
 @RequiredArgsConstructor
+@Slf4j
 public class PropertyServiceImpl implements PropertyService, InitializingBean {
 
     private final SharpService sharpService;
@@ -64,7 +67,10 @@ public class PropertyServiceImpl implements PropertyService, InitializingBean {
         // 配置文件属性
         PropertyUtils.map.putAll(keyValueProperties.getItems());
         // 数据库属性
-        PropertyUtils.map.putAll(sharpService.queryForKeyValue(SELECT_SQL, null));
-
+        try {
+            PropertyUtils.map.putAll(sharpService.queryForKeyValue(SELECT_SQL, null));
+        } catch (Exception e) {
+            log.warn("sys_property表没有创建成功！");
+        }
     }
 }

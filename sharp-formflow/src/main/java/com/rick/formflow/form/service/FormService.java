@@ -202,15 +202,23 @@ public class FormService {
             formCpnValueDAO.deleteByInstanceId(instanceId);
             formCpnValueDAO.insert(FormCpnValueList);
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
-            if (StringUtils.isNotBlank(form.getForm().getRepositoryName())) {
-                EntityDAO entityDAO = applicationContext.getBean(form.getForm().getRepositoryName(), EntityDAO.class);
-                // 内部 map 转 entity，可以做级联操作；客户端可以对 DAO 的方法insertOrUpdate(Map<String, Object> params) 进行业务数据的再处理
-                entityDAO.insertOrUpdate(values);
+            boolean customInsertOrUpdate = false;
+
+            if (formAdvice != null) {
+                customInsertOrUpdate = formAdvice.insertOrUpdate(values);
+            }
+
+            if (!customInsertOrUpdate) {
+                if (StringUtils.isNotBlank(form.getForm().getRepositoryName())) {
+                    EntityDAO entityDAO = applicationContext.getBean(form.getForm().getRepositoryName(), EntityDAO.class);
+                    // 内部 map 转 entity，可以做级联操作；客户端可以对 DAO 的方法insertOrUpdate(Map<String, Object> params) 进行业务数据的再处理
+                    entityDAO.insertOrUpdate(values);
 
 //              // entityDAO.insertOrUpdate(entityDAO.mapToEntity(values)); 在这里不需要显示地转
-            } else {
-                MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, form.getForm().getTableName(), Long.class);
-                mapDAO.insertOrUpdate(values);
+                } else {
+                    MapDAO<Long> mapDAO = MapDAOImpl.of(applicationContext, form.getForm().getTableName(), Long.class);
+                    mapDAO.insertOrUpdate(values);
+                }
             }
         }
 

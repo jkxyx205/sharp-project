@@ -40,4 +40,9 @@ public interface FormAdvice {
      * @param instanceId
      */
     default void beforeDeleteInstance(Long instanceId) {}
+
+    /**
+     * 客户端实现, 执行完成后返回true
+     */
+    default boolean insertOrUpdate(Map<String, Object> values) {return false;}
 }
