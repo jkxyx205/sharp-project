@@ -19,6 +19,15 @@ head.appendChild(style)
                 _renderTable(this.$tbody, this.options.value)
             }
 
+            this.$tbody.find('.operator').each((e, elem) => {
+                elem.addEventListener("click", (e) => {
+                    if ((this.options.beforeRemoveCallback && this.options.beforeRemoveCallback($(e.target).parent())) || !this.options.beforeRemoveCallback) {
+                        $(e.target).parent().remove()
+                        this.options.afterRemoveCallback && this.options.afterRemoveCallback($(e.target).parent())
+                    }
+                });
+            })
+
             _addEmptyLine(this.options.columns, this.$tbody, this.options.addEmptyLineCallback, this.options.beforeRemoveCallback, this.options.afterRemoveCallback)
 
             if (this.options.readonly !== undefined) {
@@ -105,7 +114,7 @@ head.appendChild(style)
             }
         })
 
-        $tbody.find('.operator').each((e, elem) => {
+        $tbody.find('tr:last-child .operator').each((e, elem) => {
             elem.addEventListener("click", (e) => {
                 if ((beforeRemoveCallback && beforeRemoveCallback($(e.target).parent())) || !beforeRemoveCallback) {
                     $(e.target).parent().remove()
