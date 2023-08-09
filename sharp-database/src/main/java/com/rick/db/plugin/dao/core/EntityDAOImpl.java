@@ -19,6 +19,7 @@ import com.rick.db.service.support.Params;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -505,7 +506,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public List<T> selectByParams(T example, String conditionSQL) {
-        return selectByParams(entityToMap(example), conditionSQL);
+        return selectByParams(entityToMapParams(example), conditionSQL);
     }
 
     /**
@@ -559,7 +560,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public List<ID> selectIdsByParams(T example, String conditionSQL) {
-        return selectIdsByParams(entityToMap(example), conditionSQL);
+        return selectIdsByParams(entityToMapParams(example), conditionSQL);
     }
 
     /**
@@ -571,7 +572,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      */
     @Override
     public Optional<ID> selectIdByParams(T example, String conditionSQL) {
-        List<ID> ids = (List<ID>) selectByParams(entityToMap(example), this.idColumnName, conditionSQL, sql -> sql, this.idClass);
+        List<ID> ids = selectByParams(entityToMapParams(example), this.idColumnName, conditionSQL, sql -> sql, this.idClass);
         return expectedAsOptional(ids);
     }
 
@@ -582,7 +583,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     public List<T> selectByParamsWithoutCascade(T example, String conditionSQL) {
-        return selectByParamsWithoutCascade(entityToMap(example), selectColumnNames, conditionSQL);
+        return selectByParamsWithoutCascade(entityToMapParams(example), selectColumnNames, conditionSQL);
     }
 
     @Override
@@ -645,30 +646,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }, Collectors.mapping(function, Collectors.toList())));
     }
 
-    @Override
-    public Map<String, Object> entityToMap(T entity) {
-        if (entity == null) {
-            return Collections.emptyMap();
-        }
-
-        Set<String> fieldNames = tableMeta.getFieldMap().keySet();
-
-        Map<String, Object> params;
-        params = Maps.newHashMapWithExpectedSize(fieldNames.size());
-        for (String fieldName : fieldNames) {
-            String columnName = propertyNameToColumnNameMap.get(fieldName);
-            Object propertyValue = EntityDAOManager.getPropertyValue(entity, fieldName);
-            if (Objects.nonNull(propertyValue)) {
-                params.put(dotValueToCamel(fieldName), propertyValue);
-
-                if (columnName != null && !fieldName.equals(columnName)) {
-                    params.put(columnName, resolveEntityValueToDbValue(propertyValue));
-                }
-
-            }
-        }
-        return params;
-    }
 
     @Override
     public <E> E mapToEntity(Map<String, ?> map) {
@@ -718,6 +695,25 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         return mappedObject;
+    }
+
+    @Override
+    public Map<String, Object> entityToMap(T entity) {
+        if (entity == null) {
+            return Collections.emptyMap();
+        }
+
+        Set<String> fieldNames = tableMeta.getFieldMap().keySet();
+
+        Map<String, Object> params;
+        params = Maps.newHashMapWithExpectedSize(fieldNames.size());
+        for (String fieldName : fieldNames) {
+            Object propertyValue = EntityDAOManager.getPropertyValue(entity, fieldName);
+            if (Objects.nonNull(propertyValue)) {
+                params.put(fieldName, propertyValue);
+            }
+        }
+        return params;
     }
 
     @Override
@@ -865,6 +861,28 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return count;
     }
 
+    private Map<String, Object> entityToMapParams(T entity) {
+        Map<String, Object> entityParams = entityToMap(entity);
+        Map<String, Object> mapParams = Maps.newHashMapWithExpectedSize(entityParams.size() * 2);
+
+        if (MapUtils.isNotEmpty(entityParams)) {
+            Iterator<String> iterator = entityParams.keySet().iterator();
+            while (iterator.hasNext()) {
+                String name = iterator.next();
+                Object value = entityParams.get(name);
+
+                String columnName = propertyNameToColumnNameMap.get(name);
+                if (columnName != null && !name.equals(columnName)) {
+                    mapParams.put(columnName, resolveEntityValueToDbValue(value));
+                }
+
+                mapParams.put(dotValueToCamel(name), resolveEntityValueToDbValue(value));
+            }
+        }
+
+        return mapParams;
+    }
+
     private int[] insertOrUpdate(T t, boolean insert, boolean cascadeDelete, boolean cascadeInsert, EntityDAO subTableEntityDAO, Class<?> subClass,
                                  @NonNull String refColumnName, String reversePropertyName, @NonNull Object refValue, Collection<?> subDataList) {
         Field reverseField = ReflectionUtils.findField(subClass, reversePropertyName);
@@ -976,6 +994,39 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
+
+        // region Select
+        for (TableMeta.SelectProperty selectProperty : tableMeta.getSelectAnnotationList()) {
+            String joinValue = StringUtils.isBlank(selectProperty.getSelect().joinValue()) ? subTableRefColumnName : selectProperty.getSelect().joinValue();
+            String referencePropertyName = StringUtils.isBlank(selectProperty.getSelect().referencePropertyName()) ? tableMeta.getIdPropertyName() : selectProperty.getSelect().referencePropertyName();
+
+            String storeKey = selectProperty.getSelect().table() + ":" + joinValue;
+            if (EntityDAOThreadLocalValue.remove(storeKey)) {
+                continue;
+            }
+            EntityDAOThreadLocalValue.add(storeKey);
+
+            String targetTable = selectProperty.getSelect().table();
+            EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
+            if (subTableEntityDAO == null) {
+                log.warn("Table [" + targetTable + "] lost DAOImpl, will auto generate it!");
+                subTableEntityDAO = context.getBean(EntityDAOSupport.class).getEntityDAO(selectProperty.getSubEntityClass());
+            }
+
+            Set<Object> refIds = list.stream().map(t -> getValue(t, referencePropertyName)).collect(Collectors.toSet());
+            Map<Object, List<?>> subTableData = subTableEntityDAO.groupByColumnName(joinValue, refIds);
+
+            for (T t : list) {
+                Object data = subTableData.get(getValue(t, referencePropertyName));
+                if (selectProperty.getSelect().oneToOne()) {
+                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? null : ((Collection) data).iterator().next());
+                } else {
+                    setPropertyValue(t, selectProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
+                }
+
+            }
+        }
+        // endregion
 
         //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {

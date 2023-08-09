@@ -144,14 +144,21 @@ public abstract class AbstractSqlFormatter {
                 if (value instanceof Iterable) {
                     Iterable iterable = (Iterable) value;
                     for(Object v : iterable) {
+                        if (Objects.isNull(v)) {
+                            continue;
+                        }
                         set.add(v);
                     }
                 } else if (value.getClass().isArray()) {
                     int length = Array.getLength(value);
                     for (int i = 0; i < length; i ++) {
-                        set.add(Array.get(value, i));
+                        Object v = Array.get(value, i);
+                        if (Objects.isNull(v)) {
+                            continue;
+                        }
+                        set.add(v);
                     }
-                } else { // 其他当字符串处理
+                } else { // 其他当字符串处理 name,name2,name3
                     String strValue = String.valueOf(value);
                     set.addAll(Arrays.asList(strValue.split(Constants.PARAM_IN_SEPARATOR)));
                 }
@@ -171,9 +178,7 @@ public abstract class AbstractSqlFormatter {
 					srcSql = srcSql.replaceAll("((?i)in)\\s*[(]\\s*:" + h.param + "\\s*[)]", sb.toString());
 				} else {
                     srcSql = ignoreAndReturnSQL(srcSql, h);
-                    continue;
                 }
-
 			} else if("LIKE".equalsIgnoreCase(h.operator)) {
 				 srcSql = srcSql.replace(h.full, new StringBuilder("UPPER(").append(h.column).append(") ").append(h.operator).append(contactString(name)).append(" ").append(escapeString()));
 				 formatMap.put(name, likeEscape(value + ""));

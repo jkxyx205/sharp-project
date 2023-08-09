@@ -38,17 +38,24 @@ public final class HttpServletRequestUtils {
     private HttpServletRequestUtils() {
     }
 
-    /**
-     *      * 判断是否ajax请求.
-     *      * 可以看到Ajax 请求多了个 x-requested-with ，可以利用它，
-     *      * request.getHeader("x-requested-with"); 为 null，则为传统同步请求，为 XMLHttpRequest，则为Ajax 异步请求。
-     *      *@paramrequest  HttpServletRequest
-     *      *@return是否ajax请求.
-     *     
-     */
     public static boolean isAjaxRequest(HttpServletRequest request) {
-        String xr = request.getHeader(X_REQUESTED_WITH);
-        return (xr != null && XML_HTTP_REQUEST.equalsIgnoreCase(xr));
+        String accept = request.getHeader("accept");
+        if (accept != null && accept.indexOf("application/json") != -1) {
+            return true;
+        }
+
+        String xRequestedWith = request.getHeader(X_REQUESTED_WITH);
+        if (xRequestedWith != null && xRequestedWith.indexOf(XML_HTTP_REQUEST) != -1) {
+            return true;
+        }
+
+        String uri = request.getRequestURI();
+        if (inStringIgnoreCase(uri, ".json" , ".xml")) {
+            return true;
+        }
+
+        String ajax = request.getParameter("__ajax");
+        return inStringIgnoreCase(ajax, "json", "xml");
     }
 
     public static boolean isNotAjaxRequest(HttpServletRequest request) {
@@ -118,6 +125,17 @@ public final class HttpServletRequestUtils {
             mergeParams.putAll(extendParams);
         }
         return mergeParams;
+    }
+
+    private static boolean inStringIgnoreCase(String str, String... strs) {
+        if (str != null && strs != null) {
+            for (String s : strs) {
+                if (str.equalsIgnoreCase(s.trim())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
