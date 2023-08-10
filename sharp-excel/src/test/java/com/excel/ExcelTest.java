@@ -3,21 +3,25 @@ package com.excel;
 import com.rick.excel.core.ExcelWriter;
 import com.rick.excel.core.model.ExcelCell;
 import com.rick.excel.core.model.ExcelRow;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.commons.io.IOUtils;
+import org.apache.poi.ooxml.POIXMLDocumentPart;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
 import org.junit.Test;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -176,7 +180,149 @@ public class ExcelTest {
         excelWriter.toFile(new FileOutputStream(file));
     }
 
+    @Test
+    public void testWriteFromTemplate() throws IOException {
+         String template = "/Users/rick/Space/Workspace/sharp-admin/src/main/resources/templates/excel/po.xlsx";
+        String dist = "/Users/rick/Space/Workspace/sharp-admin/src/main/resources/templates/excel/dist.xlsx";
 
+        // 这样就不会改变模版文件
+        byte[] bytes = IOUtils.toByteArray(new FileInputStream(template));
+
+        ExcelWriter excelWriter = new ExcelWriter(new XSSFWorkbook(new ByteArrayInputStream(bytes)));
+
+        excelWriter.writeCell(new ExcelCell(7, 3, "PO NO: PY20230726-100"));
+
+        excelWriter.writeCell(new ExcelCell(1, 5, "供方（Vendor）：苏州云点信息系统工程有限公司"));
+        excelWriter.writeCell(new ExcelCell(2, 6, "李峰 18898876623"));
+        excelWriter.writeCell(new ExcelCell(2, 7, "0512-88359511"));
+        excelWriter.writeCell(new ExcelCell(2, 8, "0512-88359511"));
+        excelWriter.writeCell(new ExcelCell(1, 9, "ADD：  江苏省南京市武侯区遥观镇郑村村委63号"));
+
+
+//        excelWriter.writeCell(new ExcelCell(7, 5, "需方：普源电机制造（苏州）有限公司"));
+//        excelWriter.writeCell(new ExcelCell(7, 6, "慧博士 18898876623"));
+//        excelWriter.writeCell(new ExcelCell(7, 7, "0512-77359511"));
+//        excelWriter.writeCell(new ExcelCell(7, 8, "0512-77359511"));
+//        excelWriter.writeCell(new ExcelCell(7, 10, "交货地点：苏州市高新区石阳路28号一号厂房大厅"));
+
+
+        ArrayList<Object[]> data = new ArrayList<>();
+        data.add(new Object[]{1, "资材编号1", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{2, "资材编号2", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+        data.add(new Object[]{3, "资材编号3", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{4, "资材编号4", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+        data.add(new Object[]{1, "资材编号1", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{2, "资材编号2", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+        data.add(new Object[]{3, "资材编号3", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{4, "资材编号4", "品 名", "型号规格", 3, "单位", 1, 12, "注意"});
+        data.add(new Object[]{1, "资材编号1", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{2, "资材编号2", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+        data.add(new Object[]{3, "资材编号3", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{4, "资材编号4", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+        data.add(new Object[]{1, "资材编号1", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{2, "资材编号2", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+        data.add(new Object[]{3, "资材编号3", "品 名", "型号规格", 3, "单位", 1, 11, "2022-11-16"});
+        data.add(new Object[]{4, "资材编号4", "品 名", "型号规格", 3, "单位", 1, 12, "2022-11-16"});
+
+        int rowSize = data.size();
+
+        // 获取 cell 样式
+        XSSFRow row = excelWriter.getActiveSheet().getRow(11);
+        int physicalNumberOfCells = row.getPhysicalNumberOfCells();
+        XSSFCellStyle[] cellStyles = new XSSFCellStyle[physicalNumberOfCells];
+        for (int i = 0; i < physicalNumberOfCells; i++) {
+            cellStyles[i] = row.getCell(i).getCellStyle();
+        }
+
+        XSSFColor redColor = new XSSFColor(Color.RED, new DefaultIndexedColorMap());
+
+        // 文字色
+        XSSFFont font = excelWriter.getBook().createFont();
+        font.setColor(redColor);
+        font.setBold(true);
+
+        excelWriter.insertAndWriteRow(1, 12, data, row.getHeightInPoints(), cellStyles, (ecell, cell) -> {
+            if (ecell.getX() == 9 && !String.valueOf(ecell.getValue()).matches("\\d{4}-\\d{2}-\\d{2}")) {
+                XSSFCellStyle newStyle = cell.getCellStyle().copy();
+                font.setFamily(newStyle.getFont().getFamily());
+                font.setFontName(newStyle.getFont().getFontName());
+                font.setFontHeight(newStyle.getFont().getFontHeight());
+                newStyle.setFont(font);
+                cell.setCellStyle(newStyle);
+            }
+        });
+
+        excelWriter.writeCell(new ExcelCell(3, 13 + rowSize, "¥46.00"));
+        excelWriter.writeCell(new ExcelCell(3, 14 + rowSize, "RMB46"));
+        excelWriter.writeCell(new ExcelCell(2, 15 + rowSize, "哈哈"));
+        excelWriter.writeCell(new ExcelCell(4, 28 + rowSize, "本公司确认：方慧2023/08/10"));
+
+        excelWriter.getBook().setSheetName(0, "20230810");
+
+        // 插入图片
+        //创建一个excel文件，名称为：
+        XSSFWorkbook workbook = excelWriter.getBook();
+        //创建一个sheet，名称为工作簿1
+        XSSFSheet sheet = excelWriter.getActiveSheet();
+
+        BufferedImage bufferImg;
+        //先把读进来的图片放到一个ByteArrayOutputStream中，以便产生ByteArray
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+        String imageUrl = "/Users/rick/Space/Share/seal.png";
+
+        //获取图片后缀
+        bufferImg = ImageIO.read(new File(imageUrl));
+        ImageIO.write(bufferImg, "png", byteArrayOut);
+
+        //画图的顶级管理器，一个sheet只能获取一个（一定要注意这点）
+        XSSFDrawing patriarch = sheet.createDrawingPatriarch();
+        //anchor主要用于设置图片的属性
+        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, (short) 7, 19 + rowSize, (short) 9, 30 + rowSize);
+        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
+        //插入图片
+        patriarch.createPicture(anchor, workbook.addPicture(byteArrayOut.toByteArray(), XSSFWorkbook.PICTURE_TYPE_PNG));
+
+        excelWriter.toFile(new FileOutputStream(dist));
+    }
+
+    /**
+     * 获取 Excel 的图片
+     * @throws IOException
+     */
+    @Test
+    public void getSheetPictrues07() throws IOException {
+        String template = "/Users/rick/Space/Workspace/sharp-admin/src/main/resources/templates/excel/dist.xlsx";
+
+        byte[] bytes = IOUtils.toByteArray(new FileInputStream(template));
+
+        XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(bytes));
+        XSSFSheet sheet = workbook.getSheetAt(0);
+
+        Map<String, PictureData> sheetIndexPicMap = new HashMap<>();
+
+        for (POIXMLDocumentPart dr : sheet.getRelations()) {
+            if (dr instanceof XSSFDrawing) {
+                XSSFDrawing drawing = (XSSFDrawing) dr;
+
+                List<XSSFShape> shapes = drawing.getShapes();
+                for (XSSFShape shape : shapes) {
+                    XSSFPicture pic = (XSSFPicture) shape;
+
+                    XSSFClientAnchor anchor = pic.getPreferredSize();
+
+                    CTMarker ctMarker = anchor.getFrom();
+                    String picIndex = 0 + "_"
+                            + ctMarker.getRow() + "_" + ctMarker.getCol();
+                    sheetIndexPicMap.put(picIndex, pic.getPictureData());
+
+
+                }
+            }
+        }
+
+        workbook.close();
+        System.out.println(sheetIndexPicMap);
+    }
 
     private XSSFCellStyle createStyle(XSSFWorkbook book) {
         XSSFCellStyle cellStyle = book.createCellStyle();

@@ -30,6 +30,8 @@ public interface CellValueExtractor {
             case BOOLEAN:
                 return cell.getBooleanCellValue();
             case _NONE:
+            case FORMULA:
+                return cell.getRawValue();
             case ERROR:
                 return null;
             default:

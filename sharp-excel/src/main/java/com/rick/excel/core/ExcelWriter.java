@@ -4,6 +4,7 @@ import com.rick.excel.core.model.ExcelCell;
 import com.rick.excel.core.model.ExcelColumn;
 import com.rick.excel.core.model.ExcelRow;
 import lombok.Getter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -39,13 +41,19 @@ public class ExcelWriter {
     @Getter
     private XSSFSheet activeSheet;
 
+
     public ExcelWriter() {
-        this(null);
+        this("");
     }
 
     public ExcelWriter(String sheetName) {
         book = new XSSFWorkbook();
         createSheetAndActive(sheetName);
+    }
+
+    public ExcelWriter(XSSFWorkbook book) {
+        this.book = book;
+        this.activeSheet = book.getSheetAt(0);
     }
 
     public void createSheetAndActive(String sheetName) {
@@ -66,7 +74,10 @@ public class ExcelWriter {
     }
 
     public void writeCell(ExcelCell ecell) {
+        writeCell(ecell, null);
+    }
 
+    public void writeCell(ExcelCell ecell, ExcelWriterHook hook) {
         int rowIndex = ecell.getY() - 1;
         int colIndex = ecell.getX() - 1;
 
@@ -76,7 +87,11 @@ public class ExcelWriter {
             row = activeSheet.createRow(rowIndex);
         }
 
-        XSSFCell cell = row.createCell(colIndex, convertCellType(ecell.getValue()));
+        XSSFCell cell = row.getCell(colIndex);
+
+        if (cell == null) {
+            cell = row.createCell(colIndex, convertCellType(ecell.getValue()));
+        }
 
         float currentHeightInPoints = row.getHeightInPoints();
 
@@ -97,9 +112,16 @@ public class ExcelWriter {
             setRegionStyle(activeSheet, region);
         }
 
+        if (Objects.nonNull(hook)) {
+            hook.afterCellWrite(ecell, cell);
+        }
+
     }
 
     public void writeRow(ExcelRow row) {
+        writeRow(row, null);
+    }
+    public void writeRow(ExcelRow row, ExcelWriterHook hook) {
         Object[] values = row.getValue();
 
         if (ArrayUtils.isEmpty(values)) {
@@ -111,12 +133,21 @@ public class ExcelWriter {
         for (int i = 0; i < length; i++) {
             ExcelCell cell = new ExcelCell(row.getX() + i, row.getY(), values[i]);
             cell.setHeightInPoints(row.getHeightInPoints());
-            cell.setStyle(row.getStyle());
-            writeCell(cell);
+
+            if (Objects.nonNull(row.getCellStyles()) && row.getCellStyles().length > i) {
+                cell.setStyle(row.getCellStyles()[i]);
+            } else {
+                cell.setStyle(row.getStyle());
+            }
+
+            writeCell(cell, hook);
         }
     }
 
     public void writeColumn(ExcelColumn column) {
+        writeColumn(column, null);
+    }
+    public void writeColumn(ExcelColumn column, ExcelWriterHook hook) {
         Object[] values = column.getValue();
 
         if (ArrayUtils.isEmpty(values)) {
@@ -129,8 +160,24 @@ public class ExcelWriter {
             ExcelCell cell = new ExcelCell(column.getX(), column.getY() + i, values[i]);
             cell.setHeightInPoints(column.getHeightInPoints());
             cell.setStyle(column.getStyle());
-            writeCell(cell);
+            writeCell(cell, hook);
         }
+    }
+
+    public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle cellStyle) {
+        insertAndWriteRow(x, y, dataList, heightInPoints, cellStyle, null);
+    }
+
+    public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle cellStyle, ExcelWriterHook hook) {
+        insertAndWriteRow(x, y, dataList, heightInPoints, row -> row.setStyle(cellStyle), hook);
+    }
+
+    public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle[] cellStyles) {
+        insertAndWriteRow(x, y, dataList, heightInPoints, cellStyles, null);
+    }
+
+    public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle[] cellStyles, ExcelWriterHook hook) {
+        insertAndWriteRow(x, y, dataList, heightInPoints, row -> row.setCellStyles(cellStyles), hook);
     }
 
     public void toFile(OutputStream os) throws IOException {
@@ -193,4 +240,18 @@ public class ExcelWriter {
         }
     }
 
+    private void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, Consumer<ExcelRow> consumer, ExcelWriterHook hook) {
+        if (CollectionUtils.isNotEmpty(dataList)) {
+            // 第1个参数是指要开始插入的行，第2个参数是结尾行数,第三个参数表示动态添加的行数
+            this.getActiveSheet().shiftRows(y - 1, activeSheet.getLastRowNum(), dataList.size(), true, false);
+
+            for (int i = 0; i < dataList.size(); i++) {
+                Object[] rowData = dataList.get(i);
+                ExcelRow excelRow = new ExcelRow(x, y++, rowData);
+                consumer.accept(excelRow);
+                excelRow.setHeightInPoints(heightInPoints);
+                writeRow(excelRow, hook);
+            }
+        }
+    }
 }
