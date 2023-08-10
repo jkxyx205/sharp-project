@@ -148,8 +148,8 @@ public class ReportService {
             requestMap.put(PageModel.PARAM_SIDX,  report.getSidx());
         }
 
-        if (requestMap.get(PageModel.PARAM_SORD) == null) {
-            requestMap.put(PageModel.PARAM_SORD,  report.getSord().name());
+        if (requestMap.get("sord") == null && report.getSord() != null) {
+            requestMap.put("sord", report.getSord().name());
         }
 
         if (!report.getPageable()) {
@@ -216,7 +216,11 @@ public class ReportService {
 
                 if (CollectionUtils.isNotEmpty(reportColumn.getValueConverterNameList())) {
                     for (String convertName : reportColumn.getValueConverterNameList()) {
-                        row[i] = valueConverterMap.get(convertName).convert(reportColumn.getContext(), row[i]);
+                        ValueConverter valueConverter = valueConverterMap.get(convertName);
+                        if (valueConverter == null) {
+                            throw new BizException(400, "没有找到转换器：" + convertName);
+                        }
+                        row[i] = valueConverter.convert(reportColumn.getContext(), row[i]);
                     }
 
                     rowMap.put(reportColumn.getName(), row[i]);

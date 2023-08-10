@@ -60,7 +60,6 @@ public class ApiExceptionHandler {
         result.setMessage(message);
 
         if (log.isErrorEnabled()) {
-            log.error(result.getCode() + "," + message, ex.getCause());
             this.logStackTrace(ex);
         }
 
