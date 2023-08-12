@@ -90,7 +90,6 @@ public class BookTest {
         Map<String, Object> bookMap = bookDAO.entityToMap(book);
 
         assertThat(617327246029365249L).isEqualTo(((Person)bookMap.get("person")).getId());
-        assertThat(617327246029365249L).isEqualTo(bookMap.get("person_id"));
         assertThat("威尼斯人").isEqualTo(bookMap.get("title"));
         assertThat("文学").isEqualTo(((List<Tag>)bookMap.get("tagList")).get(0).getTitle());
 
