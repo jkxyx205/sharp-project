@@ -57,7 +57,7 @@ public class ExcelReader {
 				if(row == null) {
 					data = new Object[]{};
 				} else {
-					int colNum = row.getPhysicalNumberOfCells();
+					int colNum = Math.max(row.getLastCellNum(), row.getPhysicalNumberOfCells());
 					int j = 0;
 					data = new Object[colNum];
 					while (j < colNum) {

@@ -43,12 +43,15 @@ public class ExcelWriter {
 
 
     public ExcelWriter() {
-        this("");
+        this(true);
+    }
+
+    public ExcelWriter(boolean initFirstSheet) {
+        init(initFirstSheet, null);
     }
 
     public ExcelWriter(String sheetName) {
-        book = new XSSFWorkbook();
-        createSheetAndActive(sheetName);
+        init(true, sheetName);
     }
 
     public ExcelWriter(XSSFWorkbook book) {
@@ -57,8 +60,8 @@ public class ExcelWriter {
     }
 
     public void createSheetAndActive(String sheetName) {
-        XSSFSheet sheet = this.activeSheet = createSheet(sheetName);
-        sheetList.add(sheet);
+        this.activeSheet = createSheet(sheetName);
+        sheetList.add(this.activeSheet);
     }
 
     private XSSFSheet createSheet(String sheetName) {
@@ -183,6 +186,13 @@ public class ExcelWriter {
     public void toFile(OutputStream os) throws IOException {
         book.write(os);
         book.close();
+    }
+
+    private void init(boolean initFirstSheet, String sheetName) {
+        book = new XSSFWorkbook();
+        if (initFirstSheet) {
+            createSheetAndActive(sheetName);
+        }
     }
 
     private CellType convertCellType(Object object) {

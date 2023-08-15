@@ -324,6 +324,28 @@ public class ExcelTest {
         System.out.println(sheetIndexPicMap);
     }
 
+    @Test
+    public void testAndNewSheet() throws IOException {
+        ExcelWriter excelWriter = new ExcelWriter("hello");
+        excelWriter.writeCell(new ExcelCell(1, 1, "hello"));
+
+        excelWriter.createSheetAndActive("world");
+        excelWriter.writeCell(new ExcelCell(2, 2, "world"));
+        excelWriter.toFile(new FileOutputStream("/Users/rick/Space/Share/index.xlsx"));
+    }
+
+    @Test
+    public void testAndNewSheet2() throws IOException {
+        ExcelWriter excelWriter = new ExcelWriter(false);
+
+        for (int i = 0; i < 2; i++) {
+            excelWriter.createSheetAndActive("sheet-by-rick-" + (i + 1));
+            excelWriter.writeCell(new ExcelCell(i + 1, i + 1, "hello " + (i + i)));
+        }
+
+        excelWriter.toFile(new FileOutputStream("/Users/rick/Space/Share/index2.xlsx"));
+    }
+
     private XSSFCellStyle createStyle(XSSFWorkbook book) {
         XSSFCellStyle cellStyle = book.createCellStyle();
 

@@ -81,6 +81,12 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     }
 
     @Override
+    public int insertOrUpdate(Map<String, Object> params) {
+        T t = mapToEntity(params);
+        return insertOrUpdate(t);
+    }
+
+    @Override
     public int insert(T t) {
         // check code if unique
         this.assertCodeNotExists(t.getCode());
