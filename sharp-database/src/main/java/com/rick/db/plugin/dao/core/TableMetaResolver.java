@@ -2,6 +2,7 @@ package com.rick.db.plugin.dao.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.rick.common.util.ClassUtils;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.annotation.*;
 import lombok.experimental.UtilityClass;
@@ -10,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -99,8 +99,7 @@ class TableMetaResolver {
                 if (selectAnnotation.oneToOne()) {
                     subEntityClass = field.getType();
                 } else {
-                    ParameterizedType subEntityListType = (ParameterizedType) field.getGenericType();
-                    subEntityClass = (Class<?>) subEntityListType.getActualTypeArguments()[0];
+                    subEntityClass = ClassUtils.getFieldGenericClass(field);
                 }
 
                 selectAnnotationList.add(new TableMeta.SelectProperty(selectAnnotation, field, subEntityClass));
@@ -111,8 +110,7 @@ class TableMetaResolver {
                 Class<?> targetClass;
 
                 if (Collection.class.isAssignableFrom(field.getType())) {
-                    ParameterizedType subEntityListType = (ParameterizedType) field.getGenericType();
-                    targetClass = (Class<?>) subEntityListType.getActualTypeArguments()[0];
+                    targetClass = ClassUtils.getFieldGenericClass(field);
                 } else {
                     targetClass = field.getType();
                 }
@@ -127,8 +125,7 @@ class TableMetaResolver {
                 if (oneToManyAnnotation.oneToOne()) {
                     subEntityClass = field.getType();
                 } else {
-                    ParameterizedType subEntityListType = (ParameterizedType) field.getGenericType();
-                    subEntityClass = (Class<?>) subEntityListType.getActualTypeArguments()[0];
+                    subEntityClass = ClassUtils.getFieldGenericClass(field);
                 }
 
                 oneToManyAnnotationList.add(new TableMeta.OneToManyProperty(oneToManyAnnotation, field,

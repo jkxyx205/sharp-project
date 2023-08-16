@@ -16,6 +16,23 @@ import java.lang.reflect.Type;
 public class ClassUtils {
 
     /**
+     * 获取字段的范型类型
+     * @param field
+     * @return
+     */
+    public static Class<?> getFieldGenericClass(Field field) {
+        Type type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType)type).getRawType();
+        }
+
+        return null;
+    }
+
+    /**
      * 获取类范型的真正class
      * @param clazz
      * @return

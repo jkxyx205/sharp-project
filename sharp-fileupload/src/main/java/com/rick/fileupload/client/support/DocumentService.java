@@ -24,7 +24,7 @@ public interface DocumentService {
      */
     Document store(FileMeta fileMeta, String groupName) throws IOException;
 
-    List<Document> store(List<FileMeta> fileMetaList, String groupNme) throws IOException;
+    List<Document> store(List<FileMeta> fileMetaList, String groupName) throws IOException;
 
     /**
      * 文件下载

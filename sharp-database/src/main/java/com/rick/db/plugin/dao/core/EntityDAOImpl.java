@@ -36,7 +36,6 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
@@ -678,12 +677,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     List originalList = (List) propertyValue;
                     List distList = Lists.newArrayListWithExpectedSize(originalList.size());
                     if (Map.class.isAssignableFrom(originalList.get(0).getClass())) {
-                        Class<?> subEntityClass = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
+                        Class<?> subEntityClass = ClassUtils.getFieldGenericClass(field);
                         if (SimpleEntity.class.isAssignableFrom(subEntityClass)) {
                             for (Object object : originalList) {
                                 distList.add(mapToEntity((Map<String, ?>) object, subEntityClass));
                             }
                             bw.setPropertyValue(fieldName, distList);
+                        } else {
+                            bw.setPropertyValue(fieldName, propertyValue);
                         }
                     } else {
                         bw.setPropertyValue(fieldName, propertyValue);
@@ -1193,7 +1194,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 subClass = oneToManyProperty.getField().getType();
             } else {
                 subDataList = (List<?>) getPropertyValue(t, oneToManyProperty.getField());
-                subClass = ((Class) ((ParameterizedType) oneToManyProperty.getField().getGenericType()).getActualTypeArguments()[0]);
+                subClass = ClassUtils.getFieldGenericClass(oneToManyProperty.getField());
             }
 
             Object refId = getIdValue(t);
