@@ -80,7 +80,7 @@ head.appendChild(style)
     }
 
     function input_focus(e, columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback) {
-        let isLastChild = ($(e.target).parent().parent().next().length == 0)
+        let isLastChild = $(e.target).parents('tr').eq(0).next().length == 0 // ($(e.target).parent().parent().next().length == 0)
         if (isLastChild) {
             _addEmptyLine(columns, $tbody, addEmptyLineCallback, beforeRemoveCallback, afterRemoveCallback)
         }
