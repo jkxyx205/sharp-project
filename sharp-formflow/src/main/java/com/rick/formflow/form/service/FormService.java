@@ -147,6 +147,7 @@ public class FormService {
         return new FormBO(form, instanceId, propertyList);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void post(Long formId, Map<String, Object> values) throws BindException {
         handle(formId, null, values);
     }
