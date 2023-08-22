@@ -2,6 +2,7 @@ package com.rick.report.core.controller;
 
 
 import com.google.common.collect.Lists;
+import com.rick.common.http.HttpRequestDeviceUtils;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.model.Result;
@@ -93,7 +94,7 @@ public class ReportController {
         model.addAttribute("grid", gird);
         model.addAttribute("id", id);
         model.addAttribute("params", params);
-        model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), gird.getPageSize(), gird.getPage()));
+        model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : gird.getPageSize(), gird.getPage()));
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 
