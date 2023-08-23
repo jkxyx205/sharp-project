@@ -83,7 +83,9 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     @Override
     public int insertOrUpdate(Map<String, Object> params) {
         T t = mapToEntity(params);
-        return insertOrUpdate(t);
+        int count = insertOrUpdate(t);
+        params.put(getIdColumnName(), getIdValue(t));
+        return count;
     }
 
     @Override
