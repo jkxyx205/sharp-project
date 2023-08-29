@@ -350,7 +350,8 @@ public final class SQLUtils {
         tablePrefix = StringUtils.isBlank(tablePrefix) ? "" : tablePrefix + ".";
         asc = ObjectUtils.defaultIfNull(asc, false);
         if (SQLUtils.SHARP_DATABASE_PROPERTIES.getType().equals(DB_MYSQL)) {
-            return tablePrefix + column + " " + (asc ? "asc," : "desc, ") + tablePrefix + "id DESC";
+            // 解决 order by limit 分页出现数据丢失和重复， 自动带上 id 进行排序
+            return tablePrefix + column + " " + (asc ? "asc," : "desc, ") + tablePrefix + "id ASC";
         }
 
         return tablePrefix + column + " " + (asc ? "asc" : "desc");
