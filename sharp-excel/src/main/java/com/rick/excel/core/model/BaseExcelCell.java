@@ -32,4 +32,19 @@ public class BaseExcelCell<T> {
         this.y = y;
         this.value = value;
     }
+
+    public BaseExcelCell(int x, int y, float heightInPoints, T value) {
+        this.x = x;
+        this.y = y;
+        this.heightInPoints = heightInPoints;
+        this.value = value;
+    }
+
+    public BaseExcelCell(int x, int y, float heightInPoints, XSSFCellStyle style, T value) {
+        this.x = x;
+        this.y = y;
+        this.value = value;
+        this.heightInPoints = heightInPoints;
+        this.style = style;
+    }
 }

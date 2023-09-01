@@ -24,6 +24,10 @@ public class ExcelCell extends BaseExcelCell<Object> {
         super(x, y, value);
     }
 
+    public ExcelCell(int x, int y, float heightInPoints, Object value) {
+        super(x, y, heightInPoints, value);
+    }
+
     public ExcelCell(int x, int y, Object value, int rowSpan, int colSpan) {
         this(x, y, value);
         this.rowSpan = rowSpan;

@@ -19,7 +19,15 @@ public class ExcelRow extends BaseExcelCell<Object[]> {
 
     private XSSFCellStyle[] cellStyles;
 
+    public ExcelRow(int x, int y) {
+        super(x, y, null);
+    }
+
     public ExcelRow(int x, int y, Object[] values) {
         super(x, y, values);
+    }
+
+    public ExcelRow(int x, int y, float heightInPoints, Object... values) {
+        super(x, y, heightInPoints, values);
     }
 }
