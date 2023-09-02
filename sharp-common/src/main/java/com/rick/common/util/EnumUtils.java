@@ -16,12 +16,11 @@ public class EnumUtils {
     private static final String GET_CODE_METHOD_NAME = "getCode";
 
     /**
-     *
      * @param enumType 枚举class
-     * @param code code
+     * @param code     code
      * @return 如果没有找到返回null
      */
-    public static Enum valueOfCode(Class<?> enumType, String code) {
+    public static Enum valueOfCode(Class enumType, String code) {
         Method[] methods = enumType.getMethods();
         try {
             Enum en;
@@ -37,9 +36,10 @@ public class EnumUtils {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        return null;
+        return Enum.valueOf(enumType, code);
     }
 
     /**
