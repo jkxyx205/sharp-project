@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.rick.common.util.JsonUtils;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
             Long id = node.asLong();
             return invokeSetIdMethod(id, this.javaType.getRawClass());
         } else if (node.isTextual()) {
-            Long id = Long.valueOf(node.asText());
+            Long id = StringUtils.isBlank(node.asText()) ? null : Long.valueOf(node.asText());
             return invokeSetIdMethod(id, this.javaType.getRawClass());
         }
 
