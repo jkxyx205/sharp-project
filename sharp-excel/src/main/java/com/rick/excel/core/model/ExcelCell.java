@@ -2,6 +2,7 @@ package com.rick.excel.core.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -28,6 +29,10 @@ public class ExcelCell extends BaseExcelCell<Object> {
         super(x, y, heightInPoints, value);
     }
 
+    public ExcelCell(int x, int y, float heightInPoints, XSSFCellStyle style, Object value) {
+        super(x, y, heightInPoints, style, value);
+    }
+
     public ExcelCell(int x, int y, Object value, int rowSpan, int colSpan) {
         this(x, y, value);
         this.rowSpan = rowSpan;
@@ -36,6 +41,12 @@ public class ExcelCell extends BaseExcelCell<Object> {
 
     public ExcelCell(int x, int y, float heightInPoints, Object value, int rowSpan, int colSpan) {
         super(x, y, heightInPoints, value);
+        this.rowSpan = rowSpan;
+        this.colSpan = colSpan;
+    }
+
+    public ExcelCell(int x, int y, float heightInPoints, XSSFCellStyle style, Object value, int rowSpan, int colSpan) {
+        super(x, y, heightInPoints, style, value);
         this.rowSpan = rowSpan;
         this.colSpan = colSpan;
     }

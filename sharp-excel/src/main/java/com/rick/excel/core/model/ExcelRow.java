@@ -30,4 +30,8 @@ public class ExcelRow extends BaseExcelCell<Object[]> {
     public ExcelRow(int x, int y, float heightInPoints, Object... values) {
         super(x, y, heightInPoints, values);
     }
+
+    public ExcelRow(int x, int y, float heightInPoints, XSSFCellStyle style, Object... values) {
+        super(x, y, heightInPoints, style, values);
+    }
 }
