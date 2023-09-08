@@ -1,5 +1,6 @@
 package com.rick.report.core.service;
 
+import com.rick.db.dto.Grid;
 import com.rick.report.core.entity.Report;
 
 import java.math.BigDecimal;
@@ -17,4 +18,6 @@ public interface ReportAdvice {
     default void beforeSetRow(Report report, List<Map<String, Object>> rows) {};
 
     default void combineSummaryList(Report report, List<BigDecimal> summaryList, Map<String, Object> requestMap, String conditionSql){}
+
+    default Grid<Map<String, Object>> fetchDataWithoutSql(Report report, Map<String, Object> requestMap, Map<String, BigDecimal> summaryMap) {return null;}
 }

@@ -76,6 +76,9 @@ public class ReportService {
     public ReportDTO list(long id, Map<String, Object> requestMap) {
         Report report = getReport(id);
         mergeParams(report, requestMap);
+        if (StringUtils.isBlank(report.getQuerySql())) {
+            return fetchDataWithoutSql(report, requestMap);
+        }
         // format sql
         report.setQuerySql(report.getQuerySql()
                 .replaceFirst("(?i)(select)\\s+", "SELECT ")
@@ -141,6 +144,21 @@ public class ReportService {
         }
 
         return new ReportDTO(report, convert(grid, report), grid, summaryMap);
+    }
+
+    private ReportDTO fetchDataWithoutSql(Report report, Map<String, Object> requestMap) {
+        Map<String, BigDecimal> summaryMap = null;
+        if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
+            summaryMap = new HashMap<>();
+        }
+
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        if (reportAdvice != null) {
+            Grid<Map<String, Object>> grid = reportAdvice.fetchDataWithoutSql(report, requestMap, summaryMap);
+            return new ReportDTO(report, convert(grid, report), grid, summaryMap);
+        }
+
+        throw new RuntimeException("reportAdvice is needed!");
     }
 
     private void mergeParams(Report report, Map<String, Object> requestMap) {
@@ -253,8 +271,7 @@ public class ReportService {
     }
 
     private void validateNonDeleteSql(String sql) {
-        boolean isNullOrDeleteSql = Objects.isNull(sql) || sql.matches("(?i).*delete\\s+from*.");
-        if (isNullOrDeleteSql) {
+        if (StringUtils.isNotBlank(sql) && sql.matches("(?i).*delete\\s+from*.")) {
             throw new BizException(ResultUtils.fail("Report sql error!"));
         }
     }

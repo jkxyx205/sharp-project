@@ -50,8 +50,8 @@ public class Report extends BaseCodeEntity {
     @NotNull
     private String name;
 
-    @NotNull
-    @Column(columnDefinition = "text not null")
+//    @NotNull
+//    @Column(columnDefinition = "text not null")
     private String querySql;
 
     private String summaryColumnNames;
