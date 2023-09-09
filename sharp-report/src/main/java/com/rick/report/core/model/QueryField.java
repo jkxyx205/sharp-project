@@ -33,6 +33,8 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
      */
     private String extraData;
 
+    private String value;
+
     public QueryField(String name, String label) {
         this(name, label, Type.TEXT);
     }
@@ -52,4 +54,8 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
         TEXT, SELECT, GROUP_SELECT, MULTIPLE_SELECT, DATE_RANGE;
     }
 
+    public QueryField setValue(String value) {
+        this.value = value;
+        return this;
+    }
 }
