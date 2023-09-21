@@ -1171,19 +1171,17 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      * @param insert One的一方是否是新增
      */
     private void cascadeInsertOrUpdate(T t, boolean insert) {
-        // 更新过的对象不再处理
-        String storeKey = t.toString() + ":InsertOrUpdate";
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
             if (!oneToManyProperty.getOneToMany().cascadeInsertOrUpdate() && !oneToManyProperty.getOneToMany().cascadeInsert()) {
                 continue;
             }
 
-//            String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue() + ":InsertOrUpdate";
-            if (EntityDAOThreadLocalValue.remove(storeKey)) {
+            String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue();
+            if (EntityDAOThreadLocalValue.remove(storeKey + "+")) {
                 continue;
             }
-            EntityDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey + "-");
 
             String targetTable = oneToManyProperty.getOneToMany().subTable();
             EntityDAO subTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
@@ -1214,12 +1212,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             String refColumnName = manyToOneProperty.getManyToOne().value();
-//            String storeKey = getTableName() + ":" + refColumnName + ":InsertOrUpdate";
+            String storeKey = getTableName() + ":" + refColumnName;
 
-            if (EntityDAOThreadLocalValue.remove(storeKey)) {
+            if (EntityDAOThreadLocalValue.remove(storeKey + "-")) {
                 continue;
             }
-            EntityDAOThreadLocalValue.add(storeKey);
+            EntityDAOThreadLocalValue.add(storeKey + "+");
 
             String targetTable = manyToOneProperty.getManyToOne().parentTable();
             EntityDAO parentTableEntityDAO = EntityDAOManager.tableNameEntityDAOMap.get(targetTable);
