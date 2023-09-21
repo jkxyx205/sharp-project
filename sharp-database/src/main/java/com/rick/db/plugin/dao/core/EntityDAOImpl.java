@@ -1171,13 +1171,15 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
      * @param insert One的一方是否是新增
      */
     private void cascadeInsertOrUpdate(T t, boolean insert) {
+        // 更新过的对象不再处理
+        String storeKey = t.toString() + ":InsertOrUpdate";
         // OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
             if (!oneToManyProperty.getOneToMany().cascadeInsertOrUpdate() && !oneToManyProperty.getOneToMany().cascadeInsert()) {
                 continue;
             }
 
-            String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue() + ":InsertOrUpdate";
+//            String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue() + ":InsertOrUpdate";
             if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
             }
@@ -1212,7 +1214,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             String refColumnName = manyToOneProperty.getManyToOne().value();
-            String storeKey = getTableName() + ":" + refColumnName + ":InsertOrUpdate";
+//            String storeKey = getTableName() + ":" + refColumnName + ":InsertOrUpdate";
 
             if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
