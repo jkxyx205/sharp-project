@@ -21,9 +21,11 @@ head.appendChild(style)
 
             this.$tbody.find('.operator').each((e, elem) => {
                 elem.addEventListener("click", (e) => {
-                    if ((this.options.beforeRemoveCallback && this.options.beforeRemoveCallback($(e.target).parent())) || !this.options.beforeRemoveCallback) {
-                        $(e.target).parent().remove()
-                        this.options.afterRemoveCallback && this.options.afterRemoveCallback($(e.target).parent())
+                    let $tr = $(e.target).parent()
+                    if ((this.options.beforeRemoveCallback && this.options.beforeRemoveCallback($tr)) || !this.options.beforeRemoveCallback) {
+                        let removedIndex = $tr.index()
+                        $tr.remove()
+                        this.options.afterRemoveCallback && this.options.afterRemoveCallback(removedIndex)
                     }
                 });
             })
@@ -116,9 +118,11 @@ head.appendChild(style)
 
         $tbody.find('tr:last-child .operator').each((e, elem) => {
             elem.addEventListener("click", (e) => {
-                if ((beforeRemoveCallback && beforeRemoveCallback($(e.target).parent())) || !beforeRemoveCallback) {
+                let $tr = $(e.target).parent()
+                if ((beforeRemoveCallback && beforeRemoveCallback($tr)) || !beforeRemoveCallback) {
+                    let removedIndex = $tr.index()
                     $(e.target).parent().remove()
-                    afterRemoveCallback && afterRemoveCallback($(e.target).parent())
+                    afterRemoveCallback && afterRemoveCallback(removedIndex)
                 }
             });
         })
