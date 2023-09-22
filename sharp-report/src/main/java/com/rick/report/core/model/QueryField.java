@@ -35,6 +35,8 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
 
     private String value;
 
+    private String placeholder;
+
     public QueryField(String name, String label) {
         this(name, label, Type.TEXT);
     }
@@ -56,6 +58,11 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
 
     public QueryField setValue(String value) {
         this.value = value;
+        return this;
+    }
+
+    public QueryField setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
         return this;
     }
 }
