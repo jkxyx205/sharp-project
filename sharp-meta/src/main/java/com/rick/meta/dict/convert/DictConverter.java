@@ -20,6 +20,7 @@ public class DictConverter implements ValueConverter<Object> {
             return null;
         }
 
-        return dictService.getDictByTypeAndName((String) dictType, String.valueOf(value)).get().getLabel();
+        return dictService.getDictByTypeAndName((String) dictType, String.valueOf(value))
+                .orElseThrow(() -> new IllegalArgumentException(dictType + " doesn't contain " + value)).getLabel();
     }
 }
