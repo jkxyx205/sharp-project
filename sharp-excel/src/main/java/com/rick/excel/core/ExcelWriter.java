@@ -76,6 +76,11 @@ public class ExcelWriter {
          return this.activeSheet = book.getSheetAt(index);
     }
 
+    public void insertAndWriteCell(ExcelCell ecell) {
+        insertRows(ecell.getY(), 1);
+        writeCell(ecell);
+    }
+
     public void writeCell(ExcelCell ecell) {
         writeCell(ecell, null);
     }
@@ -183,6 +188,10 @@ public class ExcelWriter {
         insertAndWriteRow(x, y, dataList, heightInPoints, row -> row.setCellStyles(cellStyles), hook);
     }
 
+    public void insertRows(int y, int n) {
+        this.getActiveSheet().shiftRows(y - 1, activeSheet.getLastRowNum(), n, true, false);
+    }
+
     public void toFile(OutputStream os) throws IOException {
         book.write(os);
         book.close();
@@ -252,8 +261,7 @@ public class ExcelWriter {
 
     private void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, Consumer<ExcelRow> consumer, ExcelWriterHook hook) {
         if (CollectionUtils.isNotEmpty(dataList)) {
-            // 第1个参数是指要开始插入的行，第2个参数是结尾行数,第三个参数表示动态添加的行数
-            this.getActiveSheet().shiftRows(y - 1, activeSheet.getLastRowNum(), dataList.size(), true, false);
+            insertRows(y, dataList.size());
 
             for (int i = 0; i < dataList.size(); i++) {
                 Object[] rowData = dataList.get(i);
