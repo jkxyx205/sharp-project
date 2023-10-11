@@ -1,6 +1,7 @@
 package com.rick.common.util;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 
@@ -21,6 +22,10 @@ public class EnumUtils {
      * @return 如果没有找到返回null
      */
     public static Enum valueOfCode(Class enumType, String code) {
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
+
         Method[] methods = enumType.getMethods();
         try {
             Enum en;
