@@ -10,6 +10,7 @@ import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
+import lombok.NonNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +67,24 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
 
         return super.insertOrUpdate(entities);
+    }
+
+    @Override
+    public int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities) {
+        if (CollectionUtils.isNotEmpty(entities)) {
+            Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
+            if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
+                Map<String, Long> codeIdMap = selectCodeIdMap(emptyIdCodeSet);
+                for (T entity : entities) {
+                    // fillIds
+                    if (codeIdMap.containsKey(entity.getCode())) {
+                        entity.setId(codeIdMap.get(entity.getCode()));
+                    }
+                }
+            }
+        }
+
+        return super.insertOrUpdate(refColumnName, refValue, entities);
     }
 
     @Override
