@@ -74,7 +74,9 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         if (CollectionUtils.isNotEmpty(entities)) {
             Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
-                Map<String, Long> codeIdMap = selectCodeIdMap(emptyIdCodeSet);
+                Map<String, Long> codeIdMap = selectByParamsAsMap(Params.builder(1).pv("codes", emptyIdCodeSet).pv("refColumnName", refValue).build(),
+                        "code, id", "code IN (:codes) AND " + refColumnName + " = :refColumnName");
+
                 for (T entity : entities) {
                     // fillIds
                     if (codeIdMap.containsKey(entity.getCode())) {
