@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -914,8 +913,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             return new int[0];
         }
 
-        for (Object subData : subDataList) {
-            setPropertyValue(subData, reverseField, ObjectUtils.defaultIfNull(t, refValue));
+        if (Objects.nonNull(t)) {
+            for (Object subData : subDataList) {
+                setPropertyValue(subData, reverseField, t);
+            }
         }
 
         // 再插入或更新
