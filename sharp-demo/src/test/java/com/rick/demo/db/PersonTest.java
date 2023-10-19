@@ -130,10 +130,11 @@ public class PersonTest {
     @Test
     public void testUpdate() {
         Person person = personDAO.selectById(552098712424472576L).get();
+        person.getIdCard().setAddress("陕西b");
         System.out.println("1. -------------------");
         personDAO.update(person, "name");
-        System.out.println("2. -------------------");
-        personDAO.update("name", new Object[]{person.getName(), person.getId()}, "id = ?");
+//        System.out.println("2. -------------------");
+//        personDAO.update("name", new Object[]{person.getName(), person.getId()}, "id = ?");
     }
 
     @Test

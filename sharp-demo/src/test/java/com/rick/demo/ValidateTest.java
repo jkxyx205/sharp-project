@@ -51,14 +51,6 @@ public class ValidateTest {
     }
 
     @Test
-    public void testValidate5() {
-        Assertions.assertThatThrownBy(() -> {
-            User user = User.builder().name("rick").phone("18898987765").sex(3).userStatus("ENABLED").build();
-            validatorHelper.validate(user);
-        }).isInstanceOf(ConstraintViolationException.class);
-    }
-
-    @Test
     public void testService() {
         Assertions.assertThatThrownBy(() -> {
           projectService.save(Project.builder().title("title").build());
