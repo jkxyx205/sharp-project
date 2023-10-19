@@ -153,6 +153,28 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int[] insertOrUpdateTable(Collection<T> entities) {
+        if (CollectionUtils.isEmpty(entities)) {
+            // 删除所有
+            SQLUtils.delete(getTableName());
+            return new int[0];
+        }
+
+        Set<ID> deletedIds = entities.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(deletedIds)) {
+            // 删除所有
+            SQLUtils.delete(getTableName());
+        } else {
+            // 删除 除id之外的其他记录
+            SQLUtils.deleteNotIn(getTableName(), getIdColumnName(),
+                    deletedIds);
+        }
+
+        return insertOrUpdate(entities);
+    }
+
+    @Override
     public int insert(Map<String, Object> params) {
         T t = mapToEntity(params);
         int count = insert(t);

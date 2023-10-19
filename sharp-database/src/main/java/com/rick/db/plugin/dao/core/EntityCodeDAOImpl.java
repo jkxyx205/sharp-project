@@ -59,43 +59,26 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
-        if (CollectionUtils.isNotEmpty(entities)) {
-            Map<String, Long> codeIdMap = this.selectCodeIdMap(entities.stream().map(T::getCode).collect(Collectors.toSet()));
-            for (T t : entities) {
-                t.setId(codeIdMap.get(t.getCode()));
-            }
-        }
-
+        fillEntityIdsByCode(entities, null, null);
         return super.insertOrUpdate(entities);
     }
 
     @Override
     public int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities) {
-        if (CollectionUtils.isNotEmpty(entities)) {
-            Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
-            if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
-                Map<String, Long> codeIdMap = selectByParamsAsMap(Params.builder(1).pv("codes", emptyIdCodeSet).pv("refColumnName", refValue).build(),
-                        "code, id", "code IN (:codes) AND " + refColumnName + " = :refColumnName");
-
-                for (T entity : entities) {
-                    // fillIds
-                    if (codeIdMap.containsKey(entity.getCode())) {
-                        entity.setId(codeIdMap.get(entity.getCode()));
-                    }
-                }
-            }
-        }
-
+        fillEntityIdsByCode(entities, refColumnName, refValue);
         return super.insertOrUpdate(refColumnName, refValue, entities);
+    }
+
+    @Override
+    public int[] insertOrUpdateTable(Collection<T> entities) {
+        fillEntityIdsByCode(entities, null, null);
+        return super.insertOrUpdateTable(entities);
     }
 
     @Override
     public int insertOrUpdate(T t) {
         if (t.getId() == null && t.getCode() != null) {
-            Optional<Long> option = this.selectIdByCode(t.getCode());
-            if (option.isPresent()) {
-                t.setId(option.get());
-            }
+            handleEntityIdBeforeUpdate(t);
         }
 
         return super.insertOrUpdate(t);
@@ -126,15 +109,6 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     public int update(T t, Object[] params, String conditionSQL) {
         handleEntityIdBeforeUpdate(t);
         return super.update(t, params, conditionSQL);
-    }
-
-    private void handleEntityIdBeforeUpdate(T t) {
-        if (Objects.isNull(t.getId())) {
-            Optional<Long> option = this.selectIdByCode(t.getCode());
-            if (option.isPresent()) {
-                t.setId(option.get());
-            }
-        }
     }
 
     /**
@@ -344,5 +318,31 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     private String entityComment() {
         return EntityDAOManager.getTableMeta(getEntityClass()).getTable().comment();
+    }
+
+    private void handleEntityIdBeforeUpdate(T t) {
+        if (Objects.isNull(t.getId()) && StringUtils.isNotBlank(t.getCode())) {
+            Optional<Long> option = this.selectIdByCode(t.getCode());
+            if (option.isPresent()) {
+                t.setId(option.get());
+            }
+        }
+    }
+
+    private void fillEntityIdsByCode(Collection<T> entities, String refColumnName, Object refValue) {
+        if (CollectionUtils.isNotEmpty(entities)) {
+            Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
+            if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
+                Map<String, Long> codeIdMap = selectByParamsAsMap(Params.builder(1).pv("codes", emptyIdCodeSet).pv("refColumnName", refValue).build(),
+                        "code, id", "code IN (:codes) AND " + refColumnName + " = :refColumnName");
+
+                for (T t : entities) {
+                    // fillIds
+                    if (codeIdMap.containsKey(t.getCode())) {
+                        t.setId(codeIdMap.get(t.getCode()));
+                    }
+                }
+            }
+        }
     }
 }
