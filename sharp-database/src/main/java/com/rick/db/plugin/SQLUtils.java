@@ -189,6 +189,22 @@ public final class SQLUtils {
     }
 
     /**
+     * 删除表中所有数据
+     * @param tableName
+     * @return
+     */
+    public static int delete(String tableName) {
+        Assert.hasText(tableName, "tableName must has text!");
+        String deleteSQL = "DELETE FROM " + tableName;
+
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}]", deleteSQL);
+        }
+
+        return SQLUtils.JDBC_TEMPLATE.update(deleteSQL);
+    }
+
+    /**
      * 指定某字段删除数据
      *
      * @param tableName t_user
