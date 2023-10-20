@@ -636,14 +636,19 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         });
     }
 
-    @Override
-    public void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property) {
-        Map<ID, List<T>> refColumnNameMap = groupByColumnName(refColumnName, data.stream().map(row -> row.get(valueKey)).collect(Collectors.toSet()));
+//    @Override
+//    public void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property) {
+//        Map<ID, List<T>> refColumnNameMap = groupByColumnName(refColumnName, data.stream().map(row -> row.get(valueKey)).collect(Collectors.toSet()));
+//
+//        for (Map<String, Object> row : data) {
+//            List<T> subTableList = refColumnNameMap.get(valueKey);
+//            row.put(property, CollectionUtils.isEmpty(subTableList) ? Collections.emptyList() : subTableList);
+//        }
+//    }
 
-        for (Map<String, Object> row : data) {
-            List<T> subTableList = refColumnNameMap.get(valueKey);
-            row.put(property, CollectionUtils.isEmpty(subTableList) ? Collections.emptyList() : subTableList);
-        }
+    @Override
+    public List<T> selectSubTable(@NonNull String refColumnName, @NonNull Object refValue) {
+        return selectByParams(Params.builder(1).pv("refColumnName", refValue).build(), selectColumnNames, refColumnName + " = :refColumnName", this.entityClass);
     }
 
     @Override

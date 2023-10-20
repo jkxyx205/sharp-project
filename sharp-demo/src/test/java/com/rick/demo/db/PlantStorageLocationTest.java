@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Rick
@@ -62,6 +63,12 @@ public class PlantStorageLocationTest {
                 // C -> E 删除
                 StorageLocation.builder().plantId(1L).code("F").description("ffffF2222").build() // 新增
         ));
+    }
+
+    @Test
+    public void testSelectSubTable() {
+        List<StorageLocation> locationList = storageLocationDAO.selectSubTable("plant_id", 2L);
+        System.out.println(locationList.size());
     }
 
 }

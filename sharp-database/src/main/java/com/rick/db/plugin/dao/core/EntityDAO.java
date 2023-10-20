@@ -102,7 +102,15 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
      * @param valueKey 数据源中外键value对应的属性名key
      * @param property 写到数据源中的key
      */
-    void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property);
+//    void selectAsSubTable(List<Map<String, Object>> data, String refColumnName, String valueKey, String property);
+
+    /**
+     * 根据外键查询
+     * @param refColumnName
+     * @param refValues
+     * @return
+     */
+    List<T> selectSubTable(String refColumnName, Object refValues);
 
     Map<ID, List<T>> groupByColumnName(String refColumnName, Collection<?> refValues);
 
