@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
  */
 public final class StringUtils {
 
+    public static String appendValue(String value) {
+        return org.apache.commons.lang3.StringUtils.isNotBlank(value) ? " " + value : "";
+    }
+
     /**
      * 生成图片要显示的名字
      * @param name
