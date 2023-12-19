@@ -314,7 +314,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
     }
 
     /**
-     * 动态查询
+     * 动态条件更新
      * @param updateColumnNames name, age, user_name
      * @param params Map<String, Object> {name = rick, age = 5, user_name = Jim, id = 5}
      * @param conditionSQL id = :id
