@@ -75,7 +75,7 @@ public class ReportController {
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
         ReportDTO reportDTO = reportService.list(id, params);
 
-        Grid gird = reportDTO.getGridArray();
+        Grid<Object[]> grid = reportDTO.getGridArray();
         model.addAttribute("report", reportDTO.getReport());
 
         if (MapUtils.isNotEmpty(reportDTO.getSummaryMap())) {
@@ -91,10 +91,10 @@ public class ReportController {
             model.addAttribute("summaryIndex", Collections.emptyList());
         }
 
-        model.addAttribute("grid", gird);
+        model.addAttribute("grid", grid);
         model.addAttribute("id", id);
         model.addAttribute("params", params);
-        model.addAttribute("pageInfo", PaginationHelper.limitPages(gird.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : gird.getPageSize(), gird.getPage()));
+        model.addAttribute("pageInfo", PaginationHelper.limitPages(grid.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : grid.getPageSize(), grid.getPage()));
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 
