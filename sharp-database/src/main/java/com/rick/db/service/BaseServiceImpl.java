@@ -18,7 +18,6 @@ import java.util.*;
  */
 @RequiredArgsConstructor
 @Slf4j
-@Deprecated
 public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
 
     protected final D baseDAO;
@@ -32,8 +31,9 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param e
      * @return
      */
-    public boolean save(@Valid E e) {
-        return baseDAO.insert(e) > 0;
+    public E save(@Valid E e) {
+        baseDAO.insert(e);
+        return e;
     }
 
     public boolean save(@Valid Collection<E> collection) {
@@ -47,8 +47,9 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param e
      * @return
      */
-    public boolean saveOrUpdate(@Valid E e) {
-        return baseDAO.insertOrUpdate(e) > 0;
+    public E saveOrUpdate(@Valid E e) {
+        baseDAO.insertOrUpdate(e);
+        return e;
     }
 
     /**
