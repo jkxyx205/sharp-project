@@ -1090,6 +1090,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 } else {
                     setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
                 }
+
+                // 多的一方维护一的引用关系 20240125
+                if (Objects.nonNull(data) && StringUtils.isNotBlank(oneToManyProperty.getOneToMany().reversePropertyName())) {
+                    for (Object subData : ((Collection) data)) {
+                        setPropertyValue(subData, oneToManyProperty.getOneToMany().reversePropertyName(), t);
+                    }
+                }
             }
 
             // 级别联删除
