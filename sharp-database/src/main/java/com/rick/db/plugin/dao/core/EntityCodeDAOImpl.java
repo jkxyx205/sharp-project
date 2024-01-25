@@ -59,19 +59,19 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
-        fillEntityIdsByCode(entities, null, null);
+        fillEntityIdsByCode(this, entities, null, null);
         return super.insertOrUpdate(entities);
     }
 
     @Override
     public int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities) {
-        fillEntityIdsByCode(entities, refColumnName, refValue);
+        fillEntityIdsByCode(this, entities, refColumnName, refValue);
         return super.insertOrUpdate(refColumnName, refValue, entities);
     }
 
     @Override
     public int[] insertOrUpdateTable(Collection<T> entities) {
-        fillEntityIdsByCode(entities, null, null);
+        fillEntityIdsByCode(this, entities, null, null);
         return super.insertOrUpdateTable(entities);
     }
 
@@ -301,6 +301,13 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
     }
 
+    @Override
+    protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList) {
+        if (subTableEntityDAO instanceof EntityCodeDAO) {
+            fillEntityIdsByCode((EntityCodeDAO) subTableEntityDAO, (Collection<T>) subDataList, null, null);
+        }
+    }
+
     /**
      * 检查是否重复
      *
@@ -329,11 +336,11 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
     }
 
-    private void fillEntityIdsByCode(Collection<T> entities, String refColumnName, Object refValue) {
+    private void fillEntityIdsByCode(EntityCodeDAO entityCodeDAO, Collection<T> entities, String refColumnName, Object refValue) {
         if (CollectionUtils.isNotEmpty(entities)) {
             Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
-                Map<String, Long> codeIdMap = selectByParamsAsMap(Params.builder(1).pv("codes", emptyIdCodeSet).pv("refColumnName", refValue).build(),
+                Map<String, Long> codeIdMap = entityCodeDAO.selectByParamsAsMap(Params.builder(1).pv("codes", emptyIdCodeSet).pv("refColumnName", refValue).build(),
                         "code, id", "code IN (:codes) AND " + refColumnName + " = :refColumnName");
 
                 for (T t : entities) {

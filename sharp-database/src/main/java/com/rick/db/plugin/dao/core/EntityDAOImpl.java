@@ -925,6 +925,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 return new int[0];
             }
 
+            // subDataList
+            beforeInsertOrUpdate(subTableEntityDAO, subDataList);
             Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(deletedIds)) {
                 // 删除所有
@@ -958,6 +960,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         return new int[0];
     }
+
+    /**
+     * subDataList 子类处理subDataList数据
+     * @param subTableEntityDAO
+     * @param subDataList
+     */
+    protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList) {}
 
     private Map<ID, T> listToIdMap(List<T> list) {
         return list.stream().collect(Collectors.toMap(t -> (ID) EntityDAOManager.getPropertyValue(t, tableMeta.getIdPropertyName()), v -> v));
@@ -1092,9 +1101,21 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 }
 
                 // 多的一方维护一的引用关系 20240125
-                if (Objects.nonNull(data) && StringUtils.isNotBlank(oneToManyProperty.getOneToMany().reversePropertyName())) {
-                    for (Object subData : ((Collection) data)) {
-                        setPropertyValue(subData, oneToManyProperty.getOneToMany().reversePropertyName(), t);
+                String reversePropertyName = oneToManyProperty.getOneToMany().reversePropertyName();
+                if (Objects.nonNull(data) && StringUtils.isNotBlank(reversePropertyName)) {
+                    // 获取对象的类型
+                    try {
+                        Field field = ClassUtils.getField(subTableEntityDAO.getEntityClass(), reversePropertyName);
+                        Object refValue = t;
+                        if (field.getType() == Long.class) {
+                            refValue = getIdValue(t);
+                        }
+
+                        for (Object subData : ((Collection) data)) {
+                            setPropertyValue(subData, reversePropertyName, refValue);
+                        }
+                    } catch (NoSuchFieldException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
