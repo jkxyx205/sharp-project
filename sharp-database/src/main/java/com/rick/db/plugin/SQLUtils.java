@@ -61,6 +61,9 @@ public final class SQLUtils {
     }
 
     public static void execute(String sql) {
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args:=> [{}]", sql);
+        }
         JDBC_TEMPLATE.execute(sql);
     }
 
