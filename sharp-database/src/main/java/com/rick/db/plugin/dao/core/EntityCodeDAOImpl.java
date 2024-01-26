@@ -341,7 +341,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
             Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
                 Map<String, Long> codeIdMap = entityCodeDAO.selectByParamsAsMap(Params.builder(1).pv("codes", emptyIdCodeSet).pv("refColumnName", refValue).build(),
-                        "code, id", "code IN (:codes) AND " + refColumnName + " = :refColumnName");
+                        "code, id", "code IN (:codes)" + (StringUtils.isBlank(refColumnName) ? "" : (" AND " + refColumnName + " = :refColumnName")));
 
                 for (T t : entities) {
                     // fillIds

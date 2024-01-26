@@ -1100,24 +1100,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     setPropertyValue(t, oneToManyProperty.getField(), Objects.isNull(data) ? Collections.emptyList() : data);
                 }
 
-                // 多的一方维护一的引用关系 20240125
-                String reversePropertyName = oneToManyProperty.getOneToMany().reversePropertyName();
-                if (Objects.nonNull(data) && StringUtils.isNotBlank(reversePropertyName)) {
-                    // 获取对象的类型
-                    try {
-                        Field field = ClassUtils.getField(subTableEntityDAO.getEntityClass(), reversePropertyName);
-                        Object refValue = t;
-                        if (field.getType() == Long.class) {
-                            refValue = getIdValue(t);
-                        }
-
-                        for (Object subData : ((Collection) data)) {
-                            setPropertyValue(subData, reversePropertyName, refValue);
-                        }
-                    } catch (NoSuchFieldException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                subEntityRefParentEntity(t, subTableEntityDAO.getEntityClass(), oneToManyProperty.getOneToMany().reversePropertyName(), (Collection<?>) data);
             }
 
             // 级别联删除
@@ -1259,6 +1242,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             insertOrUpdate(t, insert, oneToManyProperty.getOneToMany().cascadeDelete(), oneToManyProperty.getOneToMany().cascadeInsert(),
                     subTableEntityDAO, subClass,
                     refColumnName, oneToManyProperty.getOneToMany().reversePropertyName(), refId, subDataList);
+
+            subEntityRefParentEntity(t, subClass, oneToManyProperty.getOneToMany().reversePropertyName(), subDataList);
         }
 
         // ManyToOne
@@ -1294,6 +1279,26 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         // ManyToMany 更新中间表
         updateManyToManyReferenceTable(t);
+    }
+
+    private void subEntityRefParentEntity(T t, Class subEntityClass, String reversePropertyName, Collection<?> data) {
+        // 多的一方维护一的引用关系 20240125
+        if (Objects.nonNull(data) && StringUtils.isNotBlank(reversePropertyName)) {
+            // 获取对象的类型
+            try {
+                Field field = ClassUtils.getField(subEntityClass, reversePropertyName);
+                Object refValue = t;
+                if (field.getType() == Long.class) {
+                    refValue = getIdValue(t);
+                }
+
+                for (Object subData : data) {
+                    setPropertyValue(subData, reversePropertyName, refValue);
+                }
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void updateManyToManyReferenceTable(T t) {
