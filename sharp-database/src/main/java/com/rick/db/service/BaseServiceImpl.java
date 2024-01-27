@@ -3,6 +3,7 @@ package com.rick.db.service;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.service.support.Params;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,7 @@ import java.util.*;
 @Slf4j
 public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
 
+    @Getter
     protected final D baseDAO;
 
     @Autowired
