@@ -38,9 +38,9 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
         return e;
     }
 
-    public boolean save(@Valid Collection<E> collection) {
-        final int[] insertCount = baseDAO.insert(collection);
-        return insertCount.length == collection.size();
+    public Collection<E> save(@Valid Collection<E> collection) {
+        baseDAO.insert(collection);
+        return collection;
     }
 
     /**
@@ -60,9 +60,9 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param collection
      * @return
      */
-    public boolean saveOrUpdate(@Valid Collection<E> collection) {
-        final int[] insertCount = baseDAO.insertOrUpdate(collection);
-        return insertCount.length == collection.size();
+    public Collection<E> saveOrUpdate(@Valid Collection<E> collection) {
+        baseDAO.insertOrUpdate(collection);
+        return collection;
     }
 
     /**
