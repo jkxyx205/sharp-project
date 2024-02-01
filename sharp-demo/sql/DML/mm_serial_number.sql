@@ -1,1 +1,0 @@
-INSERT INTO `sharp-demo`.mm_serial_number (id, code, status, create_by, create_time, update_by, update_time, is_deleted) VALUES (664984730659258368, '11', 'SOLD', 0, '2023-03-08 22:24:52', 0, '2023-09-22 01:17:55', false);
