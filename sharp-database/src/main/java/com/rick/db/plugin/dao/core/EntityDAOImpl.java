@@ -148,7 +148,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities) {
+    public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
         return insertOrUpdate(null, false, true, false, this, getEntityClass(),
                 refColumnName, columnNameToPropertyNameMap.get(refColumnName), refValue, entities);
     }
@@ -168,8 +168,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             SQLUtils.delete(getTableName());
         } else {
             // 删除 除id之外的其他记录
-            SQLUtils.deleteNotIn(getTableName(), getIdColumnName(),
-                    deletedIds);
+            SQLUtils.deleteNotIn(getTableName(), getIdColumnName(), deletedIds);
         }
 
         return insertOrUpdate(entities);
@@ -917,7 +916,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     private int[] insertOrUpdate(T t, boolean insert, boolean cascadeDelete, boolean cascadeInsert, EntityDAO subTableEntityDAO, Class<?> subClass,
-                                 @NonNull String refColumnName, String reversePropertyName, @NonNull Object refValue, Collection<?> subDataList) {
+                                 String refColumnName, String reversePropertyName, Object refValue, Collection<?> subDataList) {
         Field reverseField = ReflectionUtils.findField(subClass, reversePropertyName);
 
         if (Objects.isNull(reverseField)) {

@@ -64,9 +64,9 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     }
 
     @Override
-    public int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities) {
+    public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
         fillEntityIdsByCode(this, entities, refColumnName, refValue);
-        return super.insertOrUpdate(refColumnName, refValue, entities);
+        return super.insertOrUpdate(entities, refColumnName, refValue);
     }
 
     @Override

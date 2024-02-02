@@ -21,19 +21,20 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
     int[] insertOrUpdate(Collection<T> entities);
 
     /**
+     * 以 refColumnName 分组的全量更新(带删除)， 多用于父表不级联， 手动调用该方法处理子表的更新操作
+     * @param entities
+     * @param refColumnName 如果为空表示不分组，整个表是一个组
+     * @param refValue
+     * @return
+     */
+    int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue);
+
+    /**
      * 同步表数据
      * @param entities
      * @return
      */
     int[] insertOrUpdateTable(Collection<T> entities);
-    /**
-     * 以 refColumnName 分组的全量更新， 多用于父表不级联， 手动调用该方法处理子表的更新操作
-     * @param refColumnName
-     * @param refValue
-     * @param entities
-     * @return
-     */
-    int[] insertOrUpdate(@NonNull String refColumnName, @NonNull Object refValue, Collection<T> entities);
 
     int update(T entity);
 
