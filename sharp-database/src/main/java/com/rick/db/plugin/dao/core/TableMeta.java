@@ -5,8 +5,10 @@ import lombok.ToString;
 import lombok.Value;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Rick
@@ -78,6 +80,11 @@ public class TableMeta {
     private Map<String, Field> fieldMap;
 
     private Map<String, Column> columnNameMap;
+
+    /**
+     * get计算属性，非类属性的get方法
+     */
+    private Set<Method> computedMethods;
 
     @Value
     public static class OneToManyProperty {

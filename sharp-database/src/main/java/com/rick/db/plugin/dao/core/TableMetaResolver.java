@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,7 @@ class TableMetaResolver {
         Map<String, Field> columnNameFieldMap = Maps.newHashMap();
         Map<String, Field> fieldMap = Maps.newHashMap();
         Map<String, Column> columnNameMap = Maps.newHashMap();
+        Set<Method> computedMethods = new HashSet<>();
 
         IdCollector idCollector = new IdCollector();
         VersionCollector versionCollector = new VersionCollector();
@@ -78,9 +80,21 @@ class TableMetaResolver {
             idCollector.field = Arrays.stream(fields).filter(field -> field.getName().equals(DEFAULT_PRIMARY_COLUMN)).findFirst().get();
         }
 
+        // 获取计算属性
+        Method[] methods = clazz.getMethods();
+        Set<String> fieldsName = Arrays.stream(fields).map(field -> field.getName()).collect(Collectors.toSet());
+        for (Method method : methods) {
+            if (method.getName().startsWith("get")) {
+                String computedProperty = EntityDAOHelper.getComputedProperty(method.getName());
+                if (!fieldsName.contains(computedProperty) && !computedProperty.equals("class")) {
+                    computedMethods.add(method);
+                }
+            }
+        }
+
         return new TableMeta(tableAnnotation, idCollector.id, idCollector.field, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
                 updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, sqlAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
-                , columnNameFieldMap, fieldMap, columnNameMap);
+                , columnNameFieldMap, fieldMap, columnNameMap, computedMethods);
     }
 
     private void resolveFields(Field[] fields, String propertyNamePrefix, String columnPrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,

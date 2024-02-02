@@ -44,4 +44,8 @@ public class EntityDAOHelper {
             }
         }
     }
+
+    public String getComputedProperty(String methodName) {
+        return Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+    }
 }

@@ -31,7 +31,7 @@ public class DatabaseMetaData {
 
             // mysql 8.0 catalog => null
             // mysql 5.7 catalog => ""
-            String catalog = databaseMetaData.getDatabaseMajorVersion() == 8 ? null : "";
+            String catalog = databaseMetaData.getConnection().getCatalog(); // databaseMetaData.getDatabaseMajorVersion() == 8 ? null : "";
 
             try(ResultSet resultSet = databaseMetaData.getTables(catalog, null, "%", new String[]{"TABLE"})){
                 while(resultSet.next()) {

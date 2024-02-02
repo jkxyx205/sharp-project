@@ -196,6 +196,7 @@ public class FormService {
 
         FormAdvice formAdvice = formAdviceMap.get(form.getForm().getFormAdviceName());
         if (formAdvice != null) {
+            // 进行业务数据的再处理
             formAdvice.beforeInstanceHandle(form, instanceId, values);
         }
 
@@ -206,13 +207,14 @@ public class FormService {
             boolean customInsertOrUpdate = false;
 
             if (formAdvice != null) {
+                // 进行业务再处理
                 customInsertOrUpdate = formAdvice.insertOrUpdate(values);
             }
 
             if (!customInsertOrUpdate) {
                 if (StringUtils.isNotBlank(form.getForm().getRepositoryName())) {
                     EntityDAO entityDAO = applicationContext.getBean(form.getForm().getRepositoryName(), EntityDAO.class);
-                    // 内部 map 转 entity，可以做级联操作；客户端可以对 DAO 的方法insertOrUpdate(Map<String, Object> params) 进行业务数据的再处理
+                    // 内部 map 转 entity，可以做级联操作；客户端可以对 DAO 的方法insertOrUpdate(Map<String, Object> params)
                     entityDAO.insertOrUpdate(values);
 
 //              // entityDAO.insertOrUpdate(entityDAO.mapToEntity(values)); 在这里不需要显示地转

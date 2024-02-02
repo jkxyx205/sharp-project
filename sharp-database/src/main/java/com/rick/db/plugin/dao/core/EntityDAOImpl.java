@@ -35,6 +35,7 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
@@ -740,6 +741,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 params.put(fieldName, propertyValue);
             }
         }
+
+        for(Method computedMethod : tableMeta.getComputedMethods()) {
+            params.put(EntityDAOHelper.getComputedProperty(computedMethod.getName()), ReflectionUtils.invokeMethod(computedMethod, entity));
+        }
+
         return params;
     }
 

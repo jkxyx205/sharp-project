@@ -1,5 +1,6 @@
 package com.rick.formflow.form.service;
 
+import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.formflow.form.cpn.core.Form;
 import com.rick.formflow.form.service.bo.FormBO;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 public interface FormAdvice {
 
     /**
-     * 表单实例数据保存之后
+     * 表单实例数据保存之前
      */
     default void beforeInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values){}
 
@@ -42,7 +43,7 @@ public interface FormAdvice {
     default void beforeDeleteInstance(Long instanceId) {}
 
     /**
-     * 客户端实现, 执行完成后返回true
+     * 客户端实现, 执行完成后返回true，终止 form 的insertOrUpdate
      */
     default boolean insertOrUpdate(Map<String, Object> values) {return false;}
 }
