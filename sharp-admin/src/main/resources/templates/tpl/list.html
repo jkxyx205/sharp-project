@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      xmlns:sp="">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <style th:inline="css">
+        .ms-parent {
+            padding: 0;
+        }
+
+        .ms-parent .ms-choice {
+            display: block;
+            border: none;
+            height: 33px;
+            line-height: 33px;
+        }
+
+        /*[(${(report.additionalInfo != null && report.additionalInfo['css'] != null ) ? report.additionalInfo['css'] : ''})]*/
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <form class="form-inline query-form-container">
+                    <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
+                        <div class="form-group">
+                            <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
+                            <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
+                                <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem/>
+                            </th:block>
+
+                            <th:block style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                                <div class="input-group input-daterange" th:classappend="${f.name}">
+                                    <input class="form-control" th:id="${f.name + '0'}" th:name="${f.name + '0'}" type="text" placeholder="开始时间"
+                                           autocomplete="off"><label
+                                        class="col-form-label" style="padding-left: 0;">～</label>
+                                    <input class="form-control" th:id="${f.name + '1'}" th:name="${f.name + '1'}" type="text" placeholder="结束时间"
+                                           autocomplete="off">
+                                </div>
+                            </th:block>
+                        </div>
+                    </th:block>
+                    <div class="form-group">
+                        <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
+                            <i class="fa fa-search"></i> 查询</button>
+                        <button class="btn btn-secondary mr-2" type="button" name="reset" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
+                            <i class="fa fa-remove"></i> 重置</button>
+                        <a class="btn btn-secondary mr-2" id="exportBtn" th:href="${'/reports/' + id + '/export'}" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                            <i class="fa fa-upload"></i> 导出</a>
+                        <button class="btn btn-primary" type="button" onclick="showDialog('新增')" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                            <i class="fa fa-plus"></i> 新增</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body" id="report-list" style="padding-bottom: 0">
+                <div class="card-body-scroll-panel">
+                    <table class="table table-responsive-sm table-bordered table-striped table-sm">
+                        <thead>
+                        <tr>
+                            <th style="width: 40px">序号</th>
+                            <th class="text-center" th:if="${'multiple' eq params['mode']}" style="width: 40px"><input id="table-select-all-checkbox" type="checkbox"/></th>
+                            <th th:each="n : ${report.reportColumnList}" th:text="${n.label}" th:data-name="${n.name}" th:class="${(n.sortable ? 'sortable text-' + n.align.name().toLowerCase() : 'text-' + n.align.name().toLowerCase()) + (n.name == report.sidx ? ' active' : '') }"
+                                th:style="${n.columnWidth == null ? '': 'width: ' + n.columnWidth + 'px'}" th:if="${!n.hidden}"></th>
+                            <th class="text-center" style="width: 100px" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="m : ${grid.rows}">
+                            <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
+                            <td class="text-center" th:if="${'multiple' eq params['mode']}"><input type="checkbox" th:name="check_key" th:value="${m[0]}"/></td>
+                            <td th:each="v : ${grid.rows[mStat.index]}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}" th:if="${!report.reportColumnList.get(vStat.index).hidden}">
+                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="showDialog('查看', [[${m[0]}]])"></a>
+                                <span th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index > 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }"></span>
+                            </td>
+                            <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+<!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read')}">查看</a>-->
+                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('编辑', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
+                                <a href="javascript:;" th:onclick="deleteRow([[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
+                            </td>
+                            <input type="hidden" th:each="v : ${grid.rows[mStat.index]}" th:if="${report.reportColumnList.get(vStat.index).hidden}" th:name="${report.reportColumnList.get(vStat.index).name}" th:value="${v}" />
+                        </tr>
+                        <tr th:if="${summary ne null}">
+                            <td style="font-weight: bold;">合计</td>
+                            <td th:if="${'multiple' eq params['mode']}"></td>
+                            <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}"></td>
+                            <td></td>
+                        </tr>
+                        <tr class="tr-empty non-data" th:if="${grid.records < 1}">
+                            <td th:colspan="${report.visibleColumnSize + 2 + ('multiple' eq params['mode'] ? 1 : 0)}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer-bar">
+                    <div style="margin-bottom: 8px; float: left;">
+                        <span class="breadcrumb-item active" th:text="'共' + ${grid.records} + '条，'+${grid.totalPages}+'页'"></span>
+                        <select onchange="search('page=1&size=' + this.value)" th:if="${report.pageable}">
+                            <option value="15" th:selected="${grid.pageSize == 15}">15条</option>
+                            <option value="50" th:selected="${grid.pageSize == 50}">50条</option>
+                            <option value="100" th:selected="${grid.pageSize == 100}">100条</option>
+                            <option value="200" th:selected="${grid.pageSize == 200}">200条</option>
+                        </select>
+                        <span th:if="${grid.totalPages > 1}">，前往<input class="goto" style="width: 68px;" th:onkeyup="'gotoPage(this, ' + ${grid.page} + ')'" maxlength="6" th:value="${grid.page}">页</span>
+                    </div>
+                    <div id="batch-cpn-bar" style="margin-left: 16px; float: left; margin-bottom: 8px;" th:if="${'multiple' eq params['mode']}">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-light" style="padding: .075rem .45rem" type="button" onclick="batchDelete()" disabled><i class="fa fa-trash-o fa-lg"></i></button>
+<!--                                <button class="btn btn-light" style="padding: .075rem .45rem" type="button"><i class="fa fa-trash-o fa-lg"></i></button>-->
+                            </div>
+                        </div>
+                    </div>
+                    <nav style="float: right" th:if="${grid.totalPages > 1}">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item" th:if="${grid.page > 1}"><a class="page-link" th:href="${'javascript:search(''page='+(grid.page - 1)+''')'}">上一页</a></li>
+                            <li th:class="'page-item ' + ${i == grid.page - 1 ? 'active': ''}" th:if="${grid.totalPages > 0}" th:each="i: ${#numbers.sequence(pageInfo.startPage - 1, pageInfo.endPage - 1)}">
+                                <a class="page-link" th:href="${i == grid.page - 1 ? 'javascript:;' : 'javascript:search(''page='+(i+1)+''')'}"  th:text="${i+1}"></a>
+                            </li>
+                            <li class="page-item" th:if="${grid.page < grid.totalPages}">
+                                <a class="page-link" th:href="${'javascript:search(''page='+(grid.page + 1)+''')'}">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="modal fade" id="dialog" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-primary modal-dialog-auto" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="dialog-title"></h5>
+                                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary ok-show" id="okId"><i class="fa fa-save"></i> 保存</button>
+                                <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.table.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.pageTable.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.formautofill.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script th:src="@{/ajaxfileupload.js}"></script>
+
+    <script th:inline="javascript">
+        $.fn.multipleSelect.locales['zh-CN'] = {
+            formatSelectAll: function () {
+                return '[全选]'
+            },
+            formatAllSelected: function () {
+                return '已选择所有记录'
+            },
+            formatCountSelected: function(count, total) {
+                return '已从' + total + '条记录中选择' + count + '条'
+            },
+            formatNoMatchesFound: function () {
+                return '没有找到记录'
+            }
+        }
+
+        $.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
+
+        let urlObject = getUrlObject();
+
+        /*<![CDATA[*/
+        var fz = [[${report.queryFieldList}]] || []
+        var multipleSelect = fz.filter(f => f.type == 'MULTIPLE_SELECT')
+        multipleSelect.forEach(f => {
+            var value = urlObject[f.name]
+            $('#' + f.name).multipleSelect({
+                selectAll: true,
+                single: false,
+                placeholder: '请输入' + f.label
+            }).multipleSelect('setSelects', !value ? '' : value.split(','))
+        })
+
+        var dateRange = fz.filter(f => f.type == 'DATE_RANGE')
+        dateRange.forEach(f => {
+            $('.'+f.name+'.input-daterange').datepicker({
+                language: "zh-CN",
+                autoclose: true,
+                clearBtn: true,
+                todayBtn: 'linked',
+                todayHighlight: true,
+                format: 'yyyy-mm-dd'
+            })
+        })
+
+        /*]]>*/
+
+        $('#report-list').table({
+            type: 'server',
+            clicked: function (obj, e) {
+                search('page=1&sidx='+$(e).data('name')+'&sord='+e.sord+'')
+            }
+        })
+
+        $('.query-form-container').autofill(urlObject).pageTable()
+
+        $('#exportBtn').attr('href', $('#exportBtn').attr('href') + _newUrl())
+
+        let $modal = $('#dialog')
+        let report = [[${report}]]
+        let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
+
+        function showDialog(title, id) {
+            if (form_id) {
+                $('#dialog-title').text(title)
+
+                $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+                    $modal.find('.modal-body').html(res)
+                    $modal.modal({
+                        show: true,
+                        backdrop: 'static'
+                    })
+                })
+            } else { // 跳转页面详情
+                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id) + '?readonly=' + (title === '查看'),  report.name);
+            }
+        }
+
+        $('#okId').on('click', function () {
+            saveForm(() => {
+                $modal.modal('hide');
+                toastr.success("保存成功")
+                setTimeout(() => {
+                    // $('[name=reset]').click()
+                    window.location.reload()
+                }, 1000)
+            })
+        })
+
+        function deleteRow(id) {
+            if (confirm('确定要删除该条记录吗？')) {
+                if (form_id) {
+                    $.ajax({
+                        url: '/forms/ajax/' + form_id + '/' + id,
+                        type: "delete",
+                        success: function(){
+                            $modal.modal('hide');
+                            toastr.success("删除成功")
+                            setTimeout(() => {
+                                // $('[name=reset]').click()
+                                window.location.reload()
+                            }, 1000)
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/'+ endpoint +  '/' + id,
+                        type: "delete",
+                        success: function(){
+                            $modal.modal('hide');
+                            toastr.success("删除成功")
+                            setTimeout(() => {
+                                // $('[name=reset]').click()
+                                window.location.reload()
+                            }, 1000)
+                        }
+                    });
+                }
+            }
+        }
+
+        function batchDelete() {
+            let selectedIds = []
+            $('table > tbody td:nth-child(2) > input[type=checkbox]:checked').each(function () {
+                console.log($(this).prop("name"), '...')
+                selectedIds.push($(this).prop("name"))
+            })
+            if (!selectedIds.length) {
+                alert('请选择要删除的行！')
+                return
+            }
+
+            if (confirm('确定要删除记录吗？')) {
+                $.ajax({
+                    url: '/forms/ajax/' + form_id + '?ids=' + selectedIds,
+                    type: "delete",
+                    success: function(){
+                        $modal.modal('hide');
+                        toastr.success("删除成功")
+                        setTimeout(() => {
+                            // $('[name=reset]').click()
+                            window.location.reload()
+                        }, 1000)
+                    }
+                });
+            }
+        }
+
+        let $tableSelectAllCheckbox = $('#table-select-all-checkbox')
+        let $rowCheckbox = $('table > tbody td:nth-child(2) > input[type=checkbox]');
+        let $batchCpnBar = $('#batch-cpn-bar');
+
+        $tableSelectAllCheckbox.on('click', function () {
+            $rowCheckbox.prop('checked', $(this).prop('checked'))
+            $batchCpnBar.find('button').prop("disabled", !$(this).prop('checked'))
+        })
+
+        $rowCheckbox.on('click', function () {
+            let currentCheck = $(this).prop('checked')
+            let allCheckboxRelated = true
+            let nonChecked = true;
+            $rowCheckbox.each(function () {
+                if(allCheckboxRelated && (!currentCheck || ($(this).prop('checked') !== currentCheck))) {
+                    allCheckboxRelated = false
+                }
+
+                if (nonChecked && $(this).prop('checked')) {
+                    nonChecked = false
+                }
+            })
+
+            if (allCheckboxRelated || !currentCheck) {
+                $tableSelectAllCheckbox.prop('checked', currentCheck)
+            }
+
+            $batchCpnBar.find('button').prop("disabled", nonChecked)
+        })
+
+        /*[(${(report.additionalInfo != null && report.additionalInfo['js'] != null ) ? report.additionalInfo['js'] : ''})]*/
+    </script>
+</th:block>
+</body>
+</html>

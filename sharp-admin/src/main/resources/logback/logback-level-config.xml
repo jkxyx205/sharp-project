@@ -1,0 +1,18 @@
+<included>
+    <logger name="javax.activation" level="INFO" />
+    <logger name="javax.mail" level="WARN" />
+    <logger name="com.sun" level="ERROR" />
+    <logger name="org.hibernate" level="INFO" />
+    <logger name="org.springframework"  level="ERROR"/>
+    <logger name="org.thymeleaf"  level="ERROR"/>
+    <logger name="com.mchange" level="INFO" />
+    <logger name="org.apache.ibatis" level="INFO" />
+    <logger name="com.baomidou" level="INFO" />
+    <logger name="org.mybatis" level="INFO" />
+    <logger name="org.apache.shiro" level="INFO" />
+    <logger name="org.apache.http" level="INFO" />
+    <logger name="org.quartz" level="INFO" />
+    <logger name="net.sf.ehcache" level="INFO" />
+    <logger name="com.gargoylesoftware.htmlunit" level="ERROR" />
+    <logger name="org.apache.http" level="ERROR" />
+</included>
