@@ -85,7 +85,7 @@
                                 <span th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index > 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }"></span>
                             </td>
                             <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
-<!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read')}">查看</a>-->
+<!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
                                 <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('编辑', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
                                 <a href="javascript:;" th:onclick="deleteRow([[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
                             </td>
@@ -172,6 +172,11 @@
     <script th:src="@{/ajaxfileupload.js}"></script>
 
     <script th:inline="javascript">
+        var readonly = true
+        /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+            readonly = false
+        /*[/]*/
+
         $.fn.multipleSelect.locales['zh-CN'] = {
             formatSelectAll: function () {
                 return '[全选]'
@@ -235,6 +240,9 @@
 
         function showDialog(title, id) {
             if (form_id) {
+                if (!readonly) {
+                    title = '编辑'
+                }
                 $('#dialog-title').text(title)
 
                 $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
