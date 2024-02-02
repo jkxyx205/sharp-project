@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="includes/base :: common_header(~{::title},~{::link},~{})">
+    <title>苏州XXX有限公司</title>
+    <link th:href="@{/plugins/scrollbar/jquery.scrollbar.min.css}" rel="stylesheet">
+    <link th:href="@{/plugins/nth-tabs/css/nth-tabs.css}" rel="stylesheet">
+    <link th:href="@{/plugins/nth-tabs/css/nth-icons.css}" rel="stylesheet">
+</head>
+<body class="app header-fixed sidebar-fixed aside-menu-fixed sidebar-lg-show">
+<header class="app-header navbar" id="user">
+    <button class="navbar-toggler sidebar-toggler d-lg-none mr-auto" type="button" data-toggle="sidebar-show">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">
+        <img class="navbar-brand-full" src="img/brand/logo.svg" width="89" height="25" alt="CoreUI Logo">
+        <img class="navbar-brand-minimized" src="img/brand/sygnet.svg" width="30" height="30" alt="CoreUI Logo">
+    </a>
+    <button class="navbar-toggler sidebar-toggler d-md-down-none" type="button" data-toggle="sidebar-lg-show">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <ul class="nav navbar-nav ml-auto">
+        <!--        <li class="nav-item d-md-down-none">-->
+        <!--            <a class="nav-link" href="javascript:addTab('produce_order_stock', '生产库存预警', '/reports/710331838161227776?mode=multiple')">-->
+        <!--                <i class="icon-bell" data-toggle="tooltip" title data-original-title="生产库存预警"></i>-->
+        <!--                <span class="badge badge-pill badge-danger"> 1</span>-->
+        <!--            </a>-->
+        <!--        </li>-->
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <!--<img class="img-avatar" th:src="@{/img/avatars/6.jpg}" th:alt="${session.user.name}">-->
+                <!--<img class="img-avatar" src="https://api.uomg.com/api/rand.avatar" th:alt="${session.user.name}">-->
+                <div style="display: inline-block; height: 30px; width: 30px; border-radius: 50%; background: #20a8d8; text-align: center; line-height: 30px; color: #fff; font-size: 12px;" th:text="${session.user.imgName}"></div>
+                <span class="visible-md" style="margin-right: 4px;" sec:authentication="name"></span>
+                <!--<span style="margin-right: 4px;" th:text="${session.user.name}"></span>-->
+                <i style="margin-right: 15px; position: relative; top: -2px;" class="fa fa-sort-down"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <button class="dropdown-item" data-toggle="modal" data-target="#passwordModal" data-backdrop="static">
+                    <i class="fa fa-wrench"></i> [[#{password.setting}]]</button>
+                <form th:action="@{/logout}" method="post" name="logoutForm">
+                    <a class="dropdown-item" href="javascript:;" onclick="document.logoutForm.submit()">
+                        <i class="fa fa-lock"></i> [[#{logout.label}]]</a>
+                </form>
+            </div>
+        </li>
+    </ul>
+</header>
+<div class="app-body">
+    <div class="sidebar">
+        <nav class="sidebar-nav">
+            <ul class="nav">
+                <!--                <li class="nav-item" sec:authorize="hasAuthority('dashboard')">-->
+                <!--                    <a class="nav-link" href="javascript:addTab('dashboard', '仪表盘', '/dashboard')">-->
+                <!--                        <i class="nav-icon icon-speedometer"></i> 仪表盘-->
+                <!--                    </a>-->
+                <!--                </li>-->
+                <li class="nav-item nav-dropdown open">
+                    <a class="nav-link nav-dropdown-toggle" href="#">
+                        <i class="nav-icon icon-wallet"></i> 数据</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="javascript:addTab('plants', '库房', '/reports/695623902415556608?mode=multiple')">
+                                <i class="nav-icon icon-home"></i> 库房
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item nav-dropdown open" sec:authorize="hasAuthority('sys_management')">
+                    <a class="nav-link nav-dropdown-toggle" href="#">
+                        <i class="nav-icon icon-settings"></i> 系统</a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item" sec:authorize="hasAuthority('sys_user')">
+                            <a class="nav-link" href="javascript:addTab('users', '用户管理', '/reports/694714180413960192')">
+                                <i class="nav-icon icon-people"></i> 用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('role_management')">
+                            <a class="nav-link" href="javascript:addTab('roles', '角色管理', '/roles')">
+                                <i class="nav-icon icon-share"></i> 角色管理
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('sys_dict')">
+                            <a class="nav-link" href="javascript:addTab('dict', '字典管理', '/reports/695316160014499840')">
+                                <i class="nav-icon icon-notebook"></i> 字典管理
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!--                <li class="nav-item">-->
+                <!--                    <a class="nav-link" href="javascript:addTab('help', '帮助文档', '/dashboard/help')">-->
+                <!--                        <i class="nav-icon icon-earphones-alt"></i> 帮助文档-->
+                <!--                    </a>-->
+                <!--                </li>-->
+            </ul>
+        </nav>
+        <button class="sidebar-minimizer brand-minimizer" type="button"></button>
+    </div>
+    <main class="main" id="main">
+        <div class="nth-tabs" id="custom-id" style="height: calc(100vh - 106px);"></div>
+    </main>
+</div>
+<footer class="app-footer">
+    <div>
+        <a href="javascript:;">苏州XXX有限公司</a>
+        <span>&copy; 2023-[[${#dates.format(new java.util.Date().getTime(), 'yyyy')}]]</span>
+    </div>
+    <div class="ml-auto hidden-sm"><a href="javascript:addTab('releases', '更新日志', '/releases')">更新日志</a></div>
+</footer>
+<div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+            <form class="form-horizontal" th:action="@{/password/update}" method="post" id="passwordForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">密码修改</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <div class="form-group row required">
+                            <label class="col-md-3 col-form-label" for="password" autocomplete="off">当前密码</label>
+                            <div class="col-md-9">
+                                <input class="form-control" id="password" type="password" name="password" placeholder="当前密码" required>
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-md-3 col-form-label" for="newPassword">新密码</label>
+                            <div class="col-md-9">
+                                <input class="form-control" id="newPassword" type="password" name="newPassword" placeholder="新密码" autocomplete="off" required>
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-md-3 col-form-label" for="newPassword2">确认密码</label>
+                            <div class="col-md-9">
+                                <input class="form-control" id="newPassword2" type="password" name="newPassword2" placeholder="确认密码" autocomplete="off" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary"><i class="fa fa-save"></i> 保存</button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/plugins/scrollbar/jquery.scrollbar.min.js}"></script>
+    <script th:src="@{/plugins/nth-tabs/js/nth-tabs.js}"></script>
+    <script th:src="@{/plugins/jquery-validate/jquery.validate.min.js}"></script>
+    <script th:src="@{/plugins/jquery-validate/jqurey.messages_zh.min.js}"></script>
+    <script th:src="@{/plugins/axios.min.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:inline="javascript">
+        var username = /*[[${session.user.code}]]*/
+        var fixTab = false
+
+        var user = new Vue({
+            el: '#user',
+            data: /*[[${session.user}]]*/,
+        })
+
+        function changeZIndex() {
+            $('#custom-id .tab-pane.active>iframe').css({'z-index': '1'})
+        }
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+
+    </script>
+
+    <script>
+        $(function() {
+            // nthTabs.addTab({
+            //     id: "purchase_order_list",
+            //     title: '订单管理',
+            //     url: "/reports/702566176051462144",
+            //     allowClose: false
+            // });
+            // fixTab = true
+        })
+    </script>
+</div>
+</body>
+</html>

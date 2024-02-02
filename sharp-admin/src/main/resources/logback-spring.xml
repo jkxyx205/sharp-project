@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!--
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+     -->
+    <!-- 日志最大的历史 30天 -->
+    <property name="maxHistory" value="30"/>
+    <property name="maxFileSize" value="64MB"/>
+
+    <springProfile name="dev">
+        <include resource="logback/logback-dev.xml"/>
+    </springProfile>
+    <springProfile name="test">
+        <include resource="logback/logback-test.xml"/>
+    </springProfile>
+    <springProfile name="prod">
+        <include resource="logback/logback-prod.xml"/>
+    </springProfile>
+    <springProfile name="dev-prod">
+        <include resource="logback/logback-dev.xml"/>
+    </springProfile>
+
+    <!--idea 可以运行，bash运行找不到-->
+    <!--<include resource="logback/logback-${spring.profiles.active}.xml"/>-->
+</configuration>

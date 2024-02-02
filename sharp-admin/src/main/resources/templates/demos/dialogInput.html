@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">Card outline</div>
+            <div class="card-body">这里是仪表盘</div>
+            <a class="a" href="javascript:;" onclick="showFormDialog('物料', '695978675677433856', '696078910634332160')">物料 1</a>
+            <a class="a" href="javascript:;" onclick="showFormDialog('物料', '695978675677433856', '696062598608588800')">物料 2</a>
+            <a class="a" href="javascript:;" onclick="showFormDialog('业务伙伴', '695708313425285120', '695729182495215616')">业务伙伴 1</a>
+
+            <a class="a" href="javascript:;" onclick="showReportDialog('物料', '697147523487240192')">物料查询</a>
+            物料1：<div onclick="showReportDialog('物料', '697147523487240192', this)">
+                    <label type="text" class="form-control">请选择</label>
+                    <input type="text" class="form-control">
+                </div>
+            <br>
+            <hr>
+            物料2：<div onclick="showReportDialog('物料', '697147523487240192', this)">
+                    <label type="text" class="form-control">请选择</label>
+                    <input type="text" class="form-control">
+                  </div>
+
+            <br>
+            <hr>
+            物料3: <div class="dialogInput"></div>
+        </div>
+
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script th:src="@{/js/jquery.dialogInput.js}"></script>
+
+    <script>
+        $('.dialogInput').dialogInput({
+            title: '选择物料',
+            name: 'material_id',
+            reportId: '697147523487240192',
+            labelDisplay: function (row) {
+                return row.name + ' ' + (!row.specification ? '' : row.specification)
+            }
+        })
+
+        let __$modal = $('#__dialog')
+        function showFormDialog(title, formId, instanceId) {
+            $('#dialog-title').text(title)
+            $.get('/forms/page/' + formId + '/' + instanceId + '?readonly=true', function (res) {
+                __$modal.find('.modal-body').html(res)
+                __$modal.modal({
+                    show: true,
+                    backdrop: 'static'
+                })
+            })
+        }
+
+        // 开始
+        function showReportDialog(title, reportId, dom) {
+            $('#dialog-title').text(title)
+            document.getElementById('iframe').input = $(dom).find('input')
+            document.getElementById('iframe').label = $(dom).find('label')
+            document.getElementById('iframe').src = '/reports/' + reportId
+            __$modal.modal({
+                show: true,
+                backdrop: 'static'
+            })
+        }
+
+        $('#okId').on('click', function () {
+            let rows = window.frames["iframe"].document.getElementById('qid').rows
+            dialogRowDbClick(rows);
+        })
+
+        function dialogRowDbClick(rows) {
+            if (!rows.length) {
+                __$modal.modal('hide')
+                document.getElementById('iframe').input.val(row.id)
+                document.getElementById('iframe').label.text(row.name + ' ' + (!row.specification ? '' : row.specification))
+            } else {
+                toastr.error('请先选择一条记录后再点击确定');
+            }
+        }
+        // 结束
+
+    </script>
+</th:block>
+</body>
+<div class="modal fade" id="__dialog" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-primary modal-dialog-auto" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dialog-title"></h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="iframe" name="iframe" src="" width="100%" style="border: 0; padding: 0; margin: 0; height: calc(100% - 6px);"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary ok-show" id="okId"><i class="fa fa-cog"></i> 确定</button>
+                <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/coreui-tabs.css}">
+    <link rel="stylesheet" th:href="@{/plugins/zTree_v3/css/zTreeStyle/zTreeStyle.css}" type="text/css">
+    <style>
+        ul {
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            list-style: none;
+            cursor: pointer;
+        }
+
+        .role-container li {
+            padding: 0 12px;
+            line-height: 35px;
+        }
+
+        li.active {
+            background: #20a8d8;
+            color: #fff;
+        }
+
+        .label {
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+
+        .empty-text2 {
+            font-size: 14px;
+            color: #768192;
+        }
+
+        .user-selected {
+            padding: 5px 10px;
+            border: 1px solid #c8ced3;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        @media screen and (min-width: 768px) {
+            .user-selected {
+                height: calc(100vh - 186px);
+                overflow: auto;
+            }
+
+            .role-container {
+                border-right: 1px dashed #c8ced3;
+            }
+
+            .permission-container {
+                 height: calc(100vh - 184px);
+                 margin-top: 4px;
+                 overflow: auto;
+            }
+
+            .user-list-container, .role-list-container {
+                height: calc(100vh - 220px);
+                overflow: auto;
+                margin-top: 4px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+           .user-selected, .keyword-input {
+               margin-bottom: 15px;
+           }
+            .label {
+                border-bottom: 1px solid #23282c;
+                line-height: 40px;
+            }
+        }
+
+
+
+        .warning-text {
+            color: #f86c6b;
+            font-size: .8em;
+        }
+
+        .permissionListAll-container .role-delete-btn {
+            margin-left: 10px;
+        }
+
+        .permissionListAll-container, .role-modal-container {
+            height: calc(100vh - 300px);
+            overflow: auto;
+        }
+
+        .role-modal-container li {
+            margin-bottom: 4px;
+        }
+
+        .status-false {
+            color: #f86c6b;
+        }
+
+        .status-true {
+            color: #1da142;
+        }
+    </style>
+</head>
+<body class="app">
+    <th:block th:replace="includes/base :: common_content(~{::#auth})">
+    <div class="container-fluid" id="auth">
+        <div class="card">
+            <div class="card-header">权限管理</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-sm-12 role-container">
+                        <div class="label">角色名称（<span v-text="datasource.roleList.length"></span>）<a href="javascript:;" data-target="#roleModal" data-toggle="modal" data-backdrop="static">[编辑]</a></div>
+                        <input class="form-control keyword-input" type="text" v-model="roleKeyword" placeholder="关键字" autocomplete="off">
+                        <ul class="role-list-container">
+                            <li v-for="r in filteredRoleList" :class="{'active': form.roleId === r.id}" @click="changeRole(r)" v-text="r.name"></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-12">
+                        <div class="label">权限信息（<span v-text="datasource.roleInfo.permissionList.length"></span>）<a href="javascript:;" data-target="#permissionModal" data-toggle="modal" data-backdrop="static">[编辑]</a></div>
+                        <div class="permission-container">
+                            <ul id="permissionList" class="ztree"></ul>
+                            <div class="empty-text2" v-if="datasource.roleInfo.permissionList.length === 0">没有权限数据</div>
+                        </div>
+                    </div>
+                    <div class="col-md-7 col-sm-12">
+                        <div class="user-container">
+                            <div class="row">
+                            <div class="col-md-4">
+                                <div class="label">授权人员（<span v-text="form.userIds.length"></span>人）</div>
+                                <div class="user-selected">
+                                    <ul class="clearfix">
+                                        <li v-for="user in userSelectedList" @click="removeUser(user.id)">
+                                            <span v-text="user.name + '('+ user.code + ')'"></span>
+                                        </li>
+                                    </ul>
+                                    <div class="empty-text2" v-show="form.userIds.length === 0">没有人员数据</div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div>
+                                    <div style="height: 28px; line-height: 28px; margin-bottom: 12px;">
+                                        <label class="pull-left"><input type="checkbox" v-model="showSelectedUser" style="margin-right: 8px;">仅显示授权人员</label>
+                                        <button class="btn btn-primary pull-right btn-sm" @click="save"><i class="fa fa-save"></i> 保存</button>
+                                        <span v-cloak class="warning-text pull-right" v-show="isNeedSave" style="line-height: 28px; margin-right: 4px;">授权人员发生变更尚未保存</span>
+                                    </div>
+                                    <input class="form-control keyword-input" type="text" v-model="keyword" placeholder="关键字" autocomplete="off">
+                                    <div class="user-list-container card-body-scroll-panel">
+                                        <table class="table table-sm">
+                                            <tbody>
+                                            <tr v-for="user in datasource.userList" v-show="filterUser(user)">
+                                                <td><input type="checkbox" v-model="form.userIds" :value="user.id"></td>
+                                                <td v-text="user.username"></td>
+                                                <td><span v-text="user.name" @click="checkBoxUser(user.id)" style="cursor: pointer;"></span></td>
+                                                <td><span :class="'status-' + user.available" v-text="$options.filters.userStatus(user.available)"></span></td>
+                                                <td align="right"><a href="javascript:;" @click="viewUserPermission(user.id)">查看权限</a>&nbsp;|&nbsp;<a href="javascript:;" @click="resetPassword(user)">密码重置</a></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-primary" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">角色编辑</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card-body">
+                            <div class="role-modal-container">
+                                <table class="table table-responsive-sm table-bordered table-sm">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 30px"></th>
+                                        <th>角色名</th>
+                                        <th style="width: 50px;">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(r, index) in form2.roleList" :key="index">
+                                        <td style="vertical-align: middle; text-align: center"><a href="javascript:;" @click="roleUp(index)"><i class="fa fa-arrow-up"></i></a></td>
+                                        <td><input class="form-control" type="text" v-model="r.name"></td>
+                                        <td style="vertical-align: middle;"><a href="javascript:;" @click="form2.roleList.splice(index, 1)">X</a></td>
+                                    </tr>
+                                    <tr style="text-align: center">
+                                        <td colspan="3" style="padding: 12px 0;">
+                                            <button class="btn btn-secondary mr-2 btn-sm" type="button" @click="form2.roleList.push({})">
+                                                <i class="fa fa-plus"></i> 新增</button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="saveRoleBtn" @click="saveRole"><i class="fa fa-save"></i> 保存</button>
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </th:block>
+    <th:block th:replace="includes/base :: common_js(~{::script})">
+        <script type="text/javascript" th:src="@{/plugins/zTree_v3/js/jquery.ztree.core.js}"></script>
+        <script type="text/javascript" th:src="@{/plugins/zTree_v3/js/jquery.ztree.excheck.js}"></script>
+        <script th:src="@{/plugins/lodash.min.js}"></script>
+        <script th:inline="javascript">
+            var setting = {
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                }
+            };
+
+            var setting2 = {
+                check: {
+                    enable: true,
+                    chkboxType: { "Y" : "ps", "N" : "ps" }
+                },
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                }
+            };
+
+            var treeObj;
+
+            /**
+             * 同步到操作树
+             */
+            function setChecked(permissionList) {
+                treeObj.checkAllNodes(false)
+                permissionList.forEach(function (node) {
+                    var node = treeObj.getNodeByParam("id", node.id, null);
+                    treeObj.checkNode(node, true, false);
+                })
+            }
+
+            $(document).ready(function(){
+                // 初始化
+                var permissionList = /*[[${roleInfo.permissionList}]]*/
+                var permissionFullList = /*[[${permissionFullList}]]*/
+                treeObj = $.fn.zTree.init($("#permissionListAll"), setting2, permissionFullList);
+
+                var permissionFullListMap = _.keyBy(permissionFullList, function(o) {
+                    return o.id
+                });
+
+                //
+                var $userPermissionModal = $('#userPermissionModal')
+
+
+                $('#savePermissionBtn').on('click', function () {
+                    var nodes = treeObj.getCheckedNodes();
+
+                    var permissionIds = _.map(nodes, "id");
+
+                    var permissionList = []
+
+                    $.post("/auth/assign/role/" + vue.$data.form.roleId + "/permission", {"permissionIds": permissionIds}, function () {
+                        nodes.forEach(function (node) {
+                            permissionList.push(permissionFullListMap[node.id])
+                        })
+                        $.fn.zTree.init($("#permissionList"), setting, permissionList)
+
+                        vue.$data.datasource.roleInfo.permissionList = permissionList
+
+                        $('#permissionModal').modal('hide');
+                        toastr.success('权限编辑成功')
+                    })
+                })
+
+                var roleVue = new Vue({
+                    el: '#roleListAll-container',
+                    data: {
+                        userId: undefined,
+                        roles: []
+                    },
+                    methods: {
+                        removeRole: function (roleId) {
+                            var _this = this
+
+                            confirm('确定删除用户的角色吗？') && $.post("auth/assign/role/"+roleId+"/"+this.userId+"", function (res) {
+                                toastr.success('用户角色删除成功');
+                                _this.roles = _.filter(_this.roles, function (r) {
+                                    return r.id !== roleId
+                                })
+                            })
+
+                        }
+                    }
+                })
+
+                vue = new Vue({
+                    el: '#auth',
+                    data: {
+                        isNeedSave: false,
+                        roleKeyword: '',
+                        keyword: '',
+                        showSelectedUser: false,
+                        currentRole: /*[[${roleList[0]}]]*/,
+                        datasource: {
+                            roleList: /*[[${roleList}]]*/,
+                            userList: /*[[${userList}]]*/,
+                            userSelectedList: /*[[${roleInfo.userList}]]*/,
+                            roleInfo: /*[[${roleInfo}]]*/
+                        },
+                        form: {
+                            roleId:  [[${roleList[0].id}]],
+                            userIds: /*[[${userIds}]]*/
+                        },
+                        form2: {
+                            roleList: [],
+                        }
+                    },
+                    computed: {
+                        userSelectedList: function () {
+                            this.isNeedSave  = !((_.difference(this.dsUserSelectedList, this.form.userIds).length == 0)  && this.dsUserSelectedList.length == this.form.userIds.length)
+
+                            var _this = this
+                            return _.filter(this.datasource.userList, function (user) {
+                                return _this.form.userIds.includes(user.id)
+                            })
+                        },
+                        dsUserSelectedList: function() {
+                            return _.map(this.datasource.userSelectedList, 'id')
+                        },
+                        filteredRoleList() {
+                            var roleKeyword = this.roleKeyword;
+
+                            if (!roleKeyword || !roleKeyword.trim()) {
+                                return this.datasource.roleList;
+                            }
+                            return _.filter(this.datasource.roleList, function(r) {
+                                return r.name.toLowerCase().indexOf(roleKeyword.toLowerCase()) > -1 });
+                        },
+                    },
+                    filters: {
+                        userStatus: function (val) {
+                            if (false === val) {
+                                return '停用'
+                            } else {
+                                return '启用'
+                            }
+                        }
+                    },
+                    methods: {
+                       changeRole: function (role) {
+                          if (this.isNeedSave && !confirm("授权对象发生变更尚未保存，确定要离开？"))
+                              return
+
+                           var id = role.id
+                           this.currentRole = role
+                           this.form.roleId = id
+                           var _this = this
+
+                          $.get("/auth/" + id + "/info", function (res) {
+                              _this.datasource.roleInfo = res.data
+
+                              _this.datasource.userSelectedList = res.data.userList
+                              _this.form.userIds = _.map(res.data.userList, "id")
+
+                              $.fn.zTree.init($("#permissionList"), setting, res.data.permissionList);
+
+                              setChecked(res.data.permissionList)
+                          })
+                        },
+                        checkBoxUser: function(userId) {
+                            if (this.form.userIds.includes(userId)) {
+                                this.removeUser(userId)
+                            } else {
+                                this.form.userIds.push(userId)
+                            }
+                        },
+                        removeUser: function(userId) {
+                            this.form.userIds = this.form.userIds.filter(function (id) {
+                                return id !== userId
+                            })
+                        },
+                        resetPassword: function(user) {
+                            confirm('确定重置用户「'+user.code+' '+user.name+'」的密码为「111111」吗？') && $.post("password/"+user.id+"/reset", function (res) {
+                                layer.alert('密码重置成功！新的密码是' + res.data + '<br>请通知用户及时修改密码！')
+                            })
+                        },
+                        save: function () {
+                           if (!this.isNeedSave) {
+                               toastr.success('保存成功')
+                               return;
+                           }
+
+                            var _this = this
+                            $.post("/auth/assign/role/" + this.form.roleId + "/user", {"userIds": this.form.userIds}, function () {
+                                _this.datasource.userSelectedList = _.cloneDeep(_this.userSelectedList)
+                                toastr.success('保存成功')
+                            })
+                        },
+                        roleUp: function(index) {
+                            var prevIndex = index -1
+                            var curIndex = index
+
+                            if (index === 0) {
+                                prevIndex = this.form2.roleList.length - 1
+                                curIndex = 0
+                            }
+
+                            var curRole = this.form2.roleList[index]
+                            var prevRole = this.form2.roleList[prevIndex]
+                            this.$set(this.form2.roleList, prevIndex, curRole)
+                            this.$set(this.form2.roleList, curIndex, prevRole)
+
+                        },
+                        saveRole: function () {
+                            if (!this._check()) {
+                                toastr.error('角色名称不能为空!');
+                                return
+                            }
+                            var _this = this
+                            $.ajax({
+                                method: 'POST',
+                                url: '/auth/add/roles',
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                data: JSON.stringify(this.form2.roleList),
+                                success: function (res) {
+                                    if (res.success) {
+                                        _this.datasource.roleList = res.data
+                                        _this._normalizeRoleFormData();
+                                        $('#roleModal').modal('hide');
+                                        toastr.success('角色编辑成功');
+                                    } else {
+                                        toastr.error(res.msg);
+                                    }
+                                }
+                            })
+                        },
+                        viewUserPermission: function(userId) {
+                            $.get('/auth/permission', {"userId": userId}, function (res) {
+                                var permissionAllList = res.data.permissionList
+                                var roleAllList = res.data.roleList
+
+                                // 处理权限
+                                if (permissionAllList.length < 1) {
+                                    $('#userPermissionEmpty').show()
+                                    $('#permissionListAll-container').hide()
+                                } else {
+                                    $('#userPermissionEmpty').hide()
+                                    $.fn.zTree.init($("#userPermissionListAll"), setting, permissionAllList);
+                                    $('#permissionListAll-container').show()
+                                }
+
+                                // 处理角色
+                                roleVue.$data.roles = roleAllList
+                                roleVue.$data.userId = userId
+
+                                $userPermissionModal.modal({
+                                    show: true,
+                                    backdrop: 'static'
+                                })
+                            })
+                        },
+                        filterUser: function (user) {
+                            var keywordMatched = !this.keyword || (user.username && user.username.toLowerCase().indexOf(this.keyword) > -1 || user.name && user.name.toLowerCase().indexOf(this.keyword) > -1)
+
+                            if (!keywordMatched)
+                                return false
+
+                            if (this.showSelectedUser && this.form.userIds.includes(user.id))
+                                return true
+                            else if (!this.showSelectedUser)
+                                return true
+
+                            return false;
+                        },
+                        _check: function () {
+                            for (var i = 0; i < this.form2.roleList.length; i++) {
+                                var name = this.form2.roleList[i].name
+
+                                if (!name || !name.trim()) {
+                                    return false
+                                }
+                            }
+                            return true
+                        },
+                        _normalizeRoleFormData: function () {
+                            this.form2.roleList = []
+                            var _this = this
+                            this.datasource.roleList.forEach(function (r) {
+                                _this.form2.roleList.push(
+                                    {
+                                        name: r.name,
+                                        id: r.id
+                                    }
+                                )
+                            })
+
+                            // 默认选中管理员
+                            if (this.currentRole.id !== this.datasource.roleList[0].id)
+                                this.changeRole(this.datasource.roleList[0])
+                        }
+                    },
+                    created: function () {
+                        this._normalizeRoleFormData()
+                    },
+                    mounted: function () {
+                        $.fn.zTree.init($("#permissionList"), setting, permissionList);
+                        setChecked(permissionList)
+                    }
+                })
+            });
+
+        </script>
+    </th:block>
+</body>
+<div class="modal fade" id="permissionModal" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">权限编辑</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card-body">
+                    <div class="permissionListAll-container">
+                        <ul id="permissionListAll" class="ztree"></ul>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="savePermissionBtn"><i class="fa fa-save"></i> 保存</button>
+                <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="userPermissionModal" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">用户权限</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="nav-tabs-boxed">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#home-1" role="tab" aria-controls="home" aria-selected="false">权限</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#roleListAll-container" role="tab" aria-controls="profile" aria-selected="true">角色</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="home-1" role="tabpanel">
+                            <div class="show-permission-empty empty-text" id="userPermissionEmpty">
+                                没有权限数据
+                            </div>
+                            <div class="permissionListAll-container" id="permissionListAll-container">
+                                <ul id="userPermissionListAll" class="ztree"></ul>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="roleListAll-container" role="tabpanel">
+                            <div class="show-permission-empty empty-text" v-if="roles.length === 0">
+                                没有角色数据
+                            </div>
+                            <div class="permissionListAll-container" v-else>
+                                <div class="role-item" v-for="r in roles">{{r.name}}<a class="role-delete-btn" href="javascript:;" @click="removeRole(r.id)">删除</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

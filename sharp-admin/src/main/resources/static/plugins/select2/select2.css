@@ -1,0 +1,32 @@
+.select2 {
+	position: relative;
+}
+
+.select2 input {
+	width: 100%;
+}
+
+.select2 .items {
+	position: fixed;
+	z-index: 9;
+	max-height: 300px;
+	overflow: auto;
+	box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 12px 0px;
+	background-color: #fff;
+	cursor: pointer;
+}
+
+.select2 ul {
+	padding: 0;
+	margin: 0;
+}
+.select2 li {
+	display: block;
+	list-style: none;
+	padding: 4px;
+}
+
+.select2 li.active {
+	background-color: #20a8d8;
+	color: #fff;
+}

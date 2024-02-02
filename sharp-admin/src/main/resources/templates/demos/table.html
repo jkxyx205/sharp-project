@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sp="" lang="zh">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <style>
+        .form-control:disabled, .form-control[readonly] {
+            background: #fff;
+        }
+
+        .operator-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: .2rem 1.25rem;
+            background: #fff;
+            border-top: 1px solid #c8ced3;
+        }
+
+        .table-fixed-container {
+            max-height: calc(100vh - 340px);
+        }
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <form class="form-inline query-form-container" id="form-operator">
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="type">场景</label>
+                        <select id="type" name="type" class="form-control">
+                            <option value="INBOUND">入库</option>
+                            <option value="OUTBOUND">出库</option>
+                            <option value="RETURN">退货</option>
+                            <option value="CANCEL">取消</option>
+                            <option value="DISPLAY">显示</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="referenceType">参考凭证</label>
+                        <select id="referenceType" name="referenceType" class="form-control">
+                            <option value="OTHER">无</option>
+                            <option value="MATERIAL_DOCUMENT">参考凭证</option>
+                            <option value="PO">采购订单</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" id="referenceCode" type="text" name="referenceCode">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary mr-2" type="button" name="search">
+                            <i class="fa fa-cog"></i> 确定</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <form class="form-inline query-form-container" id="form-header">
+                    <div class="form-group">
+                        <label class="col-form-label mr-2 required">凭证日期</label>
+                        <input class="form-control" type="text" id="documentDate" name="documentDate" required th:value="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2">库房</label>
+                        <sp:select  id="plantId" name="plantId" key="core_plant" class="form-control" hideAllItem/>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2">操作人</label>
+                        <sp:select  id="operatorId" name="operatorId" key="sys_user" class="form-control" emptyItemText th:value="${session.user.id}"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2">备注</label>
+                        <input class="form-control" type="text" id="remark" name="remark">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div id="table-container">
+                    <form class="form-item" id="form-item">
+                        <div class="table-fixed-container">
+                            <table class="table-thead">
+                                <thead>
+                                <tr>
+                                    <th style="width: 40px;">序号</th>
+                                    <th><label class="col-form-label col-sm-2 required">物料</label></th>
+                                    <th><label class="col-form-label col-sm-2 required">数量</label></th>
+                                    <th><label class="col-form-label col-sm-2">单位</label></th>
+                                    <th><label class="col-form-label col-sm-2">备注</label></th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                                </thead>
+                            </table>
+
+                            <table id="table" class="table-tbody">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="dialogInput" style="display: none"></div>
+        <div class="operator-bar text-center">
+            <button class="btn btn-primary" type="button" name="send" onclick="send()">
+                <i class="fa fa-send"></i> 提交</button>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+
+    <script th:src="@{/js/jquery.dialogInput.js}"></script>
+    <script th:src="@{/js/jquery.table.js}"></script>
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script>
+        let dialogInput = $('#dialogInput');
+        var currentMaterialDom;
+
+        $('#documentDate').datepicker({
+            language: "zh-CN",
+            autoclose: true,
+            clearBtn: true,
+            todayBtn: 'linked',
+            todayHighlight: true,
+            format: 'yyyy-mm-dd'
+        })
+
+        $('#table-container').table({fixedHead: true})
+        $('.tr-empty.non-data').remove()
+
+        var editableTableIndex = 1;
+        $('#table').editableTable({
+            columns: 5,
+            addEmptyLineCallback: function ($tr) {
+                $tr.find('td:nth-child(2) input').attr('readonly', false);
+                $tr.find('td:nth-child(2)').append('<input class="form-control" type="hidden" name="materialId" required>')
+
+                $tr.find('td:nth-child(3) input')
+                    // .attr('type', 'number')
+                    .attr('pattern', '^\\d+(\\.\\d{1,3})?$')
+                    .attr('title', '必须数字')
+                    .attr('name', "quantity");
+                $tr.find('td:nth-child(4) input').attr('disabled', true)
+                $tr.find('td:nth-child(5) input').attr('name', "remark")
+
+                rebuildIndex()
+            },
+            beforeRemoveCallback: function ($parent) {
+                // console.log($parent)
+                return true
+            },
+            afterRemoveCallback: function ($parent) {
+                // console.log($parent)
+                rebuildIndex()
+                return true
+            }
+        })
+
+        function rebuildIndex() {
+            editableTableIndex = 1;
+            $('#table tbody tr').each(function () {
+                $(this).find('td:nth-child(1)').text(editableTableIndex++)
+            })
+
+            // 倒数第二个 设置 required
+            let $tr = $('#table tbody tr:last-child')
+            let $requiredTr = $tr.prev()
+            if ($requiredTr.length == 0) {
+                $requiredTr = $tr
+            }
+
+            $requiredTr.find('td:nth-child(2) input').attr('required', true)
+            $requiredTr.find('td:nth-child(3) input').attr("required", true)
+        }
+
+        $('#dialogInput').dialogInput({
+            title: '选择物料',
+            name: 'material_id',
+            reportId: '697147523487240192',
+            labelDisplay: function (row) {
+                return row.name + ' ' + (!row.specification ? '' : row.specification)
+            },
+            selected: function (row) {
+                console.log(row)
+                if ("createEvent" in document) {
+                    var evt = document.createEvent("HTMLEvents");
+                    evt.initEvent("input", false, true);
+                    currentMaterialDom.dispatchEvent(evt);
+                }
+                else
+                    currentMaterialDom.fireEvent("input");
+
+                currentMaterialDom.value = this.labelDisplay(row)
+                setCaretPosition(currentMaterialDom, currentMaterialDom.value.length)
+
+                $(currentMaterialDom).parents('tr').find('td:nth-child(4) input').val(row.base_unit)
+                $(currentMaterialDom).siblings().val(row.id)
+            }
+        })
+
+        function setCaretPosition(ctrl, pos) {
+            // Modern browsers
+            if (ctrl.setSelectionRange) {
+                ctrl.focus();
+                ctrl.setSelectionRange(pos, pos);
+
+                // IE8 and below
+            } else if (ctrl.createTextRange) {
+                var range = ctrl.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        }
+
+        $('#table tbody').delegate('td:nth-child(2) input[type=text]', 'click keydown focus', function(event){
+            // if ((event.keyCode && event.keyCode === 13) || !event.keyCode) {
+            if ((event.keyCode && event.keyCode !== 9) || !event.keyCode) {
+                dialogInput.click();
+                currentMaterialDom = this
+            }
+
+            if (event.keyCode !== 9 ) {
+                event.preventDefault();
+                return;
+            }
+        })
+
+        $('#table tbody').delegate('td:nth-child(3) input[type=text]', 'keydown', function(event){
+            if ((event.keyCode > 57 || event.keyCode < 48) && event.keyCode !== 8 && event.keyCode !== 190 && event.keyCode !== 39 && event.keyCode !== 37 && event.keyCode !== 9) {
+                event.preventDefault();
+                return;
+            }
+        })
+
+        let formHeader = document.getElementById('form-header');
+        let formItem = document.getElementById('form-item');
+
+        function valid() {
+            var formHeaderValidity = formHeader.checkValidity()
+            var formItemValidity = formItem.checkValidity()
+            formHeader.classList.add('was-validated')
+            formItem.classList.add('was-validated')
+            return formHeaderValidity && formItemValidity;
+        }
+
+        function reset() {
+            formHeader.classList.remove('was-validated')
+            formItem.classList.remove('was-validated')
+            $('#table tbody tr:not(:last-child)').remove()
+            rebuildIndex()
+            document.getElementById('referenceCode').value = ''
+        }
+
+        function send() {
+            var params = {}
+            var items = []
+            $('#table tbody tr:not(:last-child)').each(function () {
+                var row = {}
+                $(this).find('td input[name]').each(function () {
+                    row[$(this).attr('name')] = $(this).val()
+
+                    // 处理material
+                    if (!row.materialId) {
+                        $(this).siblings().val('')
+                    }
+                })
+
+                // 如何全部为空删除该行
+                let allEmpty = true
+                for (const [key, value] of Object.entries(row)) {
+                    if (!!value) {
+                        allEmpty = false
+                        break
+                    }
+                }
+                if (allEmpty) {
+                    $(this).remove()
+                } else {
+                    items.push(row)
+                }
+                //end
+            })
+
+            rebuildIndex()
+            params['items'] = items
+
+            if (!valid()) {
+                return
+            }
+
+            params = $.extend({},
+                params, $('#form-operator').form2json({allowEmptyMultiVal:true}), $('#form-header').form2json({allowEmptyMultiVal:true})); //合并参数
+
+            console.log(params)
+            toastr.success('提交成功');
+            reset()
+        }
+    </script>
+</th:block>
+</body>
+</html>

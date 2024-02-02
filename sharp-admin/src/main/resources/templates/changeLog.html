@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style>
+        .release-container {
+            max-width: 786px;
+            margin: 0 auto;
+            border-left: 1px solid #c8ced3;
+            padding: 1rem;
+        }
+        .release {
+            margin-bottom: 2rem;
+        }
+        .release ul {
+            font-style: italic;
+        }
+        .release h3 {
+            position: relative;
+        }
+        .release h3:before {
+            position: absolute;
+            left: calc(-.6rem / 2 - 1rem);
+            top: .6rem;
+            content: '';
+            width: .6rem;
+            height: .6rem;
+            /*border-radius: 50%;*/
+            background-color: #c8ced3;
+        }
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <!--<hr style="border-top: 1px solid #c8ced3; margin: 0;">-->
+                <div class="release-container">
+                    <div class="release">
+                        <h3>2020.08.10</h3>
+                        <div class="function">
+                            <h6>功能</h6>
+                            <ul>
+                                <li>项目初始化</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script>
+    </script>
+</th:block>
+</body>
+</html>

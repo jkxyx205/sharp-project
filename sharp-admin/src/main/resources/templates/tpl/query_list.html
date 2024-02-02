@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sp="" th:with="reportDomId = ${'report-list' + T(java.lang.System).currentTimeMillis()}">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <style>
+        .ms-parent {
+            padding: 0;
+        }
+
+        .ms-parent .ms-choice {
+            display: block;
+            border: none;
+            height: 33px;
+            line-height: 33px;
+        }
+
+        @media screen and (min-width: 576px) {
+            .card-body-scroll-panel, .table-fixed-container {
+                max-height: calc(100vh - 152px);
+            }
+        }
+
+        .scroll-panel {
+            padding: 0!important;
+            overflow: hidden!important;
+        }
+
+        .ac-sidebar {
+            display: none;
+        }
+
+        table tr.active {
+            background: #20a8d8!important;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="app">
+<input type="hidden" name="qid" id="qid">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div>
+        <div class="card" style="margin-bottom: .5rem;">
+            <div class="card-body">
+                <form class="form-inline query-form-container" onsubmit="return false">
+                    <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList.size() > 0}">
+                        <div class="form-group">
+                            <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
+                            <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
+                                <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem/>
+                            </th:block>
+
+                            <th:block style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                                <div class="input-group input-daterange" th:classappend="${f.name}">
+                                    <input class="form-control" th:id="${f.name + '0'}" th:name="${f.name + '0'}" type="text" placeholder="开始时间"
+                                           autocomplete="off"><label
+                                        class="col-form-label" style="padding-left: 0;">～</label>
+                                    <input class="form-control" th:id="${f.name + '1'}" th:name="${f.name + '1'}" type="text" placeholder="结束时间"
+                                           autocomplete="off">
+                                </div>
+                            </th:block>
+                        </div>
+                    </th:block>
+                    <div class="form-group">
+                        <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList.size() > 0}">
+                            <i class="fa fa-search"></i> 查询</button>
+                        <button class="btn btn-secondary mr-2" type="button" name="reset" th:if="${report.queryFieldList.size() > 0}">
+                            <i class="fa fa-remove"></i> 重置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 0;">
+            <div class="card-body" style="padding-bottom: 0">
+                <div th:id="${reportDomId}">
+                    <ajax-table :grid="grid" :display-page="displayPage" class="report-list-table" row-key="id" @refresh="refresh"
+                                :fixed-head="true"
+                                @page-change="pageChange"
+                                @sort-column="sortColumn"
+                                @size-change="sizeChange"
+                                @row-click="rowClick"
+                                @row-dbclick="rowDbClick">
+                        <table-column
+                                type="index"
+                                label="序号"
+                                width="40">
+                        </table-column>
+                        <table-column
+                                type="checkbox"
+                                class="text-center"
+                                label="<input type=checkbox>"
+                                align="center"
+                                width="40" th:if="${'multiple' eq params['mode']}">
+                        </table-column>
+                        <table-column th:each="n : ${report.reportColumnList}" th:if="${!n.hidden}" th:attr="prop=${n.name}, label=${n.label}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
+                        </table-column>
+                    </ajax-table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.table.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.ajaxTable.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.pageTable.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.formautofill.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script th:src="@{/ajaxfileupload.js}"></script>
+
+    <script th:inline="javascript">
+        $.fn.multipleSelect.locales['zh-CN'] = {
+            formatSelectAll: function () {
+                return '[全选]'
+            },
+            formatAllSelected: function () {
+                return '已选择所有记录'
+            },
+            formatCountSelected: function(count, total) {
+                return '已从' + total + '条记录中选择' + count + '条'
+            },
+            formatNoMatchesFound: function () {
+                return '没有找到记录'
+            }
+        }
+
+        $.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
+
+        let urlObject = getUrlObject();
+
+        $('.query-form-container').autofill(urlObject).pageTable()
+
+        /*<![CDATA[*/
+        let isMultiple = [[${'multiple' eq params['mode']}]]
+
+        var fz = [[${report.queryFieldList}]]
+        var multipleSelect = fz.filter(f => f.type == 'MULTIPLE_SELECT')
+        multipleSelect.forEach(f => {
+            var value = urlObject[f.name]
+            $('#' + f.name).multipleSelect({
+                // selectAll: true,
+                single: true,
+                filter: true,
+                // placeholder: '请选择' + f.label
+            }).multipleSelect('setSelects', !value ? '' : value.split(','))
+        })
+
+        var dateRange = fz.filter(f => f.type == 'DATE_RANGE')
+        dateRange.forEach(f => {
+            $('.'+f.name+'.input-daterange').datepicker({
+                language: "zh-CN",
+                autoclose: true,
+                clearBtn: true,
+                todayBtn: 'linked',
+                todayHighlight: true,
+                format: 'yyyy-mm-dd'
+            })
+        })
+
+        /*]]>*/
+
+        var $listTable;
+
+        $('.query-form-container').pageTable()
+
+        // 覆盖base中的方法
+        function search(params) {
+            listRequest(params)
+        }
+
+        let report_id = /*[[${report.id} + '']]*/
+        let pageable = /*[[${report.pageable}]]*/
+        let reportDomId = /*[[${reportDomId}]]*/
+
+        function listRequest(params) {
+            console.log('list ajax request...')
+            params.page = 1
+            params.size = pageable ? 15 : -1 // 不分页
+            params.sord = /*[[${report.sord}]]*/
+            params.sidx = /*[[${report.sidx}]]*/
+
+            if (!$listTable) {
+                $listTable = $('#' + reportDomId).ajaxTable({
+                    url: '/reports/'+report_id+'/json',
+                    query: params,
+                    displayPage: function () {
+                        if(/*[[${device.isNormal()}]]*/) {
+                            return 15
+                        } else if(/*[[${device.isTablet()}]]*/) {
+                            return 10
+                        }
+                        return 5
+                    }
+                })
+            } else {
+                $listTable.ajaxTable('reload', params)
+            }
+        }
+
+        listRequest(/*[[${params}]]*/)
+
+        window[reportDomId + 'RowClick'] = function(row, event) {
+            $(event.target).parents('tr')
+                .addClass('active')
+                .siblings().removeClass()
+
+            document.getElementById('qid').row = row
+        }
+
+        window[reportDomId + 'RowDbClick'] = function(row, event) {
+            $(event.target).parents('tr')
+                .addClass('active')
+                .siblings().removeClass()
+
+            window.parent['dialogRowDbClick'] && window.parent['dialogRowDbClick'](row)
+        }
+
+        $(document).on('keyup', function (e) {
+            let theEvent = window.event || e;
+            let code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+
+            if (code === 13) {
+                window.parent['dialogRowDbClick']()
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        })
+    </script>
+</th:block>
+</body>
+</html>

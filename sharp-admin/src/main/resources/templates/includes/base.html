@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="common_header(title, links, style)">
+    <base href="./">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no, maximum-scale=1.0,minimum-scale=1.0,user-scalable=0">
+    <meta name="description" content="XXXX科技">
+    <meta name="author" content="Rick">
+    <meta name="keyword" content="XXXX科技">
+    <title th:replace="${title}">XXXX科技</title>
+    <!-- Common styles and scripts -->
+    <!-- Icons-->
+    <link th:href="@{/coreui/vendors/@coreui/icons/css/coreui-icons.min.css}" rel="stylesheet">
+    <link th:href="@{/coreui/vendors/flag-icon-css/css/flag-icon.min.css}" rel="stylesheet">
+    <link th:href="@{/coreui/vendors/font-awesome/css/font-awesome.min.css}" rel="stylesheet">
+    <link th:href="@{/coreui/vendors/simple-line-icons/css/simple-line-icons.css}" rel="stylesheet">
+    <!--Main styles for this application-->
+    <link th:href="@{/coreui/css/style.min.css}" rel="stylesheet">
+    <link th:href="@{/coreui/vendors/pace-progress/css/pace.min.css}" rel="stylesheet">
+    <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
+
+    <!--/* Per-page placeholder for additional links */-->
+    <th:block th:replace="${links}" />
+    <style>
+        .sidebar {
+            /*background: rgb(48, 65, 86);*/
+        }
+        .nav-dropdown-items {
+            /*background: #2b2f3a;*/
+        }
+        .nav-dropdown-items .nav-link {
+            padding-left: 2rem;
+        }
+
+        [v-cloak]{
+            visibility: hidden !important; /*防止被覆盖*/
+            display: none;
+        }
+
+        html, body {
+            -webkit-overflow-scrolling:touch;
+            height: 100%;
+        }
+
+        input[type="file"]{
+            color: transparent;
+        }
+
+        .layui-layer-title {
+            background-color: #20a8d8!important;
+            color: #fff!important;
+        }
+
+        .layui-layer-btn .layui-layer-btn0 {
+            color: #fff!important;
+            background-color: #20a8d8!important;;
+            border-color: #20a8d8!important;
+        }
+
+        .layui-layer-btn a:hover {
+            background-color: #1b8eb7!important;;
+            border-color: #1985ac!important;
+            opacity: 1!important;
+        }
+
+        /*验证样式开始*/
+        .form-check-input.is-valid~.form-check-label, .was-validated .form-check-input:valid~.form-check-label {
+            color: inherit;
+        }
+
+        .form-control.is-valid, .was-validated .form-control:valid {
+            border-color: #e4e7ea;
+            padding-right: .75rem;
+            background: none;
+        }
+
+        .form-control.is-invalid, .was-validated .form-control:invalid {
+            padding-right: .75rem;
+        }
+
+        .table-editor .form-control.is-valid, .was-validated .table-editor .form-control:valid {
+            border-color: #e4e7ea;
+            padding-right: .5rem;
+            background: none;
+        }
+
+        .table-editor .form-control.is-invalid, .was-validated .table-editor .form-control:invalid {
+            padding-right: .5rem;
+            border-width: 1px;
+        }
+        /*验证样式结束*/
+
+        @media screen and (max-width: 768px) {
+            .hidden-sm {
+                display: none;
+            }
+        }
+
+        @media (min-width: 576px) {
+            .modal-dialog {
+                max-width: 550px;
+            }
+        }
+
+        .modal-header {
+            padding: .6rem .6rem;
+        }
+
+        .modal-body {
+            overflow: auto;
+        }
+
+        .modal-backdrop.show {
+            opacity: .3;
+        }
+
+        .dialog-form table .col-form-label {
+            padding-left: 12px;
+        }
+
+        .table-bordered thead td
+        /*.table-bordered thead th*/ {
+            border-width: 1px;
+        }
+
+        table th, table td{
+            white-space: nowrap;
+        }
+
+        .table-fixed-container {
+            position: relative;
+            overflow: auto;
+        }
+
+        .table-responsive-sm {
+            display: table!important; /*no-need to display:blocktab-common.css*/
+        }
+
+        .table-fixed-container table {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .table-fixed-container th, .table-fixed-container td {
+            white-space: nowrap;
+            word-break: break-all;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table-fixed-container .table-thead {
+            position: absolute;
+            background-color: #fff;
+            z-index: 9;
+        }
+
+        /*.table-body-fixed .table-head-container::-webkit-scrollbar {*/
+            /*display:none*/
+        /*}*/
+
+        /*.table-body-fixed .table-head-container {*/
+            /*-ms-overflow-style: none;*/
+            /*overflow: -moz-scrollbars-none;*/
+        /*}*/
+
+        .input-daterange input {
+            text-align: left;
+        }
+
+        .ms-parent {
+            padding: 0;
+        }
+        .ms-parent .ms-choice {
+            display: block;
+            border: none;
+            height: 33px;
+            line-height: 33px;
+        }
+
+        .ms-choice > span {
+            padding-left: 12px;
+        }
+
+        table th i {
+            margin-left: 8px;
+        }
+
+        table thead th.sortable.desc:after,
+        table thead td.sortable.desc:after,
+        table thead th.sortable.DESC:after,
+        table thead td.sortable.DESC:after,
+        table thead th.sortable:after,
+        table thead td.sortable:after{
+            font-family:'FontAwesome';
+            content:"\f0ab";
+            margin-left: 2px;
+        }
+
+        table thead th.sortable.asc:after,
+        table thead td.sortable.asc:after,
+        table thead th.sortable.ASC:after,
+        table thead td.sortable.ASC:after{
+            content:"\f0aa";
+        }
+
+        table thead th.sortable.active {
+            color: #20a8d8;
+        }
+
+        table tr.non-data {
+            background: rgba(0,0,0,.05);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .red {
+            color: #f86c6b;
+        }
+
+        .visible-md {
+            display: none;
+        }
+
+        .app-header {
+            border-bottom: none;
+        }
+
+        select {
+            border-color: #e4e7ea;
+        }
+
+        .table-footer-bar .goto {
+            width: 48px;
+            border: 1px solid #e4e7ea;
+            padding: 0 4px;
+            vertical-align: bottom;
+            height: 24px;
+        }
+
+        .table-footer-bar select {
+            height: 24px;
+        }
+
+        @media screen and (min-width: 768px){
+            .visible-md {
+                display: initial;
+            }
+        }
+
+        .scroll-panel {
+            width: 100vw;
+            height: 100%;
+            padding-top: 1rem;
+            overflow-y: auto;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-body-scroll-panel {
+            overflow-x: auto;
+        }
+
+        .ellipsis {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        label.required {
+            position: relative;
+        }
+
+        .required label:before, label.required:before {
+            content: '*';
+            position: absolute;
+            left: 6px;
+            color: #f86c6b;
+        }
+
+        .form-inline .required label:before, .form-inline label.required:before {
+            left: -8px;
+        }
+
+        .tip-text  {
+            color: #768192;
+        }
+        .empty-text, .loading-panel {
+            color: #768192;
+            line-height: 50px;
+            text-align: center;
+        }
+
+        .loading-panel {
+            display: none;
+        }
+
+        .loading-panel.active {
+            display: block;
+        }
+
+        label.error {
+            color: #f86c6b;
+            /*color: var(--red);*/
+        }
+
+        .hidden {
+            display: none!important;
+        }
+
+        .display-group label {
+            font-weight: bold;
+            width: 90px;
+            text-align: right;
+            margin-right: 1rem;
+        }
+
+        .form-line .col-form-label {
+            position: relative;
+            padding-left: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .form-line .col-form-btn {
+                padding-top: calc(.375rem + 1px);
+            }
+        }
+
+        @media screen and (min-width: 576px) {
+            .form-inline .form-group {
+                margin: 0 .5rem .5rem 0;
+            }
+
+            .card-body-scroll-panel {
+                max-height: calc(100vh - 200px);
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            .form-inline {
+                display: block;
+            }
+        }
+
+        .ac-sidebar {
+            position: fixed;
+            right: 4px;
+            bottom: 0;
+            background: #fff;
+
+            text-align: center;
+
+            -moz-box-shadow:2px 2px 4px #333333; -webkit-box-shadow:2px 2px 4px #333333; box-shadow:2px 2px 4px #333333;
+        }
+
+        .ac-sidebar > div {
+            padding: 2px 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #c8ced3
+        }
+
+        #upTop {
+            display: none;
+        }
+
+
+    </style>
+    <th:block th:replace="${style}" />
+</head>
+
+<th:block th:fragment="common_js(scripts)">
+    <script th:src="@{/plugins/polyfill.min.js}"></script>
+    <!-- CoreUI and necessary plugins-->
+    <script th:src="@{/coreui/vendors/jquery/js/jquery.min.js}"></script>
+    <script th:src="@{/coreui/vendors/popper.js/js/popper.min.js}"></script>
+    <script th:src="@{/coreui/vendors/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/coreui/vendors/pace-progress/js/pace.min.js}"></script>
+    <script th:src="@{/coreui/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/coreui/vendors/@coreui/coreui/js/coreui.min.js}"></script>
+    <script th:src="@{/plugins/fastclick.min.js}"></script>
+    <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
+    <script th:src="@{/plugins/vue.min.js}"></script>
+    <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+    <script th:src="@{/plugins/layer/layer.js}"></script>
+    <script th:src="@{/plugins/math.min.js}"></script>
+    <!-- Plugins and scripts required by this view-->
+    <script>
+        $(function () {
+            FastClick.attach(document.body);
+
+            // $('.page-link').on('click', function () {
+            //     $.LoadingOverlay('show')
+            // })
+
+            $.ajaxSetup({
+                beforeSend: function (xhr) {
+                    var url = arguments[1].url.replace(/\?.*/, "")
+
+                    var ignoreLoadingOverlay = ['/password/check'] // 禁止加载loading
+
+                    var len = ignoreLoadingOverlay.length;
+
+                    for (var i = 0; i < len; i++) {
+                        if(url === ignoreLoadingOverlay[i]) {
+                            return
+                        }
+                    }
+                    $.LoadingOverlay("show");
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 400) {
+                        let message = '请求出现错误!'
+                        let json = xhr.responseJSON
+                        if (json) {
+                            if (json.message) {
+                                message += json.message
+                            }
+
+                            if (json.data) {
+                                if (Array.isArray(json.data)) {
+                                    for (let row of json.data) {
+                                        message += "<br> * " + row.message
+                                    }
+                                } else {
+                                    message += "<br> * " + json.data
+                                }
+                            }
+                        }
+                        toastr.error(message);
+                    } else if (xhr.status === 403) {
+                        toastr.warning('您没有操作权限！');
+                    } else if (xhr.status === 404) {
+                        toastr.error('请求资源不存在！');
+                    } else if (xhr.status === 500) {
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            toastr.error(xhr.responseJSON.message);
+                        } else {
+                            toastr.error('服务器发生异常!');
+                        }
+                    } else {
+                        toastr.error(xhr.responseJSON.message);
+                    }
+                },
+                // dataFilter: function(str, type) {
+                //     try {
+                //         res = JSON.parse(str)
+                //         if (res.success === false) {
+                //             toastr.error(res.msg)
+                //         }
+                //     } catch(e) {
+                //
+                //     }
+                //     return str
+                // },
+                complete: function (xhr,status) {
+                    $.LoadingOverlay("hide");
+                }
+            })
+
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+        })
+
+        /**
+         * 表格函数
+         * @param page
+         */
+        function search(url) {
+            $.LoadingOverlay("show");
+            location.href = location.pathname + _newUrl(url)
+        }
+
+        function _newUrl(url) {
+            if (typeof url === 'object') {
+                url = $.param(url)
+            }
+
+            var search = location.search
+
+            if (!search)
+                return !url ? "" : "?" + url
+
+            if (!url) {
+                return search
+            }
+
+            search = search.replace("?", '')
+
+            var searchObject = url2Object(search)
+
+            $.extend(searchObject, url2Object(url));
+            return "?" + $.param(searchObject);
+        }
+
+        /**
+         * 获取url参数对象
+         * @returns {*}
+         */
+        function getUrlObject() {
+            var search = location.search.substring(1);
+
+            if (!search) {
+                return {}
+            }
+            return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) })
+        }
+
+        function gotoPage(o, curPage, event) {
+            if (o.value == curPage) {
+                return
+            }
+
+            // 兼容FF和IE和Opera
+            var theEvent = event || window.event;
+            var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+            if (code == 13) {
+                if (o.value && o.value.trim()) {
+                    var page = o.value.trim()
+
+                    if (/^[0-9]*[1-9][0-9]*$/.test(page)) {
+                        search('page=' + o.value)
+                    } else {
+                        toastr.error('页码只能是正整数!');
+                    }
+                    return
+                }
+                toastr.error('页码不能为空!');
+            }
+        }
+
+        function url2Object(search) {
+            var urlObj = {}
+
+            if (!search)
+                return urlObj
+
+            var params = search.split('&');
+            params.forEach(function(item) {
+                var data = item.split('=')
+                if (data.length === 2)
+                    urlObj[data[0]] = decodeURIComponent(data[1].replace(/[+]/g, ' '))
+            })
+            return urlObj
+        }
+
+        function replaceAndOpenOnNewTab(tabId, url, name, hash) {
+            openOnNewTab(tabId, url, name, hash)
+            delTab()
+        }
+
+        function openOnNewTab(tabId, url, name, hash) {
+            if (hash)
+                url += '#' + hash
+
+            if (!tabId) {
+                tabId = new Date().getTime()
+            }
+            // 'tab-' 防止 tabId 是纯数字，tab切换会有问题
+            if ((tabId + '').match(/^\d+$/)) {
+                tabId = 'tab-' + tabId
+            }
+            window.parent.addTab(tabId, name, url)
+        }
+
+        function openOnNewTabLink(url, name) {
+            return '<a href="javascript:;" onclick="openOnNewTab(\''+url+'\', \''+name+'\')">'+name+'</a>'
+        }
+
+        function replaceTabLink(url, name) {
+            return '<a href="javascript:;" onclick="replaceAndOpenOnNewTab(\''+url+'\', \''+name+'\')">'+name+'</a>'
+        }
+
+        function delTab(tabId) {
+            if (!tabId) {
+                // 关闭当前
+                tabId = window.frameElement.parentElement.id
+            }
+
+            window.parent.delTab(tabId)
+        }
+
+        function toggleTab(tabId) {
+            if (!tabId) {
+                // 关闭当前
+                tabId = window.frameElement.parentElement.id
+            }
+            window.parent.toggleTab(tabId)
+        }
+
+        function reloadTab(id) {
+            let frameLength = window.parent.frames.length
+            for (let i = 0; i < frameLength; i++) {
+                let frame = window.parent.frames[i]
+                if (frame.frameElement.parentElement.id === id) {
+                    frame.location.reload()
+                    return true
+                }
+            }
+        }
+
+        function limitPages(total, displayPage, activePage) {
+            var leftOffset = parseInt((displayPage - 1) / 2);
+            var leftPage = activePage - 1;
+            var rightOffset = displayPage - leftOffset - 1;
+            var rightPage = total - activePage;
+            var startPage = 1;
+            if (rightPage < rightOffset) {
+                leftOffset = leftOffset + rightOffset - rightPage;
+            }
+
+            if (leftPage > leftOffset) {
+                startPage = activePage - leftOffset;
+            }
+
+            var endPage = startPage + displayPage - 1;
+            if (endPage > total) {
+                endPage = total;
+            }
+
+            return {
+                "startPage": startPage,
+                "endPage": endPage
+            }
+        }
+
+        function formatDecimal(num) {
+            if (typeof num === 'undefined' || num === null)
+                return ''
+
+            var result = parseFloat(num);
+            if (isNaN(result)) {
+                alert('传递参数错误，请检查！');
+                return false;
+            }
+            result = Math.round(num * 100) / 100;
+            var s_x = result.toString();
+            var pos_decimal = s_x.indexOf('.');
+            if (pos_decimal < 0) {
+                pos_decimal = s_x.length;
+                s_x += '.';
+            }
+            while (s_x.length <= pos_decimal + 2) {
+                s_x += '0';
+            }
+            return formatNumber(s_x);
+        }
+
+        function formatInteger(num) {
+            if (typeof num === 'undefined' || num === null)
+                return ''
+
+            return formatNumber(Math.round(num));
+        }
+
+        /**
+         * 整数部分，3位逗号隔开
+         * @param num
+         * @returns {string}
+         */
+        function formatNumber(num) {
+            if (typeof num === 'undefined' || num === null)
+                return ''
+
+            var num = (num || 0).toString(), result = '';
+
+            var d = num.split('.');
+            var s = ''
+
+            if (d.length > 1) {
+                s = '.' + d[1]
+            }
+
+            num = d[0]
+
+            var sign = ''
+            var firstLetter = num.charAt(0)
+
+            if (/^\-|\+$/.test(firstLetter)) {
+                num = num.substr(1)
+                sign = firstLetter
+            }
+
+            while (num.length > 3) {
+                result = ',' + num.slice(-3) + result;
+                num = num.slice(0, num.length - 3);
+            }
+            if (num) { result = num + result; }
+            return sign + result + s;
+        }
+
+        Vue.filter('formatInteger', formatInteger)
+        Vue.filter('formatDecimal', formatDecimal)
+        Vue.filter('openOnNewTabLink', openOnNewTabLink)
+
+        // https://css-tricks.com/snippets/jquery/make-jquery-contains-case-insensitive/
+        $.expr[":"].contains = $.expr.createPseudo(function(arg) {
+            return function( elem ) {
+                return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+            };
+        });
+
+        $.fn.enterKeyup = function(fn) {
+            $(this).on('keyup', function (e) {
+                var theEvent = window.event || e;
+                var code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+
+                if (code === 13) {
+                    fn()
+                }
+            })
+        }
+    </script>
+    <!--滚动条美化有问题，反应迟钝-->
+    <script th:if="${device.isNormal()}">　
+        var $scrolPannel = $('.scroll-panel')
+
+        // $('.card-body').niceScroll({
+        //     cursorcolor: "#7f7f7f",
+        //     cursoropacitymax: 1, //改变不透明度非常光标处于活动状态（scrollabar“可见”状态），范围从1到0
+        //     touchbehavior: false, //使光标拖动滚动像在台式电脑触摸设备
+        //     cursorwidth: "6px", //像素光标的宽度
+        //     cursorborder: "0", // 游标边框css定义
+        //     cursorborderradius: "6px",//以像素为光标边界半径
+        //     autoh.table-body-fixed .table-body-containerde: false //是否隐藏滚动条
+        // })
+        //
+        // $scrolPannel.niceScroll({
+        //     cursorcolor: "#7f7f7f",
+        //     cursoropacitymax: 1, //改变不透明度非常光标处于活动状态（scrollabar“可见”状态），范围从1到0
+        //     touchbehavior: false, //使光标拖动滚动像在台式电脑触摸设备
+        //     cursorwidth: "6px", //像素光标的宽度
+        //     cursorborder: "0", // 游标边框css定义
+        //     cursorborderradius: "6px",//以像素为光标边界半径
+        //     autoh.table-body-fixed .table-body-containerde: true //是否隐藏滚动条
+        // })
+
+        $scrolPannel.on('scroll', function() {
+            if ($(this).scrollTop() > 200) {
+                $('#upTop').css("display", "block")
+            } else {
+                $('#upTop').css("display", "none")
+            }
+        })
+    </script>
+    <th:block th:replace="${scripts}" />
+</th:block>
+
+<th:block th:fragment="common_content(content)">
+    <div th:class="${'scroll-panel device-' + device.deviceType}">
+        <th:block th:replace="${content}" />
+    </div>
+    <div class="ac-sidebar">
+        <div id="upTop" onclick="$('.scroll-panel').animate({scrollTop: 0}, 'fast')">
+            <i class="fa fa-arrow-up"></i>
+        </div>
+        <div id="page-refresh" onclick="location.reload()">
+            <i class="fa fa-refresh"></i>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="pagination">
+    <div class="table-footer-bar">
+        <div class="pull-left" style="margin-bottom: 8px;">
+            <span class="breadcrumb-item active" th:text="'共' + ${grid.records} + '条，'+${grid.totalPages}+'页'"></span>
+            <select onchange="search('page=1&size=' + this.value)">
+                <option value="15" th:selected="${grid.pageSize == 15}">15条</option>
+                <option value="50" th:selected="${grid.pageSize == 50}">50条</option>
+                <option value="100" th:selected="${grid.pageSize == 100}">100条</option>
+                <option value="200" th:selected="${grid.pageSize == 200}">200条</option>
+            </select>
+            <span th:if="${grid.totalPages > 1}">，前往<input class="goto" th:onkeyup="'gotoPage(this, ' + ${grid.page} + ')'" maxlength="6" th:value="${grid.page}">页</span>
+        </div>
+        <nav class="pull-right" th:if="${grid.totalPages > 1}">
+            <ul class="pagination pagination-sm">
+                <li class="page-item" th:if="${grid.page > 1}"><a class="page-link" th:href="${'javascript:search(''page='+(grid.page - 1)+''')'}" th:text="#{pagination.prev}"></a></li>
+                <li th:class="'page-item ' + ${i == grid.page - 1 ? 'active': ''}" th:if="${grid.totalPages > 0}" th:each="i: ${#numbers.sequence(pageInfo.startPage - 1, pageInfo.endPage - 1)}">
+                    <a class="page-link" th:href="${i == grid.page - 1 ? 'javascript:;' : 'javascript:search(''page='+(i+1)+''')'}"  th:text="${i+1}"></a>
+                </li>
+                <li class="page-item" th:if="${grid.page < grid.totalPages}">
+                    <a class="page-link" th:href="${'javascript:search(''page='+(grid.page + 1)+''')'}" th:text="#{pagination.next}"></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</th:block>
+</html>
+

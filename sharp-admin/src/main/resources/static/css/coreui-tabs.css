@@ -1,0 +1,65 @@
+/*tabs start*/
+.nav-tabs-boxed.nav-tabs-boxed-left,
+.nav-tabs-boxed.nav-tabs-boxed-right {
+    display:-ms-flexbox;
+    display:flex
+}
+
+.nav-tabs-boxed.nav-tabs-boxed-left .nav-item,
+.nav-tabs-boxed.nav-tabs-boxed-right .nav-item {
+    z-index:1;
+    -ms-flex-positive:1;
+    margin-bottom:0
+}
+
+*[dir=rtl] .nav-tabs-boxed.nav-tabs-boxed-left {
+    -ms-flex-direction:row-reverse;
+    flex-direction:row-reverse
+}
+
+.nav.nav-tabs {
+    border-bottom: none;
+    flex-shrink: 0; /*保存宽度150px，小的时候不压缩*/
+}
+
+.nav-tabs-boxed.nav-tabs-boxed-left .nav.nav-tabs,
+.nav-tabs-boxed.nav-tabs-boxed-right .nav.nav-tabs {
+    width: 120px;
+    flex-direction: column;
+}
+
+.nav-tabs-boxed.nav-tabs-boxed-right {
+    flex-direction: row-reverse;
+    overflow-x: auto;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+}
+
+.nav-tabs-boxed .nav-link.active {
+    border-color:#c8ced3 #c8ced3 #fff #c8ced3;
+}
+
+.nav-tabs-sm .nav-link {
+    padding: .2rem .8rem;
+}
+
+.nav-tabs-boxed.nav-tabs-boxed-left .nav-link {border-radius:.25rem 0 0 .25rem;}
+.nav-tabs-boxed.nav-tabs-boxed-left .nav-link.active {border-color:#c8ced3 #fff #c8ced3 #c8ced3; color: rgb(100, 169, 9);}
+.nav-tabs-boxed.nav-tabs-boxed-left .nav-item {margin-right: -1px}
+
+.nav-tabs-boxed.nav-tabs-boxed-right .nav-link {border-radius: 0 .25rem .25rem 0}
+.nav-tabs-boxed.nav-tabs-boxed-right .nav-link.active {border-color:#c8ced3 #c8ced3 #c8ced3 #fff; color: rgb(100, 169, 9);}
+.nav-tabs-boxed.nav-tabs-boxed-right .nav-item {margin-left: -1px}
+
+
+.nav-tabs-boxed .nav-link.active {
+    color: #20a8d8;
+}
+
+.tab-content  {
+    margin-top: 0;
+    flex: 1;
+}
+/*tabs end*/

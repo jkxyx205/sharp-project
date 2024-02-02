@@ -1,0 +1,57 @@
+server:
+  servlet:
+    session:
+      timeout: -1
+spring:
+  profiles:
+    active: dev
+  messages:
+    basename: static/i18n/messages #相对路径 开头请勿添加斜杠
+    useCodeAsDefaultMessage: true
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+  cache:
+    jcache:
+      config: classpath:ehcache.xml
+  mobile:
+    devicedelegatingviewresolver:
+      enabled: false # 必须开启才能使用devicedelegatingviewresolver功能
+      #     normalPrefix: normal/
+      mobilePrefix: mobile/
+      tabletPrefix: tablet/
+      enableFallback: true # 有问题
+    sitepreference: # 参数
+      enabled: false # 开启,可以指定参数
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 50MB
+  mail:  # SMTP 发邮件
+    host: smtp.qiye.aliyun.com
+    port: 25
+    username: xxx
+    password: xxx
+    default-encoding: UTF-8
+    imap: # IMAP 收邮件
+      host: imap.qiye.aliyun.com
+      port: 143
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+sharp:
+  database:
+    entity-base-package: com.rick.admin.module.**.entity
+
+dict:
+  items:
+    - type: sys_user
+      sql: "select id, name from sys_user order by id asc"
+    - type: sys_role
+      sql: "select id, name from sys_role order by id asc"
+    - type: sys_dict_type
+      sql: "select distinct type, type from sys_dict order by type asc"

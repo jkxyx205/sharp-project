@@ -1,0 +1,114 @@
+/*
+ * Table styles
+ */
+table.dataTable {
+  margin: 0 auto;
+}
+
+table.dataTable,
+table.dataTable th,
+table.dataTable td {
+  box-sizing: content-box;
+  /*border: none;*/
+}
+
+
+/*.table thead th {
+    border-bottom: none;
+}*/
+
+.dataTables_scrollBody tbody td:nth-child(1),
+.dataTables_scrollBody tbody td:nth-child(2) {
+    /*border-color: transparent;*/
+}
+
+table.dataTable thead,
+table.dataTable thead th,
+table.dataTable thead td,
+table.dataTable table {
+    /*border-bottom: 1px solid transparent;*/
+    /*border-color: transparent!important;*/
+}
+
+
+/*.table-bordered thead td, .table-bordered thead th{
+    border: none;
+}
+
+.table-bordered td, .table-bordered th {
+    border: none;
+}
+
+.DTFC_LeftBodyLiner td th {
+    border-color: transparent;
+}
+
+.table-bordered {
+    border: none;
+}*/
+.dataTables_scrollBody {
+    margin-top: -1px;
+}
+
+.dataTables_scrollBody .table-bordered td,
+.dataTables_scrollBody .table-bordered th   {
+    /*border: 1px solid red;*/
+    border-top: none;
+}
+
+
+.dataTables_scrollBody .table-bordered td:nth-child(1),
+.dataTables_scrollBody .table-bordered td:nth-child(2)  {
+    /*border-right: 1px solid transparent;*/
+    /*border-top: none;*/
+    /*opacity: 0;*/
+}
+
+.dataTables_scrollHead {
+    z-index: 2;
+}
+.dataTables_scrollHead .table-bordered td,
+.dataTables_scrollHead .table-bordered th,
+.DTFC_LeftWrapper .table-bordered th,
+.DTFC_LeftBodyWrapper .table-bordered th {
+/*    border-left: 1px solid red;
+
+    /*border-top: 1px solid red;*/
+    /*border-right: 1px solid transparent;*/
+    border-top: none;
+}
+
+.DTFC_LeftHeadWrapper {
+    z-index: 3;
+}
+.DTFC_LeftBodyLiner {
+    top: -1px!important;
+    overflow: hidden;
+}
+
+.DTFC_LeftBodyLiner .table-bordered td,
+.DTFC_LeftBodyLiner .table-bordered th {
+     /*border: 1px solid red;*/
+     border-top: none;
+    /*border-right-color: transparent;*/
+}
+
+.DTFC_LeftBodyLiner .table-striped tbody tr:nth-of-type(2n+1) {
+    background: #f2f2f2;
+}
+
+.DTFC_LeftBodyLiner .table-striped tbody tr:nth-of-type(2n) {
+    background: #fff;
+}
+
+.dataTables_wrapper {
+    border-top: 1px solid #c8ced3;
+}
+.dataTables_wrapper table {
+    border: none;
+}
+
+.table-sm2 td,
+.table-sm2 th{
+    padding: 5px; /*.3rem 此单位有问题*/
+}

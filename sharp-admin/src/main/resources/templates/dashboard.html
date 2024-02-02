@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            物料1: <div class="dialogInput"></div>
+            <hr>
+            物料2: <div class="dialogInput"></div>
+            <hr>
+            物料3: <div id="dialogInput2"></div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script th:src="@{/js/jquery.dialogInput.js}"></script>
+
+    <script>
+        $('.dialogInput').dialogInput({
+            title: '选择物料',
+            // placeholder: '请选择物料',
+            name: 'material_id',
+            reportId: '697147523487240192',
+            value: '696078910634332160',
+            labelDisplay: function (row) {
+                return row.name + ' ' + (!row.specification ? '' : row.specification)
+            }
+        })
+
+        $('#dialogInput2').dialogInput({
+            title: '选择物料',
+            placeholder: '请选择物料',
+            name: 'material_id',
+            mode: 'multiple', // 多选
+            reportId: '697147523487240192',
+            value :['696078910634332160', '696545874376949760'],
+            labelDisplay: function (rows) {
+                return rows.map(row => row.name + ' ' + (!row.specification ? '' : row.specification)).join(", ")
+            },
+            selected: function (rows) {
+                console.log(rows)
+            }
+        })
+    </script>
+</th:block>
+</body>
+</html>

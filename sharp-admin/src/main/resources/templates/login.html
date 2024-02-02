@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="includes/base :: common_header(~{::title},~{},~{})">
+    <title>苏州XXX有限公司</title>
+</head>
+<body class="app flex-row align-items-center">
+<script>
+    if(window.parent.length > 0) {
+        document.body.style.display = 'none';
+        window.parent.location.href = location.href
+    }
+</script>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <form th:action="@{/login}" method="post" onsubmit="$.LoadingOverlay('show')" id="form">
+                <div class="card-group">
+                    <div class="card p-4">
+                        <div class="invalid-feedback" style="display: block" th:if="${session.SPRING_SECURITY_LAST_EXCEPTION}" th:text="${session.SPRING_SECURITY_LAST_EXCEPTION.message}">
+                        </div>
+                        <div class="card-body">
+                            <h1 th:text="#{login.label}"></h1>
+<!--                            <img class="navbar-brand-full" th:src="@{/img/brand/logo.png}" height="25" alt="Logo" style="height: 40px; position: absolute; right: 20px; top: 20px;">-->
+                            <p class="text-muted" th:text="#{login.description}"></p>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                      <i class="icon-user"></i>
+                                    </span>
+                                </div>
+                                <input class="form-control" v-model="username" name="username" type="text" th:placeholder="#{login.username}" required autocomplete>
+                            </div>
+                            <div class="input-group mb-4">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                      <i class="icon-lock"></i>
+                                    </span>
+                                </div>
+                                <input class="form-control" v-model="password" name="password" type="password" th:placeholder="#{login.password}" required autocomplete>
+                            </div>
+                            <th:block th:if="${session.showCode == true}">
+                                <div class="input-group mb-3">
+                                    <input class="form-control" v-model="code" name="code" type="text" required autocomplete="off">
+                                    <img alt="验证码找不到" th:src="@{/kaptcha}" onclick="this.src = '/kaptcha?' + new Date().getTime()" style="cursor: pointer;">
+                                </div>
+                            </th:block>
+                            <div class="row" id="login-btn">
+                                <div class="col-6">
+                                    <button class="btn btn-primary px-4" th:text="#{login.label}" :disabled="loginDisabled"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div th:replace="includes/base :: common_js(~{})">
+</div>
+<script th:inline="javascript">
+    new Vue({
+        el: '#form',
+        data: {
+            username: "",
+            password: "",
+            code: "",
+            showCode: /*[[${session.showCode}]]*/
+        },
+        computed: {
+            loginDisabled: function () {
+                return !(this.username && this.password && (!this.showCode || this.showCode && this.code))
+            }
+        },
+        methods: {
+        }
+    })
+</script>
+</body>
+</html>
