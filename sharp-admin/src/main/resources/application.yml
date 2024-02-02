@@ -1,10 +1,11 @@
 server:
   servlet:
     session:
-      timeout: -1
+      timeout: 120m
 spring:
   profiles:
     active: dev
+
   messages:
     basename: static/i18n/messages #相对路径 开头请勿添加斜杠
     useCodeAsDefaultMessage: true
