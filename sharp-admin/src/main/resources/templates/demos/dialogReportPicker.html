@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>对话框</title>
+    <link rel="stylesheet" href="../../../coreui/css/style.min.css">
+    <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
+    <style>
+        .container-search-dialog.modal-lg {
+             max-width: 800px!important;
+        }
+
+        .container-search-dialog.modal-lg iframe {
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-body">
+
+        <button class="btn btn-primary mr-2" type="button" name="search" id="choose-btn">
+            <i class="fa fa-search"></i> 多选择</button>
+
+        <button class="btn btn-primary mr-2" type="button" name="search" id="choose-btn2">
+            <i class="fa fa-search"></i> 单选择</button>
+
+        <div class="mt-4">
+            <input class="form-control" id="userIdsPicker"/>
+            <input type="hidden" name="userIds" id="userIds"/>
+        </div>
+
+        <button class="btn btn-primary mt-2" type="button" name="search" id="choose-btn3">
+            <i class="fa fa-search"></i> 多选择$</button>
+
+        <div class="mt-2" id="reportInput"></div>
+
+    </div>
+</div>
+
+<script src="../../../coreui/vendors/jquery/js/jquery.min.js"></script>
+<script src="../../../coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../../js/jquery.dialog.js"></script>
+<script src="../../../js/jquery.dialog-reportpicker.js"></script>
+<script src="../../../js/jquery.dialog-input-reportpicker.js"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+
+<script>
+    $("#choose-btn").dialogReportPicker({
+        reportId: "786015805669142528",
+        class: 'container-search-dialog modal-lg',
+        selectMode: 'multiple',
+        value: ['1', '786079661661646848'],
+        render: function (value) {
+
+        },
+        ok: {
+            label: '确定',
+            success: function (value, dialog) {
+                console.log('success', value)
+                dialog.$modal.modal('hide')
+            }
+        },
+        hidden: function () {
+            console.log('hidden')
+        }
+    })
+
+    $("#choose-btn2").dialogReportPicker({
+        reportId: "786015805669142528",
+        class: 'container-search-dialog modal-lg',
+        selectMode: 'single',
+        value: '786079661661646848',
+        render: function (value) {
+
+        },
+        ok: {
+            label: '确定',
+            success: function (value, dialog) {
+                console.log('success', value)
+                dialog.$modal.modal('hide')
+            }
+        },
+        hidden: function () {
+            console.log('hidden')
+        }
+    })
+
+    $('#userIdsPicker').dialogReportPicker({
+        reportId: "786015805669142528",
+        class: 'container-search-dialog modal-lg',
+        selectMode: 'multiple',
+        value: ['1', '786079661661646848'],
+        render: function (value, dialog) {
+            document.getElementById('userIds').value = value.map(row => row.id).join(',')
+            dialog.element.value = value.map(row => row.name).join(',')
+        },
+        ok: {
+            label: '确定',
+            success: function (value, dialog) {
+                console.log('success', value)
+
+                document.getElementById('userIds').value = value.map(row => row.id).join(',')
+                dialog.element.value = value.map(row => row.name).join(',')
+                dialog.$modal.modal('hide')
+            }
+        },
+        hidden: function () {
+            console.log('hidden')
+        }
+    })
+
+    $('#choose-btn3').on('click', function () {
+        // 全局
+        $.dialogReportPicker({
+            reportId: "786015805669142528",
+            class: 'container-search-dialog modal-lg',
+            selectMode: 'multiple',
+            ok: {
+                label: '确定',
+                success: function (value, dialog) {
+                    console.log('success', value)
+
+                    document.getElementById('userIds').value = value.map(row => row.id).join(',')
+                    dialog.element.value = value.map(row => row.name).join(',')
+
+                    dialog.$modal.modal('hide')
+                }
+            },
+            hidden: function () {
+                console.log('hidden')
+            }
+        })
+    })
+
+    $('#reportInput').dialogInputReportPicker({
+        reportId: "786015805669142528",
+        class: 'container-search-dialog modal-lg',
+        selectMode: 'multiple',
+        value: ['1'],
+        name: "userIds",
+        required: true,
+        display: function (value) {
+            return value.name
+        }
+    })
+</script>
+</body>
+</html>

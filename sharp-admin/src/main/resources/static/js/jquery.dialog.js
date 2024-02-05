@@ -2,9 +2,15 @@
     var Dialog = function(element, options) {
         this.isGlobal = (element === $) // add global dialog 20200812
 
+        this.element = element
         this.$element = this.isGlobal ? $ : $(element);
         this.options = $.extend({},
             $.fn.dialog.defaults, options); //合并参数
+
+        if (!this.isGlobal) {
+            this.options.url = this.$element.data('url') || this.options.url
+            this.options.src = this.$element.data('src') || this.options.src
+        }
 
         this.init();
     };
@@ -56,35 +62,57 @@
                     clearInterval(_this.intervalId);
                 }
             })
+            this.options.mounted && this.options.mounted(this)
         },
         _fetchData: function () {
             if (!this.options.lazy || (this.options.lazy && !this.fetched)) {
-                $.get((!this.isGlobal && this.$element.data('url')) || this.options.content, res => {
-                    this.$modal.find('.modal-body').html(res)
-                    this.$modal.modal({
-                        show: true,
-                        backdrop: this.options.backdrop
+                if (this.options.content) {
+                    this.$modal.find('.modal-body').html(this.options.content)
+                    this._show()
+                } else if (this.options.url) {
+                    $.get(this.options.url, res => {
+                        this.$modal.find('.modal-body').html(res)
+                        this._show()
+
+                        if (this.options.refreshTime) {
+                            this.intervalId = setInterval(() => {
+                                $.get(this.options.url, res => {
+                                    this.$modal.find('.modal-body').html(res)
+                                    let stillRefresh = (this.options.afterRefresh && this.options.afterRefresh())
+                                    if (!stillRefresh) {
+                                        clearInterval(this.intervalId);
+                                    }
+                                })
+                            }, this.options.refreshTime)
+                        }
                     })
+                } else if (this.options.src) {
+                    this.iframeDom.src = this.options.src
+                    this._show()
 
                     if (this.options.refreshTime) {
                         this.intervalId = setInterval(() => {
-                            $.get((!this.isGlobal && this.$element.data('url')) || this.options.content, res => {
-                                this.$modal.find('.modal-body').html(res)
-                                let stillRefresh = (this.options.afterRefresh && this.options.afterRefresh())
-                                if (!stillRefresh) {
-                                    clearInterval(this.intervalId);
-                                }
-                            })
+                            this.iframeDom.src = this.options.src
                         }, this.options.refreshTime)
                     }
-                })
+                } else {
+
+                }
+
             } else {
                 this.$modal.modal('show');
             }
         },
+        _show: function() {
+            this.$modal.modal({
+                show: true,
+                backdrop: this.options.backdrop
+            })
+        },
         _bindDom: function () {
             if (!this.domBind) {
-                this.modalId = "dialog_id_" + new Date().getTime();
+                this.modalId = "dialog_id_" + (this.isGlobal ? parseInt(Math.random() * 100000000000, 10) : (this.$element[0].id || parseInt(Math.random()* 100000000000, 10))) // + new Date().getTime();
+                this.iframeId = this.modalId + "_iframeId"
 
                 var dialogTpl = Dialog.prototype.tpl.replace('{{title}}', this.options.title)
                     .replace('{{id}}', this.modalId)
@@ -100,13 +128,18 @@
 
                 this.$modal = $('#' + this.modalId)
 
+                if (this.options.src) {
+                    this.$modal.find('.modal-body').append('<iframe id="'+this.iframeId+'" src="" width="100%" style="border: none;">')
+                    this.iframeDom =  this.$modal.find('iframe')[0]
+                }
+
                 if (this.options.showFooter) {
                     if (this.options.ok) {
                         this.$OkBtn = $('#' + this.okId)
                         var _this = this
 
                         this.$OkBtn.on('click', function () {
-                            _this.options.ok.success && _this.options.ok.success(_this.$modal)
+                            _this.options.ok.success && _this.options.ok.success(_this)
                         })
                     } else {
                         this.$modal.find('.ok-show').remove()

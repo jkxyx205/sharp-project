@@ -146,4 +146,43 @@ public class UserTest {
                 .sord(SordEnum.ASC)
                 .build());
     }
+
+    @Test
+    public void testReportSearch() {
+        reportService.saveOrUpdate(Report.builder()
+                .id(786015805669142528L)
+                .code("sys_user_search")
+                .tplName("tpl/dialog_report_list")
+                .name("用户查询")
+                // language=SQL
+                //  and id = :id and id IN (:ids) 回显需要的查询条件 (option.value)
+                .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +
+                        " LEFT JOIN sys_user u on u.id = sys_user.create_by\n" +
+                        " LEFT JOIN ( SELECT sys_user.id, GROUP_CONCAT(r.name) name FROM sys_user\n" +
+                        " LEFT JOIN sys_user_role ur on sys_user.id = ur.user_id AND ur.is_deleted = 0\n" +
+                        " LEFT JOIN sys_role r on r.id = ur.role_id AND r.is_deleted = 0\n" +
+                        " group by sys_user.id order by sys_user.id asc) t on t.id = sys_user.id\n" +
+                        "WHERE sys_user.code LIKE :code AND sys_user.name LIKE :name AND sys_user.is_available = :is_available AND sys_user.create_time >= :create_time0 AND sys_user.create_time <= :create_time1 AND sys_user.is_deleted = 0 and sys_user.id = :id and sys_user.id IN (:ids)")
+                .queryFieldList(Arrays.asList(
+                        new QueryField("code", "用户名"),
+                        new QueryField("name", "姓名"),
+                        new QueryField("is_available", "是否可用", QueryField.Type.SELECT, "bol"),
+                        new QueryField("create_time", "创建时间", QueryField.Type.DATE_RANGE)
+                ))
+                .reportColumnList(Arrays.asList(
+                        new HiddenReportColumn("id"),
+                        new ReportColumn("code", "用户名", true),
+                        new ReportColumn("name", "姓名", true),
+                        new ReportColumn("role_name", "角色"),
+                        new ReportColumn("is_available", "是否可用").setColumnWidth(80).setAlign(AlignEnum.CENTER),
+                        new ReportColumn("create_name", "创建人").setColumnWidth(100),
+                        new ReportColumn("create_time", "创建时间").setColumnWidth(180).setAlign(AlignEnum.CENTER)
+                ))
+                .pageable(true)
+                .sidx("id")
+                .sord(SordEnum.ASC)
+                .build());
+    }
+
+
 }

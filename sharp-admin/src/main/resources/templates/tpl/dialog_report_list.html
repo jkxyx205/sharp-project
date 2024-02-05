@@ -39,7 +39,6 @@
     </style>
 </head>
 <body class="app">
-<input type="hidden" name="qid" id="qid">
 <th:block th:replace="includes/base :: common_content(~{::div})">
     <div>
         <div class="card" style="margin-bottom: .5rem;">
@@ -184,6 +183,7 @@
         let report_id = /*[[${report.id} + '']]*/
         let pageable = /*[[${report.pageable}]]*/
         let reportDomId = /*[[${reportDomId}]]*/
+        let iframeId = self.frameElement.id
 
         function listRequest(params) {
             console.log('list ajax request...')
@@ -196,6 +196,9 @@
                 $listTable = $('#' + reportDomId).ajaxTable({
                     url: '/reports/'+report_id+'/json',
                     query: params,
+                    mounted() {
+                        //
+                    },
                     displayPage: function () {
                         if(/*[[${device.isNormal()}]]*/) {
                             return 15
@@ -216,16 +219,16 @@
             $(event.target).parents('tr')
                 .addClass('active')
                 .siblings().removeClass()
-
-            document.getElementById('qid').row = row
+            window['activeRow'] = row
         }
 
         window[reportDomId + 'RowDbClick'] = function(row, event) {
+            debugger
             $(event.target).parents('tr')
                 .addClass('active')
                 .siblings().removeClass()
 
-            window.parent['dialogRowDbClick'] && window.parent['dialogRowDbClick'](row)
+            window.parent[iframeId + 'dialogRowDbClick'] && window.parent[iframeId + 'dialogRowDbClick'](row)
         }
 
         $(document).on('keyup', function (e) {
@@ -233,11 +236,28 @@
             let code = theEvent.keyCode || theEvent.which || theEvent.charCode;
 
             if (code === 13) {
-                window.parent['dialogRowDbClick']()
+                window.parent[iframeId + 'dialogRowDbClick']()
                 e.preventDefault();
                 e.stopPropagation();
             }
         })
+
+        window.parent[self.frameElement.id + 'loaded'](self.frameElement)
+
+        function init(value) {
+            if (!value || value.length === 0) {
+                return
+            }
+
+            if (isMultiple) {
+                setTimeout(() => $listTable.ajaxTable('setCheckedValue', value), 200)
+            } else {
+                setTimeout(() => {
+                    $listTable.ajaxTable('getTbody').find('tr[data-id='+value+'] td:eq(0)').click()
+                }, 200)
+            }
+
+        }
     </script>
 </th:block>
 </body>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>对话框</title>
+    <link rel="stylesheet" href="../../../static/coreui/css/style.min.css">
+    <style>
+        .container-search-btn iframe, .container-search-btn .modal-body  {
+            height: 50vh;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-body">
+        <button class="btn btn-primary mr-2" type="button" name="search" onclick="showDialog()">
+            <i class="fa fa-search"></i> 查询1</button>
+
+        <button class="btn btn-primary mr-2" type="button" name="search" id="search-btn2">
+            <i class="fa fa-search"></i> 查询2</button>
+
+        <button class="btn btn-primary mr-2" type="button" name="search" id="search-btn3">
+            <i class="fa fa-search"></i> 查询3-url</button>
+
+        <button class="btn btn-primary mr-2" type="button" name="search" id="search-btn4">
+            <i class="fa fa-search"></i> 查询4-iframe</button>
+    </div>
+</div>
+
+<script src="../../../static/coreui/vendors/jquery/js/jquery.min.js"></script>
+<script src="../../../static/coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../../static/js/jquery.dialog.js"></script>
+
+<script>
+    function showDialog() {
+        // 1.1  全局dialog
+        $.dialog({
+            content: '<h1 style="color: red;">hello world</h1>'
+        })
+    }
+
+    // 1.2
+    $("#search-btn2").dialog({
+        content: '<h1 style="color: red;">hello world2</h1>'
+    })
+
+    // 2.1
+    $("#search-btn3").dialog({
+        url: 'http://intelligent-portal.yodean.com/about-us',
+        class: 'container-search-btn modal-lg',
+        ok: {
+            label: '确定',
+            success: function (dialog) {
+                console.log('success')
+                dialog.$modal.modal('hide')
+            }
+        },
+        hidden: function () {
+            console.log('hidden')
+        }
+    })
+
+    // 3.1
+    $("#search-btn4").dialog({
+        src: 'http://intelligent-portal.yodean.com/',
+        class: 'container-search-btn modal-lg',
+        refreshTime: 2000,
+    })
+</script>
+</body>
+</html>

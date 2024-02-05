@@ -369,6 +369,16 @@
             }
 
             return this.$vue.$data.grid.rows.filter(row => value.indexOf(row[this.$vue.$children[0].rowKey]) > -1)
+        },
+        setCheckedValue(value) {
+            if (value.length > 0) {
+                for (let v of value) {
+                    this.$vue.$tbody.find(':checkbox[value='+v+']').prop('checked', true)
+                }
+            }
+        },
+        getTbody() {
+            return this.$vue.$tbody
         }
     }
 
