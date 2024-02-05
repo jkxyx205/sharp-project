@@ -38,6 +38,8 @@
 
         <div class="mt-2" id="reportInput"></div>
 
+        <div class="mt-2" id="reportInput2"></div>
+
     </div>
 </div>
 
@@ -145,6 +147,19 @@
         required: true,
         display: function (value) {
             return value.name
+        }
+    })
+
+    $('#reportInput2').dialogInputReportPicker({
+        reportId: "786015805669142528",
+        class: 'container-search-dialog modal-lg',
+        selectMode: 'multiple',
+        name: "userIds2",
+        required: true,
+        title: '请选择用户',
+        placeholder: '请选择用户',
+        display: function (value) {
+            return value.code + '-' + value.name
         }
     })
 </script>
