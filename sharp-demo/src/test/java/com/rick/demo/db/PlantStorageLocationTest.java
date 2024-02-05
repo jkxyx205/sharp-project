@@ -42,12 +42,12 @@ public class PlantStorageLocationTest {
 
     @Test
     public void testSync() {
-        storageLocationDAO.insertOrUpdate("plant_id", 1L, Arrays.asList(
+        storageLocationDAO.insertOrUpdate(Arrays.asList(
                 StorageLocation.builder().plantId(1L).id(745648278938329088L).code("A").description("aaaaA1").build(), // 修改
                 StorageLocation.builder().plantId(1L).code("B").description("bbbbB1").build(), // 修改
                 // C -> E 删除
                 StorageLocation.builder().plantId(1L).code("F").description("ffffF1").build() // 新增
-        ));
+        ), "plant_id", 1L);
     }
 
     @Test

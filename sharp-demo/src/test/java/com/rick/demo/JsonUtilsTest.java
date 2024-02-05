@@ -29,6 +29,15 @@ public class JsonUtilsTest {
         System.out.println(JsonUtils.toList("[[\"足球\", \"篮球\"]]", List.class));
     }
 
+    @Test
+    public void testToString() {
+        // hello => "hello" => hello
+        String hello = JsonUtils.toJson("hello");
+        System.out.println(hello);
+
+        String string = JsonUtils.toObject(hello, String.class);
+        System.out.println(string);
+    }
 
     @Test
     public void testToJson() {
