@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <title>对话框</title>
+    <link rel="stylesheet" href="../../../coreui/css/style.min.css">
+    <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/css/edit-table.css}">
+    <style>
+        .report-dialog.modal-lg {
+            max-width: 800px!important;
+        }
+
+        .report-dialog.modal-lg iframe {
+            height: 500px;
+        }
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <div id="table-container"></div>
+                <button class="btn btn-primary mt-2" type="button" name="search" id="get-btn">
+                    <i class="fa fa-search"></i> 获取值</button>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script src="../../../coreui/vendors/jquery/js/jquery.min.js"></script>
+    <script src="../../../coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
+
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+
+    <script src="../../../js/jquery.dialog.js"></script>
+    <script src="../../../js/jquery.dialog-reportpicker.js"></script>
+    <script src="../../../js/jquery.dialog-input-reportpicker.js"></script>
+
+
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script th:src="@{/js/jquery.table.js}"></script>
+    <script th:src="@{/js/editable-table-plus.js}"></script>
+    <script th:src="@{/js/editable-table-plus-customize_type.js}"></script>
+
+    <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+
+    <script>
+        let value = [{
+            id: '1',
+            userId: '2',
+            userName: 'Rick',
+            code:'M01',
+            name: '物料01',
+            specification: '无孔碟刹',
+            quantity: '99',
+            deliveryDate: '2024-02-29',
+            purchaseSend: '1',
+            remark: '主要包装'
+        }]
+
+        // 可编辑表格初始化
+        var $editableTable = $('#table-container').editableTablePlus({
+            customizeType,
+            showRowNumber: true, // 是否显示行号
+            // readonly, // 只读
+            allowEmpty: false, // 表格允许为空
+            highlight: true,
+            rowClick: function (context, $tr, row, fromActiveRow) {
+
+            },
+            afterDeleteRow: function () {
+
+            },
+            columnConfigs: [
+                {
+                    type: "user", //  内部调用type = dialog
+                    title: "用户",
+                    selectMode: 'multiple',
+                    params: {id: "1"}, // 初始化 筛选id = 1 的用户,
+                    beforeShow: function ($tr, context) {
+                        // 根据业务需求更改查询参数
+                        context.params.id = '786079661661646848'
+                        return true
+                    }
+                },
+                // {
+                //     type: "dialog",
+                //     name: "userId",
+                //     label: 'userName',
+                //     selectMode: 'single',
+                //     // selectMode: 'multiple',
+                //     title: "用户",
+                //     reportId: '786015805669142528',
+                //     beforeShow: function ($tr) {
+                //         return true
+                //     },
+                //     success: function (value, $tr) {
+                //         if (Array.isArray(value)) {
+                //             $editableTable.editableTablePlus('appendValue', value.map(row => {
+                //                 return {
+                //                     "userId": row.id,
+                //                     "userName": row.name
+                //                 }
+                //             }))
+                //         } else {
+                //             // 设置值
+                //             $editableTable.editableTablePlus('mergeValue', {
+                //                 "userId": value.id,
+                //                 "userName": value.name
+                //             }, $tr)
+                //         }
+                //     }
+                // },
+                {
+                    type: "render",
+                    name: "materialName",
+                    title: "名称",
+                    render: function (row) {
+                        return row.code + '-' + row.name
+                    }
+                },
+                {
+                    type: "label",
+                    name: "specification",
+                    title: "规格"
+                },
+                {
+                    type: "decimal",
+                    name: "quantity",
+                    title: "数量",
+                    width: 60,
+                    required: true,
+                    align: 'right'
+                },
+                {
+                    type: "date",
+                    name: "deliveryDate",
+                    width: 100,
+                    title: "交货日期",
+                    required: true,
+                },
+                {
+                    type: "checkbox",
+                    name: "purchaseSend",
+                    width: 80,
+                    title: "采购直发"
+                },
+                {
+                    type: "text",
+                    title: "备注",
+                    name: "remark",
+                },
+                {
+                    type: "hidden",
+                    title: "物料code",
+                    name: "code",
+                },
+                {
+                    type: "hidden",
+                    title: "物料名称",
+                    name: "name",
+                }
+            ],
+            value // 初始化值
+        })
+
+        $('#get-btn').on('click', function () {
+            let value = $editableTable.editableTablePlus('getValue')
+            console.log(value, '...')
+        })
+    </script>
+</th:block>
+</body>
+</html>

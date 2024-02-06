@@ -16,4 +16,9 @@ public class DemoController {
     public String testDialogReportPicker() {
         return "demos/dialogReportPicker";
     }
+
+    @GetMapping("table-plus")
+    public String testTablePlus() {
+        return "demos/tablePlus";
+    }
 }
