@@ -48,6 +48,10 @@
                 })
             }
 
+            _this.$modal.on('show.bs.modal', function () {
+                _this.options.show && _this.options.show(_this)
+            })
+
             _this.$modal.on('shown.bs.modal', function () {
                 (!_this.fetched || !_this.options.lazy) && _this.options.onload && (typeof window[_this.options.onload] === 'function') && window[_this.options.onload]()
                 _this.options.shown && _this.options.shown()
@@ -63,6 +67,9 @@
                 }
             })
             this.options.mounted && this.options.mounted(this)
+        },
+        setSrc: function (src) {
+            this.options.src = src
         },
         _fetchData: function () {
             if (!this.options.lazy || (this.options.lazy && !this.fetched)) {
@@ -87,8 +94,8 @@
                         }
                     })
                 } else if (this.options.src) {
-                    this.iframeDom.src = this.options.src
                     this._show()
+                    this.iframeDom.src = this.options.src
 
                     if (this.options.refreshTime) {
                         this.intervalId = setInterval(() => {

@@ -31,6 +31,9 @@
                         dialog.$modal.modal('hide')
                     }
                 },
+                beforeShow: function (reportDialog) {
+                  _this.options.beforeShow && _this.options.beforeShow(reportDialog)
+                },
                 hidden: function () {
                     console.log('hidden')
                 }

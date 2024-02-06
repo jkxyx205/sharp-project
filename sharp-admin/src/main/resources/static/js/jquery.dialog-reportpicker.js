@@ -28,7 +28,16 @@
                     }
                 },
                 hidden: this.options.hidden,
+                show: function (dialog) {
+                    _this.options.beforeShow && _this.options.beforeShow(_this)
+
+                    if (!$.isEmptyObject(_this.options.params)) {
+                        let src = '/reports/'+_this.options.reportId+'?mode=' + _this.options.selectMode + '&' + $.param(_this.options.params)
+                        dialog.setSrc(src);
+                    }
+                },
                 mounted: function (dialog) {
+                    _this.dialog = dialog
                     window[dialog.iframeDom.id + 'loaded'] = function (iframe) {
                         if (_this.options.value) {
                             window.frames[dialog.iframeId].contentWindow['init'](_this.options.value)
@@ -60,7 +69,7 @@
             let value
             if (this.options.selectMode === 'single') {
                 value = window.frames[dialog.iframeId].contentWindow['activeRow']
-                this.options.value = value.id
+                this.options.value = (value ?  value.id : undefined)
             } else {
                 value = window.frames[dialog.iframeId].contentWindow.$listTable.ajaxTable('getCheckedValue')
                 const maxRowLength = 300
@@ -79,7 +88,7 @@
 
             this.value = value
 
-            this.options.ok.success && this.options.ok.success(value, dialog)
+            this.options.ok.success && this.options.ok.success(value, dialog, this)
         }
     }
 

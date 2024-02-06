@@ -129,7 +129,7 @@
                     document.getElementById('userIds').value = value.map(row => row.id).join(',')
                     dialog.element.value = value.map(row => row.name).join(',')
 
-                    dialog.$modal.modal('hide')
+                    dialog.dialog.$modal.modal('hide')
                 }
             },
             hidden: function () {
@@ -138,6 +138,7 @@
         })
     })
 
+    let userId = 1
     $('#reportInput').dialogInputReportPicker({
         reportId: "786015805669142528",
         class: 'container-search-dialog modal-lg',
@@ -145,6 +146,11 @@
         value: ['1'],
         name: "userIds",
         required: true,
+        params: {id: "1"}, // 初始化 筛选id = 1 的用户,
+        beforeShow: function (reportDialog) {
+            // 根据业务需求更改查询参数
+            reportDialog.options.params = {id: userId}
+        },
         display: function (value) {
             return value.name
         }

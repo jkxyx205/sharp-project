@@ -223,7 +223,6 @@
         }
 
         window[reportDomId + 'RowDbClick'] = function(row, event) {
-            debugger
             $(event.target).parents('tr')
                 .addClass('active')
                 .siblings().removeClass()
