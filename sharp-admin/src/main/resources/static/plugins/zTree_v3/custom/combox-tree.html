@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<title>Combox & Tree</title> 
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<!--
+<script type="text/javascript" src="../js/jquery.ztree.all-3.5.min.js"></script> 
+-->
+<script type="text/javascript" src="../js/jquery.ztree.core.min.js"></script>
+<script type="text/javascript" src="../js/jquery.ztree.excheck.min.js"></script>
+
+<link href="../css/zTreeStyle/zTreeStyle.css" rel="stylesheet" /> 
+</head> 
+<title></title>
+<script type="text/javascript">
+        <!--
+	//var orgTree;
+$(document).ready(function () {
+        /*var zNodes = [
+            { name: "全部", open: true,
+                children: [
+                    { name: "未审核",
+                        children: [
+                            { name: "叶子节点111" },
+                            { name: "叶子节点112" },
+                            { name: "叶子节点113" },
+                            { name: "叶子节点114" }
+                        ]
+                    },
+                    { name: "已审核",
+                        children: [
+                            { name: "叶子节点121" },
+                            { name: "叶子节点122" },
+                            { name: "叶子节点123" },
+                            { name: "叶子节点124" }
+                        ]
+                    }
+                ]
+            }
+        ];
+		*/
+		
+		var zNodes =[
+			{ id:1, pId:0, name:"随意勾选 1", open:true},
+			{ id:11, pId:1, name:"随意勾选 1-1"},
+			{ id:12, pId:1, name:"随意勾选 1-2", open:true},
+			{ id:121, pId:12, name:"随意勾选 1-2-1"},
+			{ id:122, pId:12, name:"随意勾选 1-2-2"},
+			{ id:2, pId:0, name:"禁止勾选 2", open:true, doCheck:false},
+			{ id:21, pId:2, name:"禁止勾选 2-1", doCheck:false},
+			{ id:22, pId:2, name:"禁止勾选 2-2", open:true, doCheck:false},
+			{ id:221, pId:22, name:"禁止勾选 2-2-1", doCheck:false},
+			{ id:222, pId:22, name:"禁止勾选 2-2-2",  doCheck:false},
+			{ id:23, pId:2, name:"禁止勾选 2-3", doCheck:false}
+		];
+
+	var setting = {
+        view: {
+            showIcon: true
+        },
+        data: {         
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {            
+            onClick: onClick,
+			onCheck: onClick
+        },
+		check: {
+				enable: true,
+				//chkStyle:"radio",
+				chkStyle:"checkbox",
+				//radioType: "all",
+		    	autoCheckTrigger: true,
+		    	chkboxType : { "Y" : "s", "N" : "ps" }
+			}
+		};
+
+		function onClick() {
+			//alert('custom click');
+		}
+
+		$("#testTree").comboboxTree({
+			width:200,
+			height:400,
+			ztree: {
+				url:"",
+				values:"11",
+				setting:setting,
+				zNodes:zNodes,
+				sync:true
+			}
+		});
+ 
+	 	$("#testTree2").comboboxTree({
+			width:196,
+			height:200,
+			ztree: {
+				url:"abc",
+				data:{age:11},
+				values:"12",
+				setting:setting,
+				zNodes:zNodes,
+				async:false
+			}
+		});
+    });
+	
+	
+//-->
+	function getSelected() {
+		var ids =  $("#testTree").comboboxTree("getSelectedIds");
+		var ids2 =  $("#testTree2").comboboxTree("getSelectedIds");
+		
+		// alert(treeObj);
+		// alert(treeObj2);
+		console.log(ids);
+		console.log(ids2);
+		
+	}
+</script>
+
+</head>
+<body>
+ 
+<input id="testTree" type="text"/>
+<input id="testTree2" type="text"/>
+ 
+ 
+<button onClick="getSelected();">getSelected</button>
+ 
+<div style="height:200px;" ></div>
+<script type="text/javascript" src="tree.js"></script>
+<script type="text/javascript" src="combobox-tree.js"></script>
+</body>
+</html>

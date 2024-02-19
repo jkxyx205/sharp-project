@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<title>Combox & Tree</title>
+<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<!--
+    <script type="text/javascript" src="../js/jquery.ztree.all-3.5.min.js"></script>
+    -->
+<script type="text/javascript" src="../js/jquery.ztree.core.min.js"></script>
+<script type="text/javascript" src="../js/jquery.ztree.excheck.min.js"></script>
+
+<link href="../css/zTreeStyle/zTreeStyle.css" rel="stylesheet" /> 
+</head> 
+<title></title>
+<script type="text/javascript">
+        <!--
+	//var orgTree;
+$(document).ready(function () {
+       var zNodes =[
+			{ id:1, pId:0, name:"随意勾选 1", },
+			{ id:11, pId:1, name:"随意勾选 1-1"},
+			{ id:12, pId:1, name:"随意勾选 1-2"},
+			{ id:121, pId:12, name:"随意勾选 1-2-1"},
+			{ id:122, pId:12, name:"随意勾选 1-2-2"},
+			{ id:2, pId:0, name:"禁止勾选 2", open:true, doCheck:false},
+			{ id:21, pId:2, name:"禁止勾选 2-1", doCheck:false},
+			{ id:22, pId:2, name:"禁止勾选 2-2", checked:false, open:true, doCheck:false},
+			{ id:221, pId:22, name:"禁止勾选 2-2-1", doCheck:false},
+			{ id:222, pId:22, name:"禁止勾选 2-2-2", checked:false, doCheck:false},
+			{ id:23, pId:2, name:"禁止勾选 2-3", doCheck:false}
+		];
+		
+	var setting = {
+        view: {
+            showIcon: true
+        },
+        data: {         
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {            
+            onClick: onClick,
+			onCheck: onClick,
+			beforeExpand:function() {
+				console.log("custom beforeExpand...");
+			}
+        },
+		check: {
+				enable: true,
+		    		autoCheckTrigger: true,
+		    		chkboxType : { "Y" : "s", "N" : "ps" }
+			}
+		};
+	
+		function onClick() {
+			//alert('custom click');
+		}
+
+		$("#treeDemo").tree({
+				url:"getAbc",
+				data: {name:"张三"},
+				values:"21,22",
+				setting:setting,
+				zNodes:zNodes,
+				async:false
+		});
+		
+		
+		/*$("#treeDemo2").tree({
+		url:"getAbc",
+		data: {name:"张三"},
+		checked:"1",
+		setting:setting,
+		zNodes:zNodes,
+		async:false
+		});*/
+    });
+//-->
+
+	function getSelected() {
+		var treeObj =  $("#treeDemo").tree("getSelectedIds");
+		console.log(treeObj);
+	 
+		
+		//var treeObj2 =  $("#treeDemo2").tree("getSelectedIds");
+		//alert(treeObj);
+		//alert(treeObj2);
+	}
+</script>
+
+</head>
+<body>
+   
+		<ul id="treeDemo" class="ztree" style="margin-top: 0; width: 170px; height:80px; margin:0;padding:0;">
+		</ul>
+		
+		
+		<div style="height:190px;"></div>
+		<ul id="treeDemo2" class="ztree" style="margin-top: 0; width: 170px; height:80px; margin:0;padding:0;">
+		</ul>
+		
+		<button onClick="getSelected();">get Date</button>
+	
+	
+	
+<script type="text/javascript" src="tree.js"></script>
+</body>
+</html>
