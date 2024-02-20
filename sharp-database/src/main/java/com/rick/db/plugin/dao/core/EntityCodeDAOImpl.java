@@ -59,18 +59,21 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
+        assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
         fillEntityIdsByCode(this, entities, null, null);
         return super.insertOrUpdate(entities);
     }
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
+        assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
         fillEntityIdsByCode(this, entities, refColumnName, refValue);
         return super.insertOrUpdate(entities, refColumnName, refValue);
     }
 
     @Override
     public int[] insertOrUpdateTable(Collection<T> entities) {
+        assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
         fillEntityIdsByCode(this, entities, null, null);
         return super.insertOrUpdateTable(entities);
     }

@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
+import com.rick.common.util.EnumUtils;
 import com.rick.common.util.IdGenerator;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.SharpDatabaseProperties;
@@ -149,8 +150,20 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
+        String propertyName = columnNameToPropertyNameMap.get(refColumnName);
+        Field reverseField = ReflectionUtils.findField(getEntityClass(), propertyName);
+
+        Object refPropertyValue;
+        if (reverseField.getType().isEnum()) {
+            refPropertyValue = EnumUtils.valueOfCode(reverseField.getType(), (String) refValue);
+        } else {
+            refPropertyValue = refValue;
+        }
+        // 将 refValue 设置到属性中
+        entities.forEach(t -> setPropertyValue(t, propertyName, refPropertyValue));
+
         return insertOrUpdate(null, false, true, false, this, getEntityClass(),
-                refColumnName, columnNameToPropertyNameMap.get(refColumnName), refValue, entities);
+                refColumnName, propertyName, refValue, entities);
     }
 
     @Override
