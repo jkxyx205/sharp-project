@@ -1,4 +1,4 @@
-package com.rick.admin.common.api;
+package com.rick.admin.common;
 
 import lombok.experimental.UtilityClass;
 import org.apache.poi.ss.usermodel.BorderStyle;
