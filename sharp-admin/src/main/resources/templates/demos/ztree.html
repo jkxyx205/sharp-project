@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<title>Combox & Tree</title>
+	<link rel="stylesheet" href="../../../coreui/css/style.min.css">
+	<link rel="stylesheet" th:href="@{/plugins/zTree_v3/css/zTreeStyle/zTreeStyle.css}">
+<body>
+
+	<div class="card">
+		<div class="card-body">
+			<h1>tree + zNodes</h1>
+			<ul id="treeDemo" class="ztree" style="margin-top: 0; width: 170px; /*height:180px; overflow: auto;*/ margin:0;padding:0;"></ul>
+			<button class="btn btn-primary mt-2" onClick="getSelected();">get Data</button>
+
+			<h1>combobox-tree + url</h1>
+			<input class="form-control" id="comboboxTreeDemo" type="text" style="width: 200px;"/>
+			<button class="btn btn-primary mt-2" onClick="getSelected2();">get Data</button>
+		</div>
+	</div>
+
+	<script th:src="@{/coreui/vendors/jquery/js/jquery.min.js}"></script>
+	<script th:src="@{/plugins/zTree_v3/js/jquery.ztree.core.min.js}"></script>
+	<script th:src="@{/plugins/zTree_v3/js/jquery.ztree.excheck.min.js}"></script>
+	<script th:src="@{/plugins/zTree_v3/custom/tree.js}"></script>
+	<script th:src="@{/plugins/zTree_v3/custom/combobox-tree.js}"></script>
+	<script type="text/javascript">
+		<!--
+		//var orgTree;
+		$(document).ready(function () {
+			var zNodes =[
+				{ id:1, pId:0, name:"随意勾选 1", },
+				{ id:11, pId:1, name:"随意勾选 1-1"},
+				{ id:12, pId:1, name:"随意勾选 1-2"},
+				{ id:121, pId:12, name:"随意勾选 1-2-1"},
+				{ id:122, pId:12, name:"随意勾选 1-2-2"},
+				{ id:2, pId:0, name:"禁止勾选 2", open:true, doCheck:false},
+				{ id:21, pId:2, name:"禁止勾选 2-1", doCheck:false},
+				{ id:22, pId:2, name:"禁止勾选 2-2", checked:false, open:true, doCheck:false},
+				{ id:221, pId:22, name:"禁止勾选 2-2-1", doCheck:false},
+				{ id:222, pId:22, name:"禁止勾选 2-2-2", checked:false, doCheck:false},
+				{ id:23, pId:2, name:"禁止勾选 2-3", doCheck:false}
+			];
+
+			var setting = {
+				view: {
+					showIcon: true
+				},
+				data: {
+					simpleData: {
+						enable: true
+					}
+				},
+				callback: {
+					onClick: onClick,
+					onCheck: onClick,
+					beforeExpand:function() {
+						console.log("custom beforeExpand...");
+					}
+				},
+				check: {
+					enable: true,
+					autoCheckTrigger: true,
+					chkboxType : { "Y" : "s", "N" : "ps" }
+				}
+			};
+
+			function onClick() {
+				//alert('custom click');
+			}
+
+			$("#treeDemo").tree({
+				data: {name:"张三"},
+				values:"21,22",
+				setting:setting,
+				zNodes:zNodes,
+				async:false
+			});
+
+
+
+			// combox-tree
+			var setting2 = {
+				view: {
+					showIcon: true
+				},
+				data: {
+					simpleData: {
+						enable: true
+					}
+				},
+				callback: {
+					onClick: onClick,
+					onCheck: onClick
+				},
+				check: {
+					enable: true,
+					//chkStyle:"radio",
+					chkStyle:"checkbox",
+					//radioType: "all",
+					autoCheckTrigger: true,
+					chkboxType : { "Y" : "s", "N" : "ps" }
+				}
+			};
+
+
+			$("#comboboxTreeDemo").comboboxTree({
+				width:200,
+				height:400,
+				ztree: {
+					url:"/demos/ztree/url",
+					data: {name:"张三"},
+					values:"696145672415481856,696145672960741376",
+					setting:setting2,
+					async:false
+				}
+			});
+		});
+		//-->
+
+		function getSelected() {
+			var treeObj =  $("#treeDemo").tree("getSelectedIds");
+			console.log(treeObj);
+		}
+
+		function getSelected2() {
+			let ids =  $("#comboboxTreeDemo").comboboxTree("getSelectedIds");
+			console.log(ids);
+		}
+	</script>
+</body>
+</html>

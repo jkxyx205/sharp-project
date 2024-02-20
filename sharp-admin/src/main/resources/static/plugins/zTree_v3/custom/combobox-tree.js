@@ -28,7 +28,7 @@
             var id =  this.$element[0].id;
 			var treeId = id + "_zTree";
 			var divId = id + "_div";
-			var treeHtml = "\r\n<div dropdown id=\""+divId+"\" style=\"display: none; position: absolute; width:"+this.options.width+"px; border:1px solid #A9A9A9; border-top:none;overflow:auto;\"><ul class=\"ztree\" id=\""+treeId+"\" style=\"margin-top: 0; width: "+(this.options.width)+"px; height:"+this.options.height+"px; margin:0;padding:0;\"></ul></div>";
+			var treeHtml = "\r\n<div dropdown id=\""+divId+"\" style=\"display: none; position: absolute; width:"+this.options.width+"px; border:1px solid #A9A9A9; border-top:none;overflow:auto;\"><ul class=\"ztree\" id=\""+treeId+"\" style=\"margin-top: 0; width: "+(this.options.width)+"px; height:"+this.options.height+"px; margin:0;padding:0; background-color: #ffffff;\"></ul></div>";
 			var $div = $("#"+divId+"");
 			$input.after(treeHtml);
 			
@@ -38,7 +38,7 @@
 				$(this).next().css({ left: cityOffset.left + "px", top: cityOffset.top + $(this).outerHeight() + "px" }).slideDown("fast");
 			});
 			
-			$('body').on("mousedown",function() {
+			$(document).on("mousedown",function() {
 				var target;
 				if(typeof event.srcElement == undefined)
 					target=event.target; 
@@ -46,8 +46,9 @@
 					target=event.srcElement;
 					
 			  var $div = $input.next();
-			  if($div.has(target).length == 0)
-					$div.fadeOut("fast");
+			  if($div.has(target).length == 0) {
+				  $div.fadeOut("fast");
+			  }
 			  /*if (!($(event.target).parents("#"+.attr("id")+"").length > 0)) {
 						$div.fadeOut("fast");
 			  }*/
@@ -59,9 +60,7 @@
 			if(settings.callback) {
 				this.options.ztree.setting.callback = {};
 			}
-			
-			
-			
+
 			var select = this.options.ztree.setting.check == undefined ? true: false;
 			if(!select) {
 			    //如果开启触发，对于节点较多的树将会影响性能，因为所有被联动勾选的操作都会触发事件回调函数
