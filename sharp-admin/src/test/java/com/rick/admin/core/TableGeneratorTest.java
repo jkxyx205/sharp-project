@@ -18,5 +18,6 @@ public class TableGeneratorTest {
     @Test
     public void generateTable() {
 //        tableGenerator.createTable(Menu.class);
+//        tableGenerator.createTable(CodeDescription.class);
     }
 }
