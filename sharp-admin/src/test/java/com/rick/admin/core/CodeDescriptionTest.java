@@ -31,7 +31,7 @@ public class CodeDescriptionTest {
     public void testSave2() {
         codeDescriptionService.saveAll(CodeDescription.CategoryEnum.PURCHASING_ORG, Arrays.asList(
                 CodeDescription.builder().code("PG1").description("采购组织1").build(),
-                CodeDescription.builder().code("PG1").description("采购组织2").build()
+                CodeDescription.builder().code("M1").description("采购组织2").build()
         ));
     }
 

@@ -59,29 +59,33 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities) {
-        assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
-        fillEntityIdsByCode(this, entities, null, null);
+        if (!(Thread.currentThread().getStackTrace()[4]).getMethodName().equals("insertOrUpdate")) {
+            // 方法内部调用 insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
+            assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
+            fillEntityIdsByCodes(this, entities, null, null);
+        }
         return super.insertOrUpdate(entities);
     }
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
         assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
-        fillEntityIdsByCode(this, entities, refColumnName, refValue);
+//        fillEntityIdsByCodes(this, entities, refColumnName, refValue);
+        // 由 beforeInsertOrUpdate 去设置 code 的 id
         return super.insertOrUpdate(entities, refColumnName, refValue);
     }
 
     @Override
     public int[] insertOrUpdateTable(Collection<T> entities) {
         assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
-        fillEntityIdsByCode(this, entities, null, null);
+        fillEntityIdsByCodes(this, entities, null, null);
         return super.insertOrUpdateTable(entities);
     }
 
     @Override
     public int insertOrUpdate(T t) {
         if (t.getId() == null && t.getCode() != null) {
-            handleEntityIdBeforeUpdate(t);
+            fillEntityIdByCode(t);
         }
 
         return super.insertOrUpdate(t);
@@ -104,13 +108,13 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int update(T t) {
-        handleEntityIdBeforeUpdate(t);
+        fillEntityIdByCode(t);
         return super.update(t);
     }
 
     @Override
     public int update(T t, Object[] params, String conditionSQL) {
-        handleEntityIdBeforeUpdate(t);
+        fillEntityIdByCode(t);
         return super.update(t, params, conditionSQL);
     }
 
@@ -305,9 +309,9 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     }
 
     @Override
-    protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList) {
+    protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList, String refColumnName, Object refValue) {
         if (subTableEntityDAO instanceof EntityCodeDAO) {
-            fillEntityIdsByCode((EntityCodeDAO) subTableEntityDAO, (Collection<T>) subDataList, null, null);
+            fillEntityIdsByCodes((EntityCodeDAO) subTableEntityDAO, (Collection<T>) subDataList, refColumnName, refValue);
         }
     }
 
@@ -330,7 +334,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         return EntityDAOManager.getTableMeta(getEntityClass()).getTable().comment();
     }
 
-    private void handleEntityIdBeforeUpdate(T t) {
+    private void fillEntityIdByCode(T t) {
         if (Objects.isNull(t.getId()) && StringUtils.isNotBlank(t.getCode())) {
             Optional<Long> option = this.selectIdByCode(t.getCode());
             if (option.isPresent()) {
@@ -339,7 +343,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
         }
     }
 
-    private void fillEntityIdsByCode(EntityCodeDAO entityCodeDAO, Collection<T> entities, String refColumnName, Object refValue) {
+    private void fillEntityIdsByCodes(EntityCodeDAO entityCodeDAO, Collection<T> entities, String refColumnName, Object refValue) {
         if (CollectionUtils.isNotEmpty(entities)) {
             Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(BaseCodeEntity::getCode).collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {

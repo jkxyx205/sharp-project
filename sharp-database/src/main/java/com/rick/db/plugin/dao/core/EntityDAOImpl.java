@@ -156,6 +156,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         Object refPropertyValue;
         if (reverseField.getType().isEnum()) {
             refPropertyValue = EnumUtils.valueOfCode(reverseField.getType(), (String) refValue);
+        } else if (reverseField.getType().isAssignableFrom(SimpleEntity.class)) {
+            refPropertyValue = BeanUtils.instantiateClass(reverseField.getType());
+            ((SimpleEntity)refPropertyValue).setId((Long) refValue);
         } else {
             refPropertyValue = refValue;
         }
@@ -936,6 +939,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             throw new IllegalArgumentException("reversePropertyName must be set");
         }
 
+        // subDataList
+        beforeInsertOrUpdate(subTableEntityDAO, subDataList, refColumnName, refValue);
+
         if (!insert && cascadeDelete) { // 级联删除
             if (CollectionUtils.isEmpty(subDataList)) {
                 // 删除所有
@@ -943,8 +949,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 return new int[0];
             }
 
-            // subDataList
-            beforeInsertOrUpdate(subTableEntityDAO, subDataList);
             Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(deletedIds)) {
                 // 删除所有
@@ -981,10 +985,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     /**
      * subDataList 子类处理subDataList数据
+     *
      * @param subTableEntityDAO
      * @param subDataList
+     * @param refColumnName
+     * @param refValue
      */
-    protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList) {}
+    protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList, String refColumnName, Object refValue) {}
 
     private Map<ID, T> listToIdMap(List<T> list) {
         return list.stream().collect(Collectors.toMap(t -> (ID) EntityDAOManager.getPropertyValue(t, tableMeta.getIdPropertyName()), v -> v));
