@@ -156,7 +156,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         Object refPropertyValue;
         if (reverseField.getType().isEnum()) {
             refPropertyValue = EnumUtils.valueOfCode(reverseField.getType(), (String) refValue);
-        } else if (reverseField.getType().isAssignableFrom(SimpleEntity.class)) {
+        } else if (SimpleEntity.class.isAssignableFrom(reverseField.getType())) {
             refPropertyValue = BeanUtils.instantiateClass(reverseField.getType());
             ((SimpleEntity)refPropertyValue).setId((Long) refValue);
         } else {
