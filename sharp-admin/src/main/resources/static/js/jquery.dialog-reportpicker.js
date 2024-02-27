@@ -20,7 +20,7 @@
                 title: this.options.title,
                 class: this.options.class,
                 lazy: false,
-                src: '/reports/'+this.options.reportId+'?mode=' + this.options.selectMode  + (params ? '&' + params : '') ,
+                src: '/reports/'+this.options.reportId+'/page?mode=' + this.options.selectMode  + (params ? '&' + params : '') ,
                 ok: {
                     label: this.options.ok.label,
                     success: function (dialog) {
@@ -32,7 +32,7 @@
                     _this.options.beforeShow && _this.options.beforeShow(_this)
 
                     if (!$.isEmptyObject(_this.options.params)) {
-                        let src = '/reports/'+_this.options.reportId+'?mode=' + _this.options.selectMode + '&' + $.param(_this.options.params)
+                        let src = '/reports/'+_this.options.reportId+'/page?mode=' + _this.options.selectMode + '&' + $.param(_this.options.params)
                         dialog.setSrc(src);
                     }
                 },
