@@ -75,6 +75,7 @@ public class ReportService {
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
         Report report = getReport(id);
+        init(report);
         mergeParams(report, requestMap);
         if (StringUtils.isBlank(report.getQuerySql())) {
             return fetchDataWithoutSql(report, requestMap);
@@ -144,6 +145,13 @@ public class ReportService {
         }
 
         return new ReportDTO(report, convert(grid, report), grid, summaryMap);
+    }
+
+    public void init(Report report) {
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        if (reportAdvice != null) {
+            reportAdvice.init(report);
+        }
     }
 
     private ReportDTO fetchDataWithoutSql(Report report, Map<String, Object> requestMap) {

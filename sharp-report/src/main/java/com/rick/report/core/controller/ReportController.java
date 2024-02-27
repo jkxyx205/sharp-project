@@ -12,6 +12,7 @@ import com.rick.db.dto.PageModel;
 import com.rick.db.service.support.Params;
 import com.rick.db.util.PaginationHelper;
 import com.rick.excel.table.HtmlExcelTable;
+import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.ReportDTO;
 import com.rick.report.core.service.ReportService;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,26 @@ import java.util.stream.Collectors;
 public class ReportController {
 
     private final ReportService reportService;
+
+    /**
+     * ajax_list的页面
+     * @param id
+     * @param model
+     * @param request
+     * @return
+     */
+    @GetMapping("{id}/page")
+    public String ajaxIndex(@PathVariable Long id, Model model, HttpServletRequest request) {
+        Report report = reportService.findById(id).get();
+        reportService.init(report);
+
+        model.addAttribute("report", report);
+        // 不能处理有 summary 的table
+        model.addAttribute("summaryIndex", Collections.emptyList());
+        model.addAttribute("id", id);
+        model.addAttribute("params", HttpServletRequestUtils.getParameterMap(request));
+        return StringUtils.defaultString(report.getTplName(), "list");
+    }
 
     @GetMapping("{id}/json")
     @ResponseBody

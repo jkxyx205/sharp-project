@@ -13,6 +13,8 @@ import java.util.Map;
  */
 public interface ReportAdvice {
 
+    default void init(Report report) {};
+
     default void beforeQuery(Report report, Map<String, Object> requestMap) {};
 
     default void beforeSetRow(Report report, List<Map<String, Object>> rows) {};
