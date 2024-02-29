@@ -19,6 +19,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -69,17 +70,26 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
+        return insertOrUpdate(entities, refColumnName, refValue, null);
+    }
+
+    @Override
+    public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue, Consumer<Collection<ID>> deletedIdsConsumer) {
         assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
-//        fillEntityIdsByCodes(this, entities, refColumnName, refValue);
-        // 由 beforeInsertOrUpdate 去设置 code 的 id
-        return super.insertOrUpdate(entities, refColumnName, refValue);
+        fillEntityIdsByCodes(this, entities, refColumnName, refValue);
+        return super.insertOrUpdate(entities, refColumnName, refValue, deletedIdsConsumer);
     }
 
     @Override
     public int[] insertOrUpdateTable(Collection<T> entities) {
+        return insertOrUpdateTable(entities, null);
+    }
+
+    @Override
+    public int[] insertOrUpdateTable(Collection<T> entities, Consumer<Collection<ID>> deletedIdsConsumer) {
         assertCodesUnDuplicate(entities.stream().map(BaseCodeEntity::getCode).collect(Collectors.toList()));
         fillEntityIdsByCodes(this, entities, null, null);
-        return super.insertOrUpdateTable(entities);
+        return super.insertOrUpdateTable(entities, deletedIdsConsumer);
     }
 
     @Override
@@ -310,8 +320,8 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     protected void beforeInsertOrUpdate(EntityDAO subTableEntityDAO, Collection<?> subDataList, String refColumnName, Object refValue) {
-        if (subTableEntityDAO instanceof EntityCodeDAO) {
-            fillEntityIdsByCodes((EntityCodeDAO) subTableEntityDAO, (Collection<T>) subDataList, refColumnName, refValue);
+        if (subTableEntityDAO instanceof EntityCodeDAO && this != subTableEntityDAO) {
+             fillEntityIdsByCodes((EntityCodeDAO) subTableEntityDAO, (Collection<T>) subDataList, refColumnName, refValue);
         }
     }
 

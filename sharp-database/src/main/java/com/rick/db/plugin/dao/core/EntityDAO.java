@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -29,12 +30,16 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
      */
     int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue);
 
+    int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue, Consumer<Collection<ID>> deletedIdsConsumer);
+
     /**
      * 同步表数据
      * @param entities
      * @return
      */
     int[] insertOrUpdateTable(Collection<T> entities);
+
+    int[] insertOrUpdateTable(Collection<T> entities, Consumer<Collection<ID>> deletedIdsConsumer);
 
     int update(T entity);
 

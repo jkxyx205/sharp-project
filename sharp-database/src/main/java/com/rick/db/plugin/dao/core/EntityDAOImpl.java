@@ -3,6 +3,7 @@ package com.rick.db.plugin.dao.core;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.EnumUtils;
 import com.rick.common.util.IdGenerator;
@@ -39,6 +40,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -148,8 +150,18 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue) {
+        return insertOrUpdate(entities, refColumnName, refValue, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int[] insertOrUpdate(Collection<T> entities, @NonNull String refColumnName, @NonNull Object refValue, Consumer<Collection<ID>> deletedIdsConsumer) {
+        if (Objects.nonNull(deletedIdsConsumer)) {
+            // 检查 id 是否允许被删除
+            deletedIdsConsumer.accept(resolveDeletedIds(entities, selectByParams(Params.builder(1).pv("refValue", refValue).build(), idColumnName, refColumnName +" = :refValue",  idClass)));
+        }
+
         String propertyName = columnNameToPropertyNameMap.get(refColumnName);
         Field reverseField = ReflectionUtils.findField(getEntityClass(), propertyName);
 
@@ -172,6 +184,17 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int[] insertOrUpdateTable(Collection<T> entities) {
+        return insertOrUpdateTable(entities, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int[] insertOrUpdateTable(Collection<T> entities, Consumer<Collection<ID>> deletedIdsConsumer) {
+        if (Objects.nonNull(deletedIdsConsumer)) {
+            // 检查 id 是否允许被删除
+            deletedIdsConsumer.accept(resolveDeletedIds(entities,selectByParams(null, idColumnName, idClass)));
+        }
+
         if (CollectionUtils.isEmpty(entities)) {
             // 删除所有
             SQLUtils.delete(getTableName());
@@ -861,6 +884,20 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     protected void setPropertyValue(Object t, String propertyName, Object propertyValue) {
         EntityDAOManager.setPropertyValue(t, propertyName, propertyValue);
+    }
+
+    private Collection<ID> resolveDeletedIds(Collection<T> entities, List<ID> idInDbList) {
+        Set<ID> deletedIds = Sets.newHashSetWithExpectedSize(idInDbList.size());
+        if (CollectionUtils.isNotEmpty(idInDbList)) {
+            List<ID> idUpdateList = entities.stream().map(this::getIdValue).collect(Collectors.toList());
+            for (ID idInDb : idInDbList) {
+                if (!idUpdateList.contains(idInDb)) {
+                    deletedIds.add(idInDb);
+                }
+            }
+        }
+
+        return deletedIds;
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
