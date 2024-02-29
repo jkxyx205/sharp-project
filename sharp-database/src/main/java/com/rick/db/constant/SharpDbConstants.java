@@ -10,6 +10,8 @@ public class SharpDbConstants {
 
     public static final String CODE_COLUMN_NAME = "code";
 
+    public static final String DESCRIPTION_COLUMN_NAME = "description";
+
     public static final String CREATE_ID_COLUMN_NAME = "create_by";
 
     public static final String CREATE_TIME_COLUMN_NAME = "create_time";

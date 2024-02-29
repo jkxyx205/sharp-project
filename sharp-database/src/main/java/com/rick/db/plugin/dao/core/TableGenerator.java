@@ -129,7 +129,8 @@ public class TableGenerator {
 
     private boolean isHeaderColumn(String columnName) {
         if (columnName.equals(SharpDbConstants.ID_COLUMN_NAME) ||
-                columnName.equals(SharpDbConstants.CODE_COLUMN_NAME)
+                columnName.equals(SharpDbConstants.CODE_COLUMN_NAME) ||
+                columnName.equals(SharpDbConstants.DESCRIPTION_COLUMN_NAME)
         ) {
             return true;
         }
