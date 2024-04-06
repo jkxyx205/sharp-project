@@ -4,6 +4,9 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -45,6 +48,11 @@ public class EnumUtils {
         }
 
         return Enum.valueOf(enumType, code);
+    }
+
+    public static List<String> getCodes(Class enumType) {
+        Object[] enumConstants = enumType.getEnumConstants();
+        return Arrays.stream(enumConstants).map(enumConstant -> String.valueOf(enumConstant)).collect(Collectors.toList());
     }
 
     /**
