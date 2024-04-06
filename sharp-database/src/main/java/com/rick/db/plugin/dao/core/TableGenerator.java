@@ -2,6 +2,7 @@ package com.rick.db.plugin.dao.core;
 
 import com.google.common.collect.Lists;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
+import com.rick.common.util.EnumUtils;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 根据实体类创建表
@@ -158,7 +160,7 @@ public class TableGenerator {
         }
     }
 
-    private String determineSqlType(Class<?> type) {
+    private String determineSqlType(Class type) {
         if (type == Long.class) {
             return "bigint";
         } else if (type == Integer.class) {
@@ -166,7 +168,9 @@ public class TableGenerator {
         } else if (CharSequence.class.isAssignableFrom(type)) {
             return "varchar(32)";
         } else if (type.isEnum()) {
-            return "varchar(16)";
+//            return "varchar(16)";
+            String enumValues = String.join(",", EnumUtils.getCodes(type).stream().map(code -> "'" + code + "'").collect(Collectors.toList()));
+            return "ENUM("+enumValues+")";
         } else if (type == Boolean.class) {
             return "bit";
         } else if (type == BigDecimal.class) {
