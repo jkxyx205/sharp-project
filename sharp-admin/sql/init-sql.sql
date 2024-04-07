@@ -5,9 +5,9 @@
 # https://sequel-ace.com/
 # https://github.com/Sequel-Ace/Sequel-Ace
 #
-# Host: 114.55.173.102 (MySQL 5.6.24)
-# Database: intelligent-portal
-# Generation Time: 2023-12-12 04:53:06 +0000
+# Host: localhost (MySQL 8.3.0)
+# Database: sharp-admin
+# Generation Time: 2024-04-07 02:38:08 +0000
 # ************************************************************
 
 
@@ -24,14 +24,14 @@ SET NAMES utf8mb4;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_dict` (
-  `id` bigint(11) DEFAULT NULL,
+  `id` bigint DEFAULT NULL,
   `type` varchar(32) NOT NULL,
   `name` varchar(32) NOT NULL,
   `label` varchar(32) NOT NULL,
-  `sort` int(11) DEFAULT NULL,
+  `sort` int DEFAULT NULL,
   `remark` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`type`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `sys_dict` WRITE;
 /*!40000 ALTER TABLE `sys_dict` DISABLE KEYS */;
@@ -49,16 +49,16 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_document` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint NOT NULL,
   `name` varchar(255) NOT NULL,
   `extension` varchar(16) DEFAULT NULL,
   `content_type` varchar(128) DEFAULT NULL,
-  `size` int(11) DEFAULT NULL,
+  `size` int DEFAULT NULL,
   `group_name` varchar(255) NOT NULL,
   `path` varchar(255) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 
 
@@ -66,7 +66,7 @@ CREATE TABLE `sys_document` (
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_form` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint NOT NULL,
   `code` varchar(32) DEFAULT NULL,
   `name` varchar(32) NOT NULL,
   `form_advice_name` varchar(32) DEFAULT NULL,
@@ -75,13 +75,13 @@ CREATE TABLE `sys_form` (
   `storage_strategy` varchar(16) DEFAULT NULL,
   `tpl_name` varchar(32) DEFAULT NULL,
   `additional_info` text,
-  `create_by` bigint(20) NOT NULL,
+  `create_by` bigint NOT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint(20) NOT NULL,
+  `update_by` bigint NOT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `sys_form` WRITE;
 /*!40000 ALTER TABLE `sys_form` DISABLE KEYS */;
@@ -99,7 +99,7 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_form_configurer` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint NOT NULL,
   `name` varchar(32) DEFAULT NULL,
   `label` varchar(16) NOT NULL,
   `type` varchar(32) NOT NULL,
@@ -111,13 +111,13 @@ CREATE TABLE `sys_form_configurer` (
   `is_disabled` bit(1) DEFAULT NULL,
   `cpn_value_converter_name` varchar(32) DEFAULT NULL,
   `additional_info` varchar(1024) DEFAULT NULL,
-  `create_by` bigint(20) NOT NULL,
+  `create_by` bigint NOT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint(20) NOT NULL,
+  `update_by` bigint NOT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `sys_form_configurer` WRITE;
 /*!40000 ALTER TABLE `sys_form_configurer` DISABLE KEYS */;
@@ -141,18 +141,18 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_form_cpn_configurer` (
-  `id` bigint(20) NOT NULL,
-  `form_id` bigint(20) NOT NULL,
-  `config_id` bigint(20) NOT NULL,
-  `order_num` int(11) DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `form_id` bigint NOT NULL,
+  `config_id` bigint NOT NULL,
+  `order_num` int DEFAULT NULL,
   `additional_info` text,
-  `create_by` bigint(20) NOT NULL,
+  `create_by` bigint NOT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint(20) NOT NULL,
+  `update_by` bigint NOT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 LOCK TABLES `sys_form_cpn_configurer` WRITE;
 /*!40000 ALTER TABLE `sys_form_cpn_configurer` DISABLE KEYS */;
@@ -176,18 +176,18 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_permission` (
-  `id` bigint(20) NOT NULL COMMENT '主键',
+  `id` bigint NOT NULL COMMENT '主键',
   `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
   `name` varchar(32) DEFAULT NULL COMMENT '权限名称',
-  `pid` bigint(20) DEFAULT NULL COMMENT '父权限',
-  `permission_order` int(11) DEFAULT NULL COMMENT 'permission_order',
-  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `pid` bigint DEFAULT NULL COMMENT '父权限',
+  `permission_order` int DEFAULT NULL COMMENT 'permission_order',
+  `create_by` bigint DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='权限表';
 
 LOCK TABLES `sys_permission` WRITE;
 /*!40000 ALTER TABLE `sys_permission` DISABLE KEYS */;
@@ -219,7 +219,7 @@ CREATE TABLE `sys_property` (
   `name` varchar(32) NOT NULL,
   `value` varchar(255) NOT NULL,
   PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 
@@ -227,7 +227,7 @@ CREATE TABLE `sys_property` (
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_report` (
-  `id` bigint(20) NOT NULL COMMENT '主键',
+  `id` bigint NOT NULL COMMENT '主键',
   `code` varchar(32) DEFAULT NULL,
   `name` varchar(32) DEFAULT NULL,
   `tpl_name` varchar(32) DEFAULT NULL,
@@ -241,13 +241,13 @@ CREATE TABLE `sys_report` (
   `query_field_list` text,
   `additional_info` text,
   `report_advice_name` varchar(64) DEFAULT NULL,
-  `create_by` bigint(20) DEFAULT NULL,
+  `create_by` bigint DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint(20) DEFAULT NULL,
+  `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='报表';
 
 LOCK TABLES `sys_report` WRITE;
 /*!40000 ALTER TABLE `sys_report` DISABLE KEYS */;
@@ -255,7 +255,8 @@ LOCK TABLES `sys_report` WRITE;
 INSERT INTO `sys_report` (`id`, `code`, `name`, `tpl_name`, `pageable`, `sidx`, `sord`, `query_sql`, `summary`, `report_column_list`, `summary_column_names`, `query_field_list`, `additional_info`, `report_advice_name`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
 	(694714180413960192,'sys_user','用户管理','tpl/list',b'1','id','ASC',' SELECT sys_user.id, sys_user.code, sys_user.name, IF(sys_user.is_available, \'是\', \'否\') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, \'%Y-%m-%d %H:%i:%s\') create_time FROM sys_user\n LEFT JOIN sys_user u on u.id = sys_user.create_by\n LEFT JOIN ( SELECT sys_user.id, GROUP_CONCAT(r.name) name FROM sys_user\n LEFT JOIN sys_user_role ur on sys_user.id = ur.user_id AND ur.is_deleted = 0\n LEFT JOIN sys_role r on r.id = ur.role_id AND r.is_deleted = 0\n group by sys_user.id order by sys_user.id asc) t on t.id = sys_user.id\nWHERE sys_user.code LIKE :code AND sys_user.name LIKE :name AND sys_user.is_available = :is_available AND sys_user.create_time >= :create_time0 AND sys_user.create_time <= :create_time1 AND sys_user.is_deleted = 0',b'0','[{\"name\":\"id\",\"sortable\":false,\"hidden\":true,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"code\",\"label\":\"用户名\",\"sortable\":true,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"name\",\"label\":\"姓名\",\"sortable\":true,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"role_name\",\"label\":\"角色\",\"sortable\":false,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"is_available\",\"label\":\"是否可用\",\"sortable\":false,\"columnWidth\":80,\"hidden\":false,\"align\":\"center\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"create_name\",\"label\":\"创建人\",\"sortable\":false,\"columnWidth\":100,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"create_time\",\"label\":\"创建时间\",\"sortable\":false,\"columnWidth\":180,\"hidden\":false,\"align\":\"center\",\"tooltip\":false,\"type\":\"text\"}]',NULL,'[{\"name\":\"code\",\"label\":\"用户名\",\"type\":\"TEXT\"},{\"name\":\"name\",\"label\":\"姓名\",\"type\":\"TEXT\"},{\"name\":\"is_available\",\"label\":\"是否可用\",\"type\":\"SELECT\",\"extraData\":\"bol\"},{\"name\":\"create_time\",\"label\":\"创建时间\",\"type\":\"DATE_RANGE\"}]','{\"formId\":\"694980924206493696\"}',NULL,0,'2023-05-29 23:19:06',1,'2023-09-01 07:03:18',b'0'),
-	(695316160014499840,'sys_dict','字典管理','tpl/list',b'0','id','ASC','select id, type, name, label, sort from sys_dict where type = :type order by type, sort asc',b'0','[{\"name\":\"id\",\"sortable\":false,\"hidden\":true,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"name\",\"label\":\"编码\",\"sortable\":false,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"label\",\"label\":\"显示值\",\"sortable\":false,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"type\",\"label\":\"分类\",\"sortable\":true,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"sort\",\"label\":\"排序号\",\"sortable\":false,\"columnWidth\":30,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"}]',NULL,'[{\"name\":\"type\",\"label\":\"分类\",\"type\":\"SELECT\",\"extraData\":\"sys_dict_type\"}]','{\"formId\":\"695312747063197696\"}',NULL,1,'2023-05-31 15:11:09',1,'2023-09-01 07:03:07',b'0');
+	(695316160014499840,'sys_dict','字典管理','tpl/list',b'0','id','ASC','select id, type, name, label, sort from sys_dict where type = :type order by type, sort asc',b'0','[{\"name\":\"id\",\"sortable\":false,\"hidden\":true,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"name\",\"label\":\"编码\",\"sortable\":false,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"label\",\"label\":\"显示值\",\"sortable\":false,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"type\",\"label\":\"分类\",\"sortable\":true,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"sort\",\"label\":\"排序号\",\"sortable\":false,\"columnWidth\":30,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"}]',NULL,'[{\"name\":\"type\",\"label\":\"分类\",\"type\":\"SELECT\",\"extraData\":\"sys_dict_type\"}]','{\"formId\":\"695312747063197696\"}',NULL,1,'2023-05-31 15:11:09',1,'2023-09-01 07:03:07',b'0'),
+	(786015805669142528,'sys_user_search','用户查询','tpl/dialog_report_list',b'1','id','ASC',' SELECT sys_user.id, sys_user.code, sys_user.name, IF(sys_user.is_available, \'是\', \'否\') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, \'%Y-%m-%d %H:%i:%s\') create_time FROM sys_user\n LEFT JOIN sys_user u on u.id = sys_user.create_by\n LEFT JOIN ( SELECT sys_user.id, GROUP_CONCAT(r.name) name FROM sys_user\n LEFT JOIN sys_user_role ur on sys_user.id = ur.user_id AND ur.is_deleted = 0\n LEFT JOIN sys_role r on r.id = ur.role_id AND r.is_deleted = 0\n group by sys_user.id order by sys_user.id asc) t on t.id = sys_user.id\nWHERE sys_user.code LIKE :code AND sys_user.name LIKE :name AND sys_user.is_available = :is_available AND sys_user.create_time >= :create_time0 AND sys_user.create_time <= :create_time1 AND sys_user.is_deleted = 0 and sys_user.id = :id and sys_user.id IN (:ids)',b'0','[{\"name\":\"id\",\"sortable\":false,\"hidden\":true,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"code\",\"label\":\"用户名\",\"sortable\":true,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"name\",\"label\":\"姓名\",\"sortable\":true,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"role_name\",\"label\":\"角色\",\"sortable\":false,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"is_available\",\"label\":\"是否可用\",\"sortable\":false,\"columnWidth\":80,\"hidden\":false,\"align\":\"center\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"create_name\",\"label\":\"创建人\",\"sortable\":false,\"columnWidth\":100,\"hidden\":false,\"align\":\"left\",\"tooltip\":false,\"type\":\"text\"},{\"name\":\"create_time\",\"label\":\"创建时间\",\"sortable\":false,\"columnWidth\":180,\"hidden\":false,\"align\":\"center\",\"tooltip\":false,\"type\":\"text\"}]',NULL,'[{\"name\":\"code\",\"label\":\"用户名\",\"type\":\"TEXT\"},{\"name\":\"name\",\"label\":\"姓名\",\"type\":\"TEXT\"},{\"name\":\"is_available\",\"label\":\"是否可用\",\"type\":\"SELECT\",\"extraData\":\"bol\"},{\"name\":\"create_time\",\"label\":\"创建时间\",\"type\":\"DATE_RANGE\"}]',NULL,NULL,1,'2024-04-06 21:32:07',1,'2024-04-06 21:32:07',b'0');
 
 /*!40000 ALTER TABLE `sys_report` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -265,16 +266,16 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_role` (
-  `id` bigint(20) NOT NULL COMMENT '主键',
+  `id` bigint NOT NULL COMMENT '主键',
   `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
   `name` varchar(32) DEFAULT NULL,
-  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `create_by` bigint DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='角色';
 
 LOCK TABLES `sys_role` WRITE;
 /*!40000 ALTER TABLE `sys_role` DISABLE KEYS */;
@@ -291,11 +292,11 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_role_permission` (
-  `role_id` bigint(20) NOT NULL,
-  `permission_id` bigint(20) NOT NULL,
+  `role_id` bigint NOT NULL,
+  `permission_id` bigint NOT NULL,
   `is_deleted` bit(1) NOT NULL DEFAULT b'0',
   UNIQUE KEY `sys_role_permission_pk` (`role_id`,`permission_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 LOCK TABLES `sys_role_permission` WRITE;
 /*!40000 ALTER TABLE `sys_role_permission` DISABLE KEYS */;
@@ -323,25 +324,26 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_user` (
-  `id` bigint(20) NOT NULL COMMENT '主键',
+  `id` bigint NOT NULL COMMENT '主键',
   `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
   `name` varchar(32) DEFAULT NULL COMMENT '姓名',
   `password` varchar(128) DEFAULT NULL COMMENT '密码',
   `is_available` bit(1) DEFAULT NULL COMMENT '是否可用',
-  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `create_by` bigint DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='用户信息';
 
 LOCK TABLES `sys_user` WRITE;
 /*!40000 ALTER TABLE `sys_user` DISABLE KEYS */;
 
 INSERT INTO `sys_user` (`id`, `code`, `name`, `password`, `is_available`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(1,'admin','管理员','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS',b'1',1,'2023-05-29 14:55:03',1,'2023-09-03 04:30:42',b'0');
+	(1,'admin','管理员','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS',b'1',1,'2023-05-29 14:55:03',1,'2023-09-03 04:30:42',b'0'),
+	(786079661661646848,'test','测试','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS',b'1',1,'2023-05-29 14:55:03',1,'2023-09-03 04:30:42',b'0');
 
 /*!40000 ALTER TABLE `sys_user` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -351,11 +353,11 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_user_role` (
-  `user_id` bigint(20) NOT NULL,
-  `role_id` bigint(20) NOT NULL,
+  `user_id` bigint NOT NULL,
+  `role_id` bigint NOT NULL,
   `is_deleted` bit(1) NOT NULL DEFAULT b'0',
   UNIQUE KEY `sys_user_role_pk` (`user_id`,`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 LOCK TABLES `sys_user_role` WRITE;
 /*!40000 ALTER TABLE `sys_user_role` DISABLE KEYS */;
