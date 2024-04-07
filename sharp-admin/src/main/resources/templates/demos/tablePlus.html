@@ -21,7 +21,9 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                <div id="table-container"></div>
+                <form id="table-form">
+                    <div id="table-container"></div>
+                </form>
                 <button class="btn btn-primary mt-2" type="button" name="search" id="get-btn">
                     <i class="fa fa-search"></i> 获取值</button>
             </div>
@@ -168,9 +170,18 @@
         })
 
         $('#get-btn').on('click', function () {
-            let value = $editableTable.editableTablePlus('getValue')
-            console.log(value, '...')
+            if (valid()) {
+                let value = $editableTable.editableTablePlus('getValue')
+                console.log(value, '...')
+            }
         })
+
+        let tableForm = document.getElementById("table-form")
+        function valid() {
+            let formItemValidity = tableForm.checkValidity()
+            tableForm.classList.add('was-validated')
+            return formItemValidity;
+        }
     </script>
 </th:block>
 </body>
