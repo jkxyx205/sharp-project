@@ -81,7 +81,7 @@
                                 align="center"
                                 width="40" th:if="${'multiple' eq params['mode']}">
                         </table-column>
-                        <table-column th:each="n : ${report.reportColumnList}" th:if="${!n.hidden}" th:attr="prop=${n.name}, label=${n.label}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
+                        <table-column th:each="n : ${report.reportColumnList}" th:attr="prop=${n.name}, label=${n.label}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
                             <template slot-scope="scope" th:if="${n.type.name() eq 'NUMERIC'}">
                                 {{ scope.row.<th:block th:text="${n.name}"></th:block> | formatInteger}}
                             </template>

@@ -120,7 +120,7 @@
             })
         },
         // language=HTML
-        template: '<div :id="containerId">\n<div :class="(fixedHead || layoutFixed) ? \'table-fixed-container\' : \'card-body-scroll-panel\'">\n    <table class="table table-responsive-sm table-bordered table-striped table-sm table-thead" v-if="fixedHead">\n        <thead>\n            <slot></slot>\n        </thead>\n    </table>\n    <table class="table table-responsive-sm table-bordered table-striped table-sm table-tbody">\n        <thead v-if="!fixedHead">\n            <slot></slot>\n        </thead>\n        <tbody>\n        <tr :data-id="row[rowKey]" @click="$emit(\'row-click\', row, $event)" @dblclick="$emit(\'row-dbclick\', row, $event)" v-for="(row, index) in grid.rows" :key="Math.floor(Math.random()*1000000)">\n            <td :class="\'text-\'+p.align" v-text2="{ show: p.tooltip, original: row[p.prop] ,text: typeof p.$scopedSlots.default === \'function\' ? p.$scopedSlots.default({\'row\': row})[0].text : (p.type === \'index\' ? (index + 1 + (grid.page - 1) * grid.pageSize) : (p.type === \'checkbox\' ? \'<input type=checkbox name=check_key value=\' + row[rowKey] + \'>\' : row[p.prop]))}" v-for="p in props"></td>\n        </tr>\n        <tr class="tr-empty non-data" v-if="grid.rows && grid.rows < 1">\n            <td :colspan="props.length" style="text-align: center;"><span class="empty-text">暂无数据</span></td>\n        </tr>\n        </tbody>\n    </table>\n</div>\n<div class="table-footer-bar clearfix">\n    <div class="pull-left" style="margin-bottom: 8px;">\n        <span class="breadcrumb-item active">共{{ grid.records }}条，{{ grid.totalPages }}页</span>\n <select v-if="query.size !==  -1" @change="$emit(\'size-change\', query.size)" v-model="query.size">\n            <option value="15" selected="selected">15条</option>\n            <option value="50">50条</option>\n            <option value="100">100条</option>\n            <option value="200">200条</option>\n        </select>\n        <span v-show="grid.totalPages > 1">，前往<input class="goto" @keyup.enter="$emit(\'page-change\', query.page)" maxlength="6" v-model="query.page">页</span>\n    </div>\n    <nav class="pull-right" v-show="grid.totalPages > 1">\n        <ul class="pagination pagination-sm">\n            <li class="page-item" v-if="grid.page > 1">\n                <a class="page-link" href="javascript:;" @click="$emit(\'page-change\', query.page - 1)">上一页</a>\n            </li>\n            <li class="page-item" :class="{\'active\': i === grid.page}" v-for="i in pageInfo.endPage" v-if="pageInfo.startPage <= i">\n                <a class="page-link" href="javascript:;" @click="$emit(\'page-change\', i)">{{ i }}</a>\n            </li>\n            <li class="page-item" v-if="grid.page < grid.totalPages">\n                <a class="page-link" href="javascript:;" @click="$emit(\'page-change\', query.page + 1)">下一页</a>\n            </li>\n        </ul>\n    </nav>\n</div>\n</div>'
+        template: '<div :id="containerId">\n<div :class="(fixedHead || layoutFixed) ? \'table-fixed-container\' : \'card-body-scroll-panel\'">\n    <table class="table table-responsive-sm table-bordered table-striped table-sm table-thead" v-if="fixedHead">\n        <thead>\n            <slot></slot>\n        </thead>\n    </table>\n    <table class="table table-responsive-sm table-bordered table-striped table-sm table-tbody">\n        <thead v-if="!fixedHead">\n            <slot></slot>\n        </thead>\n        <tbody>\n        <tr :data-id="row[rowKey]" @click="$emit(\'row-click\', row, $event)" @dblclick="$emit(\'row-dbclick\', row, $event)" v-for="(row, index) in grid.rows" :key="Math.floor(Math.random()*1000000)">\n  <td v-if="p.category !== \'hidden\'" :class="\'text-\'+p.align" :name="p.prop" v-text2="{ show: p.tooltip, original: row[p.prop] ,text: typeof p.$scopedSlots.default === \'function\' ? p.$scopedSlots.default({\'row\': row})[0].text : (p.type === \'index\' ? (index + 1 + (grid.page - 1) * grid.pageSize) : (p.type === \'checkbox\' ? \'<input type=checkbox name=check_key value=\' + row[rowKey] + \'>\' : row[p.prop]))}" v-for="p in props"></td>\n <input v-if="p.category === \'hidden\'" type="hidden" v-for="p in props"  :name="p.prop" :value="row[p.prop]"/>      </tr>\n        <tr class="tr-empty non-data" v-if="grid.rows && grid.rows < 1">\n            <td :colspan="props.length" style="text-align: center;"><span class="empty-text">暂无数据</span></td>\n        </tr>\n        </tbody>\n    </table>\n</div>\n<div class="table-footer-bar clearfix">\n    <div class="pull-left" style="margin-bottom: 8px;">\n        <span class="breadcrumb-item active">共{{ grid.records }}条，{{ grid.totalPages }}页</span>\n <select v-if="query.size !==  -1" @change="$emit(\'size-change\', query.size)" v-model="query.size">\n            <option value="15" selected="selected">15条</option>\n            <option value="50">50条</option>\n            <option value="100">100条</option>\n            <option value="200">200条</option>\n        </select>\n        <span v-show="grid.totalPages > 1">，前往<input class="goto" @keyup.enter="$emit(\'page-change\', query.page)" maxlength="6" v-model="query.page">页</span>\n    </div>\n    <nav class="pull-right" v-show="grid.totalPages > 1">\n        <ul class="pagination pagination-sm">\n            <li class="page-item" v-if="grid.page > 1">\n                <a class="page-link" href="javascript:;" @click="$emit(\'page-change\', query.page - 1)">上一页</a>\n            </li>\n            <li class="page-item" :class="{\'active\': i === grid.page}" v-for="i in pageInfo.endPage" v-if="pageInfo.startPage <= i">\n                <a class="page-link" href="javascript:;" @click="$emit(\'page-change\', i)">{{ i }}</a>\n            </li>\n            <li class="page-item" v-if="grid.page < grid.totalPages">\n                <a class="page-link" href="javascript:;" @click="$emit(\'page-change\', query.page + 1)">下一页</a>\n            </li>\n        </ul>\n    </nav>\n</div>\n</div>'
     })
 
     Vue.component('table-column', {
@@ -139,6 +139,9 @@
                 type: Number
             },
             type: {
+                type: String
+            },
+            category: {
                 type: String
             },
             align: {
@@ -162,6 +165,7 @@
                     'label': _this.label,
                     'width': _this.width,
                     'type': _this.type,
+                    'category': _this.category,
                     'align': _this.align,
                     'tooltip': _this.tooltip,
                     '$scopedSlots':_this.$scopedSlots,
@@ -169,7 +173,7 @@
             })
         },
         // language=HTML
-        template: '<th :data-name="prop" :style="\'width:\'+width+\'px\'" :class="[ {sortable: sortable}, \'text-\' + align]" v-html="label"></th>'
+        template: '<th v-if="label" :data-name="prop" :style="\'width:\'+width+\'px\'" :class="[ {sortable: sortable}, \'text-\' + align]" v-html="label"></th>'
     })
 
     var AjaxTable = function(element, options) {
@@ -297,6 +301,9 @@
                     },
                     refresh: function () {
                         this._handleSummary()
+                        if (typeof refresh === 'function') {
+                            refresh()
+                        }
                     },
                     _handleSummary: function() {
                         if (!_this.options.count) {
