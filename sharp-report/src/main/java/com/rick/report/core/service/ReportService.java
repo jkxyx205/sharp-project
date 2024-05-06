@@ -109,7 +109,7 @@ public class ReportService {
             }
 
             if (CollectionUtils.isNotEmpty(summaryQueryColumnNameList)) {
-                summarySQL = "SELECT " + summaryQueryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(10,3))").collect(Collectors.joining(", ")) +
+                summarySQL = "SELECT " + summaryQueryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(20,3))").collect(Collectors.joining(", ")) +
                         report.getQuerySql().substring(report.getQuerySql().indexOf("FROM"));
             }
         }
