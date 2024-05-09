@@ -31,6 +31,9 @@
 					li.appendChild(text)
 					this.ul.appendChild(li)
 				})
+
+				// 弹出框定位
+				$(event.target).next().css('top', ($(event.target).offset().top + 32) + 'px')
 			}
 
 		})
@@ -64,6 +67,14 @@
 						break
 					}
 				}
+			}
+		})
+
+		this.inputElement.addEventListener('keyup', (event) => {
+			if (this.ul.childNodes.length > 0) {
+				event.preventDefault();
+				event.stopPropagation()
+				return false;
 			}
 		})
 
