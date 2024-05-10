@@ -95,7 +95,7 @@
                             <td style="font-weight: bold;">合计</td>
                             <td th:if="${'multiple' eq params['mode']}"></td>
                             <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}"></td>
-                            <td></td>
+                            <td sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete')}"></td>
                         </tr>
                         <tr class="tr-empty non-data" th:if="${grid.records < 1}">
                             <td th:colspan="${report.visibleColumnSize + 2 + ('multiple' eq params['mode'] ? 1 : 0)}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
