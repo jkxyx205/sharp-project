@@ -5,6 +5,7 @@
 		this.valueElement = parent.firstChild
 		this.inputElement = this.valueElement.nextElementSibling
 		this.select2 = this.valueElement.parentNode
+		this.itemsContainer = this.select2.querySelector('.items')
 		this.ul = this.select2.querySelector('.items ul')
 
 		// 注册搜索事件
@@ -57,24 +58,35 @@
 						node.className = ''
 
 						let activeNode = arrowDown ? node.nextSibling : node.previousSibling
+						let circle = false
 						if(!activeNode) {
+							circle = true
 							activeNode = arrowDown ? this.ul.childNodes[0] : this.ul.childNodes[this.ul.childNodes.length - 1]
 						}
 
 						activeNode.className = 'active'
 						this.valueElement.value = activeNode.getAttribute("value")
 						this.inputElement.value = activeNode.innerText
+
+						// 滚动条位置
+						if (circle && !arrowDown) {
+							this.itemsContainer.scrollTop = activeNode.offsetTop
+						} else if (circle && arrowDown) {
+							this.itemsContainer.scrollTop = 0
+						}else if (arrowDown && activeNode.offsetTop >= (this.itemsContainer.scrollTop + 270)) {
+							this.itemsContainer.scrollTop = activeNode.offsetTop - 270
+						} else if (!arrowDown && activeNode.offsetTop <= this.itemsContainer.scrollTop) {
+							this.itemsContainer.scrollTop = activeNode.offsetTop
+						}
 						break
 					}
 				}
-			}
-		})
 
-		this.inputElement.addEventListener('keyup', (event) => {
-			if (this.ul.childNodes.length > 0) {
-				event.preventDefault();
-				event.stopPropagation()
-				return false;
+				if (this.ul.childNodes.length > 0) {
+					event.preventDefault();
+					event.stopPropagation()
+					return false;
+				}
 			}
 		})
 

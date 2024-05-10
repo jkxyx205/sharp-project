@@ -113,11 +113,39 @@
             }
 
             // 键盘上下键切换单元格
-            this.$table.delegate('tr td>input[type=text]', 'keyup', (e) => {
+            this.$table.delegate('tr td>input[type=text]', 'keydown', (e) => {
                 if (e.keyCode === 40) {
                     $(e.currentTarget).parents("tr").next().find("td>input[name="+e.currentTarget.name+"]").focus()
                 } else if (e.keyCode === 38) {
                     $(e.currentTarget).parents("tr").prev().find("td>input[name="+e.currentTarget.name+"]").focus()
+                } else if (e.keyCode === 37 && e.currentTarget.selectionStart === 0 ) {
+                    let $parentTd =  $(e.currentTarget).parents("td")
+                    while ($parentTd.prev().length) {
+                        let $input = $parentTd.prev().find(">input[type=text]")
+                        if ($input.length && !$input.attr("disabled") && !$input.attr("readonly")) {
+                            $input.focus();
+                            // $input.select()
+                            // setTimeout(() => $input.select(), 100)
+                            // setTimeout(() => $input[0].setSelectionRange(e.currentTarget.length, e.currentTarget.length), 100)
+                            break
+                        }
+
+                        $parentTd = $parentTd.prev()
+                    }
+                } else if (e.keyCode === 39 && e.currentTarget.value.length <= e.currentTarget.selectionStart) {
+                    let $parentTd =  $(e.currentTarget).parents("td")
+                    while ($parentTd.next().length) {
+                        let $input = $parentTd.next().find(">input[type=text]")
+                        if ($input.length && !$input.attr("disabled") && !$input.attr("readonly")) {
+                            $input.focus();
+                            // setTimeout(() => $input[0].setSelectionRange(e.currentTarget.length, e.currentTarget.length), 100)
+                            // $input.select()
+                            // setTimeout(() => $input.select(), 100)
+                            break
+                        }
+
+                        $parentTd = $parentTd.next()
+                    }
                 }
             })
 
@@ -429,6 +457,10 @@
                     // 注册事件
                     $input.on('keydown', function(event){
                         // if ((event.keyCode > 57 || event.keyCode < 48) && event.keyCode !== 8 && event.keyCode !== 190 && event.keyCode !== 39 && event.keyCode !== 37 && event.keyCode !== 9) {
+                        if (event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40) {
+                            return true
+                        }
+
                         if (!((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105) || event.keyCode === 37 || event.keyCode === 39 || event.keyCode === 8 || event.keyCode === 9 || event.keyCode === 110 || event.keyCode === 190)) {
                             event.preventDefault();
                             event.stopPropagation()
