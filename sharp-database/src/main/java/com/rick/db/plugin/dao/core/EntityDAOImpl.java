@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.rick.common.http.exception.BizException;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.EnumUtils;
 import com.rick.common.util.IdGenerator;
@@ -941,6 +942,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         if (count > 0 && t != null && getEntityClass().isAssignableFrom(t.getClass())) {
             cascadeInsertOrUpdate((T) t, false);
             EntityDAOThreadLocalValue.removeAll();
+        } else if (hasVersionManagement) {
+            throw new BizException("版本不一致，更新失败！");
         }
 
         return count;
