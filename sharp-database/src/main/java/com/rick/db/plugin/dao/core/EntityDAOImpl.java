@@ -928,7 +928,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
     @Override
     protected int update(String tableName, Object t, String updateColumnNames, Object[] params, String conditionSQL) {
-        if (hasVersionManagement) {
+        boolean needVersionManagement = hasVersionManagement && Objects.nonNull(t);
+        if (needVersionManagement) {
             Integer version = (Integer) getValue(t, tableMeta.getVersionProperty().getPropertyName());
             Assert.notNull(version, "version不能为空");
 
@@ -939,11 +940,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         int count = super.update(tableName, t, updateColumnNames, params, conditionSQL);
+
+        if (needVersionManagement && count == 0) {
+            throw new BizException("版本不一致，更新失败！");
+        }
+
         if (count > 0 && t != null && getEntityClass().isAssignableFrom(t.getClass())) {
             cascadeInsertOrUpdate((T) t, false);
             EntityDAOThreadLocalValue.removeAll();
-        } else if (hasVersionManagement) {
-            throw new BizException("版本不一致，更新失败！");
         }
 
         return count;
