@@ -86,6 +86,10 @@ public class ReportService {
                 .replaceFirst("(?i)\\s+(from)\\s+", " FROM ")
                 .replaceFirst("(?i)\\s+(WHERE)\\s+", " WHERE "));
 
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        if (reportAdvice != null) {
+            reportAdvice.beforeQuery(report, requestMap);
+        }
 
         String summarySQL = null;
         List<String> summaryColumnNameList = null;
@@ -112,11 +116,6 @@ public class ReportService {
                 summarySQL = "SELECT " + summaryQueryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(20,3))").collect(Collectors.joining(", ")) +
                         report.getQuerySql().substring(report.getQuerySql().indexOf("FROM"));
             }
-        }
-
-        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
-        if (reportAdvice != null) {
-            reportAdvice.beforeQuery(report, requestMap);
         }
 
         Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
