@@ -162,6 +162,23 @@
         getEditRow: function () {
             return this.$table.find('input[name=id][value]').parent()
         },
+        getTrByIndex(index) {
+            return this.$table.find('tbody tr:not(:last-child):eq('+index+')')
+        },
+        getValueByIndex(index) {
+            let $tr = this.getTrByIndex(index);
+            return this._getValue($tr)
+        },
+        getTrById: function (id) {
+            return this.$table.find('input[name=id][value='+id+']').parent()
+        },
+        getValueById: function (id) {
+            let $tr = this.getTrById(id)
+            return this._getValue($tr)
+        },
+        getAllTr: function () {
+            return this.$table.find('tbody tr:not(:last-child)')
+        },
         getValue: function() {
             let valueList = []
             this.$table.find('tbody tr:not(:last-child)').each((index, elem) => {
