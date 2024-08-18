@@ -8,6 +8,7 @@ import com.rick.meta.dict.model.DictProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -31,6 +32,27 @@ public class DictServiceImpl implements DictService, InitializingBean {
     private final DictDOSupplier dictDOSupplier;
 
     private static final String SELECT_SQL = "SELECT type, name, label, sort FROM sys_dict WHERE type = :type";
+
+    public Map<String, List<Dict>> getDictsByCodes(String... codes) {
+        if (ArrayUtils.isNotEmpty(codes)) {
+            return getDictsByCodes(Arrays.asList(codes));
+        }
+
+        return null;
+    }
+
+    @Override
+    public Map<String, List<Dict>> getDictsByCodes(Collection<String> codes) {
+        if (CollectionUtils.isNotEmpty(codes)) {
+            Map<String, List<Dict>> valueMap = new HashMap<>();
+            for (String code : codes) {
+                valueMap.put(code, DictUtils.getDict(code));
+            }
+            return valueMap;
+        }
+
+        return null;
+    }
 
     @Override
     public Optional<Dict> getDictByTypeAndName(String type, String name) {
@@ -99,7 +121,6 @@ public class DictServiceImpl implements DictService, InitializingBean {
             initYml(item);
         }
     }
-
 
     private List<Dict> getDbDictList(Map<String, Object> params) {
         try {
