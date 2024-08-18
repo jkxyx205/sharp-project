@@ -21,17 +21,17 @@ public class CodeDescriptionTest {
     @Test
     public void testSave() {
         codeDescriptionService.saveAll(CodeDescription.CategoryEnum.MATERIAL, Arrays.asList(
-                CodeDescription.builder().code("M1").description("物料组1").build(),
-                CodeDescription.builder().code("M3").description("物料组3").build(),
-                CodeDescription.builder().code("M4").description("物料组4").build()
+                CodeDescription.builder().code("M1").description("物料组1").sort(0).build(),
+                CodeDescription.builder().code("M3").description("物料组3").sort(1).build(),
+                CodeDescription.builder().code("M4").description("物料组4").sort(2).build()
         ));
     }
 
     @Test
     public void testSave2() {
         codeDescriptionService.saveAll(CodeDescription.CategoryEnum.PURCHASING_ORG, Arrays.asList(
-                CodeDescription.builder().code("PG1").description("采购组织1").build(),
-                CodeDescription.builder().code("M1").description("采购组织2").build()
+                CodeDescription.builder().code("PG1").description("采购组织1").sort(0).build(),
+                CodeDescription.builder().code("M1").description("采购组织2").sort(1).build()
         ));
     }
 

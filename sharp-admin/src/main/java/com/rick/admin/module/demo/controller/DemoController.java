@@ -1,14 +1,21 @@
 package com.rick.admin.module.demo.controller;
 
+import com.rick.admin.module.demo.entity.ComplexModel;
+import com.rick.admin.module.demo.model.EmbedValue;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
+import com.rick.common.http.model.Result;
+import com.rick.common.http.model.ResultUtils;
+import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.meta.dict.model.DictValue;
+import com.rick.meta.dict.service.DictUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Rick.Xu
@@ -20,6 +27,8 @@ import java.util.List;
 public class DemoController {
 
     private final TreeNodeService treeNodeService;
+
+    private final EntityDAO<ComplexModel, Long> complexModelDAO;
 
     @GetMapping("dialog-report-picker")
     public String testDialogReportPicker() {
@@ -42,5 +51,25 @@ public class DemoController {
         return treeNodeService.getTreeNode("SELECT p.id as \"id\", p.name as \"name\", pid as \"pId\", 1 as open\n" +
                 "   FROM sys_permission p where is_deleted = 0 \n" +
                 "  order by p.permission_order asc", null);
+    }
+
+    @GetMapping("complex_models")
+    @ResponseBody
+    public Result getData() {
+        Optional<ComplexModel> optional = complexModelDAO.selectById(856759492044419072L);
+        ComplexModel complexModel = optional.get();
+        System.out.println(complexModel);
+        // 获取label
+        complexModel.setEmbedValue(new EmbedValue(new DictValue("HIBE")));
+        DictUtils.fillDictLabel(complexModel);
+        System.out.println(complexModel);
+        return ResultUtils.success(complexModel);
+    }
+
+    @PostMapping("complex_models")
+    @ResponseBody
+    public Result saveData(@RequestBody @Valid ComplexModel complexModel) {
+        complexModelDAO.insert(complexModel);
+        return ResultUtils.success();
     }
 }

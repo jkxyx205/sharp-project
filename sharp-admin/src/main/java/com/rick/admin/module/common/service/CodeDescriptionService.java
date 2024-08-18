@@ -31,4 +31,8 @@ public class CodeDescriptionService {
     public List<CodeDescription> findAll(CodeDescription.CategoryEnum category) {
         return codeDescriptionDAO.selectByParams(Params.builder(1).pv("category", category.getCode()).build());
     }
+
+    public List<CodeDescription> findAll() {
+        return codeDescriptionDAO.selectAll();
+    }
 }

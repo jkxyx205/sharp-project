@@ -22,6 +22,8 @@ public class CodeDescription extends BaseCodeDescriptionEntity {
 
     CategoryEnum category;
 
+    Integer sort;
+
     @AllArgsConstructor
     @Getter
     public enum CategoryEnum {
