@@ -4,7 +4,6 @@ import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,8 +28,6 @@ public class DictApi {
      * @param codes
      * @return
      */
-//    @PermitAll
-    @PreAuthorize("permitAll()")
     @GetMapping
     public Map<String, List<Dict>> list(String codes) {
         if (StringUtils.isNotBlank(codes)) {

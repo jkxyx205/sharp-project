@@ -11,8 +11,10 @@ import com.rick.meta.dict.model.DictValue;
 import com.rick.meta.dict.service.DictUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +55,13 @@ public class DemoController {
                 "  order by p.permission_order asc", null);
     }
 
+    @GetMapping("dict")
+    public String dicts(Model model) {
+        model.addAttribute("unit", "EA");
+        model.addAttribute("category", "PACKAGING");
+        return "demos/dict";
+    }
+
     @GetMapping("complex_models")
     @ResponseBody
     public Result getData() {
@@ -66,6 +75,7 @@ public class DemoController {
         return ResultUtils.success(complexModel);
     }
 
+    @PermitAll // 无效， 配置文件WebSecurityConfig 需要认证.anyRequest().authenticated()
     @PostMapping("complex_models")
     @ResponseBody
     public Result saveData(@RequestBody @Valid ComplexModel complexModel) {
