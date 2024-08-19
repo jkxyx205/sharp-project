@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -168,6 +169,14 @@ public class TableGenerator {
         } else if (CharSequence.class.isAssignableFrom(type)) {
             return "varchar(32)";
         } else if (type.isEnum()) {
+            try {
+                Method getCodeMethod = type.getMethod("getCode");
+                if (Number.class.isAssignableFrom(getCodeMethod.getReturnType()) || getCodeMethod.getReturnType() == int.class || getCodeMethod.getReturnType() == long.class) {
+                    return "INT";
+                }
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
 //            return "varchar(16)";
             String enumValues = String.join(",", EnumUtils.getCodes(type).stream().map(code -> "'" + code + "'").collect(Collectors.toList()));
             return "ENUM("+enumValues+")";
