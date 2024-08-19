@@ -3,6 +3,7 @@ package com.rick.db.plugin;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -26,14 +27,22 @@ public final class DbUtils {
     }
 
     public int executeUpdate(String sql, Object[] params) {
+        return executeUpdate(sql, params, null);
+    }
+
+    public int executeUpdate(String sql, Object[] params, Consumer<PreparedStatement> consumer) {
         return execute(connection -> {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 if (params != null && params.length > 0) {
                     for (int i = 0; i < params.length; i++) {
                         preparedStatement.setObject(i + 1, params[i]);
                     }
                 }
-                return preparedStatement.executeUpdate();
+                int affectRows = preparedStatement.executeUpdate();
+                if (consumer != null) {
+                    consumer.accept(preparedStatement);
+                }
+                return affectRows;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
