@@ -58,6 +58,9 @@ final public class DictUtils {
             try {
                 method = obj.getClass().getMethod("get" + String.valueOf(field.getName().charAt(0)).toUpperCase() + field.getName().substring(1));
                 Object fieldValue = ReflectionUtils.invokeMethod(method, obj);
+                if (fieldValue == null) {
+                    return;
+                }
 
                 DictType dictType = field.getAnnotation(DictType.class);
                 if (field.getType() == DictValue.class && dictType != null && fieldValue != null) {
@@ -66,6 +69,18 @@ final public class DictUtils {
                     if (StringUtils.isNotBlank(dictValue.getCode())) {
                         Optional<Dict> dictLabel = getDictLabel(type, dictValue.getCode());
                         dictLabel.ifPresent(value -> dictValue.setLabel(value.getLabel()));
+                    }
+                } else if (Iterable.class.isAssignableFrom(fieldValue.getClass())) {
+                    Iterable iterable = (Iterable) fieldValue;
+                    Iterator iterator = iterable.iterator();
+                    while (iterator.hasNext()) {
+                        fieldValue = iterator.next();
+                        if (mayEntityObject(fieldValue)) {
+                            fillDictLabel(fieldValue);
+                        } else if (fieldValue instanceof DictValue) {
+                            Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
+                            ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
+                        }
                     }
                 } else if (mayEntityObject(fieldValue)) {
                     fillDictLabel(fieldValue);
