@@ -56,3 +56,7 @@ dict:
       sql: "select id, name from sys_role order by id asc"
     - type: sys_dict_type
       sql: "select distinct type, type from sys_dict order by type asc"
+
+props:
+  items: {"group_select_sql": "select 1 id, 'Rick' name, 'Man' parent_name from dual union all select 2 id, 'Tom' name, 'Man' parent_name from dual"}
+

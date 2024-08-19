@@ -26,6 +26,7 @@ public class CodeDescription extends BaseCodeDescriptionEntity {
 
     @AllArgsConstructor
     @Getter
+//    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public enum CategoryEnum {
         /**
          * 物料组
@@ -42,11 +43,15 @@ public class CodeDescription extends BaseCodeDescriptionEntity {
         /**
          * 销售组织
          */
-        SALES_ORG("销售组织"),;
+        SALES_ORG("销售组织");
 
         @JsonValue
         public String getCode() {
             return this.name();
+        }
+
+        public String getLabel() {
+            return label;
         }
 
         private final String label;

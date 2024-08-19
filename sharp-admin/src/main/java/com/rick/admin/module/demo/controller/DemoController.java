@@ -1,7 +1,8 @@
 package com.rick.admin.module.demo.controller;
 
+import com.google.common.collect.Sets;
 import com.rick.admin.module.demo.entity.ComplexModel;
-import com.rick.admin.module.demo.model.EmbedValue;
+import com.rick.admin.module.demo.model.EmbeddedValue;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
 import com.rick.common.http.model.Result;
@@ -59,6 +60,13 @@ public class DemoController {
     public String dicts(Model model) {
         model.addAttribute("unit", "EA");
         model.addAttribute("category", "PACKAGING");
+        model.addAttribute("material", "M1");
+        model.addAttribute("category2", Sets.newHashSet("SALES_ORG", "MATERIAL", "PACKAGING"));
+        model.addAttribute("name", "1");
+
+        // 字典值
+        model.addAttribute("CategoryEnum", DictUtils.getDict("CategoryEnum"));
+        model.addAttribute("MATERIAL", DictUtils.getDict("MATERIAL"));
         return "demos/dict";
     }
 
@@ -69,9 +77,18 @@ public class DemoController {
         ComplexModel complexModel = optional.get();
         System.out.println(complexModel);
         // 获取label
-        complexModel.setEmbedValue(new EmbedValue(new DictValue("HIBE")));
+        complexModel.setEmbeddedValue(new EmbeddedValue(new DictValue("HIBE"), "text"));
         DictUtils.fillDictLabel(complexModel);
         System.out.println(complexModel);
+        return ResultUtils.success(complexModel);
+    }
+
+    @GetMapping("complex_models/{id}")
+    @ResponseBody
+    public Result getDataById(@PathVariable Long id) {
+        Optional<ComplexModel> optional = complexModelDAO.selectById(id);
+        ComplexModel complexModel = optional.get();
+        DictUtils.fillDictLabel(complexModel);
         return ResultUtils.success(complexModel);
     }
 
@@ -80,6 +97,6 @@ public class DemoController {
     @ResponseBody
     public Result saveData(@RequestBody @Valid ComplexModel complexModel) {
         complexModelDAO.insert(complexModel);
-        return ResultUtils.success();
+        return ResultUtils.success(complexModel.getId());
     }
 }

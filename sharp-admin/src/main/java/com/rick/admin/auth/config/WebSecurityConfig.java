@@ -46,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.headers().disable()
                 .authorizeRequests()
-                .antMatchers("/forbidden", "/kaptcha", "/login").permitAll()
+                .antMatchers("/forbidden", "/kaptcha", "/login", "/demos/**").permitAll()
                 .and()
                 .authorizeRequests()
                 // 第三方jar中的配置接口权限， 否则通过注解配置

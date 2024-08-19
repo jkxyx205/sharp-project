@@ -2,24 +2,170 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sp="http://www.w3.org/1999/html">
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
-<title>Combox & Tree</title>
-	<link rel="stylesheet" href="../../../coreui/css/style.min.css">
-	<link rel="stylesheet" th:href="@{/plugins/zTree_v3/css/zTreeStyle/zTreeStyle.css}">
+<title>字典Dict</title>
+<link rel="stylesheet" href="../../../coreui/css/style.min.css">
+<link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+<style type="text/css">
+	.form-control {
+		margin-top: 16px;
+	}
+
+	.ms-parent {
+		padding: 0;
+	}
+
+	.ms-parent .ms-choice {
+		display: block;
+		border: none;
+		height: 33px;
+		line-height: 33px;
+	}
+</style>
 <body>
 <div class="card">
 	<div class="card-body">
 	<h1>服务端渲染</h1>
 	<sp:select id="unit" name="unit" key="UNIT" class="form-control" th:value="${unit}"/>
 	<sp:select id="category" name="category" key="CategoryEnum" class="form-control"  th:value="${category}"/>
+	<!-- 分组 -->
+    <sp:select id="group_select_sql" key="group_select_sql" class="form-control" emptyItemText group th:value="${name}"/>
+
+	<!-- multipleSelect -->
+	<sp:select id="category2" name="category2" key="CategoryEnum" class="form-control" hideAllItem th:value="${category}" />
+
+	<div class="form-group row">
+		<label class="col-md-2 col-form-label">Inline Radios</label>
+		<div class="col-md-10 col-form-label">
+			<div class="form-check form-check-inline mr-1" th:each ="dict : ${MATERIAL}">
+				<input class="form-check-input" th:id="${'materialRadio_' + dict.name}" type="radio" th:value="${dict.name}" name="materialRadio2" th:checked="${dict.name == material}">
+				<label class="form-check-label" th:for="${'materialRadio_' + dict.name}" th:text="${dict.label}"></label>
+			</div>
+		</div>
+	</div>
+
+	<div class="form-group row">
+		<label class="col-md-2 col-form-label">Inline Checkbox</label>
+		<div class="col-md-10 col-form-label">
+			<div class="form-check form-check-inline mr-1" th:each ="dict : ${CategoryEnum}">
+				<input class="form-check-input" th:id="${'materialCheckbox_' + dict.name}" type="checkbox" th:value="${dict.name}" name="materialCheckbox2" th:checked="${category2 ne null && #sets.contains(category2, dict.name)}">
+				<label class="form-check-label" th:for="${'materialCheckbox_' + dict.name}" th:text="${dict.label}"></label>
+			</div>
+		</div>
+	</div>
+
+<!--	<div class="form-group row">-->
+<!--		<label class="col-md-2 col-form-label">Inline Radios</label>-->
+<!--		<div class="col-md-10 col-form-label">-->
+<!--			<div class="form-check form-check-inline mr-1" v-for="dict in datasource.dicts.CategoryEnum">-->
+<!--				<input class="form-check-input" :id="'materialRadio_' + dict.name" type="checkbox" :value="dict.name" name="categoryCheckBox" v-model="form.category2">-->
+<!--				<label class="form-check-label" :for="'materialRadio_' + dict.name">{{dict.label}}</label>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--	</div>-->
 
 	<hr/>
 
 	<h1>Vue + ajax</h1>
-		<!--批量获取数据源-->
-		<!--批量获取数据源-->
+		<div id="form">
+			<select name="material" class="form-control" v-model="form.material">
+				<option :value="dict.name" v-for="dict in datasource.dicts.MATERIAL">{{dict.label}}</option>
+			</select>
+
+			<select name="category" class="form-control" v-model="form.category">
+				<option :value="dict.name" v-for="dict in datasource.dicts.CategoryEnum">{{dict.label}}</option>
+			</select>
+
+<!--			<div v-for="dict in datasource.dicts.MATERIAL">-->
+<!--				<input class="form-control" name="materialRadio" type="radio" :value="dict.name"> {{dict.label}}-->
+<!--			</div>-->
+
+<!--			<form class="form-horizontal">-->
+<!--				<div class="form-group">-->
+<!--					<label class="col-md-3 col-form-label">Radios</label>-->
+<!--					<div class="col-md-9 col-form-label" v-for="dict in datasource.dicts.MATERIAL">-->
+<!--						<div class="form-check">-->
+<!--							<input class="form-check-input" :id="'materialRadio_' + dict.name" type="radio" :value="dict.name"  name="materialRadio">-->
+<!--							<label class="form-check-label" :for="'materialRadio_' + dict.name">{{dict.label}}</label>-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			</form>-->
+			<br>
+			<div class="form-group row">
+				<label class="col-md-2 col-form-label">Inline Radios</label>
+				<div class="col-md-10 col-form-label">
+					<div class="form-check form-check-inline mr-1" v-for="dict in datasource.dicts.MATERIAL">
+						<input class="form-check-input" :id="'materialRadio_' + dict.name" type="radio" :value="dict.name" name="materialRadio" v-model="form.material">
+						<label class="form-check-label" :for="'materialRadio_' + dict.name">{{dict.label}}</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-md-2 col-form-label">Inline Checkbox</label>
+				<div class="col-md-10 col-form-label">
+					<div class="form-check form-check-inline mr-1" v-for="dict in datasource.dicts.CategoryEnum">
+						<input class="form-check-input" :id="'materialCheckbox_' + dict.name" type="checkbox" :value="dict.name" name="categoryCheckBox" v-model="form.category2">
+						<label class="form-check-label" :for="'materialCheckbox_' + dict.name">{{dict.label}}</label>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
+<script th:src="@{/coreui/vendors/jquery/js/jquery.min.js}"></script>
+<script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+
+<script th:src="@{/plugins/vue.min.js}"></script>
 <script type="text/javascript">
+	// https://multiple-select.wenzhixin.net.cn/en/
+	$.fn.multipleSelect.locales['zh-CN'] = {
+		formatSelectAll: function () {
+			return '[全选]'
+		},
+		formatAllSelected: function () {
+			return '已选择所有记录'
+		},
+		formatCountSelected: function(count, total) {
+			return '已从' + total + '条记录中选择' + count + '条'
+		},
+		formatNoMatchesFound: function () {
+			return '没有找到记录'
+		}
+	}
+	$.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
+	$('#category2').multipleSelect({
+		filter: true,
+		selectAll: true,
+		single: false,
+		placeholder: '选择分类'
+	})
+
+	// vue + ajax
+	new Vue({
+		el: '#form',
+		data: {
+			datasource: {
+				dicts: {}
+			},
+			form: {
+				material: 'M3',
+				category: 'SALES_ORG',
+				category2: ['SALES_ORG', 'MATERIAL']
+			}
+		},
+		mounted() {
+			// 一次行获取多个字典数据源
+			$.get("/dicts?codes=CategoryEnum,MATERIAL", (res) => {
+				this.datasource.dicts = res
+			})
+		},
+		computed: {
+
+		},
+		methods: {
+		}
+	})
 </script>
 </body>
 </html>

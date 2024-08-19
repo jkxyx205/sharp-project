@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 8.3.0)
 # Database: sharp-admin
-# Generation Time: 2024-04-07 02:38:08 +0000
+# Generation Time: 2024-08-19 10:18:36 +0000
 # ************************************************************
 
 
@@ -18,6 +18,25 @@ SET NAMES utf8mb4;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE='NO_AUTO_VALUE_ON_ZERO', SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+# Dump of table sys_code_description
+# ------------------------------------------------------------
+
+CREATE TABLE `sys_code_description` (
+  `id` bigint NOT NULL COMMENT '主键',
+  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '外部可见，唯一code',
+  `description` varchar(32) DEFAULT NULL,
+  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') DEFAULT NULL,
+  `sort` int DEFAULT NULL,
+  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='编号-描述 表';
+
 
 
 # Dump of table sys_dict
@@ -367,6 +386,46 @@ VALUES
 	(1,694587732420202496,b'0');
 
 /*!40000 ALTER TABLE `sys_user_role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table t_complex_model
+# ------------------------------------------------------------
+
+CREATE TABLE `t_complex_model` (
+  `id` bigint NOT NULL COMMENT '主键',
+  `name` varchar(32) DEFAULT NULL,
+  `material_type_code` varchar(32) DEFAULT NULL,
+  `unit_code` varchar(32) DEFAULT NULL,
+  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') DEFAULT NULL,
+  `work_status` int DEFAULT NULL COMMENT '状态',
+  `category_code` varchar(32) DEFAULT NULL,
+  `age` int NOT NULL COMMENT '年龄',
+  `birthday` date DEFAULT NULL COMMENT '出生时间',
+  `category_list` json NOT NULL COMMENT '分类',
+  `category_dict_list` json NOT NULL COMMENT '字典分类',
+  `marriage` bit(1) NOT NULL COMMENT '婚否',
+  `attachment` text,
+  `school_experience` text,
+  `map` text,
+  `embedded_value` json DEFAULT NULL,
+  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='测试';
+
+LOCK TABLES `t_complex_model` WRITE;
+/*!40000 ALTER TABLE `t_complex_model` DISABLE KEYS */;
+
+INSERT INTO `t_complex_model` (`id`, `name`, `material_type_code`, `unit_code`, `category`, `work_status`, `category_code`, `age`, `birthday`, `category_list`, `category_dict_list`, `marriage`, `attachment`, `school_experience`, `map`, `embedded_value`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
+VALUES
+	(856958035153653760,'Rick.Xu','HIBE','EA','MATERIAL',0,'SALES_ORG',34,'2021-12-26','[\"MATERIAL\", \"PURCHASING_ORG\"]','[{\"code\": \"MATERIAL\"}, {\"code\": \"PURCHASING_ORG\"}]',b'1','[{\"name\":\"picture\",\"url\":\"baidu.com\"}]','[[\"2023-11-11\",\"苏州大学\"],[\"2019-11-11\",\"苏州中学\"]]','{\"name\":\"picture\",\"url\":\"baidu.com\"}','{\"text\": \"text\", \"dictValue\": {\"code\": \"HIBE\", \"label\": \"耗材用品\"}}',1,'2024-08-19 16:18:15',1,'2024-08-19 16:18:15',b'0'),
+	(856958362212896768,'Rick.Xu','HIBE','EA','MATERIAL',0,'SALES_ORG',34,'2021-12-26','[\"MATERIAL\", \"PURCHASING_ORG\"]','[{\"code\": \"MATERIAL\"}, {\"code\": \"PURCHASING_ORG\"}]',b'1','[{\"name\":\"picture\",\"url\":\"baidu.com\"}]','[[\"2023-11-11\",\"苏州大学\"],[\"2019-11-11\",\"苏州中学\"]]','{\"name\":\"picture\",\"url\":\"baidu.com\"}','{\"text\": \"text\", \"dictValue\": {\"code\": \"HIBE\", \"label\": \"耗材用品\"}}',1,'2024-08-19 16:19:33',1,'2024-08-19 16:19:33',b'0');
+
+/*!40000 ALTER TABLE `t_complex_model` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
