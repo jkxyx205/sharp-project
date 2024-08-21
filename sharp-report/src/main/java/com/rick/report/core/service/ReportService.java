@@ -212,6 +212,9 @@ public class ReportService {
         }
 
         Report report = optional.get();
+        if (report.getAdditionalInfo() == null) {
+            report.setAdditionalInfo(new HashMap<>());
+        }
         validateNonDeleteSql(report.getQuerySql());
         return report;
     }
