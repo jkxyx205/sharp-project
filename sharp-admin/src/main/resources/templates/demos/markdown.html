@@ -9,6 +9,15 @@
             height: calc(100vh - 430px);
         }
 
+        .CodeMirror.is-invalid {
+            border-color: #f86c6b;
+            padding-right: calc(1.5em + .75rem);
+            background-image: url(data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23f86c6b' viewBox='-2 -2 7 7'%3e%3cpath stroke='%23f86c6b' d='M0 0l3 3m0-3L0 3'/%3e%3ccircle r='.5'/%3e%3ccircle cx='3' r='.5'/%3e%3ccircle cy='3' r='.5'/%3e%3ccircle cx='3' cy='3' r='.5'/%3e%3c/svg%3E);
+            background-repeat: no-repeat;
+            background-position: center right calc(.375em + .1875rem);
+            background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        }
+
         .editor-preview img {
             max-width: 70%;
             margin: 0 auto;
@@ -59,6 +68,8 @@
                         <label class="col-1 col-form-label required" for="markdown">正文</label>
                         <div class="col-11">
                             <textarea id="markdown" th:text="${markdown}"></textarea>
+                            <!-- 用于表单验证-->
+                            <input type="text" class="form-control" style="width: 0; border: 0; padding: 0;" name="dummyContent" id="dummyContent" required>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -72,15 +83,38 @@
 </th:block>
 <th:block th:replace="includes/base :: common_js(~{::script})">
     <script>
+        // https://github.com/sparksuite/simplemde-markdown-editor
+        let formDOM = document.getElementById("form")
+        let $dummyContent = $('#dummyContent')
+        let CodeMirrorDOM
+
         const simpleMDE = new SimpleMDE({
             element: document.getElementById('markdown'),
             // previewClass: ["editor-preview"],
             status: false,
         });
 
+        CodeMirrorDOM = document.getElementsByClassName("CodeMirror")[0];
+
+        function valid() {
+            let validity = formDOM.checkValidity()
+            formDOM.classList.add('was-validated')
+            return validity;
+        }
+
         function send() {
-            console.log("value = ", simpleMDE.value())
-            console.log("html = ", simpleMDE.markdown(simpleMDE.value()))
+            // 方便前端验证
+            $dummyContent.val(simpleMDE.value())
+            if (!simpleMDE.value().trim()) {
+                CodeMirrorDOM.classList.add("is-invalid")
+            } else {
+                CodeMirrorDOM.classList.remove("is-invalid")
+            }
+
+            if (valid()) {
+                console.log("value = ", simpleMDE.value())
+                console.log("html = ", simpleMDE.markdown(simpleMDE.value()))
+            }
         }
     </script>
 </th:block>
