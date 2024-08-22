@@ -215,7 +215,7 @@
             // highlight
             if (this.options.highlight) {
                 this.$table.find('tbody tr:nth-child('+this.options.activeIndex+')')
-                    .css('border-left', '4px solid rgb(32, 168, 216)')
+                    .css('border-left', '4px solid #20a8d8')
                     .siblings().css('border-left', 'none')
             }
         },

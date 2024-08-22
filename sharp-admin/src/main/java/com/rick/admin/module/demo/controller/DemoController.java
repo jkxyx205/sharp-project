@@ -121,9 +121,12 @@ public class DemoController {
                 "\n" +
                 "<p><img alt=\"\" height=\"1450\" src=\"http://localhost:7892/ckeditor/858097155238309888.png\" width=\"2050\" /></p>\n" +
                 "\n" +
-                "<p><span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/else.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858097295885905920.png\" target=\"_blank\">点研营业执照new.png</a>&nbsp;<span style=\"color:#BCBCBC;\">2.12M</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
-                "<span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/else.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858097296171118592\" target=\"_blank\">note</a>&nbsp;<span style=\"color:#BCBCBC;\">0.03K</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
-                "&nbsp;</p>\n");
+                "<p><span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/word.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858143002420359168.docx\" target=\"_blank\">糖尿病肾病 试运行.docx</a>&nbsp;<span style=\"color:#BCBCBC;\">13.22K</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
+                "<span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/image.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858143015569502208.png\" target=\"_blank\">点研营业执照new.png</a>&nbsp;<span style=\"color:#BCBCBC;\">2.12M</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
+                "<span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/else.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858143018471960576\" target=\"_blank\">note</a>&nbsp;<span style=\"color:#BCBCBC;\">0.03K</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
+                "<span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/pdf.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858143021236006912.pdf\" target=\"_blank\">投资任职情况查询报告.pdf</a>&nbsp;<span style=\"color:#BCBCBC;\">34.52K</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>\n" +
+                "\n" +
+                "<p><span style=\"color:#e74c3c;\"><strong>hello world</strong></span></p>");
         return "demos/ckeditor";
     }
 }

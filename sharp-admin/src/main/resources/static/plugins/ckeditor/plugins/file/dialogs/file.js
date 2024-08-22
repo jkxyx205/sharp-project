@@ -1,6 +1,6 @@
 ( function() {
     function extractFileExt(ext) {
-
+		debugger
         if(ext == "xls" || ext == "xlsx")
             return "excel.png";
         if(ext == "doc" || ext == "docx")
@@ -76,7 +76,7 @@
 			     	        done: function (e, data) {
                                 counter = 0
 			     	            $.each(data.result, function (index, file) {
-			     	            	var a = "<span><img style='vertical-align: middle; width: 16px;' src=\"/plugins/ckeditor/plugins/file/icons/"+extractFileExt(file.ext)+"\"/>&nbsp;&nbsp;<a target='_blank' href=\""+file.url+"\">"+file.fullName+"</a>&nbsp;<span style='color:#BCBCBC;'>"+extractFileSize(file.size)+"</span>" +
+			     	            	var a = "<span><img style='vertical-align: middle; width: 16px;' src=\"/plugins/ckeditor/plugins/file/icons/"+extractFileExt(file.extension)+"\"/>&nbsp;&nbsp;<a target='_blank' href=\""+file.url+"\">"+file.fullName+"</a>&nbsp;<span style='color:#BCBCBC;'>"+extractFileSize(file.size)+"</span>" +
 			     	            			"\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class='delClass' style='color:#20a8d8; cursor: pointer' href='javascript:void(0);' onclick=\"$(this).parent().remove();\">删除</a></span><br/>";
 			     	            	$("#fileList").append(a);
 			     	            }); 
