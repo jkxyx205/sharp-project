@@ -99,4 +99,17 @@ public class DemoController {
         complexModelDAO.insert(complexModel);
         return ResultUtils.success(complexModel.getId());
     }
+
+    @GetMapping("markdown")
+    public String markdown(Model model) {
+        model.addAttribute("markdown", "# hello\n" +
+                "## word\n" +
+                "```javascript\n" +
+                "function send() {\n" +
+                "}\n" +
+                "```\n" +
+                "`java`\n" +
+                "**haha**");
+        return "demos/markdown";
+    }
 }
