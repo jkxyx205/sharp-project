@@ -11,8 +11,11 @@ spring:
 fileupload:
   tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
   local:
+#    cd /Users/rick/Space/tmp/fileupload
+#    http-server -p 7892
     server-url: http://localhost:7892/ # 映射到tmp目录
-    root-path: /Users/rick/Space/tmp/fileupload
+    root-path: /Users/rick/Space/tmp/fileupload #
+
   oss:
     endpoint: oss-cn-beijing.aliyuncs.com
     accessKeyId: xxx
