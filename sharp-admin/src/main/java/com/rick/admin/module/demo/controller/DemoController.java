@@ -112,4 +112,18 @@ public class DemoController {
                 "**haha**");
         return "demos/markdown";
     }
+
+    @GetMapping("ckeditor")
+    public String ckeditor(Model model) {
+        model.addAttribute("ckeditor", "<div class=\"ckeditor-html5-video\" style=\"text-align: center;\">\n" +
+                "<video controls=\"controls\" controlslist=\"nodownload\" poster=\"http://cimc.cncdh2.com/_nuxt/img/3.99045f8.jpg\" src=\"http://cdn.devyean.com/ch2/videos/2.mp4\" width=\"60%\"><source src=\"http://cdn.devyean.com/ch2/videos/2.mp4\" type=\"video/mp4\" /></video>\n" +
+                "</div>\n" +
+                "\n" +
+                "<p><img alt=\"\" height=\"1450\" src=\"http://localhost:7892/ckeditor/858097155238309888.png\" width=\"2050\" /></p>\n" +
+                "\n" +
+                "<p><span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/else.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858097295885905920.png\" target=\"_blank\">点研营业执照new.png</a>&nbsp;<span style=\"color:#BCBCBC;\">2.12M</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
+                "<span><img alt=\"\" src=\"/plugins/ckeditor/plugins/file/icons/else.png\" style=\"vertical-align: middle; width: 16px;\" />&nbsp;&nbsp;<a href=\"http://localhost:7892/ckeditor/858097296171118592\" target=\"_blank\">note</a>&nbsp;<span style=\"color:#BCBCBC;\">0.03K</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br />\n" +
+                "&nbsp;</p>\n");
+        return "demos/ckeditor";
+    }
 }

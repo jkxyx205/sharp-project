@@ -3,13 +3,13 @@
 PROJECTS=(
 sharp-dependencies
 sharp-common
-sharp-database
+#sharp-database
 #sharp-meta
 #sharp-excel
 #sharp-fileupload
 #sharp-formflow
 #sharp-mail
-#sharp-report
+sharp-report
 #sharp-sms
 )
 

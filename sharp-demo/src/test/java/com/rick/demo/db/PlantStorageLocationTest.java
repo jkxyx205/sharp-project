@@ -71,4 +71,12 @@ public class PlantStorageLocationTest {
         System.out.println(locationList.size());
     }
 
+    @Test
+    public void testInsertBatch() {
+        storageLocationDAO.insertOrUpdate(Arrays.asList(
+                StorageLocation.builder().code("A").description("aaaaA11").build(),
+                StorageLocation.builder().code("B").description("bbbbB11").build()
+        ), "plant_id", 3L);
+    }
+
 }
