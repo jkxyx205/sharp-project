@@ -19,15 +19,13 @@ public class FileCheckUtils {
      */
     public Boolean isImageType(HttpServletRequest request, String name) {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-        String ext = StringUtils.getFilenameExtension(multipartRequest.getFile(name).getOriginalFilename());
+        String extension = StringUtils.getFilenameExtension(multipartRequest.getFile(name).getOriginalFilename());
 
-        return isImageType(ext);
+        return isImageType(extension);
     }
 
     public Boolean isImageType(String fileName) {
-        String ext = StringUtils.getFilenameExtension(fileName);
-
-        if (!StringUtils.isEmpty(ext) && ext.matches("(?i)(bmp|png|jpeg|jpg|gif|ico)")) {
+        if (!StringUtils.isEmpty(fileName) && fileName.matches("(?i)(bmp|png|jpeg|jpg|gif|ico)")) {
             return true;
         }
 
