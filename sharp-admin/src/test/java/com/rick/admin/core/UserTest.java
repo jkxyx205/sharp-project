@@ -113,9 +113,16 @@ public class UserTest {
         reportService.saveOrUpdate(Report.builder()
                 .id(694714180413960192L)
                 .code("sys_user")
-                .tplName("tpl/list")
+                .tplName("tpl/list") // 如果由特殊需求比如显示字段的格式化，字段跳转，可以使用自己的模版
                 .name("用户管理")
                 .reportAdviceName("userReportAdvice")
+
+                // additionalInfo(Params.builder(1).pv("endpoint", "produce_orders").build()) 可以由 report 跳转 endpoint
+                // additionalInfo(Params.builder(1).pv("formId", "produce_orders").build()) 对表单进行修改
+                // additionalInfo(Params.builder(1).pv("css", "").build()) 注入 css 代码
+                // additionalInfo(Params.builder(1).pv("js", "produce_orders").build()) 注入 js 代码
+
+                // report 和 form 进行关联，可以修改表单
                 .additionalInfo(Params.builder(1).pv("formId", "694980924206493696").build())
 //                .querySql("SELECT id, code, name, IF(is_available, '是', '否') is_available, DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user WHERE code LIKE :code AND name LIKE :name AND is_available = :is_available AND create_time >= :create_time0 AND create_time <= :create_time1 AND id <> 1")
                 // language=SQL
