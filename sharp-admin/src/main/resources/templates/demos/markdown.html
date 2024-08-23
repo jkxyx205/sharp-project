@@ -55,6 +55,7 @@
 
     </style>
     <script type="text/javascript" th:src="@{/plugins/simplemde/simplemde.min.js}"></script>
+    <script th:src="@{/js/form-support.js}"></script>
 </head>
 <body class="app">
 <th:block th:replace="includes/base :: common_content(~{::div})">
@@ -95,11 +96,12 @@
 
         CodeMirrorDOM = document.getElementsByClassName("CodeMirror")[0];
 
-        function valid() {
-            let validity = formDOM.checkValidity()
-            formDOM.classList.add('was-validated')
-            return validity;
-        }
+        registerValid(formDOM);
+        // function valid() {
+        //     let validity = formDOM.checkValidity()
+        //     formDOM.classList.add('was-validated')
+        //     return validity;
+        // }
 
         function send() {
             // 方便前端验证
@@ -110,7 +112,7 @@
                 CodeMirrorDOM.classList.remove("is-invalid")
             }
 
-            if (valid()) {
+            if (formDOM.valid()) {
                 console.log("value = ", simpleMDE.value())
                 console.log("html = ", simpleMDE.markdown(simpleMDE.value()))
             }
