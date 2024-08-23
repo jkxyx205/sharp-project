@@ -655,30 +655,41 @@
             }
         }
 
-        function formatDecimal(num) {
-            if (typeof num === 'undefined' || num === null)
+        function toFixed(num) {
+            return toFixed(num, 2)
+        }
+
+        function toFixed(num, fixedValue) {
+            if (typeof num === 'undefined' || num === null || num === '')
                 return ''
+
+            if (!fixedValue) {
+                fixedValue = 2
+            }
 
             var result = parseFloat(num);
             if (isNaN(result)) {
                 alert('传递参数错误，请检查！');
                 return false;
             }
-            result = Math.round(num * 100) / 100;
-            var s_x = result.toString();
-            var pos_decimal = s_x.indexOf('.');
-            if (pos_decimal < 0) {
-                pos_decimal = s_x.length;
-                s_x += '.';
-            }
-            while (s_x.length <= pos_decimal + 2) {
-                s_x += '0';
-            }
-            return formatNumber(s_x);
+
+            return formatNumber(result.toFixed(fixedValue));
+
+            // result = Math.round(num * 100) / 100;
+            // var s_x = result.toString();
+            // var pos_decimal = s_x.indexOf('.');
+            // if (pos_decimal < 0) {
+            //     pos_decimal = s_x.length;
+            //     s_x += '.';
+            // }
+            // while (s_x.length <= pos_decimal + fixedValue) {
+            //     s_x += '0';
+            // }
+            // return formatNumber(s_x);
         }
 
         function formatInteger(num) {
-            if (typeof num === 'undefined' || num === null)
+            if (typeof num === 'undefined' || num === null || num === '')
                 return ''
 
             return formatNumber(Math.round(num));
@@ -690,7 +701,7 @@
          * @returns {string}
          */
         function formatNumber(num) {
-            if (typeof num === 'undefined' || num === null)
+            if (typeof num === 'undefined' || num === null || num === '')
                 return ''
 
             var num = (num || 0).toString(), result = '';
@@ -721,7 +732,7 @@
         }
 
         Vue.filter('formatInteger', formatInteger)
-        Vue.filter('formatDecimal', formatDecimal)
+        Vue.filter('toFixed', toFixed)
         Vue.filter('openOnNewTabLink', openOnNewTabLink)
 
         // https://css-tricks.com/snippets/jquery/make-jquery-contains-case-insensitive/

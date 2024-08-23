@@ -75,8 +75,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="javascript:addTab('code-input', '测试CodeInput', '/reports/694714180413960192')">
+                                <i class="nav-icon icon-home"></i> 测试CodeInput
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="javascript:addTab('dict', '测试字典Dict', '/demos/dict')">
                                 <i class="nav-icon icon-home"></i> 测试字典Dict
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="javascript:addTab('测试ajaxTable', '测试ajaxTable', '/demos/ajax-table')">
+                                <i class="nav-icon icon-home"></i> 测试ajaxTable
                             </a>
                         </li>
                         <li class="nav-item">
@@ -92,6 +102,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="javascript:addTab('reportForm', '测试字典Dict', '/reports/694714180413960192')">
                                 <i class="nav-icon icon-home"></i> 测试Report & Form
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="javascript:addTab('jquery-valid', '测试jquery-valid', '/reports/694714180413960192')">
+                                <i class="nav-icon icon-home"></i> 测试jquery-valid
                             </a>
                         </li>
                     </ul>
@@ -113,6 +128,11 @@
                         <li class="nav-item" sec:authorize="hasAuthority('sys_dict')">
                             <a class="nav-link" href="javascript:addTab('dict', '字典管理', '/reports/695316160014499840')">
                                 <i class="nav-icon icon-notebook"></i> 字典管理
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('sys_dict')">
+                            <a class="nav-link" href="javascript:addTab('file-manager', '文件管理', '/reports/695316160014499840')">
+                                <i class="nav-icon icon-notebook"></i> 文件（图床）管理
                             </a>
                         </li>
                     </ul>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style></style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">测试ajax-table</div>
+            <div class="card-body">
+                <div id="ajax-table-container">
+                    <div class="form-horizontal form-line" style="margin-bottom: 1rem;">
+                        <div class="form-group row" style="margin-bottom: 0;">
+                            <label class="col-form-label col-form-label-sm" for="name">姓名</label>
+                            <div class="col-md-4">
+                                <input class="form-control form-control-sm" id="name" type="text" v-model="query.name" autocomplete="" placeholder="" @keyup.enter="search()">
+                            </div>
+                            <div class="col-md-6 col-form-btn">
+                                <button class="btn btn-primary mr-2 btn-sm" type="button" @click="search({page: 1})">
+                                    <i class="fa fa-dot-circle-o"></i> 查询</button>
+                                <button class="btn btn-secondary btn-sm" type="button" @click="search({page: 1, name: ''})">
+                                    <i class="fa fa-remove"></i> 重置</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ajax-table :grid="grid" :display-page="displayPage" class="report-list-table" row-key="id" @refresh="refresh"
+                                @page-change="pageChange"
+                                @sort-column="sortColumn"
+                                @size-change="sizeChange">
+                        <table-column
+                                type="index"
+                                label="序号"
+                                width="50">
+                        </table-column>
+                        <table-column
+                                prop="name"
+                                label="姓名"
+                                width="100"
+                                tooltip>
+                        </table-column>
+                        <table-column
+                                prop="name"
+                                label="格式化数字"
+                                width="200"
+                                tooltip>
+                            <template slot-scope="scope">
+                                {{ 12345 | toFixed }}
+                                : {{ '' | toFixed(3)}} : {{ undefined | toFixed(3)}}
+                                : {{ 12 | toFixed }}
+                                : {{ 11112.12423 | toFixed(3) }}
+                                : {{ 233212.125 | toFixed }}
+                                : {{ 12.12 | toFixed }}
+                                : {{ 12.1 | toFixed }}
+
+                                : {{ '13' | toFixed }}
+                                : {{ 12.124 | toFixed }}
+                                : {{ 12.125 | toFixed }}
+                                : {{ 12.12 | toFixed }}
+                                : {{ 12.1 | toFixed }}
+                                : {{ 0 | toFixed }}
+                            </template>
+                        </table-column>
+                    </ajax-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script type="text/javascript" th:src="@{/js/jquery.table.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.ajaxTable.js}"></script>
+
+    <script th:inline="javascript">
+        $('#ajax-table-container').ajaxTable({
+            url: '/api/sql/sys_document',
+            query: { // vue data
+                name: '',
+                page: 1,
+                sidx: 'name',
+                sord: 'asc'
+            },
+            displayPage: function () {
+                if(/*[[${device.isNormal()}]]*/) {
+                    return 8
+                } else if(/*[[${device.isTablet()}]]*/) {
+                    return 4
+                }
+                return 5
+            }
+        })
+    </script>
+</th:block>
+</body>
+</html>

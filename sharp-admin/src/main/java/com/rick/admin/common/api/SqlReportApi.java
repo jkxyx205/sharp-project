@@ -15,20 +15,22 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * sql报表
  * @author Rick.Xu
  * @date 2023/6/14 11:13
  */
 @RestController
 @RequestMapping("api")
-public class SqlApi {
+public class SqlReportApi {
 
     private static final Map<String, String> sqlMapping = new HashMap<>();
 
     static {
-        sqlMapping.put("project", "select title,description,cover_url,owner_id,sex,address,status,list,phone_number,map,id FROM t_project1 WHERE id = :id and title like :title");
+        // 必须把 id 查询出来
+        sqlMapping.put("sys_document", "select id, name FROM sys_document WHERE id = :id and name like :name");
     }
 
-    @GetMapping("{key}")
+    @GetMapping("sql/{key}")
     public Grid<Map<String, Object>> list(@PathVariable String key, HttpServletRequest request) {
         String sql = sqlMapping.get(key);
         if (Objects.isNull(sql)) {

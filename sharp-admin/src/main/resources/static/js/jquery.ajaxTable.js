@@ -253,16 +253,26 @@
                         // trim
                         this.queryTrim()
                         $.get(_this.options.url, this.query, function (res) {
-                            if (res.success) {
-                                var grid = res.data;
+                            if (res.success === undefined) {
+                                var grid = res
                                 grid.sidx = that.query.sidx
                                 grid.sord = that.query.sord
 
                                 that.grid = grid
                                 that.query.page = that.grid.page
                             } else {
-                                toastr.error(res.msg)
+                                if (res.success) {
+                                    var grid = res.data;
+                                    grid.sidx = that.query.sidx
+                                    grid.sord = that.query.sord
+
+                                    that.grid = grid
+                                    that.query.page = that.grid.page
+                                } else {
+                                    toastr.error(res.msg)
+                                }
                             }
+
                         })
                     },
                     pageChange: function(currentPage) {

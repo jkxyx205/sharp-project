@@ -129,4 +129,9 @@ public class DemoController {
                 "<p><span style=\"color:#e74c3c;\"><strong>hello world</strong></span></p>");
         return "demos/ckeditor";
     }
+
+    @GetMapping("ajax-table")
+    public String ajaxTable() {
+        return "demos/ajax-table";
+    }
 }
