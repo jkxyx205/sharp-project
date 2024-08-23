@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      xmlns:sp="">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <style th:inline="css">
+        .ms-parent {
+            padding: 0;
+        }
+
+        .ms-parent .ms-choice {
+            display: block;
+            border: none;
+            height: 33px;
+            line-height: 33px;
+        }
+
+        /*[(${(report.additionalInfo != null && report.additionalInfo['css'] != null ) ? report.additionalInfo['css'] : ''})]*/
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <form class="form-inline query-form-container" onsubmit="return false">
+                    <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList.size() > 0}">
+                        <div class="form-group">
+                            <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
+                            <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
+                                <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                <sp:select th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}" th:value="${f.value}"/>
+                                <sp:select th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}" th:value="${f.value}"/>
+                                <sp:select th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem th:value="${f.value}"/>
+                            </th:block>
+
+                            <th:block style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                                <div class="input-group input-daterange" th:classappend="${f.name}">
+                                    <input class="form-control" th:id="${f.name + '0'}" th:name="${f.name + '0'}" type="text" placeholder="开始时间"
+                                           autocomplete="off"><label
+                                        class="col-form-label" style="padding-left: 0;">～</label>
+                                    <input class="form-control" th:id="${f.name + '1'}" th:name="${f.name + '1'}" type="text" placeholder="结束时间"
+                                           autocomplete="off">
+                                </div>
+                            </th:block>
+                        </div>
+                    </th:block>
+                    <div class="form-group">
+                        <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList.size() > 0}">
+                            <i class="fa fa-search"></i> 查询</button>
+                        <button class="btn btn-secondary mr-2" type="button" name="reset" th:if="${report.queryFieldList.size() > 0}">
+                            <i class="fa fa-remove"></i> 重置</button>
+                        <a class="btn btn-secondary mr-2" id="exportBtn" th:attr="data-url=${'/reports/' + id + '/export'}" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                            <i class="fa fa-upload"></i> 导出</a>
+                        <button class="btn btn-primary" type="button" onclick="showDialog('新增')" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                            <i class="fa fa-plus"></i> 新增</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body" style="padding-bottom: 0">
+                <div id="report-list">
+                    <ajax-table :grid="grid" :display-page="displayPage" class="report-list-table" row-key="id" @refresh="refresh"
+                                @page-change="pageChange"
+                                @sort-column="sortColumn"
+                                @size-change="sizeChange">
+                        <table-column
+                                type="index"
+                                label="序号"
+                                width="40"
+                                category="column">
+                        </table-column>
+                        <table-column
+                                type="checkbox"
+                                class="text-center"
+                                label="<input type=checkbox>"
+                                align="center"
+                                width="40" th:if="${'multiple' eq params['mode']}"
+                                category="column">
+                        </table-column>
+                        <table-column th:each="n : ${report.reportColumnList}" th:attr="prop=${n.name}, label=${n.label}, category=${n.hidden ? 'hidden': 'column'}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
+                            <template slot-scope="scope" th:if="${n.type.name() eq 'NUMERIC'}">
+                                {{ scope.row.<th:block th:text="${n.name}"></th:block> | formatInteger}}
+                            </template>
+                            <template slot-scope="scope" th:if="${n.type.name() eq 'DECIMAL'}">
+                                {{ scope.row.<th:block th:text="${n.name}"></th:block> | formatDecimal}}
+                            </template>
+                            <template slot-scope="scope" th:if="${nStat.index == 1}">
+                                {{openDetailLink('查看', scope.row.id, scope.row.<th:block th:text="${n.name}"></th:block>)}}
+                            </template>
+                        </table-column>
+                        <table-column label="操作" align="center" category="column" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                            <template slot-scope="scope">
+                                {{ openDetailLink('编辑', scope.row.id, '编辑') }}
+                                {{ deleteLink(scope.row.id) }}
+                                <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
+                            </template>
+                        </table-column>
+                    </ajax-table>
+                </div>
+
+                <div class="modal fade" id="dialog" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-primary modal-dialog-auto" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="dialog-title"></h5>
+                                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary ok-show" id="okId"><i class="fa fa-save"></i> 保存</button>
+                                <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.table.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.ajaxTable.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.pageTable.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.formautofill.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+    <script th:src="@{/ajaxfileupload.js}"></script>
+    <script th:src="@{/plugins/lodash.min.js}"></script>
+
+    <script th:inline="javascript">
+        var readonly = true
+        /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+            readonly = false
+        /*[/]*/
+
+        $.fn.multipleSelect.locales['zh-CN'] = {
+            formatSelectAll: function () {
+                return '[全选]'
+            },
+            formatAllSelected: function () {
+                return '已选择所有记录'
+            },
+            formatCountSelected: function(count, total) {
+                return '已从' + total + '条记录中选择' + count + '条'
+            },
+            formatNoMatchesFound: function () {
+                return '没有找到记录'
+            }
+        }
+
+        $.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
+
+        let urlObject = getUrlObject();
+
+        /*<![CDATA[*/
+        var fz = [[${report.queryFieldList}]]
+        var multipleSelect = fz.filter(f => f.type == 'MULTIPLE_SELECT')
+        multipleSelect.forEach(f => {
+            var value = urlObject[f.name]
+            $('#' + f.name).multipleSelect({
+                selectAll: true,
+                single: false,
+                placeholder: '请输入' + f.label
+            }).multipleSelect('setSelects', !value ? '' : value.split(','))
+        })
+
+        var dateRange = fz.filter(f => f.type == 'DATE_RANGE')
+        dateRange.forEach(f => {
+            $('.'+f.name+'.input-daterange').datepicker({
+                language: "zh-CN",
+                autoclose: true,
+                clearBtn: true,
+                todayBtn: 'linked',
+                todayHighlight: true,
+                format: 'yyyy-mm-dd'
+            })
+        })
+
+        /*]]>*/
+
+        var $listTable;
+
+        $('.query-form-container').pageTable()
+
+        // 覆盖base中的方法
+        function search(params) {
+            listRequest(params)
+        }
+
+        let report_id =/*[[${report.id} + '']]*/
+        let pageable = /*[[${report.pageable}]]*/
+
+        function listRequest(params) {
+            console.log('list ajax request...')
+            params.size = pageable ? 15 : -1 // 不分页
+            params.sord = /*[[${report.sord}]]*/
+            params.sidx = /*[[${report.sidx}]]*/
+
+            if (!$listTable) {
+                var options = {
+                    url: '/reports/'+report_id+'/json',
+                    query: params,
+                    summaryIndex: /*[[${summaryIndex}]]*/ ,
+                    displayPage: function () {
+                        if(/*[[${device.isNormal()}]]*/) {
+                            return 15
+                        } else if(/*[[${device.isTablet()}]]*/) {
+                            return 10
+                        }
+                        return 5
+                    },
+                    clickCheckbox: function (value) {
+                        console.log(value, '....clickCheckbox')
+                    },
+                    clickRowCheckbox: function (value, nonChecked) {
+                        console.log(value, nonChecked, '....clickRowCheckbox')
+                    }
+                }
+
+                if (options.summaryIndex.length > 0) {
+                    options['count'] = '/reports/'+report_id+'/json/count'
+                }
+
+                $listTable = $('#report-list').ajaxTable(options)
+            } else {
+                $listTable.ajaxTable('reload', params)
+            }
+            $('#exportBtn').attr('href', $('#exportBtn').data('url') + "?" + $.param($listTable.ajaxTable('getQuery')))
+        }
+
+        // listRequest({})
+        $('button[name=search]').click()
+
+        function openDetailLink(title, id, name) {
+            return '<a href="javascript:;" onclick="showDialog(\''+title+'\', \''+id+'\')">'+name+'</a>'
+        }
+
+        function deleteLink(id) {
+            return '<a href="javascript:;" onclick="deleteRow(\''+id+'\')">删除</a>'
+        }
+
+        let $modal = $('#dialog')
+        let report = [[${report}]]
+        let form_id =/*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
+
+        // function showDialog(title, id) {
+        //     if (readonly === false && title !== '复制') {
+        //         title = '编辑'
+        //     }
+        //
+        //     $('#dialog-title').text(title)
+        //
+        //     $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+        //         $modal.find('.modal-body').html(res)
+        //         $modal.modal({
+        //             show: true,
+        //             backdrop: 'static'
+        //         })
+        //     })
+        // }
+
+        function showDialog(title, id) {
+            if (form_id) {
+                if (!readonly) {
+                    title = '编辑'
+                }
+                $('#dialog-title').text(title)
+
+                $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+                    $modal.find('.modal-body').html(res)
+                    $modal.modal({
+                        show: true,
+                        backdrop: 'static'
+                    })
+                })
+            } else { // 跳转页面详情
+                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id) + '?readonly=' + (title === '查看'),  report.name);
+            }
+        }
+
+        $('#okId').on('click', function () {
+            saveForm(() => {
+                $modal.modal('hide');
+                setTimeout(() => {
+                    $listTable.ajaxTable('reload')
+                    toastr.success("保存成功")
+                }, 1000)
+            })
+        })
+
+        function deleteRow(id) {
+            if (confirm('确定要删除该条记录吗？')) {
+                if (form_id) {
+                    $.ajax({
+                        url: '/forms/ajax/' + form_id + '/' + id,
+                        type: "delete",
+                        success: function(){
+                            $modal.modal('hide');
+                            toastr.success("删除成功")
+                            setTimeout(() => {
+                                // $('[name=reset]').click()
+                                window.location.reload()
+                            }, 1000)
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/'+ endpoint +  '/' + id,
+                        type: "delete",
+                        success: function(){
+                            $modal.modal('hide');
+                            toastr.success("删除成功")
+                            setTimeout(() => {
+                                // $('[name=reset]').click()
+                                window.location.reload()
+                            }, 1000)
+                        }
+                    });
+                }
+            }
+        }
+
+        // 获取多选的值
+        function getCheckedValue() {
+            let value = $listTable.ajaxTable('getCheckedValue')
+            console.log(value)
+        }
+
+        // 处理多选业务逻辑
+        $('.table-footer-bar .pull-right').before("<div id=\"batch-cpn-bar\" style=\"margin-left: 16px; float: left; margin-bottom: 8px;\">\n" +
+            "                        <div class=\"btn-toolbar\" role=\"toolbar\">\n" +
+            "                            <div class=\"btn-group\" role=\"group\">\n" +
+            "                                <button class=\"btn btn-light\" style=\"padding: .075rem .45rem\" type=\"button\" onclick=\"getCheckedValue()\"><i class=\"fa fa-trash-o fa-lg\"></i></button>\n" +
+            "                            </div>\n" +
+            "                        </div>\n" +
+            "                    </div>")
+
+        /*[(${(report.additionalInfo != null && report.additionalInfo['js'] != null ) ? report.additionalInfo['js'] : ''})]*/
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,6 +1,6 @@
 package com.rick.admin.core;
 
-import com.rick.admin.module.demo.entity.ComplexModel;
+import com.rick.admin.module.demo.entity.Student;
 import com.rick.db.plugin.dao.core.TableGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ public class TableGeneratorTest {
     @Test
     public void generateTable() {
 //        tableGenerator.createTable(CodeDescription.class);
-        tableGenerator.createTable(ComplexModel.class);
+//        tableGenerator.createTable(ComplexModel.class);
+        tableGenerator.createTable(Student.class);
     }
 }
