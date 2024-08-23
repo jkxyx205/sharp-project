@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <form action="" id="form">
+            <div class="card">
+                <div class="card-header">发布公告</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group required">
+                                <label for="title">标题</label>
+                                <input class="form-control" id="title" name="title" type="text" placeholder="请输入标题" maxlength="64" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-sm btn-primary" id="send" type="button">
+                        <i class="fa fa-dot-circle-o"></i> 发布</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/plugins/jquery-validate/jquery.validate.min.js}"></script>
+    <script th:src="@{/plugins/jquery-validate/jqurey.messages_zh.min.js}"></script>
+    <script th:src="@{/js/jquery.validate.custom-methods.js}"></script>
+    <script>
+        var $form = $("#form")
+
+        $(function () {
+            initValidator()
+
+            $('#send').on('click', function () {
+                if ($form.valid()) {
+                    alert('提交')
+                }
+            })
+
+        })
+
+        function initValidator() {
+            $form.validate({
+                rules: {
+                    title: {
+                        notBlank : true
+                    }
+                },
+                messages: {
+                },
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

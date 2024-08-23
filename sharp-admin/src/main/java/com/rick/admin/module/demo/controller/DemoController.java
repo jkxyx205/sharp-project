@@ -134,4 +134,9 @@ public class DemoController {
     public String ajaxTable() {
         return "demos/ajax-table";
     }
+
+    @GetMapping("jq-valid")
+    public String jqValid() {
+        return "demos/jq-valid";
+    }
 }
