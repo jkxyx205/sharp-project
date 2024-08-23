@@ -1,6 +1,5 @@
 ( function() {
     function extractFileExt(ext) {
-		debugger
         if(ext == "xls" || ext == "xlsx")
             return "excel.png";
         if(ext == "doc" || ext == "docx")
