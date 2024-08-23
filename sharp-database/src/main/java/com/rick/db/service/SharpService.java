@@ -1,5 +1,7 @@
 package com.rick.db.service;
 
+import com.rick.common.util.JsonUtils;
+import com.rick.common.util.ObjectUtils;
 import com.rick.common.util.StringUtils;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.util.OptionalUtils;
@@ -192,11 +194,18 @@ public class SharpService {
                 PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(lowerCaseName(propertyName)) : null);
 
                 if (pd != null) {
+                    Object value = null;
                     try {
-                        Object value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
+                        value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
                         bw.setPropertyValue(propertyName, value);
                     } catch (TypeMismatchException | NotWritablePropertyException e) {
-                        throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property " + pd.getName(), e);
+                        if (ObjectUtils.mayPureObject(pd.getPropertyType())) {
+                            if (value != null && value instanceof String) {
+                                bw.setPropertyValue(propertyName, JsonUtils.toObject((String) value, pd.getPropertyType()));
+                            }
+                        } else {
+                            throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property " + pd.getName(), e);
+                        }
                     }
                 }
             }

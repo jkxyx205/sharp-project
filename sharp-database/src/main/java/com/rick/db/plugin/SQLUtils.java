@@ -557,6 +557,8 @@ public final class SQLUtils {
             }
 
             return values.deleteCharAt(values.length() - 1);
+        } else if (com.rick.common.util.ObjectUtils.mayPureObject(value)) {
+            return JsonUtils.toJson(value);
         }
 
         if (resolveValueFn != null) {

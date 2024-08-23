@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * json 格式存储
+ * pure对象 转 json 格式存储，如果是自己实现的类，尽量实现 JsonStringToObjectConverterFactory.JsonValue，第三方类可以不实现
  * @author Rick.Xu
  * @date 2024/8/19 03:32
  */
