@@ -1,8 +1,8 @@
 package com.rick.admin.module.ckeditor.controller;
 
+import com.rick.common.util.FileUtils;
 import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
-import com.rick.fileupload.core.support.FileCheckUtils;
 import com.rick.fileupload.core.support.FileMetaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,9 +43,9 @@ public class CkeditorController {
         response.setContentType("application/json;charset=utf-8");
         PrintWriter out = response.getWriter();
 
-        if (!FileCheckUtils.isImageType(request, "upload")) {
+        if (!FileUtils.isImageType(request, "upload")) {
             out.write("{\"error\": {\"message\":\"" + MAXIMUM_TYPE_ERROR_MESSAGE + "\"}}");
-        } else if (FileCheckUtils.maximumSize(request, "upload", MAXIMUM_SIZE)) {
+        } else if (FileUtils.maximumSize(request, "upload", MAXIMUM_SIZE)) {
             out.write("{\n" +
                     "    \"uploaded\": 0,\n" +
                     "    \"error\": {\n" +

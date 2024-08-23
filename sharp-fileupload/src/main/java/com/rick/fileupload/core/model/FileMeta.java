@@ -1,7 +1,7 @@
 package com.rick.fileupload.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.rick.common.util.StringUtils;
+import com.rick.common.util.FileUtils;
 import com.rick.db.plugin.dao.annotation.Transient;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,7 +42,7 @@ public class FileMeta {
      * @return
      */
     public String getFullName() {
-        return StringUtils.fullName(name, extension);
+        return FileUtils.fullName(name, extension);
     }
 
     public String getFullPath() {
@@ -54,8 +54,8 @@ public class FileMeta {
      * @param fullName
      */
     public void setFullName(String fullName) {
-        String fileName = com.rick.common.util.StringUtils.stripFilenameExtension(fullName);
-        String fileExt = com.rick.common.util.StringUtils.getFilenameExtension(fullName);
+        String fileName = FileUtils.stripFilenameExtension(fullName);
+        String fileExt = FileUtils.getFilenameExtension(fullName);
         setName(fileName);
         setExtension(fileExt);
     }

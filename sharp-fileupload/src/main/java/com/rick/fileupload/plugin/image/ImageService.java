@@ -1,5 +1,6 @@
 package com.rick.fileupload.plugin.image;
 
+import com.rick.common.util.FileUtils;
 import com.rick.common.util.IdGenerator;
 import com.rick.fileupload.core.Constants;
 import com.rick.fileupload.core.InputStreamStore;
@@ -19,8 +20,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Objects;
-
-import static com.rick.common.util.StringUtils.isImageType;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -137,7 +136,7 @@ public class ImageService {
 
     public FileMeta cropPic(FileMeta fileMeta, ImageParam imageParam, OutputStream os) throws IOException {
         // 不是图片类型
-        if (!isImageType(fileMeta.getExtension(), fileMeta.getContentType())) {
+        if (!FileUtils.isImageType(fileMeta.getExtension(), fileMeta.getContentType())) {
             throw new NotImageTypeException();
         }
 

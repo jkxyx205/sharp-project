@@ -1,7 +1,7 @@
 package com.rick.common.http;
 
 
-import com.rick.common.util.StringUtils;
+import com.rick.common.util.FileUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,7 +63,7 @@ public final class HttpServletResponseUtils {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setHeader("filename", encodeFileName);
         response.setHeader("Content-disposition", ""+type+"; filename="+formatedFileName+"");// 设定输出文件头
-        response.setContentType(StringUtils.getContentType(formatedFileName));// 定义输出类型
+        response.setContentType(FileUtils.getContentType(formatedFileName));// 定义输出类型
         OutputStream os = response.getOutputStream(); // 取得输出流Files
         return os;
     }

@@ -1,6 +1,5 @@
 package com.rick.fileupload.impl.local;
 
-import com.rick.common.util.StringUtils;
 import com.rick.fileupload.core.AbstractInputStreamStore;
 import com.rick.fileupload.core.model.StoreResponse;
 import com.rick.fileupload.impl.local.property.LocalProperties;
@@ -21,7 +20,7 @@ public class LocalInputStreamStore extends AbstractInputStreamStore {
 
     @Override
     public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
-        String storeFullName = StringUtils.fullName(storeName, extension);
+        String storeFullName = com.rick.common.util.FileUtils.fullName(storeName, extension);
 
         String storePath = getGroupNamePath(groupName);
 

@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
-import static com.rick.common.util.StringUtils.isImageType;
-
 /**
  * @author Rick
  * @createdAt 2021-09-29 18:15:00
@@ -146,7 +144,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public void preview(long id, ImageParam imageParam, OutputStream os) throws IOException {
         Document document = findById(id);
-        if (isImageType(document.getExtension(), document.getContentType())) {
+        if (com.rick.common.util.FileUtils.isImageType(document.getExtension(), document.getContentType())) {
             // 预览图片
             imageService.write(document, imageParam, os);
         } else {

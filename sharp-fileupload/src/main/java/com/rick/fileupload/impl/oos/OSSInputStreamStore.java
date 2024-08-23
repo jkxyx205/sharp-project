@@ -2,7 +2,7 @@ package com.rick.fileupload.impl.oos;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.OSSObject;
-import com.rick.common.util.StringUtils;
+import com.rick.common.util.FileUtils;
 import com.rick.fileupload.core.AbstractInputStreamStore;
 import com.rick.fileupload.core.model.StoreResponse;
 import com.rick.fileupload.impl.oos.property.OSSProperties;
@@ -24,7 +24,7 @@ public class OSSInputStreamStore extends AbstractInputStreamStore {
 
     @Override
     public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
-        String path = StringUtils.fullName(storeName, extension);
+        String path = FileUtils.fullName(storeName, extension);
         ossClient.putObject(ossProperties.getBucketName(),
                 groupName + "/" + path, is);
         return new StoreResponse(groupName, path, groupName + "/" + path, getURL(groupName, path));
