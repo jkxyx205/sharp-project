@@ -109,7 +109,9 @@ public class DemoController {
                 "}\n" +
                 "```\n" +
                 "`java`\n" +
-                "**haha**");
+                "**haha**" +
+                "" +
+                "![图片](http://localhost:7892/link/858375629681201152.png)");
         return "demos/markdown";
     }
 
