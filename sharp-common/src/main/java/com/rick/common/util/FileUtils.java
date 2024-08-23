@@ -1,5 +1,6 @@
 package com.rick.common.util;
 
+import com.rick.common.constant.FileConstants;
 import lombok.experimental.UtilityClass;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -215,7 +216,7 @@ public class FileUtils {
      * @return
      */
     public static boolean isImageType(String path) {
-        if (!StringUtils.isEmpty(path) && path.matches("(?i)(.*)[.]?(bmp|png|jpeg|jpg|gif|ico)")) {
+        if (!StringUtils.isEmpty(path) && path.matches(FileConstants.IMAGE_PATH_REGEX)) {
             return true;
         }
 

@@ -1,5 +1,6 @@
 package com.rick.admin.module.ckeditor.controller;
 
+import com.rick.common.constant.FileConstants;
 import com.rick.common.util.FileUtils;
 import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
@@ -32,7 +33,7 @@ public class CkeditorController {
     private static final int MAXIMUM_SIZE = 5;
 
     private static final String MAXIMUM_TIP_ERROR_MESSAGE = "图片最大不能超过"+MAXIMUM_SIZE+"M.";
-    private static final String MAXIMUM_TYPE_ERROR_MESSAGE = "图片为以下格式：bmp, png, jpeg, jpg, gif, ico";
+    private static final String MAXIMUM_TYPE_ERROR_MESSAGE = "图片为以下格式：" + FileConstants.IMAGE_EXTENSION_VALUE;
 
     @Autowired
     private DocumentService documentService;
