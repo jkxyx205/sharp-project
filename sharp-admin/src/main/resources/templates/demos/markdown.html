@@ -54,8 +54,6 @@
         }
 
     </style>
-    <script type="text/javascript" th:src="@{/plugins/simplemde/simplemde.min.js}"></script>
-    <script th:src="@{/js/form-support.js}"></script>
 </head>
 <body class="app">
 <th:block th:replace="includes/base :: common_content(~{::div})">
@@ -82,6 +80,8 @@
     </div>
 </th:block>
 <th:block th:replace="includes/base :: common_js(~{::script})">
+    <script type="text/javascript" th:src="@{/plugins/simplemde/simplemde.min.js}"></script>
+    <script th:src="@{/js/form-support.js}"></script>
     <script>
         // https://github.com/sparksuite/simplemde-markdown-editor
         let formDOM = document.getElementById("form")

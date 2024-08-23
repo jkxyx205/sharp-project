@@ -72,16 +72,18 @@
                         <table-column
                                 type="index"
                                 label="序号"
-                                width="40">
+                                width="40"
+                                category="column">
                         </table-column>
                         <table-column
                                 type="checkbox"
                                 class="text-center"
                                 label="<input type=checkbox>"
                                 align="center"
-                                width="40" th:if="${'multiple' eq params['mode']}">
+                                width="40" th:if="${'multiple' eq params['mode']}"
+                                category="column">
                         </table-column>
-                        <table-column th:each="n : ${report.reportColumnList}" th:attr="prop=${n.name}, label=${n.label}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
+                        <table-column th:each="n : ${report.reportColumnList}" th:attr="prop=${n.name}, label=${n.label}, category=${n.hidden ? 'hidden': 'column'}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
                             <template slot-scope="scope" th:if="${n.type.name() eq 'NUMERIC'}">
                                 {{ scope.row.<th:block th:text="${n.name}"></th:block> | formatInteger}}
                             </template>
@@ -92,7 +94,7 @@
                                 {{openDetailLink('查看', scope.row.id, scope.row.<th:block th:text="${n.name}"></th:block>)}}
                             </template>
                         </table-column>
-                        <table-column label="操作" align="center" th:if="${report.additionalInfo != null && report.additionalInfo['formId'] != null}" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                        <table-column label="操作" align="center" category="column" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                             <template slot-scope="scope">
                                 {{ openDetailLink('编辑', scope.row.id, '编辑') }}
                                 {{ deleteLink(scope.row.id) }}
@@ -143,7 +145,7 @@
     <script th:inline="javascript">
         var readonly = true
         /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
-            readonly = false
+        readonly = false
         /*[/]*/
 
         $.fn.multipleSelect.locales['zh-CN'] = {
@@ -201,45 +203,45 @@
         }
 
         let report_id =/*[[${report.id} + '']]*/
-        let pageable = /*[[${report.pageable}]]*/
+            let pageable = /*[[${report.pageable}]]*/
 
-        function listRequest(params) {
-            console.log('list ajax request...')
-            params.size = pageable ? 15 : -1 // 不分页
-            params.sord = /*[[${report.sord}]]*/
-            params.sidx = /*[[${report.sidx}]]*/
+            function listRequest(params) {
+                console.log('list ajax request...')
+                params.size = pageable ? 15 : -1 // 不分页
+                params.sord = /*[[${report.sord}]]*/
+                    params.sidx = /*[[${report.sidx}]]*/
 
-            if (!$listTable) {
-                var options = {
-                    url: '/reports/'+report_id+'/json',
-                    query: params,
-                    summaryIndex: /*[[${summaryIndex}]]*/ ,
-                    displayPage: function () {
-                        if(/*[[${device.isNormal()}]]*/) {
-                            return 15
-                        } else if(/*[[${device.isTablet()}]]*/) {
-                            return 10
+                if (!$listTable) {
+                    var options = {
+                        url: '/reports/'+report_id+'/json',
+                        query: params,
+                        summaryIndex: /*[[${summaryIndex}]]*/ ,
+                        displayPage: function () {
+                            if(/*[[${device.isNormal()}]]*/) {
+                                return 15
+                            } else if(/*[[${device.isTablet()}]]*/) {
+                                return 10
+                            }
+                            return 5
+                        },
+                        clickCheckbox: function (value) {
+                            console.log(value, '....clickCheckbox')
+                        },
+                        clickRowCheckbox: function (value, nonChecked) {
+                            console.log(value, nonChecked, '....clickRowCheckbox')
                         }
-                        return 5
-                    },
-                    clickCheckbox: function (value) {
-                        console.log(value, '....clickCheckbox')
-                    },
-                    clickRowCheckbox: function (value, nonChecked) {
-                        console.log(value, nonChecked, '....clickRowCheckbox')
                     }
-                }
 
-                if (options.summaryIndex.length > 0) {
-                    options['count'] = '/reports/'+report_id+'/json/count'
-                }
+                    if (options.summaryIndex.length > 0) {
+                        options['count'] = '/reports/'+report_id+'/json/count'
+                    }
 
-                $listTable = $('#report-list').ajaxTable(options)
-            } else {
-                $listTable.ajaxTable('reload', params)
+                    $listTable = $('#report-list').ajaxTable(options)
+                } else {
+                    $listTable.ajaxTable('reload', params)
+                }
+                $('#exportBtn').attr('href', $('#exportBtn').data('url') + "?" + $.param($listTable.ajaxTable('getQuery')))
             }
-            $('#exportBtn').attr('href', $('#exportBtn').data('url') + "?" + $.param($listTable.ajaxTable('getQuery')))
-        }
 
         // listRequest({})
         $('button[name=search]').click()
@@ -253,24 +255,44 @@
         }
 
         let $modal = $('#dialog')
-
+        let report = [[${report}]]
         let form_id =/*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+            let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
-        function showDialog(title, id) {
-            if (readonly === false && title !== '复制') {
-                title = '编辑'
+            // function showDialog(title, id) {
+            //     if (readonly === false && title !== '复制') {
+            //         title = '编辑'
+            //     }
+            //
+            //     $('#dialog-title').text(title)
+            //
+            //     $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+            //         $modal.find('.modal-body').html(res)
+            //         $modal.modal({
+            //             show: true,
+            //             backdrop: 'static'
+            //         })
+            //     })
+            // }
+
+            function showDialog(title, id) {
+                if (form_id) {
+                    if (!readonly) {
+                        title = '编辑'
+                    }
+                    $('#dialog-title').text(title)
+
+                    $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+                        $modal.find('.modal-body').html(res)
+                        $modal.modal({
+                            show: true,
+                            backdrop: 'static'
+                        })
+                    })
+                } else { // 跳转页面详情
+                    openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id) + '?readonly=' + (title === '查看'),  report.name);
+                }
             }
-
-            $('#dialog-title').text(title)
-
-            $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
-                $modal.find('.modal-body').html(res)
-                $modal.modal({
-                    show: true,
-                    backdrop: 'static'
-                })
-            })
-        }
 
         $('#okId').on('click', function () {
             saveForm(() => {
@@ -284,18 +306,33 @@
 
         function deleteRow(id) {
             if (confirm('确定要删除该条记录吗？')) {
-                $.ajax({
-                    url: '/forms/ajax/' + form_id + '/' + id,
-                    type: "delete",
-                    success: function(){
-                        $modal.modal('hide');
-
-                        setTimeout(() => {
-                            $listTable.ajaxTable('reload')
+                if (form_id) {
+                    $.ajax({
+                        url: '/forms/ajax/' + form_id + '/' + id,
+                        type: "delete",
+                        success: function(){
+                            $modal.modal('hide');
                             toastr.success("删除成功")
-                        }, 1000)
-                    }
-                });
+                            setTimeout(() => {
+                                // $('[name=reset]').click()
+                                window.location.reload()
+                            }, 1000)
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/'+ endpoint +  '/' + id,
+                        type: "delete",
+                        success: function(){
+                            $modal.modal('hide');
+                            toastr.success("删除成功")
+                            setTimeout(() => {
+                                // $('[name=reset]').click()
+                                window.location.reload()
+                            }, 1000)
+                        }
+                    });
+                }
             }
         }
 
