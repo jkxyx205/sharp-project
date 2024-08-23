@@ -121,6 +121,7 @@ public class UserTest {
                 // additionalInfo(Params.builder(1).pv("formId", "produce_orders").build()) 对表单进行修改
                 // additionalInfo(Params.builder(1).pv("css", "").build()) 注入 css 代码
                 // additionalInfo(Params.builder(1).pv("js", "produce_orders").build()) 注入 js 代码
+                // additionalInfo(Params.builder(1).pv("operator-bar", true).build()) list.html 是否显示操作按钮（新增/修改/删除）
 
                 // report 和 form 进行关联，可以修改表单
                 .additionalInfo(Params.builder(1).pv("formId", "694980924206493696").build())
