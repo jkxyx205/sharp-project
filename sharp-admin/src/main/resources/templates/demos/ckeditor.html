@@ -27,7 +27,7 @@
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="content">正文</label>
                         <div class="col-11">
-                            <textarea class="form-control" name="content" id="content" placeholder="请输入正文" th:text="${ckeditor}" autocomplete="off"/></textarea>
+                            <textarea class="form-control" name="content" id="content" placeholder="请输入正文" th:text="${ckeditor}" autocomplete="off" data-group="customize-group"/></textarea>
                             <!-- 用于表单验证 -->
                             <input type="text" class="form-control" style="width: 0; border: 0; padding: 0;" name="dummyContent" id="dummyContent" required>
                         </div>
@@ -54,6 +54,7 @@
             CKEDITOR.config.height = 300;
             CKEDITOR.config.width = 'auto';
             CKEDITOR.config.allowedContent = true;
+            // CKEDITOR.config.groupName = 'customize-group' // 自定义文件上传分组，默认分组是 ckeditor
 
             CKEDITOR.config.toolbarGroups = [
                 { name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
@@ -91,7 +92,6 @@
             // 方便前端验证
             $dummyContent.val(editorInstance.document.getBody().getText())
             if (!editorInstance.document.getBody().getText().trim()) {
-                debugger
                 ckeContentDOM.classList.add("is-invalid")
             } else {
                 ckeContentDOM.classList.remove("is-invalid")

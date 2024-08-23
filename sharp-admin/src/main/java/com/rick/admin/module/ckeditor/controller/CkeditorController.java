@@ -5,6 +5,7 @@ import com.rick.common.util.FileUtils;
 import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileMetaUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,7 @@ public class CkeditorController {
 
 
     @PostMapping("uploadImage")
-    public void uploadImage(MultipartHttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void uploadImage(MultipartHttpServletRequest request, HttpServletResponse response, String groupName) throws IOException {
         response.setContentType("application/json;charset=utf-8");
         PrintWriter out = response.getWriter();
 
@@ -56,7 +57,7 @@ public class CkeditorController {
 
         } else {
             List<MultipartFile> files = request.getFiles("upload");
-            List<? extends FileMeta> list = documentService.store(FileMetaUtils.parse(files), "ckeditor");
+            List<? extends FileMeta> list = documentService.store(FileMetaUtils.parse(files), StringUtils.defaultString(groupName,"ckeditor"));
             FileMeta uf = list.get(0);
             out.write("{\n" +
                     "    \"uploaded\": 1,\n" +

@@ -9,7 +9,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.removePlugins = 'elementspath';
     config.resize_enabled = false;
 
-    config.filebrowserImageUploadUrl= "/ckeditor/uploadImage";
+    config.filebrowserImageUploadUrl= "/ckeditor/uploadImage" + (config.groupName ? '?groupName=' + config.groupName : '');
 
     config.extraPlugins = 'letterspacing,file,lineheight';
 
