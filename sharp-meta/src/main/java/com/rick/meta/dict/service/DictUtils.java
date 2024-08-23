@@ -1,6 +1,7 @@
 package com.rick.meta.dict.service;
 
 
+import com.rick.common.util.ObjectUtils;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
@@ -12,7 +13,6 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.time.temporal.Temporal;
 import java.util.*;
 
 /**
@@ -47,19 +47,49 @@ final public class DictUtils {
         return Optional.empty();
     }
 
+    /**
+     * 任意对象， 可以是 entity Map List Dict
+     * @param obj
+     */
     public static void fillDictLabel(Object obj) {
         if (obj == null) {
             return;
         }
 
-        Field[] allFields = FieldUtils.getAllFields(obj.getClass());
+        if (Iterable.class.isAssignableFrom(obj.getClass())) {
+            // 集合
+            Iterable iterable = (Iterable) obj;
+            Iterator iterator = iterable.iterator();
+            while (iterator.hasNext()) {
+                obj = iterator.next();
+                fillDictLabel(obj);
+            }
+        } else if (Map.class.isAssignableFrom(obj.getClass())) {
+            // Map
+            Map map = (Map)obj;
+            fillDictLabel(map.keySet());
+            fillDictLabel(map.values());
+        }
+
+       if (obj instanceof DictValue) {
+            DictValue dictValue = (DictValue) obj;
+            if (StringUtils.isNotBlank(dictValue.getCode()) && StringUtils.isNotBlank(dictValue.getType())) {
+                getDictLabel(dictValue.getType(), dictValue.getCode()).ifPresent(dict -> dictValue.setLabel(dict.getLabel()));
+            }
+
+            return;
+        } else if (!mayEntityObject(obj)) {
+            return;
+        }
+
+       Field[] allFields = FieldUtils.getAllFields(obj.getClass());
         for (Field field : allFields) {
             Method method;
             try {
                 method = obj.getClass().getMethod("get" + String.valueOf(field.getName().charAt(0)).toUpperCase() + field.getName().substring(1));
                 Object fieldValue = ReflectionUtils.invokeMethod(method, obj);
                 if (fieldValue == null) {
-                    return;
+                    continue;
                 }
 
                 DictType dictType = field.getAnnotation(DictType.class);
@@ -68,20 +98,30 @@ final public class DictUtils {
                     DictValue dictValue = (DictValue) fieldValue;
                     if (StringUtils.isNotBlank(dictValue.getCode())) {
                         Optional<Dict> dictLabel = getDictLabel(type, dictValue.getCode());
-                        dictLabel.ifPresent(value -> dictValue.setLabel(value.getLabel()));
+                        dictLabel.ifPresent(value -> {
+                            dictValue.setLabel(value.getLabel());
+                            dictValue.setType(value.getType());
+                        });
                     }
                 } else if (Iterable.class.isAssignableFrom(fieldValue.getClass())) {
+                    // 集合
                     Iterable iterable = (Iterable) fieldValue;
                     Iterator iterator = iterable.iterator();
                     while (iterator.hasNext()) {
                         fieldValue = iterator.next();
                         if (mayEntityObject(fieldValue)) {
                             fillDictLabel(fieldValue);
-                        } else if (fieldValue instanceof DictValue) {
+                        } /*else if (fieldValue instanceof DictValue) {
                             Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
                             ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
-                        }
+                            ((DictValue)fieldValue).setType(dictLabel.get().getType());
+                        } */
                     }
+                } else if (Map.class.isAssignableFrom(fieldValue.getClass())) {
+                    // Map
+                    Map map = (Map)fieldValue;
+                    fillDictLabel(map.keySet());
+                    fillDictLabel(map.values());
                 } else if (mayEntityObject(fieldValue)) {
                     fillDictLabel(fieldValue);
                 }
@@ -93,32 +133,6 @@ final public class DictUtils {
     }
 
     private static boolean mayEntityObject(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (Number.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        } else if (obj instanceof DictValue) {
-            return false;
-        } else if (obj instanceof String) {
-            return false;
-        } else if (obj instanceof Character) {
-            return false;
-        } else if (obj instanceof Boolean) {
-            return false;
-        } else if (obj.getClass().isEnum()) {
-            return false;
-        } else if (obj.getClass().isArray()) {
-            return false;
-        } else if (Temporal.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        } else if (obj.getClass().isPrimitive()) {
-            return false;
-        } else if (Collection.class.isAssignableFrom(obj.getClass()) || Map.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        }
-
-        return true;
+        return ObjectUtils.mayPureObject(obj);
     }
 }

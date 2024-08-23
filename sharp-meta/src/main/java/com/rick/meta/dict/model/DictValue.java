@@ -23,6 +23,14 @@ public class DictValue {
     @Transient
     String label;
 
+    @Transient
+    String type;
+
+    public DictValue(String code, String type) {
+        this.code = code;
+        this.type = type;
+    }
+
     public DictValue(String code) {
         this.code = code;
     }
