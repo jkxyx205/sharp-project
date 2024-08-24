@@ -3,6 +3,7 @@ package com.rick.db.plugin.dao.core;
 import com.google.common.collect.Lists;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.EnumUtils;
+import com.rick.common.util.ObjectUtils;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
@@ -111,6 +112,7 @@ public class TableGenerator {
         createManyToManyTable(tableMeta.getManyToManyAnnotationList());
 
         jdbcTemplate.execute(createTableSql.toString());
+        log.info(createTableSql.toString());
         tableNameCreatedContainer.get().add(tableMeta.getTableName());
     }
 
@@ -194,7 +196,7 @@ public class TableGenerator {
             return "date";
         } else if (type == LocalTime.class) {
             return "time";
-        } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type)) {
+        } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type) || ObjectUtils.mayPureObject(type)) {
 //            return "text";
             return "json";
         } else if (BaseEntity.class.isAssignableFrom(type)) {
