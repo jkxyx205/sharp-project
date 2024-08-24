@@ -66,9 +66,15 @@ public class Generator {
         }
         // 2.4 report
         if ((Boolean) config.get(REPORT) == true) {
-            generatorReport(entityClass, name, (String)config.get(REPORT_TEST_PATH), (String)config.get(REPORT_TEST_PACKAGE));
+            generatorReport(entityClass, name, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
             // 运行 report.java
-            // exec("mvn test -Dtest=${NAME}Test#testReport");
+            new Thread(() -> {
+                try {
+                    exec("mvn test -Dtest="+name+"Test#testReport");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
         }
     }
 
@@ -232,12 +238,16 @@ public class Generator {
                 columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
             } else if (isDictValue) { // 字典
                 columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"dictConverter\")),\n");
-            } else if(field.getClass().isAssignableFrom(Collection.class)) {
+            } else if(Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
-                if (clazz.isEnum() || clazz == DictValue.class) {
-                    // enum TODO List<DictValue> 需要单独处理
-                    type = field.getType().getSimpleName();
+                if (clazz.isEnum()) {
+                    type = clazz.getSimpleName();
                     columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
+                } else if (clazz == DictValue.class) {
+                    type = field.getAnnotation(DictType.class).type();
+                    columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
+                } else {
+                    columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
                 }
             } else {
                 columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
