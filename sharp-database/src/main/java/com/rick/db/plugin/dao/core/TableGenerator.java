@@ -1,10 +1,8 @@
 package com.rick.db.plugin.dao.core;
 
-import com.google.common.collect.Lists;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.EnumUtils;
 import com.rick.common.util.ObjectUtils;
-import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
@@ -60,8 +58,7 @@ public class TableGenerator {
                 .append("(")
                 .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" " + determineSqlType(idField.getType()))+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
-        List<String> columnNames = Arrays.asList(tableMeta.getColumnNames().split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX));
-        columnNames = sortColumnNames(columnNames);
+        List<String> columnNames = tableMeta.getSortedColumns();
 
         for (String columnName : columnNames) {
             if (tableMeta.getIdColumnName().equals(columnName) ) {
@@ -114,33 +111,6 @@ public class TableGenerator {
         jdbcTemplate.execute(createTableSql.toString());
         log.info(createTableSql.toString());
         tableNameCreatedContainer.get().add(tableMeta.getTableName());
-    }
-
-    private List<String> sortColumnNames(List<String> columnNames) {
-        List<String> sortColumnNames = Lists.newArrayListWithExpectedSize(columnNames.size());
-        List<String> tailColumnNames = new ArrayList<>();
-
-        for (String columnName : columnNames) {
-            if (isHeaderColumn(columnName)) {
-                sortColumnNames.add(columnName);
-            } else {
-                tailColumnNames.add(columnName);
-            }
-        }
-
-        sortColumnNames.addAll(tailColumnNames);
-        return sortColumnNames;
-    }
-
-    private boolean isHeaderColumn(String columnName) {
-        if (columnName.equals(SharpDbConstants.ID_COLUMN_NAME) ||
-                columnName.equals(SharpDbConstants.CODE_COLUMN_NAME) ||
-                columnName.equals(SharpDbConstants.DESCRIPTION_COLUMN_NAME)
-        ) {
-            return true;
-        }
-
-        return false;
     }
 
     private void createManyToManyTable(List<TableMeta.ManyToManyProperty> manyToManyPropertyList) {

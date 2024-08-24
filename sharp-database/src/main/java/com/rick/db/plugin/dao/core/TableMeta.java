@@ -1,11 +1,14 @@
 package com.rick.db.plugin.dao.core;
 
+import com.google.common.collect.Lists;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.plugin.dao.annotation.*;
 import lombok.ToString;
 import lombok.Value;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -148,5 +151,33 @@ public class TableMeta {
         private String columnName;
 
         private String propertyName;
+    }
+
+    public List<String> getSortedColumns() {
+        String[] columnArr = getColumnNames().split(SharpDbConstants.COLUMN_NAME_SEPARATOR_REGEX);
+        List<String> sortedColumnNames = Lists.newArrayListWithExpectedSize(columnArr.length);
+        List<String> tailColumnNames = new ArrayList<>();
+
+        for (String columnName : columnArr) {
+            if (isHeaderColumn(columnName)) {
+                sortedColumnNames.add(columnName);
+            } else {
+                tailColumnNames.add(columnName);
+            }
+        }
+
+        sortedColumnNames.addAll(tailColumnNames);
+        return sortedColumnNames;
+    }
+
+    private boolean isHeaderColumn(String columnName) {
+        if (columnName.equals(SharpDbConstants.ID_COLUMN_NAME) ||
+                columnName.equals(SharpDbConstants.CODE_COLUMN_NAME) ||
+                columnName.equals(SharpDbConstants.DESCRIPTION_COLUMN_NAME)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

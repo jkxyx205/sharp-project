@@ -138,4 +138,6 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     Map<String, String> getPropertyNameToColumnNameMap();
 
+    Map<String, String> getColumnNameToPropertyNameMap();
+
 }

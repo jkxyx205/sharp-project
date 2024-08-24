@@ -1097,6 +1097,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return propertyNameToColumnNameMap;
     }
 
+    @Override
+    public Map<String, String> getColumnNameToPropertyNameMap() {
+        return columnNameToPropertyNameMap;
+    }
+
+
     private void cascadeSelect(List<T> list) {
         if (CollectionUtils.isEmpty(list)) {
             return;
