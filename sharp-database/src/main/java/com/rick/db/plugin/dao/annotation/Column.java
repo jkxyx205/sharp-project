@@ -3,6 +3,7 @@ package com.rick.db.plugin.dao.annotation;
 import java.lang.annotation.*;
 
 /**
+ * 使用了 columnDefinition ，nullable、comment 失效
  * @author Rick
  * @createdAt 2021-09-27 09:19:00
  */
