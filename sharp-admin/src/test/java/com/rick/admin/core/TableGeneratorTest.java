@@ -1,6 +1,6 @@
 package com.rick.admin.core;
 
-import com.rick.admin.module.demo.entity.Student;
+import com.rick.admin.module.student.entity.Student;
 import com.rick.db.plugin.dao.core.TableGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

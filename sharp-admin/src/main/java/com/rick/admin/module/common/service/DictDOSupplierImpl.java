@@ -1,6 +1,7 @@
 package com.rick.admin.module.common.service;
 
 import com.rick.admin.module.common.entity.CodeDescription;
+import com.rick.admin.module.student.entity.Student;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictDOSupplier;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,9 @@ public class DictDOSupplierImpl implements DictDOSupplier {
         try {
 
             registerEnum(dictList,
-                    CodeDescription.CategoryEnum.class
+                    CodeDescription.CategoryEnum.class,
+                    Student.GenderEnum.class,
+                    Student.HobbyEnum.class
                     );
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -48,9 +51,9 @@ public class DictDOSupplierImpl implements DictDOSupplier {
         if (ArrayUtils.isNotEmpty(enums)) {
             for (Class<? extends Enum> clazz : enums) {
                 for (Enum value : clazz.getEnumConstants()) {
-                    Method isWeekendMethod = clazz.getMethod("getLabel");
-                    String label = (String) isWeekendMethod.invoke(value);
-                    dictList.add(new Dict(CodeDescription.CategoryEnum.class.getSimpleName(), value.name(), label, value.ordinal()));
+                    Method getLabelMethod = clazz.getMethod("getLabel");
+                    String label = (String) getLabelMethod.invoke(value);
+                    dictList.add(new Dict(clazz.getSimpleName(), value.name(), label, value.ordinal()));
                 }
             }
         }

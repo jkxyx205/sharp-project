@@ -173,7 +173,7 @@
             })
         },
         // language=HTML
-        template: '<th :data-name="prop" :style="\'width:\'+width+\'px\'" :class="[ {sortable: sortable}, \'text-\' + align]" v-html="label"></th>'
+        template: '<th v-if="category === \'column\'" :data-name="prop" :style="\'width:\'+width+\'px\'" :class="[ {sortable: sortable}, \'text-\' + align]" v-html="label"></th>'
     })
 
     var AjaxTable = function(element, options) {
