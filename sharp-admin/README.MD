@@ -19,7 +19,7 @@ sh mvn
 ```
 4. 上传服务器（安装JDK）
 ```shell
-nohup java -Xms1024m -Xmx2048m -jar sharp-admin-1.0-SNAPSHOT.jar &
+nohup java -Xms64m -Xmx1024m -Dspring.profiles.active=dev -jar sharp-admin-1.0-SNAPSHOT.jar --server.port=8081 &
 ```
 5. 域名解析到服务器
 6. 安装 nginx
@@ -41,7 +41,6 @@ nohup java -Xms1024m -Xmx2048m -jar sharp-admin-1.0-SNAPSHOT.jar &
          ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
 
          ssl_prefer_server_ciphers on;
- 
  
          location / {
                proxy_pass http://localhost:8081/;
