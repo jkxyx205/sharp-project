@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Objects;
 
 /**
  * @author Rick.Xu
@@ -22,7 +23,7 @@ public class DictValidator implements ConstraintValidator<DictValueCheck, DictVa
 
     @Override
     public boolean isValid(DictValue dictValue, ConstraintValidatorContext constraintValidatorContext) {
-        if (StringUtils.isNotBlank(dictValue.getCode())) {
+        if (Objects.nonNull(dictValue) && StringUtils.isNotBlank(dictValue.getCode())) {
             ConstraintValidatorContextImpl impl = (ConstraintValidatorContextImpl) constraintValidatorContext;
 
             DictValueCheck dictValueCheck = (DictValueCheck) impl.getConstraintDescriptor().getAnnotation();

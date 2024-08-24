@@ -10,6 +10,7 @@ sharp-common
 #sharp-formflow
 #sharp-mail
 sharp-report
+sharp-generator
 #sharp-sms
 )
 
