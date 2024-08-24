@@ -43,7 +43,9 @@
             })
 
             this.$element.find('select').on('change', function () {
-                $search.click()
+                if (!this.multiple) {
+                    $search.click()
+                }
             })
 
             this.$element.on('keyup', function (e) {

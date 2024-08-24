@@ -24,7 +24,7 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
     private String label;
 
     /**
-     * type: text, mutile select, date_range
+     * type: text, multiple select, date_range
      */
     private Type type;
 

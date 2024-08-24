@@ -230,7 +230,13 @@ public class Generator {
                 queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.SELECT, \""+type+"\"),\n");
             } else if (field.getType() == LocalDateTime.class) {
                 queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.DATE_RANGE),\n");
-            }else {
+            } else if (Collection.class.isAssignableFrom(field.getType())) {
+                Class<?> clazz = ClassUtils.getFieldGenericClass(field);
+                if (clazz == DictValue.class) {
+                    type = field.getAnnotation(DictType.class).type();
+                    queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.MULTIPLE_SELECT, \""+type+"\"),\n");
+                }
+            } else {
                 queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\"),\n");
             }
 
@@ -289,7 +295,7 @@ public class Generator {
                 "//                .tplName(\"tpl/list\") // 没有特殊要求使用模版页面\n" +
                 "//                .tplName(\"tpl/ajax_list\") // 没有特殊要求使用模版页面\n" +
                 "                .name(\"学生信息\")\n" +
-                "                .reportAdviceName(\"operatorReportAdvice\")" +
+                "                .reportAdviceName(\"operatorReportAdvice\")\n" +
                 "                .additionalInfo(Params.builder(1).pv(\"operator-bar\", true) // 显示操作按钮\n" +
                 "                        .pv(\"endpoint\", \""+(name.toLowerCase() + "s")+"\")\n" +
                 "                        .build()) // 显示操作按钮\n" +
