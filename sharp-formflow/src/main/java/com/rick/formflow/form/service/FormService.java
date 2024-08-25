@@ -14,6 +14,7 @@ import com.rick.formflow.form.dao.FormCpnDAO;
 import com.rick.formflow.form.dao.FormCpnValueDAO;
 import com.rick.formflow.form.dao.FormDAO;
 import com.rick.formflow.form.service.bo.FormBO;
+import com.rick.formflow.form.service.model.FormCache;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +58,7 @@ public class FormService {
     private final ApplicationContext applicationContext;
 
     private final DictService dictService;
+    private List<FormBO.Property> propertyList;
 
     public Form saveOrUpdate(@Valid Form form) {
         formDAO.insertOrUpdate(form);
@@ -70,11 +72,26 @@ public class FormService {
     public FormBO getFormBOByIdAndInstanceId(Long formId, Long instanceId) {
         boolean isInstanceForm = Objects.nonNull(instanceId);
 
-        Form form = formDAO.selectById(formId).get();
-        List<FormCpn> formCpnList = formCpnDAO.listByFormId(formId);
-        Map<Long, CpnConfigurer> configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
+        FormCache formCache = FormUtils.getFormCacheById(formId);
 
-        List<FormBO.Property> propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
+        Form form;
+        Map<Long, CpnConfigurer> configIdMap;
+        List<FormBO.Property> propertyList;;
+        List<FormCpn> formCpnList;
+
+        if (formCache == null) {
+            form = formDAO.selectById(formId).get();
+            formCpnList = formCpnDAO.listByFormId(formId);
+            configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
+            formCache = new FormCache(form, formCpnList, configIdMap);
+
+            FormUtils.update(formId, formCache);
+        }
+
+        form = formCache.getForm();
+        configIdMap = formCache.getConfigIdMap();
+        formCpnList = formCache.getFormCpnList();
+        propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
         Map<String, Object> valueMap = null;
         Map<Long, FormCpnValue> formCpnValueMap = null;
