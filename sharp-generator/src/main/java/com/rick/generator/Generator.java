@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Rick.Xu
@@ -203,10 +200,25 @@ public class Generator {
             if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
                 continue;
             }
-
-            String comment = column == null ? "" : StringUtils.defaultIfBlank(column.comment(), "");
-
             String propertyName = columnNameToPropertyNameMap.get(columnName);
+
+            String comment = column == null ? propertyName : column.comment();
+
+            if (Objects.nonNull(column)) {
+                if (StringUtils.isBlank(comment)) {
+                    if (StringUtils.isNotBlank(column.columnDefinition())) {
+                        String columnDefinition = column.columnDefinition();
+                        if (columnDefinition.indexOf("comment") > -1) {
+                            comment = StringUtils.substringAfterLast(columnDefinition, " ");
+                            comment = comment.substring(1, comment.length() - 1);
+                        }
+                    } else {
+                        comment = propertyName;
+                    }
+                }
+            }
+
+
             Field field = fieldMap.get(propertyName);
 
             // 是否是字典

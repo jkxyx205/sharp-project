@@ -18,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -40,10 +41,14 @@ public class Student extends BaseCodeEntity {
     @NotBlank
 //    @Column(nullable = false, comment = "姓名")
     // 使用了 columnDefinition ，数据库中 nullable、comment 失效，但可以指定 comment， 生成默认 StudentTest 的 report 作为name
-    @Column(columnDefinition = "varchar(16) not null comment '姓名'", comment = "姓名")
+    // 最佳实践： comment 两边都必须写
+    @Column(columnDefinition = "varchar(16) not null comment '姓名'")
     String name;
 
     GenderEnum gender;
+
+    @Column(value = "birthday", comment = "出生日期")
+    private LocalDate birthday;
 
     @Embedded(columnPrefix="unit_")
     @JsonAlias("unit")
