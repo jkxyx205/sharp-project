@@ -52,7 +52,8 @@ public class UserTest {
                 .id(694980924206493696L)
                 .code("sys_user")
                 .tableName("sys_user")
-                .tplName("tpl/form")
+//                .tplName("tpl/form") // 弹出框编辑，适合字段少的表
+                .tplName("tpl/form-link") // 跳转新的页面编辑
                 .name("人员信息表")
                 .formAdviceName("userFormAdvice")
                 .repositoryName("userDAO")
@@ -119,6 +120,7 @@ public class UserTest {
 
                 // additionalInfo(Params.builder(1).pv("endpoint", "produce_orders").build()) 可以由 report 跳转 endpoint
                 // additionalInfo(Params.builder(1).pv("formId", "produce_orders").build()) 对表单进行修改
+                // additionalInfo(Params.builder(1).pv("formAction", "link").build()) 对表跳转新的页面修改
                 // additionalInfo(Params.builder(1).pv("css", "").build()) 注入 css 代码
                 // additionalInfo(Params.builder(1).pv("js", "produce_orders").build()) 注入 js 代码
                 // additionalInfo(Params.builder(1).pv("operator-bar", true).build()) list.html 是否显示操作按钮（新增/修改/删除）
