@@ -36,6 +36,15 @@ public class StringUtilsTest {
     }
 
     @Test
+    public void testCamelToSpinal() {
+        assertThat(StringUtils.camelToSpinal("student")).isEqualTo("student");
+        assertThat(StringUtils.camelToSpinal("MaterialType")).isEqualTo("material-type");
+        assertThat(StringUtils.camelToSpinal("materialType")).isEqualTo("material-type");
+        assertThat(StringUtils.camelToSpinal("material-Type")).isEqualTo("material-type");
+        assertThat(StringUtils.camelToSpinal("material-type")).isEqualTo("material-type");
+    }
+
+    @Test
     public void testList() {
         List<Cat.Reward> list = Arrays.asList(Cat.Reward.builder().title("吃饭冠军").build());
 
