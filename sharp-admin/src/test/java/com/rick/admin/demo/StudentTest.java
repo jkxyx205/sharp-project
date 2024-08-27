@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 /**
  * @author Rick.Xu
- * @date 2024-08-25 03:23:48
+ * @date 2024-08-27 19:15:34
  */
 @SpringBootTest
 public class StudentTest {
@@ -27,23 +27,24 @@ public class StudentTest {
     public void testReport() {
         Report report = Report.builder()
                 .code("t_student")// 　建议和数据库表名保持一致
-                .tplName("tpl/ajax_list") // 拷贝模版页面到指定目录
+                .tplName("demos/student/list") // 拷贝模版页面到指定目录
 //                .tplName("tpl/list") // 没有特殊要求使用模版页面
 //                .tplName("tpl/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生信息")
-                .reportAdviceName("operatorReportAdvice")                .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
+                .reportAdviceName("operatorReportAdvice")
+                .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
                         .pv("endpoint", "students")
                         .build()) // 显示操作按钮
-                .querySql("SELECT t_student.name AS \"name\",t_student.gender AS \"gender\",t_student.unit_code AS \"unit.code\",t_student.files AS \"files\",t_student.avatar AS \"avatar\",t_student.hobby_list AS \"hobbyList\",t_student.material_type AS \"materialTypeList\",t_student.code AS \"code\",t_student.create_by AS \"createBy\",t_student.create_time AS \"createTime\",t_student.update_by AS \"updateBy\",t_student.update_time AS \"updateTime\",t_student.is_deleted AS \"deleted\",t_student.id AS \"id\" FROM t_student WHERE name = :name AND gender = :gender AND unit_code = :unit_code AND unit_code = :unitCode AND files = :files AND avatar = :avatar AND hobby_list = :hobby_list AND hobby_list = :hobbyList AND material_type = :material_type AND material_type = :materialTypeList AND code = :code AND create_by = :create_by AND create_by = :createBy AND create_time = :create_time AND create_time = :createTime AND update_by = :update_by AND update_by = :updateBy AND update_time = :update_time AND update_time = :updateTime AND is_deleted = 0 AND is_deleted = :deleted AND id = :id")
+                .querySql("SELECT t_student.name AS \"name\",t_student.gender AS \"gender\",t_student.birthday AS \"birthday\",t_student.unit_code AS \"unit.code\",t_student.files AS \"files\",t_student.avatar AS \"avatar\",t_student.hobby_list AS \"hobbyList\",t_student.remark AS \"remark\",t_student.material_type AS \"materialTypeList\",t_student.code AS \"code\",t_student.create_by AS \"createBy\",t_student.create_time AS \"createTime\",t_student.update_by AS \"updateBy\",t_student.update_time AS \"updateTime\",t_student.is_deleted AS \"deleted\",t_student.id AS \"id\" FROM t_student WHERE name = :name AND gender = :gender AND birthday = :birthday AND unit_code = :unit_code AND unit_code = :unitCode AND files = :files AND avatar = :avatar AND hobby_list = :hobby_list AND hobby_list = :hobbyList AND remark = :remark AND material_type = :material_type AND material_type = :materialTypeList AND code = :code AND create_by = :create_by AND create_by = :createBy AND create_time = :create_time AND create_time = :createTime AND update_by = :update_by AND update_by = :updateBy AND update_time = :update_time AND update_time = :updateTime AND is_deleted = 0 AND is_deleted = :deleted AND id = :id")
                 .queryFieldList(Arrays.asList(
                         new QueryField("code", "外部可见，唯一code"),
                         new QueryField("name", "姓名"),
-                        new QueryField("gender", "", QueryField.Type.SELECT, "GenderEnum"),
-                        new QueryField("unit_code", "", QueryField.Type.SELECT, "UNIT"),
-                        new QueryField("files", ""),
-                        new QueryField("avatar", ""),
-                        new QueryField("hobby_list", ""),
-                        new QueryField("material_type", "物料类型"),
+                        new QueryField("gender", "gender", QueryField.Type.SELECT, "GenderEnum"),
+                        new QueryField("birthday", "出生日期"),
+                        new QueryField("unit_code", "unit.code", QueryField.Type.SELECT, "UNIT"),
+                        new QueryField("avatar", "avatar"),
+                        new QueryField("remark", "简介"),
+                        new QueryField("material_type", "物料类型", QueryField.Type.MULTIPLE_SELECT, "MATERIAL_TYPE"),
                         new QueryField("create_by", "创建人"),
                         new QueryField("create_time", "创建时间", QueryField.Type.DATE_RANGE),
                         new QueryField("update_by", "更新人"),
@@ -53,11 +54,13 @@ public class StudentTest {
                         new HiddenReportColumn("id"),
                         new ReportColumn("code", "外部可见，唯一code"),
                         new ReportColumn("name", "姓名"),
-                        new ReportColumn("gender", "", false,"GenderEnum", Arrays.asList("dictConverter")),
-                        new ReportColumn("unit.code", "", false,"UNIT", Arrays.asList("dictConverter")),
-                        new ReportColumn("files", ""),
-                        new ReportColumn("avatar", ""),
-                        new ReportColumn("hobbyList", "", false,"HobbyEnum", Arrays.asList("arrayDictConverter")),
+                        new ReportColumn("gender", "gender", false,"GenderEnum", Arrays.asList("dictConverter")),
+                        new ReportColumn("birthday", "出生日期"),
+                        new ReportColumn("unit.code", "unit.code", false,"UNIT", Arrays.asList("dictConverter")),
+                        new ReportColumn("files", "files"),
+                        new ReportColumn("avatar", "avatar"),
+                        new ReportColumn("hobbyList", "hobbyList", false,"HobbyEnum", Arrays.asList("arrayDictConverter")),
+                        new ReportColumn("remark", "简介"),
                         new ReportColumn("materialTypeList", "物料类型", false,"MATERIAL_TYPE", Arrays.asList("arrayDictConverter")),
                         new ReportColumn("createBy", "创建人"),
                         new ReportColumn("createTime", "创建时间", false, null, Arrays.asList("localDateTimeConverter")),

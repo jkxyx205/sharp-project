@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @author Rick.Xu
- * @date 2024-08-25 03:23:48
+ * @date 2024-08-27 19:15:34
  */
 @Repository
 public class StudentDAO extends EntityCodeDAOImpl<Student, Long> {

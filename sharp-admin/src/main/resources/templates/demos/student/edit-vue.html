@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">学生信息 Vue 实现</div>
+            <div class="card-body">
+                <form class="form-inline row" id="form" onsubmit="return false">
+                    <div class="form-group col-4">
+                        <label class="col-form-label" for="code">外部可见，唯一code</label>
+                        <input class="form-control" type="text" id="code" value="" name="code" required v-model="form.code" :disabled="!(this.form.id === '')">
+                    </div>
+                    <div class="form-group col-4">
+                        <label class="col-form-label" for="name">姓名</label>
+                        <input class="form-control" type="text" id="name" value="" name="name" required v-model="form.name">
+                    </div>
+                    <div class="form-group col-4">
+                        <label class="col-form-label" for="unitCode">单位code</label>
+                        <input class="form-control" type="text" id="unitCode" value="" name="unitCode" required v-model="form.unitCode">
+                    </div>
+                    <div class="form-group col-4">
+                        <label class="col-form-label" for="remark">备注</label>
+                        <textarea class="form-control" id="remark" name="remark" v-model="form.remark" required></textarea>
+                    </div>
+                    <div class="form-group col-12">
+                        <label class="col-form-label"></label>
+                        <div> <button class="btn btn-primary mr-4" type="button" @click="send">
+                            <i class="fa fa-send"></i> 保存</button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/js/form-support.js}"></script>
+    <script th:src="@{/jquery.form2json.js}"></script>
+    <script th:inline="javascript">
+        let formDOM
+
+        new Vue({
+            el: '#form',
+            data: {
+                datasource: {
+                },
+                form: {
+                    id: /*[[${student.id == null ? '' : student.id + ''} ]]*/,
+                    code: '',
+                    name: '',
+                    unitCode: '',
+                    remark: ''
+                },
+                loading: true
+            },
+            mounted() {
+                formDOM = document.getElementById("form")
+                registerValid(formDOM);
+
+                if (this.form.id) {
+                    $.get("/students/" + this.form.id, (data) => {
+                        this.form = data
+                        this.form.unitCode = data.unit ? data.unit.code : ''
+                    })
+                }
+
+            },
+            computed: {
+
+            },
+            methods: {
+                send: function () {
+                    if (formDOM.valid()) {
+                        // let formData = $('form').form2json({
+                        //     multiValSelector: '[type=checkbox]'
+                        // });
+
+                        let formData = this.form
+
+                        $.ajax ({
+                            url: "/students",
+                            type: "post",
+                            data: JSON.stringify(formData),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            success: (res) => {
+                                if (!res.success) {
+                                    toastr.error(res.message)
+                                } else {
+                                    this.form.id = res.data.id
+                                    this.form.code = res.data.code
+                                    toastr.success("保存成功")
+                                    reloadTab('student2')
+                                }
+                            }
+                        });
+                    }
+                }
+
+            }
+        })
+    </script>
+</th:block>
+</body>
+</html>

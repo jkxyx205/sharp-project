@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">学生信息 React 实现</div>
+            <div class="card-body">
+                <form class="form-fluid query-form-container" id="form" onsubmit="return false">
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="code">外部可见，唯一code</label>
+                        <input class="form-control" id="code" type="text" name="code" autocomplete="" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="name">姓名</label>
+                        <input class="form-control" id="name" type="text" name="name" autocomplete="" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="gender">gender</label>
+                        <select id="gender" name="gender" class="form-control" value="" key="GenderEnum"><option value="" selected="">全部</option><option value="M">女</option><option value="F">男</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="birthday">出生日期</label>
+                        <input class="form-control" id="birthday" type="text" name="birthday" autocomplete="" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="unit_code">unit.code</label>
+                        <select id="unit_code" name="unit_code" class="form-control" value="" key="UNIT"><option value="" selected="">全部</option><option value="EA">个</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="avatar">avatar</label>
+                        <input class="form-control" id="avatar" type="text" name="avatar" autocomplete="" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="remark">简介</label>
+                        <input class="form-control" id="remark" type="text" name="remark" autocomplete="" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="create_by">创建人</label>
+                        <input class="form-control" id="create_by" type="text" name="create_by" autocomplete="" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="create_time">创建时间</label>
+                        <div class="input-group input-daterange create_time">
+                            <input class="form-control" id="create_time0" name="create_time0" type="text" placeholder="开始时间" autocomplete="off"><label class="col-form-label" style="padding-left: 0;">～</label>
+                            <input class="form-control" id="create_time1" name="create_time1" type="text" placeholder="结束时间" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="update_by">更新人</label>
+                        <input class="form-control" id="update_by" type="text" name="update_by" autocomplete="" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label mr-2" for="update_time">更新时间</label>
+                        <div class="input-group input-daterange update_time">
+                            <input class="form-control" id="update_time0" name="update_time0" type="text" placeholder="开始时间" autocomplete="off"><label class="col-form-label" style="padding-left: 0;">～</label>
+                            <input class="form-control" id="update_time1" name="update_time1" type="text" placeholder="结束时间" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-primary mr-2" type="button" name="search">
+                            <i class="fa fa-search"></i> 查询</button>
+                        <button class="btn btn-secondary mr-2" type="button" name="reset">
+                            <i class="fa fa-remove"></i> 重置</button>
+                        <a class="btn btn-secondary mr-2" id="exportBtn" data-url="/reports/858937583114170368/export" href="/reports/858937583114170368/export?code=&amp;name=&amp;birthday=&amp;avatar=&amp;remark=&amp;create_by=&amp;create_time0=&amp;create_time1=&amp;update_by=&amp;update_time0=&amp;update_time1=&amp;gender=&amp;unit_code=&amp;material_type=&amp;page=1&amp;size=15&amp;sord=DESC&amp;sidx=createTime">
+                            <i class="fa fa-upload"></i> 导出</a>
+                        <button class="btn btn-primary" type="button" onclick="gotoDetail('新增')">
+                            <i class="fa fa-plus"></i> 新增</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/js/form-support.js}"></script>
+    <script th:src="@{/jquery.form2json.js}"></script>
+    <script>
+        let formDOM = document.getElementById("form")
+        let idDOM = document.getElementById("id")
+        let codeDOM = document.getElementById("code")
+        registerValid(formDOM);
+
+        function send() {
+            if (formDOM.valid()) {
+                let formData = $('form').form2json({
+                    multiValSelector: '[type=checkbox]'
+                });
+
+                $.ajax ({
+                    url: "/students",
+                    type: "post",
+                    data: JSON.stringify(formData),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function(res) {
+                        if (!res.success) {
+                            toastr.error(res.message)
+                        } else {
+                            idDOM.value = res.data.id
+                            codeDOM.value = res.data.code
+                            codeDOM.setAttribute("disabled", "true")
+                            toastr.success("保存成功")
+                            reloadTab('student')
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

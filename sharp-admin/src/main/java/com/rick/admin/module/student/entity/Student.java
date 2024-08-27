@@ -51,7 +51,7 @@ public class Student extends BaseCodeEntity {
     private LocalDate birthday;
 
     @Embedded(columnPrefix="unit_")
-    @JsonAlias("unit")
+    @JsonAlias("unitCode")
     @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
     @DictType(type = "UNIT")
     @DictValueCheck(type = "UNIT")
@@ -63,9 +63,20 @@ public class Student extends BaseCodeEntity {
 
     List<HobbyEnum> hobbyList;
 
+    @Column(comment = "简介")
+    String remark;
+
     @Column(comment = "物料类型", value = "material_type")
     @DictType(type = "MATERIAL_TYPE")
     List<DictValue> materialTypeList;
+
+//    /**
+//     * 可以前台获取 this.form.unitCode = data.unit ? data.unit.code : ''
+//     * @return
+//     */
+//    public String getUnitCode() {
+//        return Objects.nonNull(unit) ? unit.getCode() : "";
+//    }
 
     @AllArgsConstructor
     @Getter
