@@ -66,7 +66,7 @@ public class UserTest {
 
                 // 3. link
                 .tplName("tpl/form") // report 设置参数 .pv("formAction", "link")
-                .additionalInfo(Params.builder(3)
+                .additionalInfo(Params.builder(1)
                         .pv("label-col", 1)
                         .build()) // 跳转新的页面编辑，适合字段多的页面
 
@@ -157,7 +157,8 @@ public class UserTest {
                 // additionalInfo(Params.builder(1).pv("js-operator-columnr", "{{ openDetailLink('复制', scope.row.id, '复制') }}").build()) row 除编辑和删除的其他操作
 
                 // report 和 form 进行关联，可以修改表单
-                .additionalInfo(Params.builder(1).pv("formId", "694980924206493696")
+                .additionalInfo(Params.builder(1)
+                        .pv("formId", "694980924206493696")
                         .pv("formAction", "link")
                         .build())
 //                .querySql("SELECT id, code, name, IF(is_available, '是', '否') is_available, DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user WHERE code LIKE :code AND name LIKE :name AND is_available = :is_available AND create_time >= :create_time0 AND create_time <= :create_time1 AND id <> 1")

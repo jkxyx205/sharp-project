@@ -10,6 +10,9 @@ import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.plugin.dao.core.TableGenerator;
+import com.rick.formflow.form.cpn.core.CpnTypeEnum;
+import com.rick.generator.control.ControlGeneratorManager;
+import com.rick.generator.control.RenderTypeEnum;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
 import org.apache.commons.io.FileUtils;
@@ -23,6 +26,8 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static com.rick.common.util.StringUtils.camelToSpinal;
 
 /**
  * @author Rick.Xu
@@ -41,6 +46,10 @@ public class Generator {
     public static final String REPORT_TEST_PATH = "reportTestPath";
 
     public static final String REPORT_TEST_PACKAGE = "reportTestPackage";
+
+    public static final String CONTROL_PATH = "controlPath";
+
+    public static final String CONTROL_RENDER_TYPE = "controlRenderType";
 
     public Generator(TableGenerator tableGenerator) {
         this.tableGenerator = tableGenerator;
@@ -68,10 +77,20 @@ public class Generator {
             new Thread(() -> {
                 try {
                     exec("mvn test -Dtest="+name+"Test#testReport");
+//                    exec("open -a \"Google Chrome\" http://localhost:8081/");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }).start();
+        }
+
+        // 2.5 html
+        if (config.get(CONTROL_RENDER_TYPE == null) == null) {
+            for (RenderTypeEnum value : RenderTypeEnum.values()) {
+                generatorHtml(entityClass, (String) config.get(CONTROL_PATH), value);
+            }
+        } else {
+            generatorHtml(entityClass, (String) config.get(CONTROL_PATH), (RenderTypeEnum) config.get(CONTROL_RENDER_TYPE));
         }
     }
 
@@ -149,12 +168,20 @@ public class Generator {
         String template = "package ${PACKAGE_NAME}.controller;\n" +
                 "\n" +
                 "import com.rick.admin.common.api.BaseFormController;\n" +
-                "import ${PACKAGE_NAME}.entity.${NAME};\n" +
-                "import ${PACKAGE_NAME}.service.${NAME}Service;\n" +
+                "import com.rick.admin.common.exception.ResourceNotFoundException;\n" +
+                "import com.rick.admin.module.student.entity.Student;\n" +
+                "import com.rick.admin.module.student.service.StudentService;\n" +
+                "import com.rick.db.dto.BaseEntity;\n" +
+                "import com.rick.db.plugin.dao.core.EntityDAOManager;\n" +
                 "import lombok.AccessLevel;\n" +
                 "import lombok.experimental.FieldDefaults;\n" +
                 "import org.springframework.stereotype.Controller;\n" +
+                "import org.springframework.web.bind.annotation.GetMapping;\n" +
+                "import org.springframework.web.bind.annotation.PathVariable;\n" +
                 "import org.springframework.web.bind.annotation.RequestMapping;\n" +
+                "import org.springframework.web.bind.annotation.ResponseBody;\n" +
+                "\n" +
+                "import java.util.Optional;\n" +
                 "\n" +
                 "/**\n" +
                 " * @author Rick.Xu\n" +
@@ -163,10 +190,29 @@ public class Generator {
                 "@Controller\n" +
                 "@RequestMapping(\""+camelName+"s\")\n" +
                 "@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)\n" +
-                "public class ${NAME}Controller extends BaseFormController<${NAME}, ${NAME}Service> {\n" +
+                "public class StudentController extends BaseFormController<${NAME}, StudentService> {\n" +
                 "\n" +
-                "    public ${NAME}Controller(${NAME}Service "+camelName+"Service) {\n" +
-                "        super("+camelName+"Service, \""+formPage+"\");\n" +
+                "    public StudentController(StudentService studentService) {\n" +
+                "        super(studentService, \""+formPage+"\");\n" +
+                "    }\n" +
+                "\n" +
+                "    @GetMapping(\"{id}\")\n" +
+                "    @ResponseBody\n" +
+                "    public ${NAME} findById(@PathVariable Long id) {\n" +
+                "        Optional<${NAME}> byId = baseService.findById(id);\n" +
+                "        return getEntityFromOptional(byId, id);\n" +
+                "    }\n" +
+                "\n" +
+                "    protected ${NAME} getEntityFromOptional(Optional<${NAME}> optional, Object key) {\n" +
+                "        return optional.orElseThrow(() -> getResourceNotFoundException(key));\n" +
+                "    }\n" +
+                "\n" +
+                "    protected ResourceNotFoundException getResourceNotFoundException(Object key) {\n" +
+                "        return new ResourceNotFoundException(comment() + \" id = \" + key + \"不存在\");\n" +
+                "    }\n" +
+                "\n" +
+                "    protected String comment() {\n" +
+                "        return EntityDAOManager.getTableMeta(baseService.getBaseDAO().getEntityClass()).getTable().comment();\n" +
                 "    }\n" +
                 "}";
 
@@ -217,7 +263,6 @@ public class Generator {
                     }
                 }
             }
-
 
             Field field = fieldMap.get(propertyName);
 
@@ -309,7 +354,7 @@ public class Generator {
                 "                .name(\"学生信息\")\n" +
                 "                .reportAdviceName(\"operatorReportAdvice\")\n" +
                 "                .additionalInfo(Params.builder(1).pv(\"operator-bar\", true) // 显示操作按钮\n" +
-                "                        .pv(\"endpoint\", \""+(name.toLowerCase() + "s")+"\")\n" +
+                "                        .pv(\"endpoint\", \""+(camelToSpinal(name) + "s")+"\")\n" +
                 "                        .build()) // 显示操作按钮\n" +
                 "                .querySql(\""+entityDAO.getSelectConditionSQL(Collections.emptyMap()).replace("\"", "\\\"").replaceAll(":is_deleted", "0")+"\")\n" +
                 "                .queryFieldList(Arrays.asList(\n" +
@@ -332,6 +377,37 @@ public class Generator {
         return template.replace("${NAME}", name);
     }
 
+    private void generatorHtml(Class<? extends SimpleEntity> entityClass, String controlPath, RenderTypeEnum renderType) throws IOException {
+        Assert.hasText(controlPath);
+
+        EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
+        Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
+        Map<String, String> columnNameToPropertyNameMap = entityDAO.getColumnNameToPropertyNameMap();
+
+        List<String> columnNames = entityDAO.getTableMeta().getSortedColumns();
+        StringBuilder htmlStringBuilder = new StringBuilder();
+        for (String columnName : columnNames) {
+            if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
+                continue;
+            }
+            String camelName = com.rick.common.util.StringUtils.stringToCamel(entityClass.getSimpleName());
+            String propertyName = columnNameToPropertyNameMap.get(columnName);
+            Field field = fieldMap.get(propertyName);
+
+            String name = com.rick.common.util.StringUtils.stringToCamel(propertyName.replace(".", "_"));
+            if (field.getType() == String.class) {
+                // input
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXT, camelName, name, renderType)).append("\n");
+                // textarea
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXTAREA, camelName, name, renderType)).append("\n");
+            }
+            htmlStringBuilder.append("\n");
+        }
+
+        // 写文件
+        FileUtils.writeStringToFile(new File(new File(controlPath), "control-"+renderType.name().toLowerCase()+".html"), htmlStringBuilder.toString(), "UTF-8");
+
+    }
     private File mkdirPackage(String rootPackagePath, String curPackageName) {
         File daoPackage = new File(rootPackagePath, curPackageName);
         if (!daoPackage.exists()) {

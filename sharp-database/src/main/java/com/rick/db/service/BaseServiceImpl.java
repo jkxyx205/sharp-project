@@ -1,6 +1,8 @@
 package com.rick.db.service;
 
+import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.dto.SimpleEntity;
+import com.rick.db.plugin.dao.core.EntityCodeDAO;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.service.support.Params;
 import lombok.Getter;
@@ -50,6 +52,10 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @return
      */
     public E saveOrUpdate(@Valid E e) {
+        if (e instanceof BaseCodeEntity && e.getId() == null) {
+            ((EntityCodeDAO)baseDAO).assertCodeNotExists(((BaseCodeEntity) e).getCode());
+        }
+
         baseDAO.insertOrUpdate(e);
         return e;
     }

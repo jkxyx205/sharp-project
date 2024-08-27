@@ -92,7 +92,7 @@ public class ReportController {
     }
 
     @GetMapping("{id}")
-    public String index(@PathVariable  Long id, Model model, HttpServletRequest request) {
+    public String index(@PathVariable  Long id, boolean readonly, Model model, HttpServletRequest request) {
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
         ReportDTO reportDTO = reportService.list(id, params);
 
@@ -116,6 +116,7 @@ public class ReportController {
         model.addAttribute("id", id);
         model.addAttribute("params", params);
         model.addAttribute("pageInfo", PaginationHelper.limitPages(grid.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : grid.getPageSize(), grid.getPage()));
+        model.addAttribute("readonly", readonly);
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 

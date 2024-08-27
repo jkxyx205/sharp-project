@@ -244,7 +244,7 @@
             if (form_id) {
                 $('#dialog-title').text(title)
 
-                $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+                $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, function (res) {
                     $modal.find('.modal-body').html(res)
                     $modal.modal({
                         show: true,
@@ -252,7 +252,7 @@
                     })
                 })
             } else { // 跳转页面详情
-                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id) + '?readonly=' + (title === '查看'),  report.name);
+                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly,  report.name);
             }
         }
 

@@ -144,6 +144,8 @@
 
     <script th:inline="javascript">
         var readonly = true
+
+        readonly = /*[[${ readonly }]]*/
         /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
             readonly = false
         /*[/]*/
@@ -266,7 +268,7 @@
         //
         //     $('#dialog-title').text(title)
         //
-        //     $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+        //     $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, function (res) {
         //         $modal.find('.modal-body').html(res)
         //         $modal.modal({
         //             show: true,
@@ -282,7 +284,7 @@
                 }
                 $('#dialog-title').text(title)
 
-                $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + (title === '查看'), function (res) {
+                $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, function (res) {
                     $modal.find('.modal-body').html(res)
                     $modal.modal({
                         show: true,
@@ -290,7 +292,7 @@
                     })
                 })
             } else { // 跳转页面详情
-                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + (title === '查看'),  report.name);
+                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly,  report.name);
             }
         }
 
