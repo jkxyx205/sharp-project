@@ -166,5 +166,6 @@ gradle-app.setting
 .classpath
 .idea
 target
+control-*.html
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,jetbrains+iml,java,gradle
