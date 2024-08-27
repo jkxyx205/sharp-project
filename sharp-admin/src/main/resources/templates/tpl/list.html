@@ -56,7 +56,7 @@
                             <i class="fa fa-remove"></i> 重置</button>
                         <a class="btn btn-secondary mr-2" id="exportBtn" th:href="${'/reports/' + id + '/export'}" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                             <i class="fa fa-upload"></i> 导出</a>
-                        <button class="btn btn-primary" type="button" onclick="showDialog('新增')" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                        <button class="btn btn-primary" type="button" onclick="gotoDetail('新增')" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                             <i class="fa fa-plus"></i> 新增</button>
                     </div>
                 </form>
@@ -81,12 +81,12 @@
                             <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
                             <td class="text-center" th:if="${'multiple' eq params['mode']}"><input type="checkbox" th:name="check_key" th:value="${m[0]}"/></td>
                             <td th:each="v : ${grid.rows[mStat.index]}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}" th:if="${!report.reportColumnList.get(vStat.index).hidden}">
-                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="showDialog('查看', [[${m[0]}]])"></a>
+                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="gotoDetail('查看', [[${m[0]}]])"></a>
                                 <span th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index > 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }"></span>
                             </td>
                             <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
-<!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
-                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="showDialog('编辑', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
+<!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
+                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('编辑', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
                                 <a href="javascript:;" th:onclick="deleteRow([[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
                             </td>
                             <input type="hidden" th:each="v : ${grid.rows[mStat.index]}" th:if="${report.reportColumnList.get(vStat.index).hidden}" th:name="${report.reportColumnList.get(vStat.index).name}" th:value="${v}" />
@@ -239,7 +239,7 @@
 
         let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
-        function showDialog(title, id) {
+        function gotoDetail(title, id) {
             if (form_id) {
                 if (!readonly) {
                     title = '编辑'

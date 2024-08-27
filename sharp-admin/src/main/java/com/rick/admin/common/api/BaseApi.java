@@ -97,7 +97,7 @@ public class BaseApi<T extends BaseEntity, S extends BaseServiceImpl<? extends E
     }
 
     protected ResourceNotFoundException getResourceNotFoundException(Object key) {
-        return new ResourceNotFoundException(comment());
+        return new ResourceNotFoundException(comment() + " id = " + key + "不存在");
     }
 
     protected String comment() {

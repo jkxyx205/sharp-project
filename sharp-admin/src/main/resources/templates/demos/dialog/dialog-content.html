@@ -17,7 +17,7 @@
 <body>
 <div class="card">
     <div class="card-body">
-        <button class="btn btn-primary mr-2" type="button" name="search" onclick="showDialog()">
+        <button class="btn btn-primary mr-2" type="button" name="search" onclick="gotoDetail()">
             <i class="fa fa-search"></i> 查询1</button>
 
         <button class="btn btn-primary mr-2" type="button" name="search" id="search-btn2">
@@ -36,7 +36,7 @@
 <script src="../../../static/js/jquery.dialog.js"></script>
 
 <script>
-    function showDialog() {
+    function gotoDetail() {
         // 1.1  全局dialog
         $.dialog({
             content: '<h1 style="color: red;">hello world</h1>'

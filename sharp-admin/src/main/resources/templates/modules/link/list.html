@@ -56,7 +56,7 @@
                             <i class="fa fa-remove"></i> 重置</button>
                         <a class="btn btn-secondary mr-2" id="exportBtn" th:href="${'/reports/' + id + '/export'}" sec:authorize="${hasAuthority(#vars.report.code + '_read')}">
                             <i class="fa fa-upload"></i> 导出</a>
-                        <button class="btn btn-primary" type="button" onclick="showDialog('新增')" th:if="${report.additionalInfo != null && report.additionalInfo['operator-bar'] != null}">
+                        <button class="btn btn-primary" type="button" onclick="gotoDetail('新增')" th:if="${report.additionalInfo != null && report.additionalInfo['operator-bar'] != null}">
                             <i class="fa fa-plus"></i> 新增</button>
 
 <!--                        <input type="file" multiple="multiple" name="upload" id="upload" accept="image/*" data-group-name="image" onchange="ajaxFileUpload()" style="width: 99px;">-->
@@ -84,7 +84,7 @@
                             <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
                             <td class="text-center" th:if="${'multiple' eq params['mode']}"><input type="checkbox" th:name="check_key" th:value="${m[0]}"/></td>
                             <td th:each="v : ${grid.rows[mStat.index]}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}" th:if="${!report.reportColumnList.get(vStat.index).hidden}">
-                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1 && report.additionalInfo != null && report.additionalInfo['operator-bar'] != null}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="showDialog('查看', [[${m[0]}]])"></a>
+                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1 && report.additionalInfo != null && report.additionalInfo['operator-bar'] != null}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="gotoDetail('查看', [[${m[0]}]])"></a>
                                 <span th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index > 1 || !(report.additionalInfo != null && report.additionalInfo['operator-bar'] != null)}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }"></span>
                             </td>
                             <td class="text-center">
@@ -240,7 +240,7 @@
         let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
         let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
-        function showDialog(title, id) {
+        function gotoDetail(title, id) {
             if (form_id) {
                 $('#dialog-title').text(title)
 

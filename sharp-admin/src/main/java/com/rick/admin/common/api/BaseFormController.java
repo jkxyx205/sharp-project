@@ -38,7 +38,7 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
         return this.formPage;
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{id}/page")
     public String gotoFormPageById(@PathVariable  Long id, Model model) {
         model.addAttribute(entityPropertyName, baseService.findById(id).get());
         return this.formPage;
