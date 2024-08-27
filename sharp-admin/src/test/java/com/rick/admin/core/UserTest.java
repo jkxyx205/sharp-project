@@ -52,9 +52,35 @@ public class UserTest {
                 .id(694980924206493696L)
                 .code("sys_user")
                 .tableName("sys_user")
-//                .tplName("tpl/form") // 弹出框编辑，适合字段少的表
-                .tplName("tpl/form-link") // 跳转新的页面编辑
-                .name("人员信息表")
+//                // 1. 弹出框
+//                .tplName("tpl/form-full") // 弹出框显示需要使用 tpl/form-full
+//                .additionalInfo(Params.builder(1).pv("showSaveFormBtn", false).build())
+
+                // 2. 弹出框 + tab
+//                .tplName("tpl/form-tab-full") // 弹出框显示需要使用 tpl/form-tab-full
+//                .additionalInfo(Params.builder(3)
+//                        .pv("showSaveFormBtn", false)
+//                        .pv("label-col", 2)
+//                        .pv("tab-list", Arrays.asList("基本信息", "配置信息"))
+//                        .build()) // 跳转新的页面编辑，适合字段多的页面
+
+                // 3. link
+                .tplName("tpl/form") // report 设置参数 .pv("formAction", "link")
+                .additionalInfo(Params.builder(3)
+                        .pv("label-col", 1)
+                        .build()) // 跳转新的页面编辑，适合字段多的页面
+
+                // 4. link + tab
+//                .tplName("tpl/form-tab") // report 设置参数 .pv("formAction", "link")；弹出框显示需要使用 tpl/form-tab
+//                 .additionalInfo(Params.builder(1)
+//                        .pv("label-col", 2)
+//                        .pv("tab-list", Arrays.asList("基本信息", "配置信息"))
+//                        .build()) // 跳转新的页面编辑，适合字段多的页面
+
+//                CpnConfigurer volumeCpn = CpnConfigurer.builder()
+//                        .additionalInfo(Params.builder(1).pv("tab-index", "2").build()) // 所属的tab index
+//                        .build();
+                .name("用户信息")
                 .formAdviceName("userFormAdvice")
                 .repositoryName("userDAO")
                 .storageStrategy(Form.StorageStrategyEnum.CREATE_TABLE)
@@ -80,6 +106,7 @@ public class UserTest {
                 .label("用户名")
                 .placeholder("请输入用户名")
                 .validatorList(codeRegexValidatorList)
+                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
                 .build();
 
         CpnConfigurer nameCpn = CpnConfigurer.builder()
@@ -88,6 +115,7 @@ public class UserTest {
                 .label("姓名")
                 .placeholder("请输入姓名")
                 .validatorList(textValidatorList)
+                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
                 .build();
 
         CpnConfigurer availableCpn = CpnConfigurer.builder()
@@ -95,6 +123,7 @@ public class UserTest {
                 .name("available")
                 .label("可用")
                 .defaultValue("1")
+                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
                 .build();
 
         CpnConfigurer roleCpn = CpnConfigurer.builder()
@@ -103,6 +132,7 @@ public class UserTest {
 //                .options(Arrays.asList(new CpnConfigurer.CpnOption("694587732420202496", "管理员")))
                 .name("roleIds")
                 .label("角色")
+                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
                 .build();
 
         List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, availableCpn, roleCpn);
@@ -127,7 +157,9 @@ public class UserTest {
                 // additionalInfo(Params.builder(1).pv("js-operator-columnr", "{{ openDetailLink('复制', scope.row.id, '复制') }}").build()) row 除编辑和删除的其他操作
 
                 // report 和 form 进行关联，可以修改表单
-                .additionalInfo(Params.builder(1).pv("formId", "694980924206493696").build())
+                .additionalInfo(Params.builder(1).pv("formId", "694980924206493696")
+                        .pv("formAction", "link")
+                        .build())
 //                .querySql("SELECT id, code, name, IF(is_available, '是', '否') is_available, DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user WHERE code LIKE :code AND name LIKE :name AND is_available = :is_available AND create_time >= :create_time0 AND create_time <= :create_time1 AND id <> 1")
                 // language=SQL
                 .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +

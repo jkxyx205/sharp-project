@@ -65,7 +65,7 @@ public class DictTest {
                 .tableName("sys_dict")
                 .tplName("tpl/form")
                 .formAdviceName("dictFormService")
-                .name("字典表")
+                .name("字典")
                 .repositoryName("dictDAO")
                 .storageStrategy(Form.StorageStrategyEnum.CREATE_TABLE)
                 .build());

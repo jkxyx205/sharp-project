@@ -2309,7 +2309,7 @@ textarea.form-control {
   box-shadow: 0 0 0 0.2rem rgba(248, 108, 107, 0.25);
 }
 
-.form-inline {
+.form-inline, .form-fluid {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-flow: row wrap;
@@ -2318,12 +2318,12 @@ textarea.form-control {
   align-items: center;
 }
 
-.form-inline .form-check {
+.form-inline .form-check, .form-fluid .form-check {
   width: 100%;
 }
 
 @media (min-width: 576px) {
-  .form-inline label {
+  .form-inline label, .form-fluid label {
     display: -ms-flexbox;
     display: flex;
     -ms-flex-align: center;
@@ -2332,7 +2332,7 @@ textarea.form-control {
     justify-content: center;
     margin-bottom: 0;
   }
-  .form-inline .form-group {
+  .form-inline .form-group, .form-fluid .form-group {
     display: -ms-flexbox;
     display: flex;
     -ms-flex: 0 0 auto;
@@ -2343,19 +2343,21 @@ textarea.form-control {
     align-items: center;
     margin-bottom: 0;
   }
-  .form-inline .form-control {
+  .form-inline .form-control, .form-fluid .form-control {
     display: inline-block;
     width: auto;
     vertical-align: middle;
   }
-  .form-inline .form-control-plaintext {
+  .form-inline .form-control-plaintext, .form-fluid .form-control-plaintext {
     display: inline-block;
   }
   .form-inline .input-group,
-  .form-inline .custom-select {
+  .form-inline .custom-select,
+  .form-fluid .input-group,
+  .form-fluid .custom-select {
     width: auto;
   }
-  .form-inline .form-check {
+  .form-inline .form-check, .form-fluid .form-check {
     display: -ms-flexbox;
     display: flex;
     -ms-flex-align: center;
@@ -2365,7 +2367,7 @@ textarea.form-control {
     width: auto;
     padding-left: 0;
   }
-  .form-inline .form-check-input {
+  .form-inline .form-check-input, .form-fluid .form-check-input {
     position: relative;
     -ms-flex-negative: 0;
     flex-shrink: 0;
@@ -2373,13 +2375,13 @@ textarea.form-control {
     margin-right: 0.25rem;
     margin-left: 0;
   }
-  .form-inline .custom-control {
+  .form-inline .custom-control, .form-fluid .custom-control {
     -ms-flex-align: center;
     align-items: center;
     -ms-flex-pack: center;
     justify-content: center;
   }
-  .form-inline .custom-control-label {
+  .form-inline .custom-control-label, .form-fluid .custom-control-label {
     margin-bottom: 0;
   }
 }

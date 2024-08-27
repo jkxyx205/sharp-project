@@ -29,7 +29,7 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                <form class="form-inline query-form-container" id="form-operator">
+                <form class="form-fluid query-form-container" id="form-operator">
                     <div class="form-group">
                         <label class="col-form-label mr-2" for="type">场景</label>
                         <select id="type" name="type" class="form-control">
@@ -60,7 +60,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <form class="form-inline query-form-container" id="form-header">
+                <form class="form-fluid query-form-container" id="form-header">
                     <div class="form-group">
                         <label class="col-form-label mr-2 required">凭证日期</label>
                         <input class="form-control" type="text" id="documentDate" name="documentDate" required th:value="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}">
