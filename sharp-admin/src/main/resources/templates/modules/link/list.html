@@ -27,7 +27,7 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-body">
-                <form class="form-inline query-form-container">
+                <form class="form-fluid query-form-container">
                     <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
                         <div class="form-group">
                             <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
