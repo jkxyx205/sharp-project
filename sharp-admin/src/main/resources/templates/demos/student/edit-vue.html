@@ -70,6 +70,10 @@
                     })
                 }
 
+                // 一次行获取多个字典数据源
+                $.get("/dicts?codes=CategoryEnum,MATERIAL", (res) => {
+                    this.datasource.dicts = res
+                })
             },
             computed: {
 

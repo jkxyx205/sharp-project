@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 /**
  * @author Rick.Xu
- * @date 2024-08-27 19:15:34
+ * @date 2024-08-27 21:23:32
  */
 @SpringBootTest
 public class StudentTest {
@@ -27,7 +27,7 @@ public class StudentTest {
     public void testReport() {
         Report report = Report.builder()
                 .code("t_student")// 　建议和数据库表名保持一致
-                .tplName("demos/student/list") // 拷贝模版页面到指定目录
+                .tplName("tpl/ajax_list") // 拷贝模版页面到指定目录
 //                .tplName("tpl/list") // 没有特殊要求使用模版页面
 //                .tplName("tpl/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生信息")
