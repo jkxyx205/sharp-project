@@ -23,8 +23,24 @@
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label" for="unitCode">单位code</label>
-                        <input class="form-control" type="text" id="unitCode" value="" name="unitCode" required v-model="form.unitCode">
+                        <select class="form-control" type="text" id="unitCode" value="" name="unitCode" required v-model="form.unitCode">
+                            <option v-for="dict in datasource.dicts.UNIT" :value="dict.name" v-text="dict.label"></option>
+                        </select>
                     </div>
+<!--                    <div class="form-group col-4">-->
+<!--                        <label class="col-form-label" for="materialTypeList">物料类型</label>-->
+<!--                        <select class="form-control" type="text" id="materialTypeList" value="" name="materialTypeList" required v-model="form.materialTypeCode">-->
+<!--                            <option v-for="dict in datasource.dicts.MATERIAL" :value="dict.name" v-text="dict.label"></option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="form-group col-4">-->
+<!--                        <label class="col-form-label" for="unitCode">单位code</label>-->
+<!--                        <input class="form-control" type="text" id="unitCode" value="" name="unitCode" required v-model="form.unitCode">-->
+<!--                    </div>-->
+<!--                    <div class="form-group col-4">-->
+<!--                        <label class="col-form-label" for="unitCode">单位code</label>-->
+<!--                        <input class="form-control" type="text" id="unitCode" value="" name="unitCode" required v-model="form.unitCode">-->
+<!--                    </div>-->
                     <div class="form-group col-4">
                         <label class="col-form-label" for="remark">备注</label>
                         <textarea class="form-control" id="remark" name="remark" v-model="form.remark" required></textarea>
@@ -49,6 +65,7 @@
             el: '#form',
             data: {
                 datasource: {
+                    dicts: {}
                 },
                 form: {
                     id: /*[[${student.id == null ? '' : student.id + ''} ]]*/,
@@ -67,16 +84,27 @@
                     $.get("/students/" + this.form.id, (data) => {
                         this.form = data
                         this.form.unitCode = data.unit ? data.unit.code : ''
+
+                        this.loading = false
                     })
+                } else {
+                    this.loading = false
                 }
 
                 // 一次行获取多个字典数据源
-                $.get("/dicts?codes=CategoryEnum,MATERIAL", (res) => {
+                $.get("/dict" +
+                    "s?codes=CategoryEnum,MATERIAL,UNIT", (res) => {
                     this.datasource.dicts = res
                 })
+
+                $.LoadingOverlay('show')
             },
             computed: {
-
+            },
+            watch: {
+                loading: function (val, oldVal) {
+                    val ? $.LoadingOverlay('show') : $.LoadingOverlay('hide')
+                }
             },
             methods: {
                 send: function () {

@@ -61,6 +61,7 @@ public class GeneratorTest {
 
                         // 表名默认 control.html
                         .pv(Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student")
+                        .pv(Generator.CONTROL_LABEL, true)
 //                        .pv(Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
 
                         .build());
