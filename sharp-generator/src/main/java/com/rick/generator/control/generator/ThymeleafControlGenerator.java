@@ -16,11 +16,11 @@ public class ThymeleafControlGenerator extends AbstractControlGenerator {
     }
 
     @Override
-    public String generate(CpnTypeEnum cpnType, String entityName, String name) {
+    public String generate(CpnTypeEnum cpnType, String entityName, String name, String dictType) {
         if (cpnType == CpnTypeEnum.TEXT) {
             return "<input class=\"form-control\" type=\"text\" id=\""+name+"\" value=\"\" name=\""+name+"\" required th:value=\"${"+entityName+"."+name+"}\">";
         } else if(cpnType == CpnTypeEnum.TEXTAREA) {
-            return "<textarea class=\"form-control\" id=\""+name+"\" name=\""+name+"\" th:text=\"${"+entityName+"."+name+"}\"></textarea>";
+            return "<textarea class=\"form-control\" id=\""+name+"\" name=\""+name+"\" th:text=\"${"+entityName+"."+name+"}\" required></textarea>";
         }
 
         return "<!-- "+name+" 没有找到模版-->";

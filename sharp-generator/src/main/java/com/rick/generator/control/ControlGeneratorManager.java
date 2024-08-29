@@ -24,7 +24,17 @@ public class ControlGeneratorManager {
         registerMap.put(RenderTypeEnum.REACT, new ReactControlGenerator());
     }
 
-    public String generate(CpnTypeEnum cpnType, String entityName, String name, RenderTypeEnum renderTypeEnum) {
-        return registerMap.get(renderTypeEnum).generate(cpnType, entityName, name);
+    public String generate(CpnTypeEnum cpnType, String camelEntityName, String name, String label,
+                           RenderTypeEnum renderTypeEnum, boolean ifGeneratorLabel) {
+        return generate(cpnType, camelEntityName, name, label, null, renderTypeEnum, ifGeneratorLabel);
+    }
+
+    public String generate(CpnTypeEnum cpnType, String camelEntityName, String name, String label, String dictType,
+                           RenderTypeEnum renderTypeEnum, boolean ifGeneratorLabel) {
+        if (ifGeneratorLabel) {
+            return registerMap.get(renderTypeEnum).generate(cpnType, camelEntityName, name, label, dictType);
+        }
+
+        return registerMap.get(renderTypeEnum).generate(cpnType, camelEntityName, name, dictType);
     }
 }

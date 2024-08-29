@@ -16,7 +16,7 @@ public class ReactControlGenerator extends AbstractControlGenerator {
     }
 
     @Override
-    public String generate(CpnTypeEnum cpnType, String entityName, String name) {
+    public String generate(CpnTypeEnum cpnType, String entityName, String name, String dictType) {
         // TODO
 
         return "<!-- "+name+" 没有找到模版-->";

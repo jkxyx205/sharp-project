@@ -15,7 +15,9 @@ import com.rick.generator.control.ControlGeneratorManager;
 import com.rick.generator.control.RenderTypeEnum;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
+import lombok.Builder;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
@@ -26,6 +28,8 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static com.rick.common.util.StringUtils.camelToSpinal;
 
@@ -49,6 +53,8 @@ public class Generator {
 
     public static final String CONTROL_PATH = "controlPath";
 
+    public static final String CONTROL_LABEL = "controlLabel";
+
     public static final String CONTROL_RENDER_TYPE = "controlRenderType";
 
     public Generator(TableGenerator tableGenerator) {
@@ -56,27 +62,27 @@ public class Generator {
     }
 
     public void execute(Class<? extends SimpleEntity> entityClass, String rootPackagePath, Map<String, Object> config) throws IOException {
-        String name = entityClass.getSimpleName();
+        String entityName = entityClass.getSimpleName();
         String rootPackageName = StringUtils.substringBeforeLast(entityClass.getPackage().getName(), ".");
 
         // 1. 创建 table
         tableGenerator.createTable(entityClass);
         // 2. 创建模版
         // 2.1 DAO
-        generatorDAO(name, rootPackageName, rootPackagePath,  "dao", BaseCodeEntity.class.isAssignableFrom(entityClass));
+        generatorDAO(entityName, rootPackageName, rootPackagePath,  "dao", BaseCodeEntity.class.isAssignableFrom(entityClass));
         // 2.2 service
-        generatorService(name, rootPackageName, rootPackagePath,  "service");
+        generatorService(entityName, rootPackageName, rootPackagePath,  "service");
         // 2.3 controller
         if ((Boolean) config.get(CONTROLLER) == true) {
-            generatorBaseFormController(name, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
+            generatorBaseFormController(entityName, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
         }
         // 2.4 report
         if ((Boolean) config.get(REPORT) == true) {
-            generatorReport(entityClass, name, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
+            generatorReport(entityClass, entityName, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
             // 运行 report.java
             new Thread(() -> {
                 try {
-                    exec("mvn test -Dtest="+name+"Test#testReport");
+                    exec("mvn test -Dtest="+entityName+"Test#testReport");
 //                    exec("open -a \"Google Chrome\" http://localhost:8081/");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -87,10 +93,10 @@ public class Generator {
         // 2.5 html
         if (config.get(CONTROL_RENDER_TYPE == null) == null) {
             for (RenderTypeEnum value : RenderTypeEnum.values()) {
-                generatorHtml(entityClass, (String) config.get(CONTROL_PATH), value);
+                generatorHtml(entityClass, (String) config.get(CONTROL_PATH), value, (Boolean) ObjectUtils.defaultIfNull(config.get(CONTROL_LABEL), false));
             }
         } else {
-            generatorHtml(entityClass, (String) config.get(CONTROL_PATH), (RenderTypeEnum) config.get(CONTROL_RENDER_TYPE));
+            generatorHtml(entityClass, (String) config.get(CONTROL_PATH), (RenderTypeEnum) config.get(CONTROL_RENDER_TYPE), (Boolean) ObjectUtils.defaultIfNull(config.get(CONTROL_LABEL), false));
         }
     }
 
@@ -171,7 +177,6 @@ public class Generator {
                 "import com.rick.admin.common.exception.ResourceNotFoundException;\n" +
                 "import com.rick.admin.module.student.entity.Student;\n" +
                 "import com.rick.admin.module.student.service.StudentService;\n" +
-                "import com.rick.db.dto.BaseEntity;\n" +
                 "import com.rick.db.plugin.dao.core.EntityDAOManager;\n" +
                 "import lombok.AccessLevel;\n" +
                 "import lombok.experimental.FieldDefaults;\n" +
@@ -229,51 +234,24 @@ public class Generator {
     }
 
     private String reportCodeTemplate(Class<? extends SimpleEntity> entityClass, String name, String reportTestPackage) {
-        EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
-        Map<String, Column> columnNameMap = entityDAO.getTableMeta().getColumnNameMap();
-        Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
-        Map<String, String> columnNameToPropertyNameMap = entityDAO.getColumnNameToPropertyNameMap();
-
         StringBuilder queryFiledBuilder = new StringBuilder();
         StringBuilder columBuilder = new StringBuilder();
 
-        List<String> columnNames = entityDAO.getTableMeta().getSortedColumns();
+        AtomicInteger index = new AtomicInteger(1); // 控制样式
+        EntityDAO entityDAO = tableResolver(entityClass, resolverInfo -> {
+            Field field = resolverInfo.field;
+            String columnName = resolverInfo.columnName;
+            String propertyName = resolverInfo.propertyName;
+            String comment = resolverInfo.comment;
 
-        int index = 1; // 控制样式
-        for (String columnName : columnNames) {
-            Column column = columnNameMap.get(columnName);
-
-            if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
-                continue;
-            }
-            String propertyName = columnNameToPropertyNameMap.get(columnName);
-
-            String comment = column == null ? propertyName : column.comment();
-
-            if (Objects.nonNull(column)) {
-                if (StringUtils.isBlank(comment)) {
-                    if (StringUtils.isNotBlank(column.columnDefinition())) {
-                        String columnDefinition = column.columnDefinition();
-                        if (columnDefinition.indexOf("comment") > -1) {
-                            comment = StringUtils.substringAfterLast(columnDefinition, " ");
-                            comment = comment.substring(1, comment.length() - 1);
-                        }
-                    } else {
-                        comment = propertyName;
-                    }
-                }
-            }
-
-            Field field = fieldMap.get(propertyName);
-
-            // 是否是字典
-            boolean isDictValue = field.getType().isEnum() || field.getDeclaringClass() == DictValue.class;
             String type = null;
+            boolean isDictValue = resolverInfo.isDictValue;
+
             if (isDictValue) {
                 if (field.getType().isEnum()) {
                     type = field.getType().getSimpleName();
                 } else {
-                    String dictValueProperty = StringUtils.substringBefore(propertyName, ".");
+                    String dictValueProperty = StringUtils.substringBefore(resolverInfo.propertyName, ".");
                     try {
                         type = entityClass.getDeclaredField(dictValueProperty).getAnnotation(DictType.class).type();
                     } catch (NoSuchFieldException e) {
@@ -284,40 +262,40 @@ public class Generator {
 
             // 设置 ReportColumn
             if (isDictValue) {
-                queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.SELECT, \""+type+"\"),\n");
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.SELECT, \""+type+"\"),\n");
             } else if (field.getType() == LocalDateTime.class) {
-                queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.DATE_RANGE),\n");
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.DATE_RANGE),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz == DictValue.class) {
                     type = field.getAnnotation(DictType.class).type();
-                    queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.MULTIPLE_SELECT, \""+type+"\"),\n");
+                    queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.MULTIPLE_SELECT, \""+type+"\"),\n");
                 }
             } else {
-                queryFiledBuilder.append((index == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\"),\n");
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\"),\n");
             }
 
             if (field.getType() == LocalDateTime.class) {
-                columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
             } else if (isDictValue) { // 字典
-                columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"dictConverter\")),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"dictConverter\")),\n");
             } else if(Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz.isEnum()) {
                     type = clazz.getSimpleName();
-                    columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
+                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
                 } else if (clazz == DictValue.class) {
                     type = field.getAnnotation(DictType.class).type();
-                    columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
+                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
                 } else {
-                    columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
+                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
                 }
             } else {
-                columBuilder.append((index == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
             }
 
-            index++;
-        }
+            index.incrementAndGet();
+        });
 
         String template = "package "+reportTestPackage+";\n" +
                 "\n" +
@@ -377,37 +355,113 @@ public class Generator {
         return template.replace("${NAME}", name);
     }
 
-    private void generatorHtml(Class<? extends SimpleEntity> entityClass, String controlPath, RenderTypeEnum renderType) throws IOException {
+    private void generatorHtml(Class<? extends SimpleEntity> entityClass, String controlPath, RenderTypeEnum renderType, boolean ifGeneratorLabel) throws IOException {
         Assert.hasText(controlPath);
 
+        StringBuilder htmlStringBuilder = new StringBuilder();
+        tableResolver(entityClass, resolverInfo -> {
+            Field field = resolverInfo.field;
+
+            String type = resolverInfo.dictTypeValue;
+
+            if (resolverInfo.isDictValue) {
+                // select
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.SELECT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
+            } else if (field.getType() == String.class) {
+                // input
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
+                // textarea
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXTAREA, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
+            }
+        });
+
+        // 写文件
+        FileUtils.writeStringToFile(new File(new File(controlPath), "control-"+renderType.name().toLowerCase()+".html"), htmlStringBuilder.toString(), "UTF-8");
+    }
+
+    private EntityDAO tableResolver(Class<? extends SimpleEntity> entityClass, Consumer<ResolverInfo> resolverInfoConsumer) {
         EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
+        Map<String, Column> columnNameMap = entityDAO.getTableMeta().getColumnNameMap();
         Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
         Map<String, String> columnNameToPropertyNameMap = entityDAO.getColumnNameToPropertyNameMap();
 
         List<String> columnNames = entityDAO.getTableMeta().getSortedColumns();
-        StringBuilder htmlStringBuilder = new StringBuilder();
+
         for (String columnName : columnNames) {
             if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
                 continue;
             }
-            String camelName = com.rick.common.util.StringUtils.stringToCamel(entityClass.getSimpleName());
-            String propertyName = columnNameToPropertyNameMap.get(columnName);
-            Field field = fieldMap.get(propertyName);
 
-            String name = com.rick.common.util.StringUtils.stringToCamel(propertyName.replace(".", "_"));
-            if (field.getType() == String.class) {
-                // input
-                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXT, camelName, name, renderType)).append("\n");
-                // textarea
-                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXTAREA, camelName, name, renderType)).append("\n");
+            String camelEntityName = com.rick.common.util.StringUtils.stringToCamel(entityClass.getSimpleName());
+            Column column = columnNameMap.get(columnName);
+            String propertyName = columnNameToPropertyNameMap.get(columnName);
+
+            String comment = column == null ? propertyName : column.comment();
+
+            if (Objects.nonNull(column)) {
+                if (StringUtils.isBlank(comment)) {
+                    if (StringUtils.isNotBlank(column.columnDefinition())) {
+                        String columnDefinition = column.columnDefinition();
+                        if (columnDefinition.indexOf("comment") > -1) {
+                            comment = StringUtils.substringAfterLast(columnDefinition, " ");
+                            comment = comment.substring(1, comment.length() - 1);
+                        }
+                    } else {
+                        comment = propertyName;
+                    }
+                }
             }
-            htmlStringBuilder.append("\n");
+
+            Field field = fieldMap.get(propertyName);
+            String camelPropertyName = com.rick.common.util.StringUtils.stringToCamel(propertyName.replace(".", "_"));
+
+            // 是否是字典
+            boolean isDictValue = field.getType().isEnum() || field.getType().getAnnotation(DictType.class) != null || field.getDeclaringClass() == DictValue.class;
+            DictType dictType = null;
+            String dictTypeValue = null;
+            if (isDictValue) {
+                if (field.getType().isEnum()) {
+                    dictTypeValue = field.getType().getSimpleName();
+                } else {
+                    Field embeddedField = fieldMap.get(StringUtils.substringBefore(propertyName, "."));
+                    dictType = ObjectUtils.defaultIfNull(field.getAnnotation(DictType.class), embeddedField.getAnnotation(DictType.class));
+                    dictTypeValue = dictType.type();
+                }
+            }
+
+            ResolverInfo resolverInfo = ResolverInfo.builder().entityDAO(entityDAO).column(column).dictType(dictType).isDictValue(isDictValue).dictTypeValue(dictTypeValue).field(field).columnName(columnName).camelPropertyName(camelPropertyName).camelEntityName(camelEntityName).propertyName(propertyName).comment(comment).build();
+            resolverInfoConsumer.accept(resolverInfo);
         }
 
-        // 写文件
-        FileUtils.writeStringToFile(new File(new File(controlPath), "control-"+renderType.name().toLowerCase()+".html"), htmlStringBuilder.toString(), "UTF-8");
-
+        return entityDAO;
     }
+
+    @Builder
+    private static class ResolverInfo {
+
+        EntityDAO entityDAO;
+
+        Column column;
+
+        DictType dictType;
+
+        String dictTypeValue;
+
+        boolean isDictValue;
+
+        Field field;
+
+        String columnName;
+
+        String comment;
+
+        String camelEntityName;
+
+        String propertyName;
+
+        String camelPropertyName;
+    }
+
     private File mkdirPackage(String rootPackagePath, String curPackageName) {
         File daoPackage = new File(rootPackagePath, curPackageName);
         if (!daoPackage.exists()) {

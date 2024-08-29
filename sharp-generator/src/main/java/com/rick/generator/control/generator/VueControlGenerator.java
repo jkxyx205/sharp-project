@@ -16,11 +16,15 @@ public class VueControlGenerator extends AbstractControlGenerator {
     }
 
     @Override
-    public String generate(CpnTypeEnum cpnType, String entityName, String name) {
+    public String generate(CpnTypeEnum cpnType, String entityName, String name, String dictType) {
         if (cpnType == CpnTypeEnum.TEXT) {
             return "<input class=\"form-control\" type=\"text\" id=\""+name+"\" value=\"\" name=\""+name+"\" required v-model=\"form."+name+"\">";
         } else if(cpnType == CpnTypeEnum.TEXTAREA) {
-            return "<textarea class=\"form-control\" id=\""+name+"\" name=\""+name+"\" v-model=\"form."+name+"\"></textarea>";
+            return "<textarea class=\"form-control\" id=\""+name+"\" name=\""+name+"\" v-model=\"form."+name+"\" required></textarea>";
+        } else if (cpnType == CpnTypeEnum.SELECT) {
+            return "<select class=\"form-control\" type=\"text\" id=\""+name+"\" value=\"\" name=\""+name+"\" required v-model=\"form."+name+"\">\n" +
+                    "   <option v-for=\"dict in datasource.dicts."+dictType+"\" :value=\"dict.name\" v-text=\"dict.label\"></option>\n" +
+                    "</select>";
         }
 
         return "<!-- "+name+" 没有找到模版-->";
