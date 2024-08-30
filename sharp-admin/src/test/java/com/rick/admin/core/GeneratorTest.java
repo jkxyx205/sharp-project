@@ -40,9 +40,7 @@ public class GeneratorTest {
 
                         .build());
 
-        SQLUtils.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `unit_code`, `files`, `avatar`, `hobby_list`, `material_type`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
-                "VALUES\n" +
-                "\t(858870425453637632, '0001', '张三', 'M', 'EA', '[{\\\"name\\\": \\\"Rick\\\"}]', '{\\\"name\\\": \\\"Tom\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[\\\"HIBE\\\"]', 1, '2024-08-24 22:57:24', 1, '2024-08-24 22:57:24', 0)");
+        executeInsertSql();
     }
 
     @Test
@@ -66,9 +64,7 @@ public class GeneratorTest {
 
                         .build());
 
-        SQLUtils.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `unit_code`, `files`, `avatar`, `hobby_list`, `material_type`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
-                "VALUES\n" +
-                "\t(858870425453637632, '0001', '张三', 'M', 'EA', '[{\\\"name\\\": \\\"Rick\\\"}]', '{\\\"name\\\": \\\"Tom\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[\\\"HIBE\\\"]', 1, '2024-08-24 22:57:24', 1, '2024-08-24 22:57:24', 0)");
+        executeInsertSql();
     }
 
     @Test
@@ -91,8 +87,12 @@ public class GeneratorTest {
 
                         .build());
 
-        SQLUtils.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `unit_code`, `files`, `avatar`, `hobby_list`, `material_type`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
+        executeInsertSql();
+    }
+
+    private void executeInsertSql() {
+        SQLUtils.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `email`, `birthday`, `unit_code`, `files`, `avatar`, `hobby_list`, `material_type`, `remark`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
                 "VALUES\n" +
-                "\t(858870425453637632, '0001', '张三', 'M', 'EA', '[{\\\"name\\\": \\\"Rick\\\"}]', '{\\\"name\\\": \\\"Tom\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[\\\"HIBE\\\"]', 1, '2024-08-24 22:57:24', 1, '2024-08-24 22:57:24', 0)");
+                "\t(858870425453637632, '0001', '张三', 'M', 'fsadfsaf@163.com', '1992-11-12', 'EA', '[{\\\"name\\\": \\\"Rick\\\", \\\"fullName\\\": \\\"Rick\\\", \\\"fullPath\\\": \\\"null/null\\\"}]', '{\\\"name\\\": \\\"Tom\\\", \\\"fullName\\\": \\\"Tom\\\", \\\"fullPath\\\": \\\"null/null\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[\\\"M1\\\"]', 'fsdfdasf', 1, '2024-08-24 22:57:24', 1, '2024-08-30 13:59:14', 0);\n");
     }
 }

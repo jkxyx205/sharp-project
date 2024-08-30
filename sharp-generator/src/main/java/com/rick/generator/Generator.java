@@ -19,6 +19,8 @@ import lombok.Builder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayOutputStream;
@@ -26,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -359,24 +362,44 @@ public class Generator {
         Assert.hasText(controlPath);
 
         StringBuilder htmlStringBuilder = new StringBuilder();
+        htmlStringBuilder.append("<form class=\"form-inline row\" id=\"form\" onsubmit=\"return false\">\n");
         tableResolver(entityClass, resolverInfo -> {
             Field field = resolverInfo.field;
 
             String type = resolverInfo.dictTypeValue;
 
-            if (resolverInfo.isDictValue) {
+            if (resolverInfo.isDictValue || Collection.class.isAssignableFrom(field.getType())) {
+                if (Collection.class.isAssignableFrom(field.getType())) {
+                    Class<?> classGenericsType = ClassUtils.getFieldGenericClass(field);
+                    if (classGenericsType.isEnum()) {
+                        type = classGenericsType.getSimpleName();
+                    } else if (classGenericsType == DictValue.class) {
+                        type = field.getAnnotation(DictType.class).type();
+                    } else {
+                        // TODO
+                        return;
+                    }
+                }
                 // select
                 htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.SELECT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
+                // checkbox
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.CHECKBOX, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
+                // radio
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.RADIO, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
             } else if (field.getType() == String.class) {
                 // input
                 htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
                 // textarea
                 htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.TEXTAREA, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
+            } else if (field.getType() == LocalDate.class) {
+                htmlStringBuilder.append(ControlGeneratorManager.generate(CpnTypeEnum.DATE, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, renderType, ifGeneratorLabel)).append("\n");
             }
         });
-
+        htmlStringBuilder.append("</form>");
         // 写文件
-        FileUtils.writeStringToFile(new File(new File(controlPath), "control-"+renderType.name().toLowerCase()+".html"), htmlStringBuilder.toString(), "UTF-8");
+        Document parse = Jsoup.parse(htmlStringBuilder.toString());
+        parse.outputSettings().indentAmount(4);
+        FileUtils.writeStringToFile(new File(new File(controlPath), "control-"+renderType.name().toLowerCase()+".html"), parse.toString(), "UTF-8");
     }
 
     private EntityDAO tableResolver(Class<? extends SimpleEntity> entityClass, Consumer<ResolverInfo> resolverInfoConsumer) {

@@ -2,8 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
     <link rel="stylesheet" th:href="@{/css/tab-common.css}">
-    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
-    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
 
     </style>
@@ -24,18 +22,10 @@
                         <input class="form-control" type="text" id="name" value="" name="name" required v-model="form.name">
                     </div>
                     <div class="form-group col-4">
-                        <label class="col-form-label required" for="birthday">出生日期</label>
-                        <input type="text" class="form-control" id="birthday" name="birthday" required>
-                    </div>
-                    <div class="form-group col-4">
                         <label class="col-form-label required" for="unitCode" required>单位code</label>
                         <select class="form-control" type="text" id="unitCode" value="" name="unitCode" v-model="form.unitCode" required>
                             <option v-for="dict in datasource.dicts.UNIT" :value="dict.name" v-text="dict.label"></option>
                         </select>
-                    </div>
-                    <div class="form-group col-4">
-                        <label class="col-form-label required" for="email">email</label>
-                        <input class="form-control" type="text" id="email" value="" pattern="^(.+)@(\S+)$" name="email" required v-model="form.email">
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required">hobbyList</label>
@@ -51,14 +41,10 @@
                             <label class="form-check-label" :for="'radio_' + dict.name">{{dict.label}}</label>
                         </div>
                     </div>
-                    <div class="form-group col-4">
-                        <label class="col-form-label required" for="materialTypeList">物料类型</label>
-                        <sp:select id="materialTypeList" name="materialTypeList" key="MATERIAL" class="form-control" hideAllItem required/>
-                    </div>
-                    <div class="form-group col-4">
-                        <label class="col-form-label required" for="category">分类</label>
-                        <sp:select id="category" name="category" key="CategoryEnum" class="form-control" hideAllItem required/>
-                    </div>
+<!--                    <div class="form-group col-4">-->
+<!--                        <label class="col-form-label" for="unitCode">单位code</label>-->
+<!--                        <input class="form-control" type="text" id="unitCode" value="" name="unitCode" required v-model="form.unitCode">-->
+<!--                    </div>-->
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="remark">备注</label>
                         <textarea class="form-control" id="remark" name="remark" v-model="form.remark" required></textarea>
@@ -76,8 +62,6 @@
 <th:block th:replace="includes/base :: common_js(~{::script})">
     <script th:src="@{/js/form-support.js}"></script>
     <script th:src="@{/jquery.form2json.js}"></script>
-    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
-    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
     <script th:inline="javascript">
         let formDOM
 
@@ -91,11 +75,8 @@
                     id: /*[[${student.id == null ? '' : student.id + ''} ]]*/,
                     code: '',
                     name: '',
-                    birthday: '',
                     gender: '',
                     unitCode: '',
-                    materialTypeList: [],
-                    category: '',
                     remark: '',
                     hobbyList: []
                 },
@@ -108,14 +89,8 @@
                 if (this.form.id) {
                     $.get("/students/" + this.form.id, (data) => {
                         this.form = data
-                        // format
                         this.form.unitCode = data.unit ? data.unit.code : ''
-                        this.form.gender = data.gender ? data.gender.code : ''
 
-                        document.getElementById("birthday").value = data.birthday
-                        this.form.materialTypeList = data.materialTypeList.map(type => type.code)
-
-                        this.form.category = data.category;
                         this.loading = false
                     })
                 } else {
@@ -129,49 +104,12 @@
                 })
 
                 $.LoadingOverlay('show')
-
-                // jquery 控件
-                $('#birthday').datepicker({
-                    language: "zh-CN",
-                    autoclose: true,
-                    clearBtn: true,
-                    todayBtn: 'linked',
-                    todayHighlight: true,
-                    format: 'yyyy-mm-dd'
-                })
-
-                $('#materialTypeList').multipleSelect({
-                    filter: true,
-                    selectAll: true,
-                    single: false,
-                    placeholder: '选择物料类型'
-                }).multipleSelect('setSelects','')
-
-                $('#category').multipleSelect({
-                    filter: true,
-                    single: true,
-                    placeholder: '选择分类'
-                }).multipleSelect('setSelects','')
             },
             computed: {
             },
             watch: {
                 loading: function (val, oldVal) {
                     val ? $.LoadingOverlay('show') : $.LoadingOverlay('hide')
-                },
-                'form.materialTypeList'(val, oldVal) {
-                    if (val && oldVal.length === 0) {
-                        if (val && val.length > 0) {
-                            $('#materialTypeList').multipleSelect('setSelects', val.join(','))
-                        }
-                    }
-                },
-                'form.category'(val, oldVal) {
-                    if (val && oldVal.length === 0) {
-                        if (val && val.length > 0) {
-                            $('#category').multipleSelect('setSelects', val)
-                        }
-                    }
                 }
             },
             methods: {
@@ -180,11 +118,7 @@
                         // let formData = $('form').form2json({
                         //     multiValSelector: '[type=checkbox]'
                         // });
-                        this.form.birthday = document.getElementById("birthday").value // 必须手动获取，Vue 获取不到
-                        this.form.materialTypeList = $('#materialTypeList').multipleSelect('getSelects')
 
-                        let categoryValue = $('#category').multipleSelect('getSelects')
-                        this.form.category = categoryValue.length > 0 ? categoryValue[0] : ''
                         let formData = this.form
 
                         $.ajax ({

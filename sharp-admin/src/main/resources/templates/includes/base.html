@@ -338,7 +338,7 @@
         }
 
         @media (max-width: 768px) {
-            .form-line .col-form-btn{
+            .form-line .col-form-btn {
                 padding-top: calc(.375rem + 1px);
             }
         }
@@ -352,12 +352,14 @@
                 margin: 0 .5rem .5rem 0;
             }
 
-            .form-inline label {
-                width: 80px;
+            .form-inline label.col-form-label {
+                max-width: 110px;
+                padding-left: 15px;
+                padding-right: 15px;
             }
 
             .form-inline .form-control {
-                width: calc(100% - 88px)
+                width: calc(100% - 110px)
             }
 
             .card-body-scroll-panel {
@@ -368,6 +370,13 @@
         @media screen and (max-width: 576px) {
             .form-fluid {
                 display: block;
+            }
+
+            .form-inline .required label:before, .form-inline label.required:before {
+                content: '*';
+                position: absolute;
+                left: -9px;
+                color: #f86c6b;
             }
         }
 
