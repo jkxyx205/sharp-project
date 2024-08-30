@@ -1,6 +1,7 @@
 package com.rick.meta.dict.convert;
 
 import com.rick.common.util.JsonUtils;
+import com.rick.meta.dict.model.DictValue;
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,13 @@ public class ArrayDictConverter implements ValueConverter<String>  {
             return null;
         }
 
-        List<String> valueList = JsonUtils.toList(values, String.class);
+        List<String> valueList;
+        try {
+            valueList = JsonUtils.toList(values, String.class);;
+        } catch (Exception e) {
+            valueList = JsonUtils.toList(values, DictValue.class).stream().map(dictValue -> dictValue.getCode()).collect(Collectors.toList());
+        }
+
         return valueList.stream().map(value -> dictService.getDictByTypeAndName((String) dictType, value).get().getLabel()).collect(Collectors.joining(","));
     }
 }
