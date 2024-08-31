@@ -3,11 +3,24 @@ package com.rick.admin.common.api;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.ClassUtils;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.BaseEntity;
+import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.service.BaseServiceImpl;
+import com.rick.meta.dict.model.DictType;
+import com.rick.meta.dict.model.DictValue;
+import com.rick.meta.dict.service.DictUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 表单的增删改
@@ -39,8 +52,51 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
     }
 
     @GetMapping("{id}/page")
-    public String gotoFormPageById(@PathVariable  Long id, Model model) {
+    public String gotoFormPageById(@PathVariable Long id, Model model) {
         model.addAttribute(entityPropertyName, baseService.findById(id).get());
+
+        // 所有用到的字典
+        EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
+        Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
+        Map<String, String> columnNameToPropertyNameMap = entityDAO.getColumnNameToPropertyNameMap();
+
+        List<String> columnNames = entityDAO.getTableMeta().getSortedColumns();
+
+        for (String columnName : columnNames) {
+            if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
+                continue;
+            }
+
+            String propertyName = columnNameToPropertyNameMap.get(columnName);
+            Field field = fieldMap.get(propertyName);
+
+            // 是否是字典
+            boolean isDictValue = field.getType().isEnum() || field.getType().getAnnotation(DictType.class) != null || field.getDeclaringClass() == DictValue.class;
+
+            String dictTypeValue = null;
+            if (isDictValue) {
+                if (field.getType().isEnum()) {
+                    dictTypeValue = field.getType().getSimpleName();
+                } else {
+                    Field embeddedField = fieldMap.get(StringUtils.substringBefore(propertyName, "."));
+                    DictType dictType = ObjectUtils.defaultIfNull(field.getAnnotation(DictType.class), embeddedField.getAnnotation(DictType.class));
+                    dictTypeValue = dictType.type();
+                }
+
+            } else if (Collection.class.isAssignableFrom(field.getType())) {
+                Class<?> classGenericsType = ClassUtils.getFieldGenericClass(field);
+                if (classGenericsType.isEnum()) {
+                    dictTypeValue = classGenericsType.getSimpleName();
+                } else if (classGenericsType == DictValue.class) {
+                    dictTypeValue = field.getAnnotation(DictType.class).type();
+                }
+            }
+
+            if (dictTypeValue != null) {
+                model.addAttribute(dictTypeValue, DictUtils.getDict(dictTypeValue));
+            }
+        }
+
         return this.formPage;
     }
 

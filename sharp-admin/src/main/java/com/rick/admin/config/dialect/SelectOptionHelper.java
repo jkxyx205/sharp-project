@@ -34,12 +34,12 @@ public class SelectOptionHelper {
         String selected = iProcessableElementTag.getAttributeValue("value");
         String excludeValues = iProcessableElementTag.getAttributeValue("exclude");
 
-
-        String emptyItemText = iProcessableElementTag.hasAttribute("emptyItemText") ? StringUtils.defaultString(iProcessableElementTag.getAttributeValue("emptyItemText"), "") : "全部";
-
-        if (!iProcessableElementTag.hasAttribute("hideAllItem")) {
-            model.add(modelFactory.createOpenElementTag("option value=\"\"selected"));
-            model.add(modelFactory.createText(emptyItemText));
+        // emptyItemText => dummyItemText
+        String dummyItemText = iProcessableElementTag.hasAttribute("dummyItemText") ? StringUtils.defaultString(iProcessableElementTag.getAttributeValue("dummyItemText"), "") : "";
+        // hideAllItem => hideDummyItemText
+        if (!iProcessableElementTag.hasAttribute("hideDummyItemText")) {
+            model.add(modelFactory.createOpenElementTag("option value=\"\""));
+            model.add(modelFactory.createText(dummyItemText));
             model.add(modelFactory.createCloseElementTag("option"));
         }
 
