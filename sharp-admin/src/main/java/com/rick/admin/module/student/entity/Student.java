@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.rick.admin.module.common.entity.CodeDescription;
 import com.rick.common.http.json.deserializer.EntityWithCodePropertyDeserializer;
 import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Column;
@@ -17,7 +18,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -45,10 +50,23 @@ public class Student extends BaseCodeEntity {
     @Column(columnDefinition = "varchar(16) not null comment '姓名'")
     String name;
 
+    @NotNull(message = "性别必须选择")
     GenderEnum gender;
 
+    /**
+     * 前端 input 手动添加 pattern="^(.+)@(\S+)$"
+     */
+    @Pattern(regexp = "^(.+)@(\\S+)$", message = "邮箱格式错误")
+    String email;
+
     @Column(value = "birthday", comment = "出生日期")
-    private LocalDate birthday;
+    LocalDate birthday;
+
+    @Column(comment = "年龄")
+    Integer age;
+
+    @Column(value = "is_marriage", comment = "婚否")
+    Boolean marriage;
 
     @Embedded(columnPrefix="unit_")
     @JsonAlias("unitCode")
@@ -61,14 +79,21 @@ public class Student extends BaseCodeEntity {
 
     Document avatar;
 
+    @NotEmpty(message = "兴趣爱好必须选择一个")
+    @Valid
     List<HobbyEnum> hobbyList;
+
+    @Column(comment = "物料类型", value = "material_type")
+    @DictType(type = "MATERIAL")
+    List<DictValue> materialTypeList;
+
+    @Column(comment = "分类", value = "category")
+    @DictType(type = "CategoryEnum")
+    CodeDescription.CategoryEnum category;
 
     @Column(comment = "简介")
     String remark;
 
-    @Column(comment = "物料类型", value = "material_type")
-    @DictType(type = "MATERIAL_TYPE")
-    List<DictValue> materialTypeList;
 
 //    /**
 //     * 可以前台获取 this.form.unitCode = data.unit ? data.unit.code : ''
@@ -82,8 +107,8 @@ public class Student extends BaseCodeEntity {
     @Getter
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public enum GenderEnum {
-        M("女"),
-        F("男");
+        M("男"),
+        F("女");
 
         public String getCode() {
             return this.name();
