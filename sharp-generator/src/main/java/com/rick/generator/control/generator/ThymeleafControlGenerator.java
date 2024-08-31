@@ -49,7 +49,7 @@ public class ThymeleafControlGenerator extends AbstractControlGenerator {
             return "<input class=\"form-control\" type=\"number\" id=\"" + name + "\" name=\"" + name + "\" th:value=\"${" + entityName + "." + name + "}\"  pattern=\"-?\\d+(\\.\\d+)?\" required>";
         } else if  (cpnType == CpnTypeEnum.SWITCH) {
             return "<div class=\"form-check form-check-inline mr-2\">\n" +
-                    "<input class=\"form-check-input\" type=\"checkbox\" th:id=\""+name+"\" th:value=\"1\" name=\"" + name + "\" th:checked=\"${"+entityName+"." + name + " ne null && "+entityName+"."+name+" == 1 }\">\n" +
+                    "<input class=\"form-check-input\" type=\"checkbox\" th:id=\""+name+"\" th:value=\"1\" name=\"" + name + "\" th:checked=\"${"+entityName+"." + name + " ne null && "+entityName+"."+name+" == true }\">\n" +
                     "<label class=\"form-check-label\" th:for=\""+name+"\"></label>\n" +
                     "</div>";
         }
