@@ -3,6 +3,7 @@ package com.rick.common.util;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ArrayUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -50,8 +51,10 @@ public class ClassUtils {
                 for (int i = 0; i < actualTypeArguments.length; i++) {
                     if (actualTypeArguments[i] instanceof ParameterizedTypeImpl) {
                         classes[i] = ((ParameterizedTypeImpl)actualTypeArguments[i]).getRawType();
-                    } else {
+                    } else if (actualTypeArguments[i] instanceof Class) {
                         classes[i] = (Class<?>) actualTypeArguments[i];
+                    } else if (actualTypeArguments[i] instanceof TypeVariableImpl){
+                        classes[i] = ((TypeVariableImpl)actualTypeArguments[i]).getClass();
                     }
                 }
             }

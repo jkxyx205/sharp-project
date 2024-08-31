@@ -170,4 +170,8 @@ public final class StringUtils {
         return ret.toLowerCase();
     }
 
+    public static String camelToDot(final String camelStr) {
+        String ret = camelStr.replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2").replaceAll("([a-z])([A-Z])", "$1.$2");
+        return ret.toLowerCase();
+    }
 }
