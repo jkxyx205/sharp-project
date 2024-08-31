@@ -15,6 +15,7 @@ public enum CpnTypeEnum {
     TEXT("短文本"),
     TEXTAREA("长文本"),
     SELECT("选项"),
+    MULTIPLE_SELECT("多选项"),
     SWITCH("单选"),
     RADIO("单选"),
     NUMBER_TEXT("数字"),

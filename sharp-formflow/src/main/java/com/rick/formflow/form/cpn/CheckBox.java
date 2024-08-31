@@ -5,15 +5,13 @@ import com.rick.common.util.JsonUtils;
 import com.rick.formflow.form.cpn.core.AbstractCpn;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
+import com.rick.meta.dict.model.DictValue;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,8 +62,22 @@ public class CheckBox extends AbstractCpn<List<String>> {
             return null;
         }
 
-        if (value instanceof List) {
-            return (List<String>) value;
+        if (value instanceof Collection) {
+            if (CollectionUtils.isEmpty((Collection<?>) value)) {
+                return Collections.emptyList();
+            }
+
+            Class<?> classGenericsType = ((Collection)value).iterator().next().getClass();
+
+            if (classGenericsType.isEnum()) {
+                return ((Collection<?>) value).stream().map((en -> ((Enum)en).name())).collect(Collectors.toList());
+            } else if (classGenericsType == DictValue.class) {
+                return ((Collection<?>) value).stream().map((dictValue -> ((DictValue)dictValue).getCode())).collect(Collectors.toList());
+            } else if (classGenericsType == String.class) {
+                return (List<String>) value;
+            }
+
+            throw new IllegalArgumentException(classGenericsType + "无法决断，请指定字段 map");
         }
 
         if (value instanceof Boolean) {
@@ -74,6 +86,12 @@ public class CheckBox extends AbstractCpn<List<String>> {
             } else {
                 return Arrays.asList(Boolean.FALSE.toString(), "0");
             }
+        } else if (value instanceof CharSequence) {
+            return Arrays.asList(value.toString());
+        } else if (value.getClass().isEnum()) {
+            return Arrays.asList(((Enum)value).name());
+        } else if (value.getClass() == DictValue.class) {
+            return Arrays.asList(((DictValue)value).getCode());
         }
 
         return super.parseValue(value);
