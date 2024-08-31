@@ -48,7 +48,7 @@ public class Generator {
 
     private final TableGenerator tableGenerator;
 
-    public static final String CONTROLLER = "controller";
+    public static final String GENERATOR_CODE = "generator_code";
 
     public static final String FORM_PAGE = "formPage";
 
@@ -82,27 +82,30 @@ public class Generator {
 
         // 1. 创建 table
         tableGenerator.createTable(entityClass);
-        // 2. 创建模版
-        // 2.1 DAO
-        generatorDAO(entityName, rootPackageName, rootPackagePath,  "dao", BaseCodeEntity.class.isAssignableFrom(entityClass));
-        // 2.2 service
-        generatorService(entityName, rootPackageName, rootPackagePath,  "service");
-        // 2.3 controller
-        if ((Boolean) config.get(CONTROLLER) == true) {
-            generatorBaseFormController(entityName, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
-        }
-        // 2.4 report
-        if ((Boolean) config.get(REPORT) == true) {
-            generatorReport(entityClass, entityName, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
-            // 运行 report.java
-            new Thread(() -> {
-                try {
-                    exec("mvn test -Dtest="+entityName+"Test#testReport");
+
+        if (config.get(GENERATOR_CODE) == null || (Boolean) config.get(GENERATOR_CODE) == true) {
+            boolean overwrite = Objects.equals(config.get(GENERATOR_CODE), true);
+
+            // 2. 创建 code 模版
+            // 2.1 DAO
+            generatorDAO(overwrite, entityName, rootPackageName, rootPackagePath,  "dao", BaseCodeEntity.class.isAssignableFrom(entityClass));
+            // 2.2 service
+            generatorService(overwrite, entityName, rootPackageName, rootPackagePath,  "service");
+            // 2.3 controller
+            generatorBaseFormController(overwrite, entityName, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
+            // 2.4 report
+            if ((Boolean) config.get(REPORT) == true) {
+                generatorReport(entityClass, entityName, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
+                // 运行 report.java
+                new Thread(() -> {
+                    try {
+                        exec("mvn test -Dtest="+entityName+"Test#testReport");
 //                    exec("open -a \"Google Chrome\" http://localhost:8081/");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
+            }
         }
 
         // 2.5 html
@@ -117,11 +120,10 @@ public class Generator {
         }
     }
 
-    private void generatorDAO(String name, String rootPackageName, String rootPackagePath, String curPackageName, boolean isCodeEntity) throws IOException {
+    private void generatorDAO(boolean overwrite, String name, String rootPackageName, String rootPackagePath, String curPackageName, boolean isCodeEntity) throws IOException {
         String daoCodeTemplate = daoCodeTemplate(name, rootPackageName, isCodeEntity);
         // 写文件
-        File daoPackage = mkdirPackage(rootPackagePath, curPackageName);
-        FileUtils.writeStringToFile(new File(daoPackage,name + "DAO.java"), daoCodeTemplate, "UTF-8");
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, name + "DAO.java", daoCodeTemplate);
     }
 
     private String daoCodeTemplate(String name, String rootPackageName, boolean isCodeEntity) {
@@ -144,11 +146,10 @@ public class Generator {
                 .replace("${NAME}", name);
     }
 
-    private void generatorService(String name, String rootPackageName, String rootPackagePath, String curPackageName) throws IOException {
+    private void generatorService(boolean overwrite, String name, String rootPackageName, String rootPackagePath, String curPackageName) throws IOException {
         String serviceCodeTemplate = serviceCodeTemplate(name, rootPackageName);
         // 写文件
-        File servicePackage = mkdirPackage(rootPackagePath, curPackageName);
-        FileUtils.writeStringToFile(new File(servicePackage,name + "Service.java"), serviceCodeTemplate, "UTF-8");
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, name + "Service.java", serviceCodeTemplate);
     }
 
     private String serviceCodeTemplate(String name, String rootPackageName) {
@@ -178,12 +179,11 @@ public class Generator {
                 .replace("${NAME}", name);
     }
 
-    private void generatorBaseFormController(String name, String rootPackageName, String rootPackagePath, String curPackageName, String formPage) throws IOException {
+    private void generatorBaseFormController(boolean overwrite, String name, String rootPackageName, String rootPackagePath, String curPackageName, String formPage) throws IOException {
         Assert.hasText(formPage);
         String controllerCodeTemplate = controllerCodeTemplate(name, rootPackageName, formPage);
         // 写文件
-        File controllerPackage = mkdirPackage(rootPackagePath, curPackageName);
-        FileUtils.writeStringToFile(new File(controllerPackage,name + "Controller.java"), controllerCodeTemplate, "UTF-8");
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, name + "Controller.java", controllerCodeTemplate);
     }
 
     private String controllerCodeTemplate(String name, String rootPackageName, String formPage) {
@@ -520,6 +520,16 @@ public class Generator {
             daoPackage.mkdirs();
         }
         return daoPackage;
+    }
+
+    private void writeCodeTemplate(boolean overwrite, String rootPackagePath, String curPackageName, String codeFileName, String codeTemplate) throws IOException {
+        // 写文件
+        File codePackage = mkdirPackage(rootPackagePath, curPackageName);
+
+        File codeFile = new File(codePackage, codeFileName);
+        if (!codeFile.exists() || overwrite) {
+            FileUtils.writeStringToFile(codeFile, codeTemplate, "UTF-8");
+        }
     }
 
     private void exec(String command) throws IOException {
