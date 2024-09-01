@@ -37,16 +37,16 @@ public abstract class AbstractControlGenerator {
         }
 
         if (cpnType == CpnTypeEnum.DATE) {
-            formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, "<input type=\"text\" class=\"form-control\" id=\""+name+"\" name=\""+name+"\" th:value=\"${"+entityName+"."+name+"}\" required>"));
+            formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, "<input type=\"text\" class=\"form-control\" id=\""+name+"\" name=\""+name+"\" th:value=\"${"+entityName+"."+name+"}\" required>"));
         } else if (cpnType == CpnTypeEnum.MULTIPLE_SELECT) {
             String embeddedClassPathName = getEmbeddedClassPathName(name, additionalInfo);
-            formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" hideDummyItemText required/>"));
+            formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" hideDummyItemText required/>"));
         } else if (cpnType == CpnTypeEnum.SEARCH_SELECT) {
             String embeddedClassPathName = getEmbeddedClassPathName(name, additionalInfo);
-            formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" required/>"));
+            formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" required/>"));
         } else {
             // 子类实现
-            formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, generate(formLayout, cpnType, entityName, name, dictType, additionalInfo)));
+            formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, generate(formLayout, cpnType, entityName, name, dictType, additionalInfo)));
         }
 
         if (cpnType == CpnTypeEnum.DATE) {
@@ -112,9 +112,13 @@ public abstract class AbstractControlGenerator {
         return formLayout == FormLayoutEnum.HORIZONTAL ? "<div class=\"col-4" + colFormLabel + "\">" + controlHtml + "</div>" : controlHtml;
     }
 
-    private void formGroupWrap(StringBuilder htmlBuilder, FormLayoutEnum formLayout, String innerHtml) {
+    private void formGroupWrap(StringBuilder htmlBuilder, FormLayoutEnum formLayout, CpnTypeEnum cpnType, String innerHtml) {
         if (formLayout == FormLayoutEnum.INLINE) {
-            htmlBuilder.append("<div class=\"form-group col-4\">" + innerHtml + "</div>");
+            if (cpnType == CpnTypeEnum.CHECKBOX || cpnType == CpnTypeEnum.RADIO) {
+                htmlBuilder.append("<div class=\"form-group col-4 form-group-check-container\">" + innerHtml + "</div>");
+            } else {
+                htmlBuilder.append("<div class=\"form-group col-4\">" + innerHtml + "</div>");
+            }
         } else if (formLayout == FormLayoutEnum.HORIZONTAL) {
             htmlBuilder.append("<div class=\"form-group row\">" + innerHtml + "</div>");
         }

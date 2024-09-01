@@ -109,13 +109,13 @@ final public class DictUtils {
                     Iterator iterator = iterable.iterator();
                     while (iterator.hasNext()) {
                         fieldValue = iterator.next();
-                        if (mayEntityObject(fieldValue)) {
-                            fillDictLabel(fieldValue);
-                        } /*else if (fieldValue instanceof DictValue) {
+                        if (fieldValue instanceof DictValue) {
                             Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
                             ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
-                            ((DictValue)fieldValue).setType(dictLabel.get().getType());
-                        } */
+                            ((DictValue)fieldValue).setType(dictType.type());
+                        } else if (mayEntityObject(fieldValue)) {
+                            fillDictLabel(fieldValue);
+                        }
                     }
                 } else if (Map.class.isAssignableFrom(fieldValue.getClass())) {
                     // Map

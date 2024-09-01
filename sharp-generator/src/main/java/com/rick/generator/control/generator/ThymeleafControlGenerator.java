@@ -36,15 +36,15 @@ public class ThymeleafControlGenerator extends AbstractControlGenerator {
         } else if (cpnType == CpnTypeEnum.SELECT) {
             return "<sp:select class=\"form-control\" id=\""+name+"\" name=\""+name+"\" key=\""+dictType+"\" th:value=\"${"+entityName+"."+ StringUtils.substringBefore(embeddedClassPathName, ".") +" ne null ? "+entityName+"."+embeddedClassPathName+" : ''}\"  required/>";
         } else if (cpnType == CpnTypeEnum.RADIO) {
-            return "<div class=\"form-check form-check-inline mr-2\" th:each =\"dict : ${" + dictType + "}\">\n" +
+            return "<div class=\"form-check-group\" id="+name+"><div class=\"form-check form-check-inline mr-2\" th:each =\"dict : ${" + dictType + "}\">\n" +
                     "<input class=\"form-check-input\" type=\"radio\" th:id=\"${'radio_' + dict.name}\" th:value=\"${dict.name}\" name=\"" + name + "\" th:checked=\"${"+entityName+"."+embeddedName+" ne null && dict.name == " + entityName + "." + embeddedClassPathName + "}\">\n" +
                     "<label class=\"form-check-label\" th:for=\"${'radio_' + dict.name}\" th:text=\"${dict.label}\"></label>\n" +
-                    "</div>";
+                    "</div></div>";
         } else if (cpnType == CpnTypeEnum.CHECKBOX) {
-            return "<div class=\"form-check form-check-inline mr-2\" th:each =\"dict : ${" + dictType + "}\" th:each=\"dict : ${" + dictType + "}\" th:with=\"" + name + "=${new com.rick.formflow.form.cpn.CheckBox().parseValue("+entityName+"."+embeddedName+" ne null ? " + entityName + "." + embeddedClassPathName + " : null)}\">\n" +
+            return "<div class=\"form-check-group\" id="+name+"><div class=\"form-check form-check-inline mr-2\" th:each =\"dict : ${" + dictType + "}\" th:each=\"dict : ${" + dictType + "}\" th:with=\"" + name + "=${new com.rick.formflow.form.cpn.CheckBox().parseValue("+entityName+"."+embeddedName+" ne null ? " + entityName + "." + embeddedClassPathName + " : null)}\">\n" +
                     "<input class=\"form-check-input\" type=\"checkbox\" th:id=\"${'checkbox_' + dict.name}\" th:value=\"${dict.name}\" name=\"" + name + "\" th:checked=\"${" + name + " ne null && #sets.contains(" + name + ", dict.name)}\">\n" +
                     "<label class=\"form-check-label\" th:for=\"${'checkbox_' + dict.name}\" th:text=\"${dict.label}\"></label>\n" +
-                    "</div>";
+                    "</div></div>";
         } else if  (cpnType == CpnTypeEnum.NUMBER_TEXT) {
             return "<input class=\"form-control\" type=\"number\" id=\"" + name + "\" name=\"" + name + "\" th:value=\"${" + entityName + "." + name + "}\"  pattern=\"-?\\d+(\\.\\d+)?\" required>";
         } else if  (cpnType == CpnTypeEnum.SWITCH) {

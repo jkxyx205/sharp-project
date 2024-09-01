@@ -44,15 +44,15 @@ public class VueControlGenerator extends AbstractControlGenerator {
                     "    <option v-for=\"dict in datasource.dicts."+dictType+"\" :value=\"dict.name\" v-text=\"dict.label\"></option>\n" +
                     "</select>";
         } else if (cpnType == CpnTypeEnum.RADIO) {
-            return "<div class=\"form-check form-check-inline mr-2\" v-for=\"dict in datasource.dicts."+dictType+"\">\n" +
+            return "<div class=\"form-check-group\" id="+name+"><div class=\"form-check form-check-inline mr-2\" v-for=\"dict in datasource.dicts."+dictType+"\">\n" +
                     "    <input class=\"form-check-input\" type=\"radio\" :id=\"'radio_' + dict.name\" :value=\"dict.name\" name=\""+name+"\" v-model=\"form."+name+"\">\n" +
                     "    <label class=\"form-check-label\" :for=\"'radio_' + dict.name\">{{dict.label}}</label>\n" +
-                    "    </div>";
+                    "    </div></div>";
         } else if (cpnType == CpnTypeEnum.CHECKBOX) {
-            return "<div class=\"form-check form-check-inline mr-2\" v-for=\"dict in datasource.dicts."+dictType+"\">\n" +
+            return "<div class=\"form-check-group\" id="+name+"><div class=\"form-check form-check-inline mr-2\" v-for=\"dict in datasource.dicts."+dictType+"\">\n" +
                     "    <input class=\"form-check-input\" type=\"checkbox\" :id=\"'checkbox_' + dict.name\" :value=\"dict.name\" name=\""+name+"\" v-model=\"form."+name+"\">\n" +
                     "    <label class=\"form-check-label\" :for=\"'checkbox_' + dict.name\">{{dict.label}}</label>\n" +
-                    "    </div>";
+                    "    </div></div>";
         }  else if  (cpnType == CpnTypeEnum.NUMBER_TEXT) {
             return "<input class=\"form-control\" type=\"number\" id=\""+name+"\" name=\""+name+"\" v-model=\"form."+name+"\" pattern=\"-?\\d+(\\.\\d+)?\" required>";
         } else if  (cpnType == CpnTypeEnum.SWITCH) {
