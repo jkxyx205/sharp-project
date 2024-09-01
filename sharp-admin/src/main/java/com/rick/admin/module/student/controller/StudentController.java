@@ -26,10 +26,10 @@ import java.util.Optional;
 public class StudentController extends BaseFormController<Student, StudentService> {
 
     public StudentController(StudentService studentService) {
-//        super(studentService, "demos/student/edit-thymeleaf");
+        super(studentService, "demos/student/edit-thymeleaf");
 //        super(studentService, "demos/student/control-thymeleaf");
 
-        super(studentService, "demos/student/edit-vue");
+//        super(studentService, "demos/student/edit-vue");
 //        super(studentService, "demos/student/control-vue");
     }
 

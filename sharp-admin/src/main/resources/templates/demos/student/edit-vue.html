@@ -56,11 +56,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group col-4">
+                    <div class="form-group col-4 form-group-check-container">
                         <label class="col-form-label required">gender</label>
-                        <div class="form-check form-check-inline mr-2" v-for="dict in datasource.dicts.GenderEnum">
-                            <input class="form-check-input" :id="'radio_' + dict.name" type="radio" :value="dict.name" name="gender" v-model="form.gender">
-                            <label class="form-check-label" :for="'radio_' + dict.name">{{dict.label}}</label>
+                        <div class="form-check-group" id="gender">
+                            <div class="form-check form-check-inline mr-2" v-for="dict in datasource.dicts.GenderEnum">
+                                <input class="form-check-input" :id="'radio_' + dict.name" type="radio" :value="dict.name" name="gender" v-model="form.gender">
+                                <label class="form-check-label" :for="'radio_' + dict.name">{{dict.label}}</label>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group col-4">
@@ -122,7 +124,16 @@
             },
             mounted() {
                 formDOM = document.getElementById("form")
-                registerValid(formDOM);
+
+                registerValid(formDOM, () => {
+                    // 其他验证 + error 样式
+                    let valid = formDOM.validElse(this.form.hobbyList.length > 0, document.getElementById('hobbyList')) &
+                                formDOM.validElse(!!this.form.gender, document.getElementById('gender')) &
+                                formDOM.validElse($('#materialTypeList').multipleSelect('getSelects').length > 0, document.getElementById('materialTypeList').nextSibling) &
+                                formDOM.validElse(!!this.form.category, document.getElementById('category').nextSibling)
+
+                    return valid
+                });
 
                 // jquery 控件
                 $('#birthday').datepicker({
@@ -157,7 +168,6 @@
 
                         // this.form.materialTypeList = (this.form.materialTypeList && this.form.materialTypeList.map(type => type.code)) || []
                         this.form.materialTypeList = this.form.materialTypeList.map(type => type.code)
-                        this.form.category = this.form.category;
 
                         console.log("this.form = ", this.form)
 
@@ -190,20 +200,6 @@
             methods: {
                 send: function () {
                     if (formDOM.valid()) {
-                        // TODO
-                        // 其他验证 + error 样式
-                        let valid = true;
-                        if (!this.form.hobbyList.length) {
-                            valid = false
-                            document.getElementById('hobbyList').classList.add("is-invalid")
-                        } else {
-                            document.getElementById('hobbyList').classList.remove("is-invalid")
-                        }
-
-                        if (!valid) {
-                            return
-                        }
-
                         // let formData = $('form').form2json({
                         //     multiValSelector: '[type=checkbox]'
                         // });
@@ -234,7 +230,6 @@
                         });
                     }
                 }
-
             }
         })
     </script>

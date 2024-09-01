@@ -27,9 +27,11 @@
                     <div class="form-group row">
                         <label class="col-1 col-form-label required">gender</label>
                         <div class="col-4 col-form-label">
-                            <div class="form-check form-check-inline mr-2" th:each="dict : ${GenderEnum}">
-                                <input class="form-check-input" type="radio" th:id="${'radio_' + dict.name}" th:value="${dict.name}" name="gender" th:checked="${student.gender ne null &amp;&amp; dict.name == student.gender.name}">
-                                <label class="form-check-label" th:for="${'radio_' + dict.name}" th:text="${dict.label}"></label>
+                            <div class="form-check-group" id="gender">
+                                <div class="form-check form-check-inline mr-2" th:each="dict : ${GenderEnum}">
+                                    <input class="form-check-input" type="radio" th:id="${'radio_' + dict.name}" th:value="${dict.name}" name="gender" th:checked="${student.gender ne null &amp;&amp; dict.name == student.gender.name}">
+                                    <label class="form-check-label" th:for="${'radio_' + dict.name}" th:text="${dict.label}"></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -111,7 +113,19 @@
         let formDOM = document.getElementById("form")
         let idDOM = document.getElementById("id")
         let codeDOM = document.getElementById("code")
-        registerValid(formDOM);
+
+        registerValid(formDOM, () => {
+            // 其他验证 + error 样式
+
+            $("[name=hobbyList]:checked");
+
+            let valid = formDOM.validElse($("[name=hobbyList]:checked").length > 0, document.getElementById('hobbyList').parentNode) &
+                formDOM.validElse($('[name=gender]:checked').length > 0, document.getElementById('gender').parentNode) &
+                formDOM.validElse($('#materialTypeList').multipleSelect('getSelects').length > 0, document.getElementById('materialTypeList').nextSibling) &
+                formDOM.validElse($('#category').multipleSelect('getSelects').length > 0 && $('#category').multipleSelect('getSelects')[0] != '', document.getElementById('category').nextSibling)
+
+            return valid
+        });
 
         $('#birthday').datepicker({
             language: "zh-CN",
