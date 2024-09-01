@@ -48,13 +48,32 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
     @GetMapping("new")
     public String gotoFormPage(Model model) {
         model.addAttribute(entityPropertyName, BeanUtils.instantiateClass(this.entityClass));
+        addAttributeOfDict(model);
         return this.formPage;
     }
 
     @GetMapping("{id}/page")
     public String gotoFormPageById(@PathVariable Long id, Model model) {
         model.addAttribute(entityPropertyName, baseService.findById(id).get());
+        addAttributeOfDict(model);
+        return this.formPage;
+    }
 
+    @PostMapping
+    @ResponseBody
+    public Result saveOrUpdate(@RequestBody E e) {
+        baseService.saveOrUpdate(e);
+        return ResultUtils.success(e);
+    }
+
+    @DeleteMapping("{id}")
+    @ResponseBody
+    public Result deleteById(@PathVariable Long id) {
+        baseService.deleteLogicallyById(id);
+        return ResultUtils.success();
+    }
+
+    private void addAttributeOfDict(Model model) {
         // 所有用到的字典
         EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
         Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
@@ -97,20 +116,5 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
             }
         }
 
-        return this.formPage;
-    }
-
-    @PostMapping
-    @ResponseBody
-    public Result saveOrUpdate(@RequestBody E e) {
-        baseService.saveOrUpdate(e);
-        return ResultUtils.success(e);
-    }
-
-    @DeleteMapping("{id}")
-    @ResponseBody
-    public Result deleteById(@PathVariable Long id) {
-        baseService.deleteLogicallyById(id);
-        return ResultUtils.success();
     }
 }
