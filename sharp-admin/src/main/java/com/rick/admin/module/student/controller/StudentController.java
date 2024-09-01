@@ -17,7 +17,7 @@ import java.util.Optional;
 
 /**
  * @author Rick.Xu
- * @date 2024-08-27 21:23:32
+ * @date 2024-08-30 21:23:20
  */
 @Controller
 @RequestMapping("students")
@@ -26,6 +26,9 @@ public class StudentController extends BaseFormController<Student, StudentServic
 
     public StudentController(StudentService studentService) {
         super(studentService, "demos/student/edit-thymeleaf");
+//        super(studentService, "demos/student/control-thymeleaf");
+//        super(studentService, "demos/student/control-thymeleaf");
+//        super(studentService, "demos/student/control-thymeleaf");
     }
 
     @GetMapping("{id}")
@@ -46,4 +49,5 @@ public class StudentController extends BaseFormController<Student, StudentServic
     protected String comment() {
         return EntityDAOManager.getTableMeta(baseService.getBaseDAO().getEntityClass()).getTable().comment();
     }
+
 }
