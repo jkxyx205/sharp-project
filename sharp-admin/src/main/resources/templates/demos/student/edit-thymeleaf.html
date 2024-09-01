@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
     <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
 
     </style>
@@ -16,11 +18,74 @@
                     <input type="hidden" id="id" th:value="${student.id}">
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="code">编号</label>
-                        <div class="col-4"><input class="form-control" type="text" id="code" value="" name="code" required th:value="${student.code}" th:disabled="${student.code}"></div>
+                        <div class="col-4"><input class="form-control" type="text" id="code" name="code" pattern="^[0-9a-zA-Z_\/%\-]{1,}$" th:value="${student.code}" th:disabled="${student.code}" required></div>
                     </div>
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="name">姓名</label>
-                        <div class="col-4"><input class="form-control" type="text" id="name" value="" name="name" required th:value="${student.name}"></div>
+                        <div class="col-4 col-form-label"><input class="form-control" type="text" id="name" name="name" required th:value="${student.name}"></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required">gender</label>
+                        <div class="col-4 col-form-label">
+                            <div class="form-check form-check-inline mr-2" th:each="dict : ${GenderEnum}">
+                                <input class="form-check-input" type="radio" th:id="${'radio_' + dict.name}" th:value="${dict.name}" name="gender" th:checked="${student.gender ne null &amp;&amp; dict.name == student.gender.name}">
+                                <label class="form-check-label" th:for="${'radio_' + dict.name}" th:text="${dict.label}"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="birthday">出生日期</label>
+                        <div class="col-4">
+                            <input type="text" class="form-control" id="birthday" name="birthday" th:value="${student.birthday}" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="age">年龄</label>
+                        <div class="col-4">
+                            <input class="form-control" type="number" id="age" name="age" th:value="${student.age}" pattern="-?\d+(\.\d+)?" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="marriage">婚否</label>
+                        <div class="col-4 col-form-label">
+                            <div class="form-check form-check-inline mr-2">
+                                <input class="form-check-input" type="checkbox" th:id="marriage" th:value="1" name="marriage" th:checked="${student.marriage ne null &amp;&amp; student.marriage == true }">
+                                <label class="form-check-label" th:for="marriage"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="email">email</label>
+                        <div class="col-4">
+                            <input class="form-control" type="text" id="email" name="email" th:value="${student.email}" pattern="^(.+)@(\S+)$" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required">hobbyList</label>
+                        <div class="col-4 col-form-label">
+                            <div class="form-check form-check-inline mr-2" th:each="dict : ${HobbyEnum}" th:with="hobbyList=${new com.rick.formflow.form.cpn.CheckBox().parseValue(student.hobbyList ne null ? student.hobbyList : null)}">
+                                <input class="form-check-input" type="checkbox" th:id="${'checkbox_' + dict.name}" th:value="${dict.name}" name="hobbyList" th:checked="${hobbyList ne null &amp;&amp; #sets.contains(hobbyList, dict.name)}">
+                                <label class="form-check-label" th:for="${'checkbox_' + dict.name}" th:text="${dict.label}"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="unitCode">单位code</label>
+                        <div class="col-4">
+                            <sp:select class="form-control" id="unitCode" name="unitCode" key="UNIT" th:value="${student.unit ne null ? student.unit.code : ''}" required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="materialTypeList">物料类型</label>
+                        <div class="col-4">
+                            <sp:select class="form-control" id="materialTypeList" name="materialTypeList" key="MATERIAL" th:value="${student.materialTypeList ne null ? student.materialTypeList : ''}" hideDummyItemText required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="category">分类</label>
+                        <div class="col-4">
+                            <sp:select class="form-control" id="category" name="category" key="CategoryEnum" th:value="${student.category ne null ? student.category.name : ''}" required />
+                        </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="remark">简介</label>
@@ -38,17 +103,50 @@
 <th:block th:replace="includes/base :: common_js(~{::script})">
     <script th:src="@{/js/form-support.js}"></script>
     <script th:src="@{/jquery.form2json.js}"></script>
-    <script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+    <script th:inline="javascript">
         let formDOM = document.getElementById("form")
         let idDOM = document.getElementById("id")
         let codeDOM = document.getElementById("code")
         registerValid(formDOM);
+
+        $('#birthday').datepicker({
+            language: "zh-CN",
+            autoclose: true,
+            clearBtn: true,
+            todayBtn: 'linked',
+            todayHighlight: true,
+            format: 'yyyy-mm-dd'
+        })
+
+        /**
+         * 查询多选
+         */
+        $('#materialTypeList').multipleSelect({
+            filter: true,
+            selectAll: true,
+            single: false,
+            placeholder: '选择物料类型'
+        }).multipleSelect("setSelects", [[${new com.rick.formflow.form.cpn.CheckBox().parseValue(student.materialTypeList)}]] || [])
+
+        /**
+         * 查询单选
+         */
+        $('#category').multipleSelect({
+            filter: true,
+            single: true,
+            placeholder: '选择分类'
+        })
 
         function send() {
             if (formDOM.valid()) {
                 let formData = $('form').form2json({
                     multiValSelector: '[type=checkbox]'
                 });
+
+                // 多选需要通过 multipleSelect 获取数据
+                formData.materialTypeList = $('#materialTypeList').multipleSelect('getSelects')
 
                 $.ajax ({
                     url: "/students",

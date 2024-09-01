@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.admin.module.common.entity.CodeDescription;
-import com.rick.common.http.json.deserializer.EntityWithCodePropertyDeserializer;
+import com.rick.common.http.json.deserializer.BooleanPropertyDeserializer;
+import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
 import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Embedded;
@@ -66,11 +67,14 @@ public class Student extends BaseCodeEntity {
     Integer age;
 
     @Column(value = "is_marriage", comment = "婚否")
+    @JsonDeserialize(using = BooleanPropertyDeserializer.class)
     Boolean marriage;
 
     @Embedded(columnPrefix="unit_")
     @JsonAlias("unitCode")
-    @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
+//    看看更强大的 NamePropertyDeserializer，支持集合
+//    @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
+    @JsonDeserialize(using = NamePropertyDeserializer.class)
     @DictType(type = "UNIT")
     @DictValueCheck(type = "UNIT")
     DictValue unit;
