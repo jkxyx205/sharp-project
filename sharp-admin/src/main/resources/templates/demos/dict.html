@@ -28,10 +28,10 @@
 	<sp:select id="unit" name="unit" key="UNIT" class="form-control" th:value="${unit}"/>
 	<sp:select id="category" name="category" key="CategoryEnum" class="form-control"  th:value="${category}"/>
 	<!-- 分组 -->
-    <sp:select id="group_select_sql" key="group_select_sql" class="form-control" emptyItemText group th:value="${name}"/>
+    <sp:select id="group_select_sql" key="group_select_sql" class="form-control" dummyItemText group th:value="${name}"/>
 
 	<!-- multipleSelect -->
-	<sp:select id="category2" name="category2" key="CategoryEnum" class="form-control" hideAllItem th:value="${category}" />
+	<sp:select id="category2" name="category2" key="CategoryEnum" class="form-control" hideDummyItemText th:value="${category}" />
 
 	<div class="form-group row">
 		<label class="col-md-2 col-form-label">Inline Radios</label>

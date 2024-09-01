@@ -84,7 +84,7 @@ public class ReportRenderTest {
                 "            <input class=\"form-control\" th:id=\"${f.name}\" type=\"text\" th:name=\"${f.name}\" autocomplete th:if=\"${f.type.name() == 'TEXT'}\" th:value=\"${f.value}\" th:placeholder=\"${f.placeholder}\">\n" +
                 "            <sp:select  th:id=\"${f.name}\" th:name=\"${f.name}\" th:attr=\"key=${f.extraData}\" class=\"form-control\" th:if=\"${f.type.name() == 'SELECT'}\"/>\n" +
                 "            <sp:select  th:id=\"${f.name}\" th:name=\"${f.name}\" th:attr=\"key=${f.extraData}\" class=\"form-control\" group th:if=\"${f.type.name() == 'GROUP_SELECT'}\"/>\n" +
-                "            <sp:select  th:id=\"${f.name}\" th:name=\"${f.name}\" multiple th:attr=\"key=${f.extraData}\" class=\"form-control\" th:if=\"${f.type.name() == 'MULTIPLE_SELECT'}\" hideAllItem/>\n" +
+                "            <sp:select  th:id=\"${f.name}\" th:name=\"${f.name}\" multiple th:attr=\"key=${f.extraData}\" class=\"form-control\" th:if=\"${f.type.name() == 'MULTIPLE_SELECT'}\" hideDummyItemText/>\n" +
                 "        </th:block>\n" +
                 "\n" +
                 "        <th:block style=\"margin-bottom: 10px;\" th:if=\"${f.type.name() == 'DATE_RANGE'}\">\n" +

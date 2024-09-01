@@ -30,7 +30,7 @@
                         <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() ne 'DATE_RANGE'}">
                             <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}">
                             <sp:dict th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
-                            <sp:dict th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem/>
+                            <sp:dict th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText/>
                         </div>
 <!--                        <div class="col-md-2" style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">-->
 <!--                            <input class="form-control" th:id="${f.name + '0'}" type="date" th:name="${f.name + '0'}" autocomplete placeholder="YYYY-MM-DD" pattern="(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/\d{4}">-->

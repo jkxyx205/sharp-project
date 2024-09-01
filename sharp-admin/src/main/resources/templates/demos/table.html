@@ -67,11 +67,11 @@
                     </div>
                     <div class="form-group">
                         <label class="col-form-label mr-2">库房</label>
-                        <sp:select  id="plantId" name="plantId" key="core_plant" class="form-control" hideAllItem/>
+                        <sp:select  id="plantId" name="plantId" key="core_plant" class="form-control" hideDummyItemText/>
                     </div>
                     <div class="form-group">
                         <label class="col-form-label mr-2">操作人</label>
-                        <sp:select  id="operatorId" name="operatorId" key="sys_user" class="form-control" emptyItemText th:value="${session.user.id}"/>
+                        <sp:select  id="operatorId" name="operatorId" key="sys_user" class="form-control" dummyItemText th:value="${session.user.id}"/>
                     </div>
                     <div class="form-group">
                         <label class="col-form-label mr-2">备注</label>

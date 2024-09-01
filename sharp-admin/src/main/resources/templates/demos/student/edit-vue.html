@@ -53,11 +53,11 @@
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="materialTypeList">物料类型</label>
-                        <sp:select id="materialTypeList" name="materialTypeList" key="MATERIAL" class="form-control" hideAllItem required/>
+                        <sp:select id="materialTypeList" name="materialTypeList" key="MATERIAL" class="form-control" hideDummyItemText required/>
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="category">分类</label>
-                        <sp:select id="category" name="category" key="CategoryEnum" class="form-control" hideAllItem required/>
+                        <sp:select id="category" name="category" key="CategoryEnum" class="form-control" hideDummyItemText required/>
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="remark">备注</label>
@@ -111,11 +111,12 @@
                         // format
                         this.form.unitCode = data.unit ? data.unit.code : ''
                         this.form.gender = data.gender ? data.gender.code : ''
-
                         document.getElementById("birthday").value = data.birthday
                         this.form.materialTypeList = data.materialTypeList.map(type => type.code)
-
                         this.form.category = data.category;
+
+                        console.log("this.form = ", this.form)
+
                         this.loading = false
                     })
                 } else {

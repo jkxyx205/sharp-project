@@ -35,7 +35,7 @@
                                 <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
                                 <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
                                 <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
-                                <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideAllItem/>
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText/>
                             </th:block>
 
                             <th:block style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
