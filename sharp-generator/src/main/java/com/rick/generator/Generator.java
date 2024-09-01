@@ -281,9 +281,7 @@ public class Generator {
 
             if (field.getType() == LocalDateTime.class) {
                 columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
-            } else if (isDictValue) { // 字典
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"dictConverter\")),\n");
-            } else if(Collection.class.isAssignableFrom(field.getType())) {
+            } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz.isEnum()) {
                     type = clazz.getSimpleName();
@@ -294,6 +292,8 @@ public class Generator {
                 } else {
                     columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
                 }
+            } else if (isDictValue) { // 字典
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"dictConverter\")),\n");
             } else {
                 columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
             }
@@ -383,6 +383,7 @@ public class Generator {
                 } else {
                     // select
                     htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SELECT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo,  renderType, ifGeneratorLabel)).append("\n");
+                    htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SEARCH_SELECT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo,  renderType, ifGeneratorLabel)).append("\n");
                     // radio
                     htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.RADIO, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
                 }

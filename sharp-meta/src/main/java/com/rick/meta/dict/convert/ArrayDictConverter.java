@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class ArrayDictConverter implements ValueConverter<String>  {
+public class ArrayDictConverter implements ValueConverter<String, String>  {
 
     private final DictService dictService;
 
     @Override
-    public String convert(Object dictType, String values) {
+    public String convert(String dictType, String values) {
         if (values == null) {
             return null;
         }
@@ -32,6 +32,6 @@ public class ArrayDictConverter implements ValueConverter<String>  {
             valueList = JsonUtils.toList(values, DictValue.class).stream().map(dictValue -> dictValue.getCode()).collect(Collectors.toList());
         }
 
-        return valueList.stream().map(value -> dictService.getDictByTypeAndName((String) dictType, value).get().getLabel()).collect(Collectors.joining(","));
+        return valueList.stream().map(value -> dictService.getDictByTypeAndName(dictType, value).get().getLabel()).collect(Collectors.joining(","));
     }
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @createdAt 2023-03-17 13:45:00
  */
 @Component
-public class LocalDateTimeConverter implements ValueConverter<LocalDateTime> {
+public class LocalDateTimeConverter implements ValueConverter<Object, LocalDateTime> {
 
     @Override
     public String convert(Object context, LocalDateTime value) {

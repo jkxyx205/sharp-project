@@ -9,7 +9,8 @@ import java.util.Objects;
  * @createdAt 2023-03-17 13:45:00
  */
 @Component
-public class BoolConverter implements ValueConverter<Object> {
+public class BoolConverter implements ValueConverter<Object, Object> {
+
     @Override
     public String convert(Object context, Object value) {
         if (value == null) {

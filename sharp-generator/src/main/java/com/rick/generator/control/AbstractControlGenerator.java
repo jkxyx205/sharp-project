@@ -37,8 +37,11 @@ public abstract class AbstractControlGenerator {
         }
 
         if (cpnType == CpnTypeEnum.DATE) {
-            formGroupWrap(htmlBuilder, formLayout, labelHtml + "<input type=\"text\" class=\"form-control\" id=\""+name+"\" name=\""+name+"\" th:value=\"${"+entityName+"."+name+"}\" required>");
+            formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, "<input type=\"text\" class=\"form-control\" id=\""+name+"\" name=\""+name+"\" th:value=\"${"+entityName+"."+name+"}\" required>"));
         } else if (cpnType == CpnTypeEnum.MULTIPLE_SELECT) {
+            String embeddedClassPathName = getEmbeddedClassPathName(name, additionalInfo);
+            formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" hideDummyItemText required/>"));
+        } else if (cpnType == CpnTypeEnum.SEARCH_SELECT) {
             String embeddedClassPathName = getEmbeddedClassPathName(name, additionalInfo);
             formGroupWrap(htmlBuilder, formLayout, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" required/>"));
         } else {
@@ -65,15 +68,28 @@ public abstract class AbstractControlGenerator {
             htmlBuilder
                     .append("<!-- <link rel=\"stylesheet\" th:href=\"@{/plugins/multiple-select/multiple-select.min.css}\"> -->")
                     .append("<!-- <script th:src=\"@{/plugins/multiple-select/multiple-select.min.js}\"></script> -->")
-                    .append("<!--\n" +
-                            // mounted 执行
+                    .append("<!--// vue 需要在 mounted 执行\n" +
                             "               $('#" + name + "').multipleSelect({\n" +
                             "                    filter: true,\n" +
                             "                    selectAll: true,\n" +
                             "                    single: false,\n" +
-                            "                    placeholder: '选择分类'\n" +
+                            "                    placeholder: '选择"+label+"'\n" +
+                            "                }).multipleSelect(\"setSelects\", [[${new com.rick.formflow.form.cpn.CheckBox().parseValue("+entityName+"."+name+")}]] || [])\n" +
+                            "            -->\n" +
+                            "            <!--// 多选需要通过 multipleSelect 获取数据\n" +
+                            "               formData.materialTypeList = $('#materialTypeList').multipleSelect('getSelects') \n" +
+                            "            --> ");
+        }  else if (cpnType == CpnTypeEnum.SEARCH_SELECT) {
+            htmlBuilder
+                    .append("<!-- <link rel=\"stylesheet\" th:href=\"@{/plugins/multiple-select/multiple-select.min.css}\"> -->")
+                    .append("<!-- <script th:src=\"@{/plugins/multiple-select/multiple-select.min.js}\"></script> -->")
+                    .append("<!--// vue 需要在 mounted 执行\n" +
+                            "               $('#" + name + "').multipleSelect({\n" +
+                            "                    filter: true,\n" +
+                            "                    single: true,\n" +
+                            "                    placeholder: '选择"+label+"'\n" +
                             "                })\n" +
-                            "        -->");
+                            "            -->");
         }
         return htmlBuilder.toString();
     }
@@ -92,15 +108,15 @@ public abstract class AbstractControlGenerator {
     }
 
     private String horizontalFormWrap(FormLayoutEnum formLayout, CpnTypeEnum cpnType, String controlHtml) {
-        String colFormLabel = (CpnTypeEnum.CHECKBOX == cpnType || CpnTypeEnum.RADIO == cpnType) ? " col-form-label" : "";
+        String colFormLabel = (CpnTypeEnum.CHECKBOX == cpnType || CpnTypeEnum.RADIO == cpnType || CpnTypeEnum.SELECT == cpnType) ? " col-form-label" : "";
         return formLayout == FormLayoutEnum.HORIZONTAL ? "<div class=\"col-4" + colFormLabel + "\">" + controlHtml + "</div>" : controlHtml;
     }
 
     private void formGroupWrap(StringBuilder htmlBuilder, FormLayoutEnum formLayout, String innerHtml) {
         if (formLayout == FormLayoutEnum.INLINE) {
-            htmlBuilder.append("<div class=\"form-group col-4\">" + innerHtml + "</div>");
-        } else if (formLayout == FormLayoutEnum.HORIZONTAL) {
             htmlBuilder.append("<div class=\"form-group row\">" + innerHtml + "</div>");
+        } else if (formLayout == FormLayoutEnum.HORIZONTAL) {
+            htmlBuilder.append("<div class=\"form-group col-4\">" + innerHtml + "</div>");
         }
     }
 

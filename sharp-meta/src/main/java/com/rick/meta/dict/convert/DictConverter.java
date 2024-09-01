@@ -10,17 +10,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class DictConverter implements ValueConverter<Object> {
+public class DictConverter implements ValueConverter<String, String> {
 
     private final DictService dictService;
 
+    private final ArrayDictConverter arrayDictConverter;
+
     @Override
-    public String convert(Object dictType, Object value) {
+    public String convert(String dictType, String value) {
         if (value == null) {
             return null;
         }
 
-        return dictService.getDictByTypeAndName((String) dictType, String.valueOf(value))
+        if (value.startsWith("[")) {
+            return arrayDictConverter.convert(dictType, value);
+        }
+
+        return dictService.getDictByTypeAndName((String) dictType, value)
                 .orElseThrow(() -> new IllegalArgumentException(dictType + " doesn't contain " + value)).getLabel();
     }
 }

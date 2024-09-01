@@ -9,7 +9,7 @@ import java.sql.Date;
  * @createdAt 2023-03-17 13:45:00
  */
 @Component
-public class SqlDateConverter implements ValueConverter<Date> {
+public class SqlDateConverter implements ValueConverter<Object, Date> {
 
     @Override
     public String convert(Object context, Date value) {

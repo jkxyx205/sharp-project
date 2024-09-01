@@ -106,7 +106,6 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
                 return (T) values;
             }
         } else {
-
             String deserializePropertyName = currentName.replace(this.propertyName, "");
             deserializePropertyName = firstLetterLowerCase(deserializePropertyName);
 
