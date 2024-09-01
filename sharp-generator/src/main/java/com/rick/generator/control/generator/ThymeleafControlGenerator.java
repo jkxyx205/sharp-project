@@ -52,6 +52,8 @@ public class ThymeleafControlGenerator extends AbstractControlGenerator {
                     "<input class=\"form-check-input\" type=\"checkbox\" th:id=\""+name+"\" th:value=\"1\" name=\"" + name + "\" th:checked=\"${"+entityName+"." + name + " ne null && "+entityName+"."+name+" == true }\">\n" +
                     "<label class=\"form-check-label\" th:for=\""+name+"\"></label>\n" +
                     "</div>";
+        } else if  (cpnType == CpnTypeEnum.DATE) {
+            return "<input class=\"form-control\" type=\"text\" id=\"" + name + "\" name=\"" + name + "\" th:value=\"${" + entityName + "." + name + "}\" required>";
         }
 
         return "<!-- " + name + " 没有找到模版-->";

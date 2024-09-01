@@ -18,9 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 表单的增删改
@@ -47,14 +45,27 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
 
     @GetMapping("new")
     public String gotoFormPage(Model model) {
-        model.addAttribute(entityPropertyName, BeanUtils.instantiateClass(this.entityClass));
+        Object entity = BeanUtils.instantiateClass(this.entityClass);
+
+        Field[] fields = ClassUtils.getAllFields(entityClass);
+        for (Field field : fields) {
+            if (List.class == field.getType()) {
+                ClassUtils.setFieldValue(entity, field, Collections.emptyList());
+            } if (Set.class == field.getType()) {
+                ClassUtils.setFieldValue(entity, field, Collections.emptySet());
+            }
+        }
+
+        model.addAttribute(entityPropertyName, entity);
         addAttributeOfDict(model);
         return this.formPage;
     }
 
     @GetMapping("{id}/page")
     public String gotoFormPageById(@PathVariable Long id, Model model) {
-        model.addAttribute(entityPropertyName, baseService.findById(id).get());
+        Object entity = baseService.findById(id).get();
+        DictUtils.fillDictLabel(entity); // 可选操作
+        model.addAttribute(entityPropertyName, entity);
         addAttributeOfDict(model);
         return this.formPage;
     }

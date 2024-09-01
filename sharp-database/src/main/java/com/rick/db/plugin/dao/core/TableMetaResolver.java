@@ -43,7 +43,7 @@ class TableMetaResolver {
         String name = (TABLE_PREFIX + camelToSnake(clazz.getSimpleName()));
         String tableName = StringUtils.isBlank(tableAnnotation.value()) ? name : tableAnnotation.value();
 
-        Field[] fields = getAllFields(clazz);
+        Field[] fields = ClassUtils.getAllFields(clazz);
         StringBuilder columnNamesBuilder = new StringBuilder();
         StringBuilder updateColumnNamesBuilder = new StringBuilder();
         StringBuilder propertiesBuilder = new StringBuilder();
@@ -159,7 +159,7 @@ class TableMetaResolver {
             Embedded embedded = field.getAnnotation(Embedded.class);
             if (embedded != null) {
                 embeddedPropertyList.add(new TableMeta.EmbeddedProperty(embedded, field));
-                Field[] embeddedFields = getAllFields(field.getType());
+                Field[] embeddedFields = ClassUtils.getAllFields(field.getType());
                 resolveFields(embeddedFields, propertyName + ".", embedded.columnPrefix(), idCollector, versionCollector, embeddedPropertyList,
                         selectAnnotationList, sqlAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
                         manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
@@ -224,17 +224,4 @@ class TableMetaResolver {
 
     }
 
-    private Field[] getAllFields(Class<?> clazz) {
-        List<Field> list = new ArrayList<>();
-        while (Objects.nonNull(clazz)) {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                if (!list.stream().map(Field::getName).collect(Collectors.toSet()).contains(field.getName())) {
-                    list.add(field);
-                }
-            }
-            clazz = clazz.getSuperclass();
-        }
-        return list.toArray(new Field[] {});
-    }
 }

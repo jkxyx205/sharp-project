@@ -19,7 +19,9 @@ public class BooleanPropertyDeserializer extends JsonDeserializer<Boolean> {
     public Boolean deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-        if (node.isArray()) {
+        if (node.isBoolean()) {
+            return node.asBoolean();
+        } if (node.isArray()) {
             return !node.isEmpty();
         } else if (node.isTextual()) {
             String text = node.asText();

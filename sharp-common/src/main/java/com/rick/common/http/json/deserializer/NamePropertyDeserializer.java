@@ -61,6 +61,11 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
     public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
         String currentName = jsonParser.getParsingContext().getCurrentName();
+
+        if (currentName.equals(propertyName)) {
+            return (T) JsonUtils.toObject(node, javaType.getRawClass());
+        }
+
         Class deserializePropertyClass;
 
         if (List.class.isAssignableFrom(this.javaType.getRawClass())) {

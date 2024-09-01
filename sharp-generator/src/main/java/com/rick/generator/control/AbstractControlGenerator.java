@@ -114,9 +114,9 @@ public abstract class AbstractControlGenerator {
 
     private void formGroupWrap(StringBuilder htmlBuilder, FormLayoutEnum formLayout, String innerHtml) {
         if (formLayout == FormLayoutEnum.INLINE) {
-            htmlBuilder.append("<div class=\"form-group row\">" + innerHtml + "</div>");
-        } else if (formLayout == FormLayoutEnum.HORIZONTAL) {
             htmlBuilder.append("<div class=\"form-group col-4\">" + innerHtml + "</div>");
+        } else if (formLayout == FormLayoutEnum.HORIZONTAL) {
+            htmlBuilder.append("<div class=\"form-group row\">" + innerHtml + "</div>");
         }
     }
 

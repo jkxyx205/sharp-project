@@ -264,7 +264,7 @@ public class Generator {
             String type = resolverInfo.dictTypeValue;
             boolean isDictValue = resolverInfo.isDictValue;
 
-            // 设置 ReportColumn
+            // 设置 QueryField
             if (isDictValue) {
                 queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.SELECT, \""+type+"\"),\n");
             } else if (field.getType() == LocalDateTime.class) {
@@ -278,9 +278,11 @@ public class Generator {
             } else {
                 queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\"),\n");
             }
-
+            // 设置 ReportColumn
             if (field.getType() == LocalDateTime.class) {
                 columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
+            } else if (field.getType() == Boolean.class) {
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"boolConverter\")),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz.isEnum()) {
@@ -333,7 +335,7 @@ public class Generator {
                 "                .tplName(\"tpl/ajax_list\") // 拷贝模版页面到指定目录\n" +
                 "//                .tplName(\"tpl/list\") // 没有特殊要求使用模版页面\n" +
                 "//                .tplName(\"tpl/ajax_list\") // 没有特殊要求使用模版页面\n" +
-                "                .name(\"学生信息\")\n" +
+                "                .name(\""+StringUtils.defaultString(entityDAO.getTableMeta().getTable().comment(), entityDAO.getTableMeta().getTableName())+"\")\n" +
                 "                .reportAdviceName(\"operatorReportAdvice\")\n" +
                 "                .additionalInfo(Params.builder(1).pv(\"operator-bar\", true) // 显示操作按钮\n" +
                 "                        .pv(\"endpoint\", \""+(camelToSpinal(name) + "s")+"\")\n" +

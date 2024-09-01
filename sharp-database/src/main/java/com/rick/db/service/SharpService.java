@@ -197,6 +197,9 @@ public class SharpService {
                     Object value = null;
                     try {
                         value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
+                        if (pd.getPropertyType() == List.class && value == null) {
+                            value = Collections.emptyList();
+                        }
                         bw.setPropertyValue(propertyName, value);
                     } catch (TypeMismatchException | NotWritablePropertyException e) {
                         if (ObjectUtils.mayPureObject(pd.getPropertyType())) {

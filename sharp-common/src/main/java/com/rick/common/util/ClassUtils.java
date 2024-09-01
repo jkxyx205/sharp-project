@@ -2,12 +2,17 @@ package com.rick.common.util;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.util.ReflectionUtils;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -75,5 +80,39 @@ public class ClassUtils {
             return getField(clazz.getSuperclass(), name);
         }
 
+    }
+
+    public static Field[] getAllFields(Class<?> clazz) {
+        List<Field> list = new ArrayList<>();
+        while (Objects.nonNull(clazz)) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                if (!list.stream().map(Field::getName).collect(Collectors.toSet()).contains(field.getName())) {
+                    list.add(field);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return list.toArray(new Field[] {});
+    }
+
+    /**
+     * POJO setter
+     * @param obj
+     * @param field
+     * @param value
+     */
+    public static void setFieldValue(Object obj, Field field,  Object value) {
+        if (obj == null) {
+            return;
+        }
+
+        String propertyName = field.getName();
+
+        try {
+            ReflectionUtils.invokeMethod(obj.getClass().getMethod("set" + String.valueOf(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1), field.getType()), obj, value);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
