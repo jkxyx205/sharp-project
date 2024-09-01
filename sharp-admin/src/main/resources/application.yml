@@ -45,7 +45,7 @@ spring:
           starttls:
             enable: true
 sharp:
-  database:
+  database: # 多个包扫描用 , 隔开
     entity-base-package: com.rick.admin.module.**.entity
 
 dict:

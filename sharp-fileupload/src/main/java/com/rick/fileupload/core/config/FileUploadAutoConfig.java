@@ -1,8 +1,7 @@
 package com.rick.fileupload.core.config;
 
-import com.rick.common.util.ReflectUtils;
-import com.rick.db.service.SharpService;
-import com.rick.fileupload.client.support.DocumentDAO;
+import com.rick.db.plugin.dao.core.EntityDAOManager;
+import com.rick.fileupload.client.support.Document;
 import com.rick.fileupload.client.support.DocumentServiceImpl;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.InputStreamStore;
@@ -19,8 +18,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
-import java.lang.reflect.Field;
 
 /**
  * @author Rick
@@ -64,42 +61,8 @@ public class FileUploadAutoConfig {
     }
 
     @Bean
-    public DocumentServiceImpl documentService(SharpService sharpService, FileStore fileStore,
+    public DocumentServiceImpl documentService(FileStore fileStore,
                                                FileUploadProperties fileUploadProperties, ImageService imageService) {
-        DocumentDAO documentDAO = new DocumentDAO();
-        Field[] allFields = ReflectUtils.getAllFields(DocumentDAO.class);
-        for (Field field : allFields) {
-            if ("sharpService".equals(field.getName())) {
-                field.setAccessible(true);
-                try {
-                    field.set(documentDAO, sharpService);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } finally {
-                    break;
-                }
-            }
-        }
-
-        return new DocumentServiceImpl(documentDAO, fileStore, fileUploadProperties, imageService);
+        return new DocumentServiceImpl(EntityDAOManager.getEntityDAO(Document.class), fileStore, fileUploadProperties, imageService);
     }
-//    @Configuration
-//    static class FastDFSConfig {
-        // 会先执行fastDFSUploaderHandler，再执行DefaultUploadHandler
-//        @Bean
-//        @Primary
-//        public InputStreamStore fastDFSInputStreamStore() throws IOException, MyException {
-//            return new FastDFSInputStreamStore("fdfs_client.properties");
-//        }
-//    }
-
-//    @Configuration
-//    static class OSSConfig {
- /*       @Bean
-        @Primary*/
-//        public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
-//            OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
-//            return new OSSInputStreamStore(ossClient, ossProperties);
-//        }
-//    }
 }

@@ -2,8 +2,8 @@ package com.rick.fileupload.client.support;
 
 import com.google.common.collect.Lists;
 import com.rick.common.http.HttpServletResponseUtils;
-import com.rick.common.util.IdGenerator;
 import com.rick.common.util.ZipUtils;
+import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileUploadProperties;
@@ -22,11 +22,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -36,7 +34,7 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    private final DocumentDAO documentDAO;
+    private final EntityDAO<Document, Long> documentDAO;
 
     private final FileStore fileStore;
 
@@ -48,7 +46,7 @@ public class DocumentServiceImpl implements DocumentService {
     public Document store(FileMeta fileMeta, String groupName) throws IOException {
         fileStore.storeFileMeta(Arrays.asList(fileMeta), groupName);
         Document document = parse(fileMeta);
-        documentDAO.insert(parseParams(document));
+        documentDAO.insert(document);
         return document;
     }
 
@@ -61,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService {
             documentList.add(parse(fileMeta));
         }
 
-        documentDAO.insert(documentList.stream().map(document -> parseParams(document)).collect(Collectors.toList()));
+        documentDAO.insert(documentList);
         return documentList;
     }
 
@@ -164,18 +162,6 @@ public class DocumentServiceImpl implements DocumentService {
         for (Document subDocument :  subDocuments) {
             FileCopyUtils.copy(fileStore.getInputStream(subDocument.getGroupName(), subDocument.getPath()), new FileOutputStream(new File(folder, subDocument.getFullName())));
         }
-    }
-
-    private Object[] parseParams(Document document) {
-        // id,create_time,name,extension,content_type,size,group_name,path
-        long sequenceId = IdGenerator.getSequenceId();
-        document.setId(sequenceId);
-        document.setCreateTime(LocalDateTime.now());
-        return new Object[] {
-                document.getId()
-                , document.getCreateTime(), document.getName(), document.getExtension(), document.getContentType(), document.getSize(),document.getGroupName(),
-                document.getPath(),
-        };
     }
 
     private Document parse(FileMeta fileMeta) {

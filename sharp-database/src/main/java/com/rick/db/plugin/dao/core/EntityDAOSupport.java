@@ -57,6 +57,8 @@ public class EntityDAOSupport {
     @Autowired
     private SharpDatabaseProperties sharpDatabaseProperties;
 
+    private static final String FILE_UPLOAD_ENTITY_PACKAGE = "com.rick.fileupload.client.support";
+
     public <T, ID> EntityDAO<T, ID> getEntityDAO(@NonNull Class<?> entityClass) {
         EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
         boolean isNotInstance = (entityDAO == null);
@@ -137,7 +139,16 @@ public class EntityDAOSupport {
                 false);
         // 只扫描注解是 @Table 的类
         provider.addIncludeFilter(new AnnotationTypeFilter(Table.class));
-        Set<BeanDefinition> scanList = provider.findCandidateComponents(sharpDatabaseProperties.getEntityBasePackage());
+        String[] packages = sharpDatabaseProperties.getEntityBasePackage().split(",\\s+");
+        for (String packagePath : packages) {
+            registerDAO(provider, packagePath);
+        }
+
+        registerDAO(provider, FILE_UPLOAD_ENTITY_PACKAGE);
+    }
+
+    private void registerDAO(ClassPathScanningCandidateComponentProvider provider, String packagePath) throws ClassNotFoundException {
+        Set<BeanDefinition> scanList = provider.findCandidateComponents(packagePath);
 
         for (BeanDefinition beanDefinition : scanList) {
             getEntityDAO(Class.forName(beanDefinition.getBeanClassName()));
