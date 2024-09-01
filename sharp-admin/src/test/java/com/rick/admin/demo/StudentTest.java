@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 /**
  * @author Rick.Xu
- * @date 2024-09-01 09:17:58
+ * @date 2024-09-01 13:39:37
  */
 @SpringBootTest
 public class StudentTest {
@@ -30,7 +30,7 @@ public class StudentTest {
                 .tplName("tpl/ajax_list") // 拷贝模版页面到指定目录
 //                .tplName("tpl/list") // 没有特殊要求使用模版页面
 //                .tplName("tpl/ajax_list") // 没有特殊要求使用模版页面
-                .name("学生信息")
+                .name("学生表")
                 .reportAdviceName("operatorReportAdvice")
                 .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
                         .pv("endpoint", "students")
@@ -63,7 +63,7 @@ public class StudentTest {
                         new ReportColumn("email", "email"),
                         new ReportColumn("birthday", "出生日期"),
                         new ReportColumn("age", "年龄"),
-                        new ReportColumn("marriage", "婚否"),
+                        new ReportColumn("marriage", "婚否", false,"null", Arrays.asList("boolConverter")),
                         new ReportColumn("unit.code", "unit.code", false,"UNIT", Arrays.asList("dictConverter")),
                         new ReportColumn("files", "files"),
                         new ReportColumn("avatar", "avatar"),
