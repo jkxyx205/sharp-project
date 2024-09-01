@@ -98,7 +98,7 @@ public class GeneratorTest {
     private void executeInsertSql() {
         SQLUtils.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `email`, `birthday`, `age`, `is_marriage`, `unit_code`, `files`, `avatar`, `hobby_list`, `material_type`, `category`, `remark`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
                 "VALUES\n" +
-                "\t(1, '0002', '李四', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0),\n" +
-                "\t(2, '0001', '张三', 'M', 'fsadfsaf@163.com', '1992-11-12', 19, 1, 'EA', '[{\\\"name\\\": \\\"Rick\\\", \\\"fullName\\\": \\\"Rick\\\", \\\"fullPath\\\": \\\"null/null\\\"}]', '{\\\"name\\\": \\\"Tom\\\", \\\"fullName\\\": \\\"Tom\\\", \\\"fullPath\\\": \\\"null/null\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[\\\"M1\\\"]', 'MATERIAL', 'fsdfdasf', 1, '2024-08-24 22:57:24', 1, '2024-08-30 13:59:14', 0)");
+                "\t(1, '0002', '李四', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[]', NULL, NULL, NULL, NULL, NULL, NULL, 0),\n" +
+                "\t(2, '0001', '张三', 'M', 'fsadfsaf@163.com', '1992-11-12', 19, 1, 'EA', '[{\\\"name\\\": \\\"Rick\\\", \\\"fullName\\\": \\\"Rick\\\", \\\"fullPath\\\": \\\"null/null\\\"}]', '{\\\"name\\\": \\\"Tom\\\", \\\"fullName\\\": \\\"Tom\\\", \\\"fullPath\\\": \\\"null/null\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[{\\\"code\\\": \\\"M1\\\"}]', 'MATERIAL', 'fsdfdasf', 1, '2024-08-24 22:57:24', 1, '2024-09-01 10:32:41', 0)");
     }
 }

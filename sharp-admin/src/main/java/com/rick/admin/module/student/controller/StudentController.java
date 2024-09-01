@@ -5,6 +5,7 @@ import com.rick.admin.common.exception.ResourceNotFoundException;
 import com.rick.admin.module.student.entity.Student;
 import com.rick.admin.module.student.service.StudentService;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
+import com.rick.meta.dict.service.DictUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Controller;
@@ -25,10 +26,11 @@ import java.util.Optional;
 public class StudentController extends BaseFormController<Student, StudentService> {
 
     public StudentController(StudentService studentService) {
-        super(studentService, "demos/student/edit-thymeleaf");
+//        super(studentService, "demos/student/edit-thymeleaf");
 //        super(studentService, "demos/student/control-thymeleaf");
-//        super(studentService, "demos/student/control-thymeleaf");
-//        super(studentService, "demos/student/control-thymeleaf");
+
+        super(studentService, "demos/student/edit-vue");
+//        super(studentService, "demos/student/control-vue");
     }
 
     @GetMapping("{id}")
@@ -39,7 +41,9 @@ public class StudentController extends BaseFormController<Student, StudentServic
     }
 
     protected Student getEntityFromOptional(Optional<Student> optional, Object key) {
-        return optional.orElseThrow(() -> getResourceNotFoundException(key));
+        Student student = optional.orElseThrow(() -> getResourceNotFoundException(key));
+        DictUtils.fillDictLabel(student);
+        return student;
     }
 
     protected ResourceNotFoundException getResourceNotFoundException(Object key) {

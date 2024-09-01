@@ -17,7 +17,7 @@
                 <form class="form-inline row" id="form" onsubmit="return false">
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="code">外部可见，唯一code</label>
-                        <input class="form-control" type="text" id="code" value="" name="code" required v-model="form.code" :disabled="!(this.form.id === '')">
+                        <input class="form-control" type="text" id="code" value="" name="code" required v-model="form.code" :disabled="this.form.id">
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="name" required>姓名</label>
@@ -25,7 +25,17 @@
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="birthday">出生日期</label>
-                        <input type="text" class="form-control" id="birthday" name="birthday" required>
+                        <input type="text" class="form-control" id="birthday" name="birthday" th:value="${student.birthday}" required>
+                    </div>
+                    <div class="form-group col-4">
+                        <label class="col-form-label required" for="age">年龄</label>
+                        <input class="form-control" type="number" id="age" value="" name="age" v-model="form.age" pattern="-?\d+(\.\d+)?" required>
+                    </div>
+                    <div class="form-group col-4">
+                        <label class="col-form-label required" for="marriage">婚否</label>
+                        <div class="form-check form-check-inline mr-2">
+                            <input class="form-check-input" type="checkbox" id="marriage" value="1" name="marriage" v-model="form.marriage">
+                        </div>
                     </div>
                     <div class="form-group col-4">
                         <label class="col-form-label required" for="unitCode" required>单位code</label>
@@ -87,49 +97,30 @@
                 datasource: {
                     dicts: {}
                 },
-                form: {
-                    id: /*[[${student.id == null ? '' : student.id + ''} ]]*/,
-                    code: '',
-                    name: '',
-                    birthday: '',
-                    gender: '',
-                    unitCode: '',
-                    materialTypeList: [],
-                    category: '',
-                    remark: '',
-                    hobbyList: []
-                },
-                loading: true
+                // form: {
+                //     id: /*[[${student.id == null ? '' : student.id + ''} ]]*/,
+                //     code: '',
+                //     name: '',
+                //     birthday: '',
+                //     age: '',
+                //     marriage: '',
+                //     gender: '',
+                //     unitCode: '',
+                //     materialTypeList: [],
+                //     category: '',
+                //     remark: '',
+                //     hobbyList: []
+                // },
+                // loading: true,
+
+
+                form: /*[[${ student } ]]*/,
+                loading: false
+
             },
             mounted() {
                 formDOM = document.getElementById("form")
                 registerValid(formDOM);
-
-                if (this.form.id) {
-                    $.get("/students/" + this.form.id, (data) => {
-                        this.form = data
-                        // format
-                        this.form.unitCode = data.unit ? data.unit.code : ''
-                        this.form.gender = data.gender ? data.gender.code : ''
-                        document.getElementById("birthday").value = data.birthday
-                        this.form.materialTypeList = data.materialTypeList.map(type => type.code)
-                        this.form.category = data.category;
-
-                        console.log("this.form = ", this.form)
-
-                        this.loading = false
-                    })
-                } else {
-                    this.loading = false
-                }
-
-                // 一次行获取多个字典数据源
-                $.get("/dict" +
-                    "s?codes=CategoryEnum,MATERIAL,UNIT,HobbyEnum,GenderEnum", (res) => {
-                    this.datasource.dicts = res
-                })
-
-                $.LoadingOverlay('show')
 
                 // jquery 控件
                 $('#birthday').datepicker({
@@ -146,33 +137,52 @@
                     selectAll: true,
                     single: false,
                     placeholder: '选择物料类型'
-                }).multipleSelect('setSelects','')
+                }).multipleSelect('setSelects',[])
 
                 $('#category').multipleSelect({
                     filter: true,
                     single: true,
                     placeholder: '选择分类'
-                }).multipleSelect('setSelects','')
+                }).multipleSelect('setSelects', [])
+
+                // 不需要 ajax 再次获取，已经放到 model 中了
+                // if (this.form.id) {
+                //     $.get("/students/" + this.form.id, (data) => {
+                //         this.form = data
+                //         // format
+                        this.form.unitCode = this.form.unit ? this.form.unit.code : ''
+                        this.form.gender = this.form.gender ? this.form.gender.code : ''
+
+                        // this.form.materialTypeList = (this.form.materialTypeList && this.form.materialTypeList.map(type => type.code)) || []
+                        this.form.materialTypeList = this.form.materialTypeList.map(type => type.code)
+                        this.form.category = this.form.category;
+
+                        console.log("this.form = ", this.form)
+
+                        $('#materialTypeList').multipleSelect('setSelects', this.form.materialTypeList)
+                        $('#category').multipleSelect('setSelects', this.form.category || '')
+                //
+                //         this.loading = false
+                //     })
+                // } else {
+                //     this.loading = false
+                // }
+
+                // 一次行获取多个字典数据源
+                $.get("/dict" +
+                    "s?codes=CategoryEnum,MATERIAL,UNIT,HobbyEnum,GenderEnum", (res) => {
+                    this.datasource.dicts = res
+                })
+
+                if (this.loading) {
+                    $.LoadingOverlay('show')
+                }
             },
             computed: {
             },
             watch: {
                 loading: function (val, oldVal) {
                     val ? $.LoadingOverlay('show') : $.LoadingOverlay('hide')
-                },
-                'form.materialTypeList'(val, oldVal) {
-                    if (val && oldVal.length === 0) {
-                        if (val && val.length > 0) {
-                            $('#materialTypeList').multipleSelect('setSelects', val.join(','))
-                        }
-                    }
-                },
-                'form.category'(val, oldVal) {
-                    if (val && oldVal.length === 0) {
-                        if (val && val.length > 0) {
-                            $('#category').multipleSelect('setSelects', val)
-                        }
-                    }
                 }
             },
             methods: {
@@ -186,6 +196,7 @@
 
                         let categoryValue = $('#category').multipleSelect('getSelects')
                         this.form.category = categoryValue.length > 0 ? categoryValue[0] : ''
+
                         let formData = this.form
 
                         $.ajax ({

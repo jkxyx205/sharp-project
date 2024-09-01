@@ -72,8 +72,8 @@ public class Student extends BaseCodeEntity {
 
     @Embedded(columnPrefix="unit_")
     @JsonAlias("unitCode")
-//    看看更强大的 NamePropertyDeserializer，支持集合
 //    @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
+    //    看看更强大的 NamePropertyDeserializer，支持集合
     @JsonDeserialize(using = NamePropertyDeserializer.class)
     @DictType(type = "UNIT")
     @DictValueCheck(type = "UNIT")
