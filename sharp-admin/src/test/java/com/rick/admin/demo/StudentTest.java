@@ -31,7 +31,7 @@ public class StudentTest {
 //                .tplName("tpl/list") // 没有特殊要求使用模版页面
 //                .tplName("tpl/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生表")
-                .reportAdviceName("operatorReportAdvice")
+                .reportAdviceName("studentReportAdvice")
                 .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
                         .pv("endpoint", "students")
                         .build()) // 显示操作按钮
