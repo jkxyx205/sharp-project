@@ -50,6 +50,8 @@ sharp:
 
 dict:
   items:
+    - type: bol
+      map: { "1": "是", "0": "否" }
     - type: sys_user
       sql: "select id, name from sys_user order by id asc"
     - type: sys_role

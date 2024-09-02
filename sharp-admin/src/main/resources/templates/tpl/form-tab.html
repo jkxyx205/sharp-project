@@ -219,8 +219,8 @@
                 success: function(res){
                     if (res.success) {
                         reloadTab(formName) // 名字需要约定好
+                        toastr.success("保存成功")
                         setTimeout(() => {
-                            toastr.success("保存成功")
                             window.location.reload()
                         }, 1000)
                     }
