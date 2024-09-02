@@ -79,7 +79,7 @@ public class SelectProcessor extends AbstractElementTagProcessor {
         model.add(modelFactory.createOpenElementTag(openElementString.toString()));
 
         new SelectOptionHelper(dictService, sharpService)
-                .appendOptions(modelFactory,model, iProcessableElementTag, iElementTagStructureHandler);
+                .appendOptions(modelFactory, model, iProcessableElementTag, iElementTagStructureHandler);
 
         model.add(modelFactory.createCloseElementTag("select"));
         iElementTagStructureHandler.replaceWith(model, false);

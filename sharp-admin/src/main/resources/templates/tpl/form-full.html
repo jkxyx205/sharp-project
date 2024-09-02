@@ -119,11 +119,11 @@
                     <!--                        <div class="invalid-feedback" th:if="${errors eq null ? false : (#maps.containsKey(errors, p.name) ? true : false)}" th:text="${errors.get(p.name).defaultMessage}"></div>-->
                 </th:block>
             </div>
-            <div class="form-group row" th:if="${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('showSaveFormBtn') == null || formBO.form.getAdditionalInfo().get('showSaveFormBtn') == true)}">
-                <label th:class="${'col-form-label col-sm-' + col}"></label>
-                <div th:class="${'col-sm-' + (12 - col)}">
-                    <button type="button" class="btn btn-primary" onclick="saveForm()">保存</button>
-                </div>
+        </div>
+        <div class="form-group row" th:if="${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('showSaveFormBtn') == null || formBO.form.getAdditionalInfo().get('showSaveFormBtn') == true)}">
+            <label th:class="${'col-form-label col-sm-' + col}"></label>
+            <div th:class="${'col-sm-' + (12 - col)}">
+                <button type="button" class="btn btn-primary" onclick="saveForm()">保存</button>
             </div>
         </div>
     </form>

@@ -65,6 +65,17 @@ public class FormService {
         return form;
     }
 
+    public FormBO getFormBO(Long formId, Long instanceId) {
+        FormBO formBO;
+        if (Objects.nonNull(instanceId)) {
+            formBO = getFormBOByIdAndInstanceId(formId, instanceId);
+        } else {
+            formBO = getFormBOById(formId);
+        }
+
+        return formBO;
+    }
+
     public FormBO getFormBOById(Long formId) {
         return getFormBOByIdAndInstanceId(formId, null);
     }

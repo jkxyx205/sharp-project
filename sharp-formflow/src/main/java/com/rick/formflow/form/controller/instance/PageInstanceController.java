@@ -42,7 +42,7 @@ public class PageInstanceController {
      */
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
     public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model, HttpServletRequest request) {
-        FormBO formBO = getFormBO(formId, instanceId);
+        FormBO formBO = formService.getFormBO(formId, instanceId);
 
         model.addAttribute("formBO", formBO);
         model.addAttribute("model", getDataModel(formBO.getPropertyList()));
@@ -76,7 +76,7 @@ public class PageInstanceController {
             return "success";
         } catch (BindException e) {
             model.addAttribute("errors", e.getAllErrors().stream().collect(Collectors.toMap(o -> ((FieldError)o).getField(), o -> o)));
-            FormBO formBO = getFormBO(formId, instanceId);
+            FormBO formBO = formService.getFormBO(formId, instanceId);
             model.addAttribute("formBO", formBO);
             // 填充表单数据
             for (FormBO.Property property : formBO.getPropertyList()) {
@@ -86,17 +86,6 @@ public class PageInstanceController {
             model.addAttribute("model", getDataModel(formBO.getPropertyList()));
             return StringUtils.defaultString(formBO.getForm().getTplName(),"form");
         }
-    }
-
-    private FormBO getFormBO(Long formId, Long instanceId) {
-        FormBO formBO;
-        if (Objects.nonNull(instanceId)) {
-            formBO = formService.getFormBOByIdAndInstanceId(formId, instanceId);
-        } else {
-            formBO = formService.getFormBOById(formId);
-        }
-
-        return formBO;
     }
 
     private Map<String, Object> getDataModel(List<FormBO.Property> propertyList) {

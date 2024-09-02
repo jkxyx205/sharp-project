@@ -66,6 +66,4 @@ public class SelectOptionProcessor extends AbstractElementTagProcessor {
                 .appendOptions(modelFactory, model, iProcessableElementTag, iElementTagStructureHandler);
     }
 
-
-
 }

@@ -5,6 +5,7 @@ import com.rick.common.util.JsonUtils;
 import com.rick.db.service.SharpService;
 import com.rick.fileupload.client.support.Document;
 import com.rick.report.core.entity.Report;
+import com.rick.report.core.support.ReportConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +44,7 @@ public class StudentReportAdvice extends OperatorReportAdvice {
 
         }
 
-        report.getAdditionalInfo().put("js", "$('table tr').find('td:eq(10)').each(function(){\n" +
+        report.getAdditionalInfo().put(ReportConstants.ADDITIONAL_JS, "$('table tr').find('td:eq(10)').each(function(){\n" +
                 "    $(this).html('<img height=\"20\" src=\"'+$(this).text()+'\"/>')\n" +
                 "})");
 
