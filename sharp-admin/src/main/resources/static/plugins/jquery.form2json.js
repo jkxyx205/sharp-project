@@ -1,11 +1,11 @@
 (function($) {
-    // https://github.com/2sidedfigure/form2json/blob/master/jquery.form2json.js
+
     var defaults = {
             inputSelectors: 'input:not([type=radio], [type=checkbox], [type=reset]), input[type=checkbox], input[type=radio]:checked, textarea, select',
             multiValSelector: '[type=checkbox], select',
             keyAttr: 'name',
             wrapped: false,
-            allowEmptyMultiVal: true,
+            allowEmptyMultiVal: false,
             allowEmptySingleVal: true,
             keyTransform: null
         },
@@ -35,11 +35,8 @@
 
         singleVal.each(function() {
             var item = $(this),
-                key = item.attr(settings.keyAttr) || item.attr('name') || item.attr('id');
-            var val = item.val();
-            if (item.attr('type') != 'password') {
-                val = !item.val() ? val : item.val().trim();
-            }
+                key = item.attr(settings.keyAttr) || item.attr('name') || item.attr('id'),
+                val = item.val();
 
             if (!settings.allowEmptySingleVal && empty(val)) return true;
             if (key) {

@@ -136,7 +136,6 @@
         registerValid(window[formCode + 'FormDOM']);
 
         window[formCode + 'FormData'] = function () {
-            debugger
             let formData = window['$' + formCode + 'FormDOM'].form2json({
                 multiValSelector: '[type=checkbox]'
             });

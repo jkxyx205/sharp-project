@@ -5,7 +5,7 @@
             multiValSelector: '[type=checkbox], select',
             keyAttr: 'name',
             wrapped: false,
-            allowEmptyMultiVal: true,
+            allowEmptyMultiVal: false,
             allowEmptySingleVal: true,
             keyTransform: null
         },
@@ -35,11 +35,8 @@
 
         singleVal.each(function() {
             var item = $(this),
-                key = item.attr(settings.keyAttr) || item.attr('name') || item.attr('id');
-            var val = item.val();
-            if (item.attr('type') != 'password') {
-                val = item.val().trim();
-            }
+                key = item.attr(settings.keyAttr) || item.attr('name') || item.attr('id'),
+                val = item.val();
 
             if (!settings.allowEmptySingleVal && empty(val)) return true;
             if (key) {
@@ -85,13 +82,17 @@
                     }
                 }
 
-                if (!obj[prop]) {
-                    obj[prop] = []
-                }
-                if (val) {
-                    obj[prop].push(val);
-                }
+                if (obj[prop]) {
+                    if (val) {
+                        //already exists, but needs to be turned into an array
+                        $.isArray(obj[prop]) || (obj[prop] = [ obj[prop] ]);
 
+                        obj[prop].push(val);
+                    }
+                } else {
+                    //data doesn't have the item yet, create it
+                    obj[prop] = val;
+                }
             }
         });
 
