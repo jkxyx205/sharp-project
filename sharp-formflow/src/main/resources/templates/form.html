@@ -19,6 +19,7 @@
 <body>
     <div class="container" style="padding-top: 56px;" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}">
         <form class="needs-validation" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="${formBO.form.id}" th:name="${formBO.form.code}" novalidate>
+            <input type="hidden" id="id" th:value="${formBO.instanceId}">
             <h2 class="mb-5" th:text="${formBO.form.name}"></h2>
 <!--            th:with="isRequired = ${#lists.contains(p.configurer.validatorList, required)}"-->
             <div class="mb-3 row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.configurer.validatorProperties.get('Required.required') eq null ? false : p.configurer.validatorProperties.get('Required.required')}">

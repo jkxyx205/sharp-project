@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.rick.db.service.SharpService;
+import com.rick.formflow.form.service.FormService;
 import com.rick.meta.dict.service.DictService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +38,8 @@ import java.time.format.DateTimeFormatter;
 public class ThymeleafConfig {
 
     @Bean
-    public CustomizeProcessorDialectDialect dictSelectDialect(DictService dictService, SharpService sharpService) {
-        return new CustomizeProcessorDialectDialect(dictService, sharpService);
+    public CustomizeProcessorDialectDialect dictSelectDialect(DictService dictService, SharpService sharpService, FormService formService) {
+        return new CustomizeProcessorDialectDialect(dictService, sharpService, formService);
     }
 
     @Bean

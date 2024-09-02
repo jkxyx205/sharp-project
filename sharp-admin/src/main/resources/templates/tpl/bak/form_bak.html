@@ -15,6 +15,7 @@
 <body>
 <div class="container" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}, col = ${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('label-col') == null) ? 2 : formBO.form.getAdditionalInfo().get('label-col')}">
     <form class="needs-validation dialog-form" th:classappend="${query.readonly == 'true' ? 'readonly' : ''}" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="${formBO.form.id}" th:name="${formBO.form.code}" novalidate>
+        <input type="hidden" id="id" th:value="${formBO.instanceId}">
         <div class="form-group row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.configurer.validatorProperties.get('Required.required') eq null ? false : p.configurer.validatorProperties.get('Required.required')}">
             <label th:for="${p.name}" th:class="${'col-form-label col-sm-' + col}" th:classappend="${isRequired ? 'required' : ''}" th:text="${p.configurer.label}"></label>
             <div th:class="${'col-sm-' + (12 - col)}">

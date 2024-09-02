@@ -3,6 +3,7 @@ package com.rick.formflow.form.controller.instance;
 
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
+import com.rick.db.constant.SharpDbConstants;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
@@ -33,16 +34,16 @@ public class AjaxInstanceController {
     }
 
     @PostMapping("{formId}")
-    public Result save(@RequestBody Map<String, Object> values, @PathVariable Long formId) throws BindException {
+    public Result<Long> save(@RequestBody Map<String, Object> values, @PathVariable Long formId) throws BindException {
         formService.post(formId, values);
-        return ResultUtils.success();
+        return ResultUtils.success((Long) values.get(SharpDbConstants.ID_COLUMN_NAME));
     }
 
     @PutMapping("{formId}/{instanceId}")
     @PostMapping("{formId}/{instanceId}")
-    public Result update(@RequestBody Map<String, Object> values, @PathVariable Long formId, @PathVariable Long instanceId) throws BindException {
+    public Result<Long> update(@RequestBody Map<String, Object> values, @PathVariable Long formId, @PathVariable Long instanceId) throws BindException {
         formService.post(formId, instanceId, values);
-        return ResultUtils.success();
+        return ResultUtils.success(instanceId);
     }
 
     @DeleteMapping("{formId}")
