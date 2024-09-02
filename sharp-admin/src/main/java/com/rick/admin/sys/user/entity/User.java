@@ -10,6 +10,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +33,8 @@ public class User extends BaseCodeEntity {
 
     @Column(comment = "密码", columnDefinition = "varchar(128)", updatable = false)
     String password;
+
+    LocalDate birthday;
 
     @Column(value = "is_available", comment = "是否可用")
     Boolean available;

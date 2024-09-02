@@ -15,6 +15,7 @@ import com.rick.formflow.form.valid.core.Validator;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.*;
 import com.rick.report.core.service.ReportService;
+import com.rick.report.core.support.ReportConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -126,9 +127,10 @@ public class FormTagTest {
                 .additionalInfo(Params.builder(1)
                         .pv("formId", "859875429241106432")
                         .pv("formAction", "link")
+                        .pv(ReportConstants.ADDITIONAL_OPERATOR_BAR, true)
                         .build())
                 // language=SQL
-                .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +
+                .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, sys_user.birthday, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +
                         " LEFT JOIN sys_user u on u.id = sys_user.create_by\n" +
                         " LEFT JOIN ( SELECT sys_user.id, GROUP_CONCAT(r.name) name FROM sys_user\n" +
                         " LEFT JOIN sys_user_role ur on sys_user.id = ur.user_id AND ur.is_deleted = 0\n" +
@@ -145,6 +147,7 @@ public class FormTagTest {
                         new HiddenReportColumn("id"),
                         new ReportColumn("code", "用户名", true),
                         new ReportColumn("name", "姓名", true),
+                        new ReportColumn("birthday", "出生日期", true),
                         new ReportColumn("role_name", "角色"),
                         new ReportColumn("is_available", "是否可用").setColumnWidth(80).setAlign(AlignEnum.CENTER),
                         new ReportColumn("create_name", "创建人").setColumnWidth(100),

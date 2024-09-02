@@ -118,6 +118,14 @@ public class UserTest {
                 .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
                 .build();
 
+        CpnConfigurer birthdayCpn = CpnConfigurer.builder()
+                .cpnType(CpnTypeEnum.DATE)
+                .name("birthday")
+                .label("出生日期")
+                .placeholder("请输入出生日期")
+                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
+                .build();
+
         CpnConfigurer availableCpn = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.SWITCH)
                 .name("available")
@@ -135,7 +143,7 @@ public class UserTest {
                 .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
                 .build();
 
-        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, availableCpn, roleCpn);
+        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, birthdayCpn, availableCpn, roleCpn);
         return cpnConfigurerList;
     }
 
@@ -163,7 +171,7 @@ public class UserTest {
                         .build())
 //                .querySql("SELECT id, code, name, IF(is_available, '是', '否') is_available, DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user WHERE code LIKE :code AND name LIKE :name AND is_available = :is_available AND create_time >= :create_time0 AND create_time <= :create_time1 AND id <> 1")
                 // language=SQL
-                .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +
+                .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, sys_user.birthday, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +
                         " LEFT JOIN sys_user u on u.id = sys_user.create_by\n" +
                         " LEFT JOIN ( SELECT sys_user.id, GROUP_CONCAT(r.name) name FROM sys_user\n" +
                         " LEFT JOIN sys_user_role ur on sys_user.id = ur.user_id AND ur.is_deleted = 0\n" +
@@ -180,6 +188,7 @@ public class UserTest {
                         new HiddenReportColumn("id"),
                         new ReportColumn("code", "用户名", true),
                         new ReportColumn("name", "姓名", true),
+                        new ReportColumn("birthday", "出生日期", true),
                         new ReportColumn("role_name", "角色"),
                         new ReportColumn("is_available", "是否可用").setColumnWidth(80).setAlign(AlignEnum.CENTER),
                         new ReportColumn("create_name", "创建人").setColumnWidth(100),
