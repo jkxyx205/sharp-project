@@ -9,14 +9,17 @@ head.appendChild(style)
  * @param name
  * @constructor
  */
-function FileUpload(name) {
+function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer) {
     this.name = name || 'attachment_file'
     this.$fileUpload = $('#' + name)
-    this.$itemContainer = this.$fileUpload.next()
+    this.$itemContainer = $itemContainer || this.$fileUpload.next()
     this.attachmentList = JSON.parse(this.$fileUpload.prev().val())
+
+    this.uploadConsumer = uploadConsumer;
+    this.deleteConsumer = deleteConsumer;
 }
 
-FileUpload.prototype.ajaxFileUpload = function (consumer) {
+FileUpload.prototype.ajaxFileUpload = function () {
     $.ajaxFileUpload
     (
         {
@@ -25,11 +28,7 @@ FileUpload.prototype.ajaxFileUpload = function (consumer) {
             fileElementId: this.name, //文件上传域的ID
             dataType: 'json', //返回值类型 一般设置为json
             success: (data, status)=> { //服务器成功响应处理函数
-                if (consumer) {
-                    consumer(data.data)
-                } {
-                    this.appendAttachment(data.data)
-                }
+                this.appendAttachment(data.data, this.uploadConsumer)
             },
             error: function (data, status, e) { //服务器响应失败处理函数
                 alert(e);
@@ -40,32 +39,41 @@ FileUpload.prototype.ajaxFileUpload = function (consumer) {
 }
 
 // 附件列表(上传文件默认样式)
-FileUpload.prototype.appendAttachment = function(attachments) {
+FileUpload.prototype.appendAttachment = function(attachments, consumer) {
     if (!attachments) {
         return
+    }
+
+    this.attachmentList = this.attachmentList.concat(attachments)
+
+    if (consumer) {
+        consumer(attachments, this.$itemContainer)
+        return;
     }
 
     if (this.$itemContainer.length == 0) {
         console.log("$itemContainer 不存在！！")
         return;
-    }
 
+    }
     for (let attachment of attachments) {
         this.$itemContainer.append("<div class=\"item\">\n" +
-            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" onclick=\"this.deleteAttachment("+attachment.id+", this, name)\">删除</button>\n" +
+            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" onclick=\"this.deleteAttachment("+attachment.id+", this)\">删除</button>\n" +
             "</div>")
-    }
 
-    this.attachmentList = this.attachmentList.concat(attachments)
+    }
 }
 
-FileUpload.prototype.deleteAttachment = function (attachmentId, obj) {
-    let filteredAttachmentList = this.attachmentList.filter(function (m) {
+FileUpload.prototype.deleteAttachment = function (attachmentId, deleteBtn) {
+    this.attachmentList = this.attachmentList.filter(function (m) {
         return m.id !== attachmentId;
     })
-    this.attachmentList = filteredAttachmentList
 
-    $(obj).parent().remove()
+    if (this.deleteConsumer) {
+        this.deleteConsumer(attachmentId, deleteBtn)
+    } else {
+        $(deleteBtn).parent(".item").remove()
+    }
 }
 
 FileUpload.prototype.getAttachments = function () {

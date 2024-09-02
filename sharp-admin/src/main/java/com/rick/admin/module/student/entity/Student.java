@@ -79,7 +79,7 @@ public class Student extends BaseCodeEntity {
     @DictValueCheck(type = "UNIT")
     DictValue unit;
 
-    List<Document> files;
+    List<Document> attachments;
 
     Document avatar;
 
