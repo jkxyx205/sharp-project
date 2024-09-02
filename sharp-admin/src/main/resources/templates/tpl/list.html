@@ -33,6 +33,8 @@
                             <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
                             <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
                                 <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                <input class="form-control" th:id="${f.name}" type="checkbox" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'CHECKBOX'}" th:value="1" th:placeholder="${f.placeholder}">
+                                <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'DATE'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
                                 <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}"/>
                                 <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
                                 <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText/>
@@ -222,6 +224,17 @@
             })
         })
 
+        var date = fz.filter(f => f.type == 'DATE')
+        date.forEach(f => {
+            $('#'+f.name+'').datepicker({
+                language: "zh-CN",
+                autoclose: true,
+                clearBtn: true,
+                todayBtn: 'linked',
+                todayHighlight: true,
+                format: 'yyyy-mm-dd'
+            })
+        })
         /*]]>*/
 
         $('#report-list').table({

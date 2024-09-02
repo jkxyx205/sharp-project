@@ -53,7 +53,7 @@ public class QueryField implements Serializable, JsonStringToObjectConverterFact
     }
 
     public enum Type {
-        TEXT, SELECT, GROUP_SELECT, MULTIPLE_SELECT, DATE_RANGE;
+        TEXT, SELECT, CHECKBOX, DATE, GROUP_SELECT, MULTIPLE_SELECT, DATE_RANGE;
     }
 
     public QueryField setValue(String value) {

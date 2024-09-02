@@ -14,6 +14,7 @@
 
             var $multipleSelect = this.$element.find("select[multiple]")
             var $search = this.$element.find('button[name=search]')
+            var $checkbox = this.$element.find('[type=checkbox]')
 
             $search.on('click', function () {
                 var param = _this.$element.form2json({allowEmptyMultiVal:true});
@@ -28,6 +29,11 @@
                         param[this.name] = undefined
                     }
                 })
+
+                // checkbox 不打勾表示不做筛选条件
+                // $checkbox.each(function () {
+                //     param[this.name] = $(this).prop('checked') & 1
+                // })
 
                 search(param)
             })
@@ -47,6 +53,10 @@
             })
 
             this.$element.find('select').not("[multiple]").on('change', function () {
+                $search.click()
+            })
+
+            this.$element.find('[type=checkbox]').on('click', function () {
                 $search.click()
             })
 
