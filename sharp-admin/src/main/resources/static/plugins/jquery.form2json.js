@@ -1,5 +1,5 @@
 (function($) {
-
+    // https://github.com/2sidedfigure/form2json/blob/master/jquery.form2json.js
     var defaults = {
             inputSelectors: 'input:not([type=radio], [type=checkbox], [type=reset]), input[type=checkbox], input[type=radio]:checked, textarea, select',
             multiValSelector: '[type=checkbox], select',
