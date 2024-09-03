@@ -139,6 +139,15 @@
                         <div class="col-4"><textarea class="form-control" id="remark" name="remark" th:text="${student.remark}" required></textarea></div>
                     </div>
                     <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="available">状态</label>
+                        <div class="col-4">
+                            <label class="switch switch-pill switch-primary">
+                                <input class="switch-input" type="checkbox" id="available" name="available" th:checked="${student.available ne null && student.available == true }">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <div class="offset-1 col-11"> <button class="btn btn-primary mr-4" type="button" onclick="send()">
                             <i class="fa fa-send"></i> 保存</button></div>
                     </div>
@@ -156,6 +165,15 @@
     <script th:src="@{/ajaxfileupload.js}"></script>
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
     <script th:inline="javascript">
+        let readonly = [[${query.readonly}]]
+        if (readonly === 'true') {
+            $("form :input").prop("disabled", true);
+            $('table .operator').hide()
+            // $('#okId').hide()
+        } else {
+            // $('#okId').show()
+        }
+
         let formDOM = document.getElementById("form")
         let idDOM = document.getElementById("id")
         let codeDOM = document.getElementById("code")

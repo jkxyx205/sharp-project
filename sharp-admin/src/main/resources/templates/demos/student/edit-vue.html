@@ -5,7 +5,9 @@
     <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
-
+        .form-inline .col-form-label {
+            width: 100px;
+        }
     </style>
 </head>
 <body class="app">
@@ -74,6 +76,13 @@
                         <sp:select id="category" name="category" key="CategoryEnum" class="form-control" hideDummyItemText required/>
                     </div>
                     <div class="form-group col-4">
+                        <label class="col-form-label required" for="available">状态</label>
+                        <label class="switch switch-pill switch-primary">
+                            <input class="switch-input" type="checkbox" id="available" name="available" v-model="form.available">
+                            <span class="switch-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group col-4">
                         <label class="col-form-label required" for="remark">备注</label>
                         <textarea class="form-control" id="remark" name="remark" v-model="form.remark" required></textarea>
                     </div>
@@ -120,9 +129,29 @@
 
                 form: /*[[${ student } ]]*/,
                 loading: false
-
+            },
+            created() {
+                // 一次行获取多个字典数据源
+                $.get("/dict" +
+                    "s?codes=CategoryEnum,MATERIAL,UNIT,HobbyEnum,GenderEnum", (res) => {
+                    this.datasource.dicts = res
+                })
+            },
+            updated() {
+                let readonly = [[${query.readonly}]]
+                if (readonly === 'true') {
+                    $("form :input").prop("disabled", true);
+                    $('table .operator').hide()
+                    // $('#okId').hide()
+                } else {
+                    // $('#okId').show()
+                }
             },
             mounted() {
+                if (this.loading) {
+                    $.LoadingOverlay('show')
+                }
+
                 formDOM = document.getElementById("form")
 
                 registerValid(formDOM, () => {
@@ -179,24 +208,14 @@
                 // } else {
                 //     this.loading = false
                 // }
-
-                // 一次行获取多个字典数据源
-                $.get("/dict" +
-                    "s?codes=CategoryEnum,MATERIAL,UNIT,HobbyEnum,GenderEnum", (res) => {
-                    this.datasource.dicts = res
-                })
-
-                if (this.loading) {
-                    $.LoadingOverlay('show')
-                }
             },
             computed: {
             },
-            watch: {
-                loading: function (val, oldVal) {
-                    val ? $.LoadingOverlay('show') : $.LoadingOverlay('hide')
-                }
-            },
+            // watch: { // 后端获取数据
+            //     loading: function (val, oldVal) {
+            //         val ? $.LoadingOverlay('show') : $.LoadingOverlay('hide')
+            //     }
+            // },
             methods: {
                 send: function () {
                     if (formDOM.valid()) {

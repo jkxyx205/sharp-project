@@ -68,7 +68,7 @@ public class Student extends BaseCodeEntity {
 
     @Column(value = "is_marriage", comment = "婚否")
     @JsonDeserialize(using = BooleanPropertyDeserializer.class)
-    Boolean marriage;
+    Boolean marriage = false; //默认值false
 
     @Embedded(columnPrefix="unit_")
     @JsonAlias("unitCode")
@@ -94,6 +94,10 @@ public class Student extends BaseCodeEntity {
     @Column(comment = "分类", value = "category")
     @DictType(type = "CategoryEnum")
     CodeDescription.CategoryEnum category;
+
+    @Column(value = "is_available", comment = "是否可用")
+    @JsonDeserialize(using = BooleanPropertyDeserializer.class)
+    Boolean available = false; // 默认值false
 
     @Column(comment = "简介")
     String remark;
