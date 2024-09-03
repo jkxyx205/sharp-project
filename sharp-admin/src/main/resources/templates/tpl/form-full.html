@@ -47,11 +47,11 @@
                             <label class="btn btn-primary btn-sm btn-upload" style="margin: 2px" th:for="${p.name} + '_file'"><i class="fa fa-upload"></i> 上传</label>
                         </div>
                         <input style="display:none;" type="text" th:id="${p.name}" th:name="${p.name}" th:value="${p.value ne null ? T(com.rick.common.util.JsonUtils).toJson(p.value) : '[]'}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
-                        <input style="display: none;" type="file" multiple="multiple" th:id="${p.name} + '_file'" th:name="${p.name} + '_file'" data-group-name="attachments" th:onchange="[('window.'+ ${p.name} + '_file.ajaxFileUpload()')]" th:placeholder="${p.configurer.placeholder}">
+                        <input style="display: none;" type="file" multiple="multiple" th:id="${p.name} + '_file'" th:name="${p.name} + '_file'" data-group-name="attachments" th:onchange="[('window.'+ ${formBO.form.code} + '_' + ${p.name} + '_file.ajaxFileUpload()')]" th:placeholder="${p.configurer.placeholder}">
                         <div class="attachment-items">
                             <th:block th:if="${p.value ne null}">
                                 <div class="item" th:each="f : ${p.value}">
-                                    <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link attachment_delete_btn" th:onclick="[(${'window.' + p.name + '_file.deleteAttachment('})][[${f.id}]][(', this)')]">删除</button>
+                                    <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link attachment_delete_btn" th:onclick="[(${'window.' + formBO.form.code + '_' + p.name + '_file.deleteAttachment('})][[${f.id}]][(', this)')]">删除</button>
                                 </div>
                             </th:block>
                         </div>
@@ -135,6 +135,8 @@
 </div>
 </body>
 <script th:inline="javascript">
+    let originalFormData = /*[[${ formBO.data }]]*/
+    let formCode = /*[[${formBO.form.code}]]*/
     /*<![CDATA[*/
     $(document).ready(function () {
         var readonly = [[${query.readonly}]]
@@ -179,7 +181,7 @@
     // file
     let files = p.filter(c => c.configurer.cpnType == 'FILE')
     files.forEach(c => {
-        window[c.name + '_file'] = new FileUpload(c.name + '_file')
+        window[formCode + '_' + c.name + '_file'] = new FileUpload(c.name + '_file')
     })
 
     /*]]>*/
