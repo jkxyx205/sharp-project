@@ -44,6 +44,25 @@ public abstract class AbstractControlGenerator {
         } else if (cpnType == CpnTypeEnum.SEARCH_SELECT) {
             String embeddedClassPathName = getEmbeddedClassPathName(name, additionalInfo);
             formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" required/>"));
+        } else if (cpnType == CpnTypeEnum.FILE) {
+            formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType,
+                    "<div class=\"attachment\">\n" +
+                            "    <div style=\"display: inline-block;\" id=\"btn-file\" >\n" +
+                            "        <label class=\"btn btn-primary btn-sm btn-upload\" style=\"margin: 2px\" for=\""+name+"\"><i class=\"fa fa-upload\"></i> 上传</label>\n" +
+                            "    </div>\n" +
+                            "    <input style=\"display:none;\" type=\"text\" th:value=\"${"+entityName+"."+name+" ne null ? T(com.rick.common.util.JsonUtils).toJson("+entityName+"."+name+") : '[]'}\">\n" +
+                            "    <input style=\"display: none;\" type=\"file\" multiple=\"multiple\" name=\""+name+"\" id=\""+name+"\" data-group-name=\""+name+"\" onchange=\"attachmentUpload.ajaxFileUpload()\">\n" +
+                            "    <div class=\"attachment-items\">\n" +
+                            "        <th:block th:if=\"${"+entityName+"."+name+" ne null}\">\n" +
+                            "            <div class=\"item\" th:each=\"f : ${"+entityName+"."+name+"}\">\n" +
+                            "                <a th:text=\"${f.fullName}\" th:href=\"${f.url}\" target=\"_blank\"></a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" th:onclick=\"attachmentUpload.deleteAttachment([[${f.id}]], this)\">删除</button>\n" +
+                            "            </div>\n" +
+                            "        </th:block>\n" +
+                            "    </div>\n" +
+                            "</div>\n" +
+                            "<!-- <script th:src=\"@{/ajaxfileupload.js}\"></script>-->\n" +
+                            "<!-- <script type=\"text/javascript\" th:src=\"@{/js/upload.js}\"></script>-->\n" +
+                            "<!-- let attachmentUpload = new FileUpload(\""+name+"\");-->"));
         } else {
             // 子类实现
             formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, generate(formLayout, cpnType, entityName, name, dictType, additionalInfo)));

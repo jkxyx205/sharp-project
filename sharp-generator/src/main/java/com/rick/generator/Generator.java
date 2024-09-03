@@ -416,6 +416,10 @@ public class Generator {
             } else if (field.getType() == Boolean.class) {
                 htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SWITCH, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
                 htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SINGLE_CHECKBOX, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
+            } else if(Collection.class.isAssignableFrom(field.getType())) {
+                if (ClassUtils.getFieldGenericClass(field) == com.rick.fileupload.client.support.Document.class) {
+                    htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.FILE, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
+                }
             }
         });
         htmlStringBuilder.append("</form>");
