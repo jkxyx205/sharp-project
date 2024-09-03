@@ -1,6 +1,5 @@
 package com.rick.formflow.form.service;
 
-import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.formflow.form.cpn.core.Form;
 import com.rick.formflow.form.service.bo.FormBO;
 

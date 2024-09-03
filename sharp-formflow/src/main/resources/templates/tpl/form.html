@@ -162,6 +162,7 @@
 
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var form = document.querySelectorAll('.needs-validation')[0]
+    let idDOM = document.getElementById("id")
 
     // TODO 先执行前端验证，再执行后端验证
     form.addEventListener('submit', function (event) {
@@ -204,6 +205,7 @@
                     })
                     alert(errorList.join(""))
                 } else {
+                    idDOM.value = data
                     alert('保存成功')
                 }
             }

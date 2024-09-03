@@ -56,7 +56,7 @@ public class FormTagTest {
                 .additionalInfo(Params.builder(1)
                         .pv("label-col", 1)
                         .build()) // 跳转新的页面编辑，适合字段多的页面
-                .name("用户信息")
+                .name("用户信息-tag")
                 .formAdviceName("userFormAdvice")
                 .repositoryName("userDAO")
                 .storageStrategy(Form.StorageStrategyEnum.CREATE_TABLE)
@@ -102,8 +102,17 @@ public class FormTagTest {
                 .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
                 .build();
 
+//        CpnConfigurer roleCpn = CpnConfigurer.builder()
+//                .cpnType(CpnTypeEnum.CHECKBOX)
+//                .datasource("sys_role")
+////                .options(Arrays.asList(new CpnConfigurer.CpnOption("694587732420202496", "管理员")))
+//                .name("roleIds")
+//                .label("角色")
+//                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+//                .build();
+
         CpnConfigurer roleCpn = CpnConfigurer.builder()
-                .cpnType(CpnTypeEnum.CHECKBOX)
+                .cpnType(CpnTypeEnum.MULTIPLE_SELECT)
                 .datasource("sys_role")
 //                .options(Arrays.asList(new CpnConfigurer.CpnOption("694587732420202496", "管理员")))
                 .name("roleIds")

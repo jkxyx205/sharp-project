@@ -460,15 +460,15 @@
 
             $.ajaxSetup({
                 beforeSend: function (xhr) {
-                    var url = arguments[1].url.replace(/\?.*/, "")
+                    let url = arguments[1].url.replace(/\?.*/, "")
 
-                    var ignoreLoadingOverlay = ['/password/check'] // 禁止加载loading
+                    let ignoreLoadingOverlay = ['/password/check'] // 禁止加载loading
 
-                    var len = ignoreLoadingOverlay.length;
+                    let len = ignoreLoadingOverlay.length;
 
-                    for (var i = 0; i < len; i++) {
-                        if(url === ignoreLoadingOverlay[i]) {
-                            return
+                    for (let i = 0; i < len; i++) {
+                        if(url === ignoreLoadingOverlay[i] || /\.(css|js|jpg)$/i.test(url)) {
+                            return false
                         }
                     }
                     $.LoadingOverlay("show");

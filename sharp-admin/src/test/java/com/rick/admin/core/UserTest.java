@@ -65,7 +65,7 @@ public class UserTest {
 //                        .build()) // 跳转新的页面编辑，适合字段多的页面
 
                 // 3. link
-                .tplName("tpl/form") // report 设置参数 .pv("formAction", "link")
+                .tplName("tpl/form") // link使用form， 不能是full, report 设置参数 .pv("formAction", "link")
                 .additionalInfo(Params.builder(1)
                         .pv("label-col", 1)
                         .build()) // 跳转新的页面编辑，适合字段多的页面

@@ -6,6 +6,9 @@
     <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
+        .form-check {
+            display: inline-block!important;
+        }
     </style>
 </head>
 <body class="app">
@@ -24,8 +27,15 @@
                 </form>
                 <br>
 
-                <h1 th:text="${query.readonly}">Form Tag</h1>
-                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
+                <h1>Form Tag</h1> <span th:text="${'readonly = ' +  query.readonly}"></span>
+                    <h2>sys_user</h2>
+                    <sp:form id="694980924206493696" form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
+
+                    <hr/>
+
+                    <h2><h2>sys_user-tag</h2></h2>
+                    <sp:form id="859875429241106432" form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
+
 <!--                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" readonly="true"></sp:form>-->
 <!--                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag"></sp:form>-->
                 <hr>
@@ -51,21 +61,44 @@
 
         function saveAllForm() {
             // 保存 sharp form 的回调函数
-            let valid = formDOM.valid() & sys_userFormDOM.valid()
-            if (valid) {
-                console.log("get tag form data = ", sys_userFormData())
 
-                sys_userSaveForm((data) => {
+            saveSharpForm("sys_user_form_tag")
+            saveSharpForm("sys_user")
+
+            // 手写
+            // let valid = formDOM.valid() & sys_user_form_tagFormDOM.valid()
+            // if (valid) {
+            //     // console.log("get tag form data = ", sys_userFormData())
+            //     console.log("get tag form data = ", sys_user_form_tagFormData())
+            //
+            //     // sys_userSaveForm((data) => {
+            //     sys_user_form_tagSaveForm((data) => {
+            //         // 获取 instance id
+            //         console.log("data = ", data)
+            //         // 执行外部方法的保存
+            //         // TODO
+            //         reloadTab('form-tag')
+            //         // setTimeout(() => {
+            //             // window.location.reload()
+            //         // }, 1000)
+            //         toastr.success("保存成功")
+            //     })
+            // }
+        }
+
+        function saveSharpForm(formCode) {
+            let valid = formDOM.valid() & window[formCode + 'FormDOM'].valid()
+            if (valid) {
+                console.log("get tag form data = ", window[formCode + 'FormData']())
+                window[formCode + 'SaveForm']((data) => {
                     // 获取 instance id
                     console.log("data = ", data)
                     // 执行外部方法的保存
-                    // TODO
-                    toastr.success("保存成功")
                     reloadTab('form-tag')
-                    setTimeout(() => {
-                        // window.location.reload()
-                    }, 1000)
-
+                    // setTimeout(() => {
+                    // window.location.reload()
+                    // }, 1000)
+                    toastr.success(formCode + " 保存成功")
                 })
             }
         }

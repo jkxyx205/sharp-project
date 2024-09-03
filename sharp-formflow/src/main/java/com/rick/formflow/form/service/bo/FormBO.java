@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,6 +51,11 @@ public class FormBO {
 
     public String getMethod() {
         return Objects.nonNull(instanceId) ? "PUT" : "POST";
+    }
+
+    public Map<String, Object> getData() {
+        return propertyList.stream()
+                .collect(HashMap::new, (m, v) -> m.put(v.name, v.value), HashMap::putAll);
     }
 
 }

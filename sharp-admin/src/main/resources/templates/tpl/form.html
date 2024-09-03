@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
     <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
         .form-check {
             display: inline-block!important;
@@ -44,6 +46,8 @@
                                     th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
                                 <sp:option dummyItemText th:if="${p.configurer.datasource != null}" th:attr="key=${p.configurer.datasource},group=${(p.configurer.getAdditionalInfo == null || p.configurer.getAdditionalInfo().get('group') == null) ? null : 'group'}" th:value="${p.value}"/>
                             </select>
+
+                            <sp:select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).MULTIPLE_SELECT}" th:id="${p.name}" class="form-control" th:name="${p.name}" multiple th:attr="key=${p.configurer.datasource}" th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" hideDummyItemText/>
 
                             <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">
                                 <input type="file" class="form-control" th:id="${p.name} + '_file'" th:name="${p.name} + '_file'" th:onchange="ajaxFileUpload([[${p.name}+ '_file']], [[${p.name}]])"
@@ -141,8 +145,10 @@
     <script th:src="@{/ajaxfileupload.js}"></script>
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
     <script th:src="@{/editable-table/editable-table.js}"></script>
     <script th:inline="javascript">
+        let originalFormData = /*[[${ formBO.data }]]*/
         /*<![CDATA[*/
         $(document).ready(function () {
             var readonly = [[${query.readonly}]]
@@ -154,6 +160,23 @@
                 $('#okId').show()
             }
         })
+
+        $.fn.multipleSelect.locales['zh-CN'] = {
+            formatSelectAll: function () {
+                return '[全选]'
+            },
+            formatAllSelected: function () {
+                return '已选择所有记录'
+            },
+            formatCountSelected: function(count, total) {
+                return '已从' + total + '条记录中选择' + count + '条'
+            },
+            formatNoMatchesFound: function () {
+                return '没有找到记录'
+            }
+        }
+
+        $.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
 
         var p = [[${formBO.propertyList}]]
         var formName = [[${formBO.form.code}]]
@@ -177,10 +200,19 @@
             })
         })
 
+        var multipleSelect = p.filter(c => c.configurer.cpnType == 'MULTIPLE_SELECT')
+        multipleSelect.forEach(c => {
+            $('#' + c.name).multipleSelect({
+                selectAll: true,
+                single: false,
+                placeholder: c.configurer.placeholder
+            }).multipleSelect('setSelects', originalFormData[c.name])
+        })
         /*]]>*/
 
         // Fetch all the forms we want to apply custom Bootstrap validation styles to
         var form = document.querySelectorAll('.needs-validation')[0]
+        let idDOM = document.getElementById("id")
 
         // TODO 先执行前端验证，再执行后端验证
         form.addEventListener('submit', function (event) {
@@ -197,7 +229,7 @@
                 return
             }
 
-            var formData = $('.dialog-form').form2json({
+            let formData = $('.dialog-form').form2json({
                 multiValSelector: '[type=checkbox]'
             });
 
@@ -215,11 +247,12 @@
                 contentType: "application/json; charset=utf-8",
                 success: function(res){
                     if (res.success) {
+                        idDOM.value = originalFormData.id = res.data
                         reloadTab(formName) // 名字需要约定好
                         toastr.success("保存成功")
-                        setTimeout(() => {
-                            window.location.reload()
-                        }, 1000)
+                        // setTimeout(() => {
+                        //     window.location.reload()
+                        // }, 1000)
                     }
                 }
             });
