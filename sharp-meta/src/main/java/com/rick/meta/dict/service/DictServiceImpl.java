@@ -31,7 +31,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private final DictDOSupplier dictDOSupplier;
 
-    private static final String SELECT_SQL = "SELECT type, name, label, sort FROM sys_dict WHERE type = :type";
+    private static final String SELECT_SQL = "SELECT type, name, label, sort FROM sys_dict WHERE type = :type ORDER BY sort";
 
     public Map<String, List<Dict>> getDictsByCodes(String... codes) {
         if (ArrayUtils.isNotEmpty(codes)) {
