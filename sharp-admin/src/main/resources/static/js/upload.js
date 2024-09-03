@@ -13,7 +13,8 @@ function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer) {
     this.name = name || 'attachment_file'
     this.$fileUpload = $('#' + name)
     this.$itemContainer = $itemContainer || this.$fileUpload.next()
-    this.attachmentList = JSON.parse(this.$fileUpload.prev().val())
+    this.$valueContainer = this.$fileUpload.prev()
+    this.attachmentList = JSON.parse(this.$valueContainer.val())
 
     this.uploadConsumer = uploadConsumer;
     this.deleteConsumer = deleteConsumer;
@@ -45,6 +46,7 @@ FileUpload.prototype.appendAttachment = function(attachments, consumer) {
     }
 
     this.attachmentList = this.attachmentList.concat(attachments)
+    this.$valueContainer.val(JSON.stringify(this.attachmentList))
 
     if (consumer) {
         consumer(attachments, this.$itemContainer)
@@ -57,10 +59,14 @@ FileUpload.prototype.appendAttachment = function(attachments, consumer) {
 
     }
     for (let attachment of attachments) {
-        this.$itemContainer.append("<div class=\"item\">\n" +
-            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" onclick=\"this.deleteAttachment("+attachment.id+", this)\">删除</button>\n" +
+        let $item = $("<div class=\"item\">\n" +
+            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" onclick=\"this.upload.deleteAttachment('"+attachment.id+"', this)\">删除</button>\n" +
             "</div>")
-
+        this.$itemContainer.append($item)
+        let upload = this;
+        $item.find('.attachment_delete_btn').each(function () {
+            this.upload = upload
+        })
     }
 }
 
@@ -68,6 +74,8 @@ FileUpload.prototype.deleteAttachment = function (attachmentId, deleteBtn) {
     this.attachmentList = this.attachmentList.filter(function (m) {
         return m.id !== attachmentId;
     })
+
+    this.$valueContainer.val(JSON.stringify(this.attachmentList))
 
     if (this.deleteConsumer) {
         this.deleteConsumer(attachmentId, deleteBtn)

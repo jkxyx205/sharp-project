@@ -120,7 +120,13 @@ public class FormTagTest {
                 .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
                 .build();
 
-        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, availableCpn, roleCpn);
+        CpnConfigurer attachmentCpn = CpnConfigurer.builder()
+                .cpnType(CpnTypeEnum.FILE)
+                .name("attachment")
+                .label("附件")
+                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .build();
+        List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, availableCpn, roleCpn, attachmentCpn);
         return cpnConfigurerList;
     }
 

@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +42,12 @@ public class User extends BaseCodeEntity {
 
     @ManyToMany(thirdPartyTable="sys_user_role", referenceTable="sys_role", referenceColumnName = "role_id", columnDefinition = "user_id")
     List<Role> roleList;
+
+    /**
+     * noted: sharp form 控件file 只能用 List<Map> 不能使用List<Document>
+     */
+    @Column(value = "attachment", comment = "附件")
+    List<Map> documentList;
 
     /**
      * 权限列表
