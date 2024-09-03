@@ -115,6 +115,12 @@ public class FormService {
                     EntityDAO entityDAO = applicationContext.getBean(form.getRepositoryName(), EntityDAO.class);
                     Optional optional = entityDAO.selectById(instanceId);
                     valueMap = entityDAO.entityToMap(optional.get());
+
+                    // 属性值 放到 map 中
+                    Map<String, String> popertyNameToColumnNameMap = entityDAO.getPropertyNameToColumnNameMap();
+                    for (Map.Entry<String, String> popertyNameToColumnNameEntry : popertyNameToColumnNameMap.entrySet()) {
+                        valueMap.put(popertyNameToColumnNameEntry.getValue(), valueMap.get(popertyNameToColumnNameEntry.getKey()));
+                    }
                 } else {
                     MapDAO<Long> dao = MapDAOImpl.of(applicationContext, form.getTableName(), Long.class);
                     Optional<Map<String, Object>> mapOptional = dao.selectById(instanceId);
