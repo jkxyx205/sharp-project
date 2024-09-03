@@ -1,6 +1,7 @@
 package com.rick.admin.config.dialect.processor;
 
 import com.rick.admin.common.util.ThymeleafRenderHelper;
+import com.rick.common.util.HtmlTagUtils;
 import com.rick.db.service.support.Params;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
@@ -78,20 +79,17 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
 
         FormBO formBO = formService.getFormBO(Long.parseLong(attrMap.get(FORM_ID)), StringUtils.isBlank(attrMap.get(FORM_INSTANCE_ID)) ? null : Long.parseLong(attrMap.get(FORM_INSTANCE_ID)));
 
-        formBO.getForm().getAdditionalInfo().put("showSaveFormBtn", attrMap.keySet().contains(FORM_SHOW_BTN));
+        formBO.getForm().getAdditionalInfo().put("showSaveFormBtn", HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_SHOW_BTN));
 
         Map<String, Object> params = new HashMap<>();
         params.put("formBO", formBO);
         params.put("query", Params.builder(1)
-                .pv(FORM_READONLY, attrMap.keySet().contains(FORM_READONLY))
+                .pv(FORM_READONLY, HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_READONLY))
                 .build());
         params.put("reloadTab", attrMap.get(FORM_RELOAD_TAB));
 
-
-        //
         String htmlContent = ThymeleafRenderHelper.renderByTemplateName(attrMap.get(FORM_PAGE), params);
         iElementTagStructureHandler.replaceWith(htmlContent, false);
     }
-
 
 }

@@ -2,6 +2,7 @@ package com.rick.formflow.form.controller.instance;
 
 import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
+import com.rick.common.util.HtmlTagUtils;
 import com.rick.common.util.JsonUtils;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
@@ -43,10 +44,13 @@ public class PageInstanceController {
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
     public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model, HttpServletRequest request) {
         FormBO formBO = formService.getFormBO(formId, instanceId);
-
+        Map<String, String> parameterMap = HttpServletRequestUtils.getParameterStringMap(request);
         model.addAttribute("formBO", formBO);
         model.addAttribute("model", getDataModel(formBO.getPropertyList()));
-        model.addAttribute("query", HttpServletRequestUtils.getParameterMap(request));
+        model.addAttribute("query", parameterMap);
+
+        // 这个是必须的字段，用于界面显示
+        HtmlTagUtils.isTagPropertyTrueAndPut(parameterMap, "readonly");
 
         // table
         for (FormBO.Property property : formBO.getPropertyList()) {

@@ -103,7 +103,7 @@ public class TableGenerator {
             createTableSql.append(" comment '"+tableMeta.getTable().comment()+"'");
         }
 
-        createTableSql.append(" ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4");
+        createTableSql.append(" ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
         log.info(createTableSql.toString());
 
         createManyToManyTable(tableMeta.getManyToManyAnnotationList());
@@ -153,7 +153,7 @@ public class TableGenerator {
             String enumValues = String.join(",", EnumUtils.getCodes(type).stream().map(code -> "'" + code + "'").collect(Collectors.toList()));
             return "ENUM("+enumValues+")";
         } else if (type == Boolean.class) {
-            return "bit";
+            return "bit DEFAULT b'0'";
         } else if (type == BigDecimal.class) {
             return "decimal(10,2)";
         } else if (type == LocalDateTime.class) {

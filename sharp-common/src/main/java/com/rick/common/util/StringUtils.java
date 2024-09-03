@@ -2,6 +2,8 @@ package com.rick.common.util;
 
 import com.google.common.base.CaseFormat;
 
+import java.util.Collection;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -173,5 +175,17 @@ public final class StringUtils {
     public static String camelToDot(final String camelStr) {
         String ret = camelStr.replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2").replaceAll("([a-z])([A-Z])", "$1.$2");
         return ret.toLowerCase();
+    }
+
+    public static boolean toBoolean(Object value) {
+        if (Objects.isNull(value)) {
+            return false;
+        } else if (CharSequence.class.isAssignableFrom(value.getClass())) {
+            return org.apache.commons.lang3.StringUtils.isNotBlank((String)value) ? true : false;
+        } else if (Collection.class.isAssignableFrom(value.getClass())) {
+            return ((Collection)value).size() > 0 ? true : false;
+        }
+
+        return false;
     }
 }

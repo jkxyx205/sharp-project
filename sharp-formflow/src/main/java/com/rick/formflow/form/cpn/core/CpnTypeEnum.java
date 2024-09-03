@@ -23,6 +23,7 @@ public enum CpnTypeEnum {
     INTEGER_NUMBER("数字"),
     CURRENCY("金额"),
     CHECKBOX("多选"),
+    SINGLE_CHECKBOX("单选"),
     MOBILE("手机号"),
     FILE("文件"),
     EMAIL("邮箱"),

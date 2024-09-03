@@ -723,6 +723,9 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
        return OptionalUtils.expectedAsOptional(list);
     }
 
+    public SharpService getSharpService() {
+        return this.sharpService;
+    }
     /**
      * 处理条件自动注入
      * @param params

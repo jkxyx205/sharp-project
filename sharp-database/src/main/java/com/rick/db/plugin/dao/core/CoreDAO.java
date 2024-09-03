@@ -1,5 +1,7 @@
 package com.rick.db.plugin.dao.core;
 
+import com.rick.db.service.SharpService;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.Map;
  * @createdAt 2021-10-31 09:29:00
  */
 public interface CoreDAO<ID> {
+
+    SharpService getSharpService();
 
     int insertOrUpdate(Map<String, Object> params);
 

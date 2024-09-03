@@ -24,10 +24,10 @@
                 </form>
                 <br>
 
-                <h1>Form Tag</h1>
-
-                <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag"></sp:form>
-<!--                <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn readonly></sp:form>-->
+                <h1 th:text="${query.readonly}">Form Tag</h1>
+                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
+<!--                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" readonly="true"></sp:form>-->
+<!--                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag"></sp:form>-->
                 <hr>
                 <button type="button" class="btn btn-primary" onclick="saveAllForm()">保存所有form</button>
             </div>

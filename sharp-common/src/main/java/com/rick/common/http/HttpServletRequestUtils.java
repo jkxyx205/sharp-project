@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -72,6 +73,16 @@ public final class HttpServletRequestUtils {
         return request.getRemoteAddr();
     }
 
+    public static Map<String, String> getParameterStringMap(HttpServletRequest request) {
+        return getParameterStringMap(request, false);
+    }
+
+    public static Map<String, String> getParameterStringMap(HttpServletRequest request, boolean skipBlank) {
+        Map<String, String> map = new HashMap<>(request.getParameterMap().size());
+        addArrayValue(request, skipBlank, map, (array) -> StringUtils.join(array, ","));
+        return map;
+    }
+
     public static Map<String, Object> getParameterMap(HttpServletRequest request) {
         return getParameterMap(request, false);
     }
@@ -83,35 +94,8 @@ public final class HttpServletRequestUtils {
      * @return
      */
     public static Map<String, Object> getParameterMap(HttpServletRequest request, boolean skipBlank) {
-        Enumeration<String> en = request.getParameterNames();
         Map<String, Object> map = new HashMap<>(request.getParameterMap().size());
-
-        while (en.hasMoreElements()) {
-            String name = en.nextElement();
-            String[] values = request.getParameterValues(name);
-
-            if (Objects.nonNull(values)) {
-                //多选 会在name后面加[]
-                String property = name.replace("[]", "");
-                if (values.length > 1 || name.endsWith("[]")) {
-                    List<String> array = Lists.newArrayListWithExpectedSize(values.length);
-                    for (String value : values) {
-                        if (skipBlank && StringUtils.isBlank(value)) {
-                            continue;
-                        }
-                        array.add(value);
-                    }
-                    map.put(property, array);
-                } else {
-                    String value = values[0];
-                    if (skipBlank && StringUtils.isBlank(value)) {
-                        continue;
-                    }
-                    map.put(property, value);
-                }
-            }
-        }
-
+        addArrayValue(request, skipBlank, map, (array) -> array);
         return map;
     }
 
@@ -136,6 +120,35 @@ public final class HttpServletRequestUtils {
             }
         }
         return false;
+    }
+
+    private static void addArrayValue(HttpServletRequest request, boolean skipBlank, Map map, Function<List<String>, Object> arraryFunction) {
+        Enumeration<String> en = request.getParameterNames();
+        while (en.hasMoreElements()) {
+            String name = en.nextElement();
+            String[] values = request.getParameterValues(name);
+
+            if (Objects.nonNull(values)) {
+                //多选 会在name后面加[]
+                String property = name.replace("[]", "");
+                if (values.length > 1 || name.endsWith("[]")) {
+                    List<String> array = Lists.newArrayListWithExpectedSize(values.length);
+                    for (String value : values) {
+                        if (skipBlank && StringUtils.isBlank(value)) {
+                            continue;
+                        }
+                        array.add(value);
+                    }
+                    map.put(property, arraryFunction.apply(array));
+                } else {
+                    String value = values[0];
+                    if (skipBlank && StringUtils.isBlank(value)) {
+                        continue;
+                    }
+                    map.put(property, value);
+                }
+            }
+        }
     }
 
 }

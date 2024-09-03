@@ -1,13 +1,10 @@
 package com.rick.formflow.form.cpn;
 
 
+import com.rick.common.util.StringUtils;
 import com.rick.formflow.form.cpn.core.AbstractCpn;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * @author Rick
@@ -36,15 +33,7 @@ public class Switch extends AbstractCpn<String> {
 
     @Override
     public String httpConverter(Object value) {
-        if (Objects.isNull(value)) {
-            return "0";
-        } else if (CharSequence.class.isAssignableFrom(value.getClass())) {
-            return StringUtils.isNotBlank((String)value) ? "1" : "0";
-        } else if (Collection.class.isAssignableFrom(value.getClass())) {
-            return ((Collection)value).size() > 0 ? "1" : "0";
-        }
-
-        return "1";
+        return StringUtils.toBoolean(value) ? "1" : "0";
     }
 
 }

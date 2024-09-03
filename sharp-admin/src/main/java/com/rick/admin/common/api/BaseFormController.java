@@ -1,8 +1,10 @@
 package com.rick.admin.common.api;
 
+import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.ClassUtils;
+import com.rick.common.util.HtmlTagUtils;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.core.EntityDAO;
@@ -17,6 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -44,7 +47,7 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
     }
 
     @GetMapping("new")
-    public String gotoFormPage(Model model) {
+    public String gotoFormPage(HttpServletRequest request, Model model) {
         Object entity = BeanUtils.instantiateClass(this.entityClass);
 
         Field[] fields = ClassUtils.getAllFields(entityClass);
@@ -57,15 +60,24 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
         }
 
         model.addAttribute(entityPropertyName, entity);
+        model.addAttribute("query", HttpServletRequestUtils.getParameterMap(request));
+
         addAttributeOfDict(model);
         return this.formPage;
     }
 
     @GetMapping("{id}/page")
-    public String gotoFormPageById(@PathVariable Long id, Model model) {
+    public String gotoFormPageById(HttpServletRequest request, @PathVariable Long id, Model model) {
+        Map<String, String> parameterMap = HttpServletRequestUtils.getParameterStringMap(request);
+
         Object entity = baseService.findById(id).get();
         DictUtils.fillDictLabel(entity); // 可选操作
         model.addAttribute(entityPropertyName, entity);
+
+        model.addAttribute("query", parameterMap);
+        // 这个是必须的字段，用于界面显示
+        HtmlTagUtils.isTagPropertyTrueAndPut(parameterMap, "readonly");
+
         addAttributeOfDict(model);
         return this.formPage;
     }
