@@ -226,7 +226,7 @@
                     selectAll: true,
                     single: false,
                     placeholder: c.configurer.placeholder
-                }).multipleSelect('setSelects',  originalFormData[c.name])
+                }).multipleSelect('setSelects',  originalFormData[c.name] || [])
             })
         })()
     })
