@@ -47,12 +47,17 @@ public class ThymeleafControlGenerator extends AbstractControlGenerator {
                     "</div></div>";
         } else if  (cpnType == CpnTypeEnum.NUMBER_TEXT) {
             return "<input class=\"form-control\" type=\"number\" id=\"" + name + "\" name=\"" + name + "\" th:value=\"${" + entityName + "." + name + "}\"  pattern=\"-?\\d+(\\.\\d+)?\" required>";
-        } else if  (cpnType == CpnTypeEnum.SWITCH) {
+        } else if  (cpnType == CpnTypeEnum.SINGLE_CHECKBOX) {
             return "<div class=\"form-check form-check-inline mr-2\">\n" +
                     "<input class=\"form-check-input\" type=\"checkbox\" th:id=\""+name+"\" th:value=\"1\" name=\"" + name + "\" th:checked=\"${"+entityName+"." + name + " ne null && "+entityName+"."+name+" == true }\">\n" +
                     "<label class=\"form-check-label\" th:for=\""+name+"\"></label>\n" +
                     "</div>";
-        } else if  (cpnType == CpnTypeEnum.DATE) {
+        } else if (cpnType == CpnTypeEnum.SWITCH) {
+            return "<label class=\"switch switch-pill switch-primary\">\n" +
+                    "  <input class=\"switch-input\" type=\"checkbox\" id=\""+name+"\" name=\""+name+"\" th:checked=\"${"+entityName+"."+name+" ne null && "+entityName+"."+name+" == true }\">\n" +
+                    "         <span class=\"switch-slider\"></span>\n" +
+                    " </label>";
+        }else if  (cpnType == CpnTypeEnum.DATE) {
             return "<input class=\"form-control\" type=\"text\" id=\"" + name + "\" name=\"" + name + "\" th:value=\"${" + entityName + "." + name + "}\" required>";
         }
 

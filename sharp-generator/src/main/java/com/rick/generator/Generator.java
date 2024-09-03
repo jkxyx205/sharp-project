@@ -290,7 +290,7 @@ public class Generator {
             if (field.getType() == LocalDateTime.class) {
                 columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
             } else if (field.getType() == Boolean.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"boolConverter\")),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz.isEnum()) {
@@ -415,6 +415,7 @@ public class Generator {
                 htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.NUMBER_TEXT, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
             } else if (field.getType() == Boolean.class) {
                 htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SWITCH, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
+                htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SINGLE_CHECKBOX, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
             }
         });
         htmlStringBuilder.append("</form>");

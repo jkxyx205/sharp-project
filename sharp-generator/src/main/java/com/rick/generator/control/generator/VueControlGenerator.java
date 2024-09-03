@@ -55,10 +55,15 @@ public class VueControlGenerator extends AbstractControlGenerator {
                     "    </div></div>";
         }  else if  (cpnType == CpnTypeEnum.NUMBER_TEXT) {
             return "<input class=\"form-control\" type=\"number\" id=\""+name+"\" name=\""+name+"\" v-model=\"form."+name+"\" pattern=\"-?\\d+(\\.\\d+)?\" required>";
-        } else if  (cpnType == CpnTypeEnum.SWITCH) {
+        } else if  (cpnType == CpnTypeEnum.SINGLE_CHECKBOX) {
             return "<div class=\"form-check form-check-inline mr-2\">\n" +
                     "    <input class=\"form-check-input\" type=\"checkbox\" id=\""+name+"\" value=\"1\" name=\""+name+"\" v-model=\"form."+name+"\">\n" +
                     "    </div>";
+        } else if (cpnType == CpnTypeEnum.SWITCH) {
+            return "<label class=\"switch switch-pill switch-primary\">\n" +
+                    "    <input class=\"switch-input\" type=\"checkbox\" id=\""+name+"\" name=\""+name+"\" v-model=\"form."+name+"\">\n" +
+                    "    <span class=\"switch-slider\"></span>\n" +
+                    "</label>";
         } else if  (cpnType == CpnTypeEnum.DATE) {
             return "<input class=\"form-control\" type=\"text\" id=\""+name+"\" name=\""+name+"\" v-model=\"form."+name+"\" required>";
         }
