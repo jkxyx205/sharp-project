@@ -53,6 +53,8 @@ public class ReportService {
 
     private final  Map<String, ReportAdvice> reportAdviceMap;
 
+    public static Map<Long, Report> reportCacheMap = new HashMap<>();
+
     /**
      * 创建报表
      */
@@ -206,15 +208,21 @@ public class ReportService {
     }
 
     private Report getReport(long id) {
-        Optional<Report> optional = findById(id);
-        if (!optional.isPresent()) {
-            throw new BizException(ResultUtils.fail("Report not exists"));
+        Report report = reportCacheMap.get(id);
+
+        if (report == null) {
+            Optional<Report> optional = findById(id);
+            if (!optional.isPresent()) {
+                throw new BizException(ResultUtils.fail("Report not exists"));
+            }
+            report = optional.get();
+            reportCacheMap.put(id, report);
         }
 
-        Report report = optional.get();
         if (report.getAdditionalInfo() == null) {
             report.setAdditionalInfo(new HashMap<>());
         }
+
         validateNonDeleteSql(report.getQuerySql());
         return report;
     }

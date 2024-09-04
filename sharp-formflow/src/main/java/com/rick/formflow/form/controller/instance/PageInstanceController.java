@@ -65,7 +65,7 @@ public class PageInstanceController {
             }
         }
 
-        return StringUtils.defaultString(formBO.getForm().getTplName(),"tpl/form");
+        return StringUtils.defaultString(formBO.getForm().getTplName(),"tpl/form/form");
     }
 
     @PostMapping( {"{formId}/{instanceId}", "{formId}"})

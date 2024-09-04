@@ -28,10 +28,7 @@ import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,7 +55,6 @@ public class FormService {
     private final ApplicationContext applicationContext;
 
     private final DictService dictService;
-    private List<FormBO.Property> propertyList;
 
     public Form saveOrUpdate(@Valid Form form) {
         formDAO.insertOrUpdate(form);
@@ -92,6 +88,9 @@ public class FormService {
 
         if (formCache == null) {
             form = formDAO.selectById(formId).get();
+            if (form.getAdditionalInfo() == null) {
+                form.setAdditionalInfo(new HashMap<>());
+            }
             formCpnList = formCpnDAO.listByFormId(formId);
             configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
             formCache = new FormCache(form, formCpnList, configIdMap);
