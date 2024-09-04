@@ -172,12 +172,14 @@
     <script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
     <script th:src="@{/editable-table/editable-table.js}"></script>
     <script th:src="@{/ajaxfileupload.js}"></script>
+    <script type="text/javascript" th:src="@{/js/upload.js}"></script>
+    <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
 
     <script th:inline="javascript">
         var readonly = true
 
         readonly = /*[[${ readonly }]]*/
-        /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+            /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
             readonly = false
         /*[/]*/
 
@@ -279,9 +281,9 @@
         }
 
         $('#okId').on('click', function () {
-            saveForm(() => {
-                $modal.modal('hide');
+            window[$(this).parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
                 toastr.success("保存成功")
+                $modal.modal('hide');
                 setTimeout(() => {
                     // $('[name=reset]').click()
                     window.location.reload()
