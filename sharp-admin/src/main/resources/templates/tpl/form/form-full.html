@@ -23,6 +23,12 @@
     let formCode = /*[[${formBO.form.code}]]*/
     let p = [[${formBO.propertyList}]]
 
+    var readonly = [[${query.readonly}]]
+
+    /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+    readonly = false
+    /*[/]*/
+
     let formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
     let idDOM = $(formDOM).find("#id")[0]
 

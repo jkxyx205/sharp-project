@@ -18,14 +18,18 @@
 </head>
 <body class="app">
 <th:block th:replace="includes/base :: common_content(~{::div})">
-    <div class="container">
-        <th:block th:replace="tpl/includes/horizotal-form-tab"></th:block>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <th:block th:replace="tpl/includes/horizotal-form-tab"></th:block>
+            </div>
+        </div>
     </div>
 </th:block>
 <th:block th:replace="includes/base :: common_js(~{::script})">
     <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
     <script th:src="@{/ajaxfileupload.js}"></script>
-    <script type="text/javascript" tsrc="/js/upload.js"></script>
+    <script th:src="@{/js/upload.js}"></script>
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
     <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
@@ -39,6 +43,11 @@
         let p = [[${formBO.propertyList}]]
 
         let readonly = [[${query.readonly}]]
+
+        /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+        readonly = false
+        /*[/]*/
+
         let formDOM = window[formCode + 'FormDOM'] = document.forms[0]
         sharpFormInit(formDOM, document.getElementById("id"), {originalFormData, formCode, p,readonly, actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
     </script>

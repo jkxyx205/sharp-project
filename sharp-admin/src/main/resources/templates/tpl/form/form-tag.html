@@ -20,7 +20,7 @@
             window[formCode + 'FormDOM'].originalFormData = originalFormData
             let idDOM = window['$' + formCode + 'FormDOM'].find('input[id=id]')[0]
 
-            let readonly = [[${query.readonly}]]
+            var readonly = [[${query.readonly}]]
 
             window[formCode + 'FormData'] = function () {
                 let formData = window['$' + formCode + 'FormDOM'].form2json({

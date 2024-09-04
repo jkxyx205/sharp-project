@@ -5,13 +5,12 @@ sharp-dependencies
 sharp-common
 sharp-database
 sharp-meta
-#sharp-excel
-#sharp-fileupload
+sharp-fileupload
 sharp-formflow
 #sharp-mail
 sharp-report
 sharp-generator
-#sharp-sms
+sharp-sms
 )
 
 for p in ${PROJECTS[@]}

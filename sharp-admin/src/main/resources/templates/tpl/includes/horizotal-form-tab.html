@@ -1,4 +1,4 @@
-<form class="needs-validation dialog-form" th:classappend="${query.readonly == 'true' ? 'readonly' : ''}" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="${formBO.form.id}" th:name="${formBO.form.code}" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}, col = ${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('label-col') == null) ? 2 : formBO.form.getAdditionalInfo().get('label-col')}">
+<form class="form-horizontal sharp-form" th:classappend="${query.readonly == 'true' ? 'readonly' : ''}" th:action="'/forms/page/' + ${formBO.getActionUrl()}" method="post" th:id="${formBO.form.id}" th:name="${formBO.form.code}" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}, col = ${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('label-col') == null) ? 2 : formBO.form.getAdditionalInfo().get('label-col')}">
     <input type="hidden" id="id" th:value="${formBO.instanceId}">
     <div class="nav-tabs-boxed">
         <ul class="nav nav-tabs" role="tablist">
