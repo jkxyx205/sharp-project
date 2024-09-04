@@ -12,6 +12,8 @@ head.appendChild(style)
 function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer) {
     this.name = name || 'attachment_file'
     this.$fileUpload = $('#' + name)
+    this.fileUploadHtml = this.$fileUpload.prop('outerHTML')
+
     this.$itemContainer = $itemContainer || this.$fileUpload.next()
     this.$valueContainer = this.$fileUpload.prev()
     this.attachmentList = JSON.parse(this.$valueContainer.val())
@@ -21,8 +23,9 @@ function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer) {
 }
 
 FileUpload.prototype.ajaxFileUpload = function () {
-    $.ajaxFileUpload
-    (
+    let that = this
+
+    $.ajaxFileUpload(
         {
             url: '/documents/upload?name='+this.name+'&groupName=' + $('#' + this.name).data('group-name'), //用于文件上传的服务器端请求地址
             secureuri: false, //是否需要安全协议，一般设置为false
@@ -33,10 +36,17 @@ FileUpload.prototype.ajaxFileUpload = function () {
             },
             error: function (data, status, e) { //服务器响应失败处理函数
                 alert(e);
+            },
+            complete: function () {
+                // 重新添加file 控件
+                let newFileInput = that.$fileUpload = $(that.fileUploadHtml)
+                that.$valueContainer.after(newFileInput)
+                newFileInput.next().remove()
             }
         }
     )
-    return false;
+
+
 }
 
 // 附件列表(上传文件默认样式)
