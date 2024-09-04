@@ -53,11 +53,11 @@ public class UserTest {
                 .code("sys_user")
                 .tableName("sys_user")
 //                // 1. 弹出框
-//                .tplName("tpl/form-full") // 弹出框显示需要使用 tpl/form-full
+//                .tplName("tpl/form/form-full") // 弹出框显示需要使用 tpl/form/form-full
 //                .additionalInfo(Params.builder(1).pv("showSaveFormBtn", false).build())
 
                 // 2. 弹出框 + tab
-//                .tplName("tpl/form-tab-full") // 弹出框显示需要使用 tpl/form-tab-full
+//                .tplName("tpl/form/form-tab-full") // 弹出框显示需要使用 tpl/form-tab-full
 //                .additionalInfo(Params.builder(3)
 //                        .pv("showSaveFormBtn", false)
 //                        .pv("label-col", 2)
@@ -65,13 +65,13 @@ public class UserTest {
 //                        .build()) // 跳转新的页面编辑，适合字段多的页面
 
                 // 3. link
-                .tplName("tpl/form") // link使用form， 不能是full, report 设置参数 .pv("formAction", "link")
+                .tplName("tpl/form/form") // link使用form， 不能是full, report 设置参数 .pv("formAction", "link")
                 .additionalInfo(Params.builder(1)
                         .pv("label-col", 1)
                         .build()) // 跳转新的页面编辑，适合字段多的页面
 
                 // 4. link + tab
-//                .tplName("tpl/form-tab") // report 设置参数 .pv("formAction", "link")；弹出框显示需要使用 tpl/form-tab
+//                .tplName("tpl/form/form-tab") // report 设置参数 .pv("formAction", "link")；弹出框显示需要使用 tpl/form-tab
 //                 .additionalInfo(Params.builder(1)
 //                        .pv("label-col", 2)
 //                        .pv("tab-list", Arrays.asList("基本信息", "配置信息"))
@@ -159,7 +159,7 @@ public class UserTest {
         reportService.saveOrUpdate(Report.builder()
                 .id(694714180413960192L)
                 .code("sys_user")
-                .tplName("tpl/list") // 如果由特殊需求比如显示字段的格式化，字段跳转，可以使用自己的模版
+                .tplName("tpl/list/list") // 如果由特殊需求比如显示字段的格式化，字段跳转，可以使用自己的模版
                 .name("用户管理")
                 .reportAdviceName("userReportAdvice")
 
@@ -212,7 +212,7 @@ public class UserTest {
         reportService.saveOrUpdate(Report.builder()
                 .id(786015805669142528L)
                 .code("sys_user_search")
-                .tplName("tpl/dialog_report_list")
+                .tplName("tpl/list/dialog_report_list")
                 .name("用户查询")
                 // language=SQL
                 //  and id = :id and id IN (:ids) 回显需要的查询条件 (option.value)

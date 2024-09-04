@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        .form-check {
+            display: inline-block!important;
+        }
+
+        .attachment .item {
+            display: inline-block;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <th:block th:replace="tpl/includes/horizotal-form"></th:block>
+</div>
+</body>
+<script th:inline="javascript">
+    let formBO = /*[[${ formBO }]]*/
+    let originalFormData = /*[[${ formBO.data }]]*/
+    let formCode = /*[[${formBO.form.code}]]*/
+    let p = [[${formBO.propertyList}]]
+
+    let formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
+    let idDOM = $(formDOM).find("#id")[0]
+
+    sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
+</script>
+</html>

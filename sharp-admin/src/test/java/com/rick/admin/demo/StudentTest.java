@@ -27,9 +27,9 @@ public class StudentTest {
     public void testReport() {
         Report report = Report.builder()
                 .code("t_student")// 　建议和数据库表名保持一致
-                .tplName("tpl/ajax_list") // 拷贝模版页面到指定目录
-//                .tplName("tpl/list") // 没有特殊要求使用模版页面
-//                .tplName("tpl/ajax_list") // 没有特殊要求使用模版页面
+                .tplName("tpl/list/ajax_list") // 拷贝模版页面到指定目录
+//                .tplName("tpl/list/list") // 没有特殊要求使用模版页面
+//                .tplName("tpl/list/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生表")
                 .reportAdviceName("operatorReportAdvice")
                 .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮

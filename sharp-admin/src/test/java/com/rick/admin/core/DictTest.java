@@ -63,7 +63,7 @@ public class DictTest {
                 .id(695312747063197696L)
                 .code("sys_dict")
                 .tableName("sys_dict")
-                .tplName("tpl/form-full") // 弹出框显示必须是 form-full 不能是form
+                .tplName("tpl/form/form-full") // 弹出框显示必须是 form-full 不能是form
                 .formAdviceName("dictFormService")
                 .name("字典")
                 .repositoryName("dictDAO")
@@ -125,7 +125,7 @@ public class DictTest {
         reportService.saveOrUpdate(Report.builder()
                 .id(695316160014499840L)
                 .code("sys_dict")
-                .tplName("tpl/list")
+                .tplName("tpl/list/list")
                 .name("字典管理")
                 .additionalInfo(Params.builder(1).pv("formId", "695312747063197696").build())
                 .querySql("select id, type, name, label, sort from sys_dict where type = :type order by type, sort asc")

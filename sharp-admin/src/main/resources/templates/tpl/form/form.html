@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <style>
+        .form-check {
+            display: inline-block!important;
+        }
+
+        .attachment .item {
+            display: inline-block;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <th:block th:replace="tpl/includes/horizotal-form"></th:block>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+
+    <script th:src="@{/plugins/ajaxfileupload.js}"></script>
+    <script th:src="@{/js/upload.js}"></script>
+
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+    <script th:src="@{/editable-table/editable-table.js}"></script>
+
+    <script th:src="@{/js/form-support.js}"></script>
+    <script th:inline="javascript">
+        let formBO = /*[[${ formBO }]]*/
+        let originalFormData = /*[[${ formBO.data }]]*/
+        let formCode = /*[[${formBO.form.code}]]*/
+        let p = [[${formBO.propertyList}]]
+
+        let readonly = [[${query.readonly}]]
+        let formDOM = window[formCode + 'FormDOM'] = document.forms[0]
+        sharpFormInit(formDOM, document.getElementById("id"), {originalFormData, formCode, p,readonly, actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
+    </script>
+</th:block>
+</body>
+</html>

@@ -94,8 +94,8 @@ tableGenerator.createTable(Student.class);
       reportService.saveOrUpdate(Report.builder()
               .code("t_student")// 　建议和数据库表名保持一致
               .tplName("demos/student/list") // 拷贝模版页面到指定目录
-//                .tplName("tpl/list") // 没有特殊要求使用模版页面
-//                .tplName("tpl/ajax_list") // 没有特殊要求使用模版页面
+//                .tplName("tpl/list/list") // 没有特殊要求使用模版页面
+//                .tplName("tpl/list/ajax_list") // 没有特殊要求使用模版页面
               .name("学生信息")
                       .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
                               .pv("endpoint", "students")

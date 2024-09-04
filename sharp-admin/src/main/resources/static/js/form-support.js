@@ -1,3 +1,135 @@
+/**
+ * 初始化表单
+ * @param formDOM
+ * @param idDOM
+ * @param options originalFormData, formCode, p,readonly
+ */
+function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
+    formDOM.originalFormData = options.originalFormData
+    controlInit(options.p)
+    registerValid(formDOM, elseValid)
+
+    // 设置只读
+    $(document).ready(function () {
+        if (options.readonly == 'true') {
+            $("form.readonly :input").prop("disabled", true);
+            $('table .operator').hide()
+        } else {
+        }
+    })
+
+    function controlInit(p) {
+        // multipleSelect
+        $.fn.multipleSelect.locales['zh-CN'] = {
+            formatSelectAll: function () {
+                return '[全选]'
+            },
+            formatAllSelected: function () {
+                return '已选择所有记录'
+            },
+            formatCountSelected: function(count, total) {
+                return '已从' + total + '条记录中选择' + count + '条'
+            },
+            formatNoMatchesFound: function () {
+                return '没有找到记录'
+            }
+        }
+        $.extend($.fn.multipleSelect.defaults, $.fn.multipleSelect.locales['zh-CN'])
+        let multipleSelect = p.filter(c => c.configurer.cpnType == 'MULTIPLE_SELECT')
+        multipleSelect.forEach(c => {
+            $('#' + c.name).multipleSelect({
+                selectAll: true,
+                single: false,
+                placeholder: c.configurer.placeholder
+            }).multipleSelect('setSelects', formDOM.originalFormData[c.name])
+        })
+        // table
+        formDOM.tables = p.filter(c => c.configurer.cpnType == 'TABLE')
+        formDOM.tables.forEach(c => {
+            $('.' + c.name).editableTable({
+                columns: c.configurer.additionalInfo.columns.length
+            })
+        })
+
+        // datepicker
+        let dates = p.filter(c => c.configurer.cpnType == 'DATE')
+        dates.forEach(c => {
+            $('#'+c.name).datepicker({
+                language: "zh-CN",
+                autoclose: true,
+                clearBtn: true,
+                todayBtn: 'linked',
+                todayHighlight: true,
+                format: 'yyyy-mm-dd'
+            })
+        })
+
+        // file
+        let files = p.filter(c => c.configurer.cpnType == 'FILE')
+        files.forEach(c => {
+            window[formDOM.getAttribute("name") + '_' + c.name + '_file'] = new FileUpload(c.name + '_file')
+        })
+    }
+
+    formDOM.save = function (successCallback) {
+        if (!formDOM.valid()) {
+            return
+        }
+
+        let formData = $(formDOM).form2json({
+            multiValSelector: '[type=checkbox]'
+        });
+
+        formDOM.tables.forEach(c => {
+            formData[c.name] = $('.' + c.name).editableTable('getValue')
+        })
+
+        console.log("formData = ", formData)
+
+        $.ajax({
+            url: "/forms/ajax/" + options.actionUrl,
+            type: options.method,
+            data: JSON.stringify(formData),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function(res){
+                if (res.success) {
+                    console.log("保存成功 res = ", res)
+                    if (successCallback) {
+                        successCallback(res)
+                    } else {
+                        toastr.success("保存成功")
+                    }
+
+                    if (!idDOM.value) { // 新增刷新页面
+                        idDOM.value = options.originalFormData.id = res.data
+
+                        // setTimeout(() => {
+                        //     window.location.reload()
+                        // }, 1000)
+                    }
+
+                    _reloadTab(reloadTabIds)
+                }
+            }
+        });
+
+        function _reloadTab(reloadTabIds) {
+            if (!reloadTabIds) {
+                reloadTabIds = [options.formCode] //名字需要约定好
+            }
+
+            if (Array.isArray(reloadTabIds)) {
+                for(let reloadTabId of reloadTabIds) {
+                    reloadTab(reloadTabId)
+                }
+            } else {
+                reloadTab(reloadTabIds)
+            }
+        }
+    }
+}
+
 function registerValid(formDOM, elseValid) {
     formDOM.valid = function () {
         let formValidity = this.checkValidity()
@@ -22,4 +154,14 @@ function registerValid(formDOM, elseValid) {
 
         return isValid;
     }
+
+    formDOM.addEventListener('submit', function (event) {
+        if (!formDOM.valid()) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+    }, false)
 }
+
+
+

@@ -134,7 +134,7 @@ public class FormTagTest {
     public void testReport() {
         reportService.saveOrUpdate(Report.builder()
                 .code("sys_user_form_tag")
-                .tplName("tpl/list") // 如果由特殊需求比如显示字段的格式化，字段跳转，可以使用自己的模版
+                .tplName("tpl/list/list") // 如果由特殊需求比如显示字段的格式化，字段跳转，可以使用自己的模版
                 .name("用户管理")
                 .reportAdviceName("userReportAdvice")
 

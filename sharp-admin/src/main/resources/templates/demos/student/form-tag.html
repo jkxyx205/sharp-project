@@ -17,7 +17,7 @@
         <div class="card">
             <div class="card-body">
                 <h1>外部 Form</h1>
-                <form class="needs-validation dialog-form" id="form" name="form">
+                <form id="form" name="form">
                     <div class="form-group row">
                         <label for="email" class="col-form-label col-sm-1 required">邮箱</label>
                         <div class="col-sm-11">
@@ -29,15 +29,17 @@
 
                 <h1>Form Tag</h1> <span th:text="${'readonly = ' +  query.readonly}"></span>
                     <h2>sys_user</h2>
-                    <sp:form id="694980924206493696" form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
+                    <sp:form id="694980924206493696" form-page="tpl/form/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
 
                     <hr/>
 
-                    <h2><h2>sys_user-tag</h2></h2>
-                    <sp:form id="859875429241106432" form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>
+<!--                    <h2><h2>sys_user-tag</h2></h2>-->
+<!--                    <sp:form id="859875429241106432" form-page="tpl/form/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" th:readonly="${query.readonly}"></sp:form>-->
 
-<!--                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" readonly="true"></sp:form>-->
-<!--                    <sp:form id="694980924206493696"  form-page="tpl/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag"></sp:form>-->
+<!--                    <sp:form id="694980924206493696"  form-page="tpl/form/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag" readonly="true"></sp:form>-->
+<!--                    <sp:form id="694980924206493696"  form-page="tpl/form/form-tag" th:value="${formBO.instanceId}" show-btn reload-tab="form-tag"></sp:form>-->
+                    <h2><h2>sys_dict</h2>
+                    <sp:form id="695312747063197696"  form-page="tpl/form/form-tag" value="862375391526948864" show-btn reload-tab="form-tag"></sp:form>
                 <hr>
                 <button type="button" class="btn btn-primary" onclick="saveAllForm()">保存所有form</button>
             </div>
@@ -62,8 +64,9 @@
         function saveAllForm() {
             // 保存 sharp form 的回调函数
 
-            saveSharpForm("sys_user_form_tag")
+            // saveSharpForm("sys_user_form_tag")
             saveSharpForm("sys_user")
+            saveSharpForm("sys_dict")
 
             // 手写
             // let valid = formDOM.valid() & sys_user_form_tagFormDOM.valid()
@@ -90,7 +93,7 @@
             let valid = formDOM.valid() & window[formCode + 'FormDOM'].valid()
             if (valid) {
                 console.log("get tag form data = ", window[formCode + 'FormData']())
-                window[formCode + 'SaveForm']((data) => {
+                window[formCode + 'FormDOM'].save((data) => {
                     // 获取 instance id
                     console.log("data = ", data)
                     // 执行外部方法的保存
