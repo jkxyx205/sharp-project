@@ -8,6 +8,7 @@ import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.PageModel;
 import com.rick.db.formatter.AbstractSqlFormatter;
+import com.rick.db.plugin.dao.core.EntityDAOManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -523,6 +524,14 @@ public final class SQLUtils {
             return null;
         }
         // 处理EntityDAOImpl特殊类型
+        if (resolveValueFn != null) {
+            // 客户端解析
+            Object[] resolveValueFnValue = resolveValueFn.apply(value);
+            if (resolveValueFnValue[0] == Boolean.TRUE) {
+                return resolveValueFnValue[1];
+            }
+        }
+
         if (Enum.class.isAssignableFrom(value.getClass())) {
             return EnumUtils.getCode((Enum) value);
         } else if (value.getClass() == Instant.class) {
@@ -557,15 +566,10 @@ public final class SQLUtils {
             }
 
             return values.deleteCharAt(values.length() - 1);
+        } if (EntityDAOManager.isEntityClass((value.getClass()))) {
+            return EntityDAOManager.getIdValue(value);
         } else if (com.rick.common.util.ObjectUtils.mayPureObject(value)) {
             return JsonUtils.toJson(value);
-        }
-
-        if (resolveValueFn != null) {
-            Object[] resolveValueFnValue = resolveValueFn.apply(value);
-            if (resolveValueFnValue[0] == Boolean.TRUE) {
-                return resolveValueFnValue[1];
-            }
         }
 
         // JDBC 支持类型

@@ -47,6 +47,6 @@ public class BigDecimalUtils {
             return "";
         }
 
-        return value.setScale(newScale, roundingMode).stripTrailingZeros().toPlainString();
+        return String.format("%."+newScale+"f", value.setScale(newScale, roundingMode).stripTrailingZeros());
     }
 }
