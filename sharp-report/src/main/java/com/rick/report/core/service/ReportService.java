@@ -6,12 +6,14 @@ import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
+import com.rick.common.util.Time2StringUtils;
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
 import com.rick.db.dto.QueryModel;
 import com.rick.db.plugin.GridUtils;
 import com.rick.db.service.GridService;
 import com.rick.excel.table.QueryResultExportTable;
+import com.rick.excel.table.model.AlignEnum;
 import com.rick.excel.table.model.MapTableColumn;
 import com.rick.meta.dict.convert.ValueConverter;
 import com.rick.report.core.dao.ReportDAO;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -200,6 +203,7 @@ public class ReportService {
             public void setRows(List<?> rows) {
                 handleReportAdvice(report, (List<Map<String, Object>>) rows);
                 toObjectArrayListAndConvert((List<Map<String, Object>>) rows, report.getReportColumnList());
+                formatValue((List<Map<String, Object>>) rows);
                 super.setRows(rows);
             }
         };
@@ -280,6 +284,17 @@ public class ReportService {
             MapTableColumn mapTableColumn = new MapTableColumn(reportColumn.getName(), reportColumn.getLabel());
             if (Objects.nonNull(reportColumn.getColumnWidth())) {
                 mapTableColumn.setColumnWidth(reportColumn.getColumnWidth() * 50);
+            } else {
+                // 根据数据类型推断长度
+                if (reportColumn.getType() == ReportColumn.TypeEnum.DATE) {
+                    mapTableColumn.setColumnWidth(4000);
+                } else if (reportColumn.getType() == ReportColumn.TypeEnum.DATETIME) {
+                    mapTableColumn.setColumnWidth(6000);
+                }
+            }
+
+            if (Objects.nonNull(reportColumn.getAlign())) {
+                mapTableColumn.setAlign(AlignEnum.valueOf(reportColumn.getAlign().name()));
             }
 
             mapTableColumnList.add(mapTableColumn);
@@ -300,4 +315,25 @@ public class ReportService {
             reportAdvice.beforeSetRow(report, rows);
         }
     }
+
+    private void formatValue(List<Map<String, Object>> rows) {
+        for (Map<String, Object> row : rows) {
+            Set<Map.Entry<String, Object>> kvs = row.entrySet();
+            for (Map.Entry<String, Object> kv : kvs) {
+                if (kv.getValue() == null) {
+                    continue;
+                }
+
+                if (Date.class.isAssignableFrom(kv.getValue().getClass())) {
+                    row.put(kv.getKey(), Time2StringUtils.format((java.sql.Date) kv.getValue()));
+                }
+                if (kv.getValue().getClass() == LocalDate.class) {
+                    row.put(kv.getKey(), Time2StringUtils.format((LocalDate) kv.getValue()));
+                } else if (kv.getValue().getClass() == LocalDateTime.class) {
+                    row.put(kv.getKey(), Time2StringUtils.format((LocalDateTime) kv.getValue()));
+                }
+            }
+        }
+    }
+
 }
