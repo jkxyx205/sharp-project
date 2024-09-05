@@ -3,9 +3,6 @@ package com.rick.formflow.form.controller.instance;
 import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.util.HtmlTagUtils;
-import com.rick.common.util.JsonUtils;
-import com.rick.formflow.form.cpn.core.CpnConfigurer;
-import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,19 +47,6 @@ public class PageInstanceController {
 
         // 这个是必须的字段，用于界面显示
         HtmlTagUtils.isTagPropertyTrueAndPut(parameterMap, "readonly");
-
-        // table
-        for (FormBO.Property property : formBO.getPropertyList()) {
-            if (property.getConfigurer().getCpnType() == CpnTypeEnum.TABLE) {
-                List<Map<String, Object>> list = (List<Map<String, Object>>) property.getConfigurer().getAdditionalInfo().get("columns");
-                List<CpnConfigurer> tableCpnConfigurerList = new ArrayList<>();
-                for (Map<String, Object> map : list) {
-                    CpnConfigurer cpnConfigurer = JsonUtils.toObject(JsonUtils.toJson(map), CpnConfigurer.class);
-                    tableCpnConfigurerList.add(cpnConfigurer);
-                }
-                property.getConfigurer().getAdditionalInfo().put("columns", tableCpnConfigurerList);
-            }
-        }
 
         return StringUtils.defaultString(formBO.getForm().getTplName(),"tpl/form/form");
     }

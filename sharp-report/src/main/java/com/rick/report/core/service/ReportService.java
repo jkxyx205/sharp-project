@@ -23,6 +23,7 @@ import com.rick.report.core.model.ReportDTO;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -76,6 +77,7 @@ public class ReportService {
 
     public Optional<Report> findById(Long id) {
         Report report = reportCacheMap.get(id);
+        Report clone = new Report();
 
         if (report == null) {
             Optional<Report> optional = reportDAO.selectById(id);
@@ -88,11 +90,10 @@ public class ReportService {
             if (report.getAdditionalInfo() == null) {
                 report.setAdditionalInfo(new HashMap<>());
             }
-
-            return optional;
         }
 
-        return Optional.of(report);
+        BeanUtils.copyProperties(report,clone);
+        return Optional.of(clone);
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
