@@ -3,7 +3,7 @@
     <div class="form-group row" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.configurer.validatorProperties.get('Required.required') eq null ? false : p.configurer.validatorProperties.get('Required.required')}">
         <label th:for="${p.name}" th:class="${'col-form-label col-sm-' + col}" th:classappend="${isRequired ? 'required' : ''}" th:text="${p.configurer.label}"></label>
         <div th:class="${'col-sm-' + (12 - col)}">
-            <label class="col-form-label"  th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).LABEL}" th:text="${(p.configurer.options == null || p.value == null) ? p.value : p.configurer.optionMap[p.value]}"></label>
+            <label class="col-form-label"  th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).LABEL}" th:text="${( p.configurer.options.size() eq 0 || p.value == null) ? p.value : p.configurer.optionMap[p.value]}"></label>
 
             <input th:attr="disabled=${(p.name eq 'code' || (p.name eq 'name' && formBO.form.code eq 'sys_dict')) && formBO.instanceId != null},pattern=${p.configurer.validatorProperties.get('CustomizeRegex.regex')}" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXT}" type="text" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                    th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
