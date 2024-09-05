@@ -20,6 +20,8 @@ public class TableColumn {
 
     private int columnWidth = 2400;
 
+    private AlignEnum align;
+
     public TableColumn(String label) {
         this.label = label;
     }

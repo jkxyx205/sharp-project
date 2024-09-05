@@ -47,8 +47,14 @@ public abstract class AbstractExportTable {
 
     protected XSSFCellStyle rowStyle;
 
+    private XSSFCellStyle defaultColumnStyle;
+
+    protected XSSFCellStyle defaultRowStyle;
+
     public AbstractExportTable(List<? extends TableColumn> tableColumnList, List<?> rows) {
         this.tableColumnList = tableColumnList;
+        this.defaultColumnStyle = createDefaultColumnStyle();
+        this.defaultRowStyle = createDefaultRowStyle();
         this.rows = rows;
     }
 
@@ -63,22 +69,31 @@ public abstract class AbstractExportTable {
             return;
         }
 
-        int size = tableColumnList.size();
-        Object[] labels = new Object[size];
+        int columnSize = tableColumnList.size();
+        Object[] labels = new Object[columnSize];
+        XSSFCellStyle[] cellStyles = new XSSFCellStyle[columnSize];
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < columnSize; i++) {
             TableColumn tableColumn = tableColumnList.get(i);
             labels[i] = tableColumn.getLabel();
             excelWriter.getActiveSheet().setColumnWidth(i, tableColumn.getColumnWidth());
+
+            // cell style
+            if (tableColumn.getAlign() != null) {
+                XSSFCellStyle defaultRowStyle = createDefaultColumnStyle();
+                defaultRowStyle.setAlignment((HorizontalAlignment.valueOf(tableColumn.getAlign().name())));
+                cellStyles[i] = defaultRowStyle;
+            }
         }
 
         ExcelRow row = new ExcelRow(1,1, labels);
         row.setHeightInPoints(columnHeight);
+        row.setCellStyles(cellStyles);
 
         if (Objects.nonNull(columnStyle)) {
             row.setStyle(columnStyle);
         } else {
-            row.setStyle(getDefaultColumnStyle());
+            row.setStyle(defaultColumnStyle);
         }
 
         excelWriter.writeRow(row);
@@ -89,17 +104,36 @@ public abstract class AbstractExportTable {
             return;
         }
 
+        if (CollectionUtils.isEmpty(tableColumnList)) {
+            return;
+        }
+        // 设置样式
+        int columnSize = tableColumnList.size();
+        XSSFCellStyle[] cellStyles = new XSSFCellStyle[columnSize];
+
+        for (int i = 0; i < columnSize; i++) {
+            TableColumn tableColumn = tableColumnList.get(i);
+
+            // cell style
+            if (tableColumn.getAlign() != null) {
+                XSSFCellStyle defaultRowStyle = createDefaultRowStyle();
+                defaultRowStyle.setAlignment((HorizontalAlignment.valueOf(tableColumn.getAlign().name())));
+                cellStyles[i] = defaultRowStyle;
+            }
+        }
+
         int startY = CollectionUtils.isEmpty(tableColumnList) ? 1 : 2;
         int size = rows.size();
 
         for (int i = 0; i < size; i++) {
             ExcelRow row = new ExcelRow(1, i + startY, resolve(rows.get(i)));
             row.setHeightInPoints(rowHeight);
+            row.setCellStyles(cellStyles);
 
             if (Objects.nonNull(rowStyle)) {
                 row.setStyle(rowStyle);
             } else {
-                row.setStyle(getDefaultRowStyle());
+                row.setStyle(defaultRowStyle);
             }
 
             excelWriter.writeRow(row);
@@ -108,7 +142,7 @@ public abstract class AbstractExportTable {
 
     protected abstract Object[] resolve(Object row);
 
-    private XSSFCellStyle getDefaultColumnStyle() {
+    private XSSFCellStyle createDefaultColumnStyle() {
         XSSFCellStyle cellStyle = excelWriter.getBook().createCellStyle();
         // 水平居中
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -127,7 +161,7 @@ public abstract class AbstractExportTable {
         return cellStyle;
     }
 
-    protected XSSFCellStyle getDefaultRowStyle() {
-        return null;
+    protected XSSFCellStyle createDefaultRowStyle() {
+        return excelWriter.getBook().createCellStyle();
     }
 }
