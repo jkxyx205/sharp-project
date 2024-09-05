@@ -2,10 +2,7 @@ package com.rick.admin.demo;
 
 import com.rick.db.service.support.Params;
 import com.rick.report.core.entity.Report;
-import com.rick.report.core.model.HiddenReportColumn;
-import com.rick.report.core.model.QueryField;
-import com.rick.report.core.model.ReportColumn;
-import com.rick.report.core.model.SordEnum;
+import com.rick.report.core.model.*;
 import com.rick.report.core.service.ReportService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +12,7 @@ import java.util.Arrays;
 
 /**
  * @author Rick.Xu
- * @date 2024-09-03 22:04:18
+ * @date 2024-09-05 07:24:13
  */
 @SpringBootTest
 public class StudentTest {
@@ -31,7 +28,7 @@ public class StudentTest {
 //                .tplName("tpl/list/list") // 没有特殊要求使用模版页面
 //                .tplName("tpl/list/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生表")
-                .reportAdviceName("operatorReportAdvice")
+                .reportAdviceName("studentReportAdvice")
                 .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
                         .pv("endpoint", "students")
                         .build()) // 显示操作按钮
@@ -63,21 +60,21 @@ public class StudentTest {
                         new ReportColumn("name", "姓名"),
                         new ReportColumn("gender", "gender", false,"GenderEnum", Arrays.asList("dictConverter")),
                         new ReportColumn("email", "email"),
-                        new ReportColumn("birthday", "出生日期"),
+                        new ReportColumn("birthday", "出生日期", true).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATE),
                         new ReportColumn("age", "年龄"),
-                        new ReportColumn("marriage", "婚否", false, null, Arrays.asList("boolConverter")),
+                        new ReportColumn("marriage", "婚否", false, null, Arrays.asList("boolConverter")).setAlign(AlignEnum.CENTER),
                         new ReportColumn("unit.code", "unit.code", false,"UNIT", Arrays.asList("dictConverter")),
                         new ReportColumn("attachments", "attachments"),
-                        new ReportColumn("avatar", "avatar"),
+                        new ReportColumn("avatar", "avatar").setAlign(AlignEnum.CENTER),
                         new ReportColumn("hobbyList", "hobbyList", false,"HobbyEnum", Arrays.asList("arrayDictConverter")),
                         new ReportColumn("materialTypeList", "物料类型", false,"MATERIAL", Arrays.asList("arrayDictConverter")),
                         new ReportColumn("category", "分类", false,"CategoryEnum", Arrays.asList("dictConverter")),
-                        new ReportColumn("available", "是否可用", false, null, Arrays.asList("boolConverter")),
+                        new ReportColumn("available", "是否可用", false, null, Arrays.asList("boolConverter")).setAlign(AlignEnum.CENTER),
                         new ReportColumn("remark", "简介"),
                         new ReportColumn("createBy", "创建人"),
-                        new ReportColumn("createTime", "创建时间", false, null, Arrays.asList("localDateTimeConverter")),
+                        new ReportColumn("createTime", "创建时间", false, null, Arrays.asList("localDateTimeConverter")).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME),
                         new ReportColumn("updateBy", "更新人"),
-                        new ReportColumn("updateTime", "更新时间", false, null, Arrays.asList("localDateTimeConverter"))
+                        new ReportColumn("updateTime", "更新时间", false, null, Arrays.asList("localDateTimeConverter")).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME)
                 ))
                 .pageable(true)
                 .sidx("createTime")
