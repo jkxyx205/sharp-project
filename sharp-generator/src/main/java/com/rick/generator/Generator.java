@@ -287,10 +287,12 @@ public class Generator {
                 queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\"),\n");
             }
             // 设置 ReportColumn
-            if (field.getType() == LocalDateTime.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")),\n");
+            if (field.getType() == LocalDate.class) {
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+columnName+"\", \""+comment+"\", true).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATE),\n");
+            } else if (field.getType() == LocalDateTime.class) {
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME),\n");
             } else if (field.getType() == Boolean.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")).setAlign(AlignEnum.CENTER),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz.isEnum()) {
@@ -319,6 +321,7 @@ public class Generator {
                 "import com.rick.report.core.model.QueryField;\n" +
                 "import com.rick.report.core.model.ReportColumn;\n" +
                 "import com.rick.report.core.model.SordEnum;\n" +
+                "import com.rick.report.core.model.AlignEnum;\n" +
                 "import com.rick.report.core.service.ReportService;\n" +
                 "import org.junit.jupiter.api.Test;\n" +
                 "import org.springframework.beans.factory.annotation.Autowired;\n" +
@@ -340,9 +343,9 @@ public class Generator {
                 "    public void testReport() {\n" +
                 "        Report report = Report.builder()\n" +
                 "                .code(\""+entityDAO.getTableMeta().getTableName()+"\")// 　建议和数据库表名保持一致\n" +
-                "                .tplName(\"tpl/ajax_list\") // 拷贝模版页面到指定目录\n" +
-                "//                .tplName(\"tpl/list\") // 没有特殊要求使用模版页面\n" +
-                "//                .tplName(\"tpl/ajax_list\") // 没有特殊要求使用模版页面\n" +
+                "                .tplName(\"tpl/list/ajax_list\") // 拷贝模版页面到指定目录\n" +
+                "//                .tplName(\"tpl/list/list\") // 没有特殊要求使用模版页面\n" +
+                "//                .tplName(\"tpl/list/ajax_list\") // 没有特殊要求使用模版页面\n" +
                 "                .name(\""+StringUtils.defaultString(entityDAO.getTableMeta().getTable().comment(), entityDAO.getTableMeta().getTableName())+"\")\n" +
                 "                .reportAdviceName(\"operatorReportAdvice\")\n" +
                 "                .additionalInfo(Params.builder(1).pv(\"operator-bar\", true) // 显示操作按钮\n" +
