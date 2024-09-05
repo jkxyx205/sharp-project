@@ -5,12 +5,12 @@
 function download(path, completedCallback, failCallback) {
     const xhr = new XMLHttpRequest()
     xhr.onload = function () {
-        if (this.status === 200 && this.response.type === 'application/json') {
+        if (this.response.type === 'application/json') {
             const fr = new FileReader();
             fr.readAsText(this.response)
             fr.onload = function (e) {
-                const msg = JSON.parse(e.target.result).msg
-                failCallback ? failCallback(msg) : alert(msg)
+                const message = JSON.parse(e.target.result).message
+                failCallback ? failCallback(message) : alert(message)
             }
         } else {
             let downloadElement = document.createElement('a');

@@ -143,6 +143,7 @@
     <script th:src="@{/editable-table/editable-table.js}"></script>
     <script th:src="@{/ajaxfileupload.js}"></script>
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
+    <script th:src="@{/js/download.js}"></script>
     <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
     <script th:src="@{/plugins/lodash.min.js}"></script>
 
@@ -250,7 +251,8 @@
                 } else {
                     $listTable.ajaxTable('reload', params)
                 }
-                $('#exportBtn').attr('href', $('#exportBtn').data('url') + "?" + $.param($listTable.ajaxTable('getQuery')))
+                // $('#exportBtn').attr('href', $('#exportBtn').data('url') + "?" + $.param($listTable.ajaxTable('getQuery')))
+                $('#exportBtn').attr('href', 'javascript:$.LoadingOverlay(\'show\');download(\''+$('#exportBtn').data('url') + "?" + $.param($listTable.ajaxTable('getQuery'))+'\', function() {$.LoadingOverlay(\'hide\')}, function(msg) {toastr.error(msg)})')
             }
 
         // listRequest({})

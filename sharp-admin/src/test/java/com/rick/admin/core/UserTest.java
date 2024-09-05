@@ -195,11 +195,11 @@ public class UserTest {
                         new HiddenReportColumn("id"),
                         new ReportColumn("code", "用户名", true),
                         new ReportColumn("name", "姓名", true),
-                        new ReportColumn("birthday", "出生日期", true),
+                        new ReportColumn("birthday", "出生日期", true).setAlign(AlignEnum.CENTER),
                         new ReportColumn("role_name", "角色"),
                         new ReportColumn("is_available", "是否可用").setColumnWidth(80).setAlign(AlignEnum.CENTER),
                         new ReportColumn("create_name", "创建人").setColumnWidth(100),
-                        new ReportColumn("create_time", "创建时间").setColumnWidth(180).setAlign(AlignEnum.CENTER)
+                        new ReportColumn("create_time", "创建时间").setColumnWidth(120).setAlign(AlignEnum.CENTER)
                 ))
                 .pageable(true)
                 .sidx("id")
@@ -236,7 +236,7 @@ public class UserTest {
                         new ReportColumn("role_name", "角色"),
                         new ReportColumn("is_available", "是否可用").setColumnWidth(80).setAlign(AlignEnum.CENTER),
                         new ReportColumn("create_name", "创建人").setColumnWidth(100),
-                        new ReportColumn("create_time", "创建时间").setColumnWidth(180).setAlign(AlignEnum.CENTER)
+                        new ReportColumn("create_time", "创建时间").setColumnWidth(120).setAlign(AlignEnum.CENTER)
                 ))
                 .pageable(true)
                 .sidx("id")

@@ -173,6 +173,7 @@
     <script th:src="@{/editable-table/editable-table.js}"></script>
     <script th:src="@{/ajaxfileupload.js}"></script>
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
+    <script th:src="@{/js/download.js}"></script>
     <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
 
     <script th:inline="javascript">
@@ -248,7 +249,9 @@
 
         $('.query-form-container').autofill(urlObject).pageTable()
 
-        $('#exportBtn').attr('href', $('#exportBtn').attr('href') + _newUrl())
+        // $('#exportBtn').attr('href', $('#exportBtn').attr('href') + _newUrl())
+        $('#exportBtn').attr('href', 'javascript:$.LoadingOverlay(\'show\');download(\''+($('#exportBtn').attr('href') + _newUrl())+'\', function() {$.LoadingOverlay(\'hide\')}, function(msg) {toastr.error(msg)})')
+
 
         let $modal = $('#dialog')
         let report = [[${report}]]
