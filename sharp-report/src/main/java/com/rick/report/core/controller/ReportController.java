@@ -92,7 +92,12 @@ public class ReportController {
     }
 
     @GetMapping("{id}")
-    public String index(@PathVariable  Long id, boolean readonly, Model model, HttpServletRequest request) {
+    public String index(@PathVariable Long id, boolean readonly, Model model, HttpServletRequest request) {
+        Report report = reportService.findById(id).get();
+        if (report.getTplName() != null && report.getTplName().indexOf("ajax") > -1) {
+            return ajaxIndex(id, model, request);
+        }
+
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
         ReportDTO reportDTO = reportService.list(id, params);
 

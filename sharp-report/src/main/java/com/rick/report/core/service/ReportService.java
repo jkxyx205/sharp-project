@@ -75,11 +75,28 @@ public class ReportService {
     }
 
     public Optional<Report> findById(Long id) {
-        return reportDAO.selectById(id);
+        Report report = reportCacheMap.get(id);
+
+        if (report == null) {
+            Optional<Report> optional = reportDAO.selectById(id);
+            if (!optional.isPresent()) {
+                throw new BizException(ResultUtils.fail("Report not exists"));
+            }
+            report = optional.get();
+            reportCacheMap.put(id, report);
+
+            if (report.getAdditionalInfo() == null) {
+                report.setAdditionalInfo(new HashMap<>());
+            }
+
+            return optional;
+        }
+
+        return Optional.of(report);
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
-        Report report = getReport(id);
+        Report report = findById(id).get();
         init(report);
         mergeParams(report, requestMap);
         if (StringUtils.isBlank(report.getQuerySql())) {
@@ -188,7 +205,7 @@ public class ReportService {
     }
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
-        Report report = getReport(id);
+        Report report = findById(id).get();
 
         QueryModel queryModel = QueryModel.of(HttpServletRequestUtils.getParameterMap(request));
         PageModel pageModel = queryModel.getPageModel();
@@ -209,26 +226,6 @@ public class ReportService {
         };
 
         exportTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName));
-    }
-
-    private Report getReport(long id) {
-        Report report = reportCacheMap.get(id);
-
-        if (report == null) {
-            Optional<Report> optional = findById(id);
-            if (!optional.isPresent()) {
-                throw new BizException(ResultUtils.fail("Report not exists"));
-            }
-            report = optional.get();
-            reportCacheMap.put(id, report);
-        }
-
-        if (report.getAdditionalInfo() == null) {
-            report.setAdditionalInfo(new HashMap<>());
-        }
-
-        validateNonDeleteSql(report.getQuerySql());
-        return report;
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
@@ -287,9 +284,9 @@ public class ReportService {
             } else {
                 // 根据数据类型推断长度
                 if (reportColumn.getType() == ReportColumn.TypeEnum.DATE) {
-                    mapTableColumn.setColumnWidth(4000);
+                    mapTableColumn.setColumnWidth(3000);
                 } else if (reportColumn.getType() == ReportColumn.TypeEnum.DATETIME) {
-                    mapTableColumn.setColumnWidth(6000);
+                    mapTableColumn.setColumnWidth(5000);
                 }
             }
 
