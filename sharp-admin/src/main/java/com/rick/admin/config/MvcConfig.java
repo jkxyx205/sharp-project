@@ -1,9 +1,11 @@
 package com.rick.admin.config;
 
 import com.rick.admin.auth.common.UrlHandlerInterceptor;
+import com.rick.admin.common.servlet.AccessFilter;
 import com.rick.common.http.exception.ApiExceptionHandler;
 import com.rick.common.http.util.MessageUtils;
 import com.rick.common.http.web.SharpWebMvcConfigurer;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -44,6 +46,17 @@ public class MvcConfig extends SharpWebMvcConfigurer {
     @Bean
     public UrlHandlerInterceptor urlHandlerInterceptor() {
         return new UrlHandlerInterceptor();
+    }
+
+    @Bean
+    public FilterRegistrationBean httpServletRequestReplacedFilter() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new AccessFilter());
+        // /* 是全部的请求拦截，和Interceptor的拦截地址/**区别开
+        registration.addUrlPatterns("/*");
+        registration.setName("accessRequestFilter");
+        registration.setOrder(1);
+        return registration;
     }
 
     @Override
