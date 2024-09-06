@@ -1,6 +1,6 @@
 package com.rick.demo.module.book.entity;
 
-import com.rick.db.dto.BaseCodeEntity;
+import com.rick.db.dto.type.BaseCodeEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "plant_storage_location", comment = "库位")
-public class StorageLocation extends BaseCodeEntity {
+public class StorageLocation extends BaseCodeEntityWithLongId {
 
     String description;
 

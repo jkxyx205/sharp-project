@@ -7,8 +7,8 @@ import lombok.Getter;
  * @author Rick
  * @createdAt 2022-05-01 13:52:00
  */
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public class Evaluate {
 
     /**

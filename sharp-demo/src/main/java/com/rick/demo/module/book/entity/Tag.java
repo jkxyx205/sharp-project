@@ -1,6 +1,6 @@
 package com.rick.demo.module.book.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_tag", comment = "tag")
-public class Tag extends BaseEntity {
+public class Tag extends BaseEntityWithLongId {
 
     private String title;
 

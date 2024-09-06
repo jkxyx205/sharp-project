@@ -30,7 +30,7 @@ public class DbUtilTest {
 
     @Test
     public void testUpdate() {
-        int rows = mysqlDbUtil.executeUpdate("update cat set name = ? where id = ?", new Object[]{"Rick", 706172121272848384L});
+        int rows = mysqlDbUtil.executeUpdate("update cat set name = ? where id = ?", new Object[]{"Rick", 706172604947402752L});
         System.out.println("affect rows " + rows);
     }
 }

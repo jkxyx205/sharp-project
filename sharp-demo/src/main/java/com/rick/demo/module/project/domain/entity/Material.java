@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.BaseEntityWithAssign;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_material", comment = "农民")
-public class Material extends BaseEntityWithAssign {
+public class Material extends BaseEntity<String> {
 
     private String name;
 }

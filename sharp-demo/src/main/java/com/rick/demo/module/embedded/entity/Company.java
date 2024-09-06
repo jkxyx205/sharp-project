@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Table(value = "t_company", comment = "公司")
 @ToString
-public class Company extends SimpleEntity {
+public class Company extends SimpleEntity<Long> {
 
     private String name;
 

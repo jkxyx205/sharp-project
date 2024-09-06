@@ -21,7 +21,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_message", comment = "消息")
-public class Message extends SimpleEntity {
+public class Message extends SimpleEntity<Long> {
 
     private String text;
 

@@ -1,6 +1,6 @@
 package com.rick.demo.module.book.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.OneToMany;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.*;
@@ -20,7 +20,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "cat", comment = "猫")
-public class Cat extends BaseEntity {
+public class Cat extends BaseEntityWithLongId {
 
     String name;
 
@@ -36,7 +36,7 @@ public class Cat extends BaseEntity {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @SuperBuilder
     @Table(value = "cat_reward", comment = "猫的证书")
-    public static class Reward extends BaseEntity {
+    public static class Reward extends BaseEntityWithLongId {
         String title;
 
         Long catId;

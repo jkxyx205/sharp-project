@@ -1,8 +1,9 @@
 package com.rick.demo.module.project.domain.entity.group;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.plugin.dao.annotation.ToStringValue;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.Dept;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
@@ -26,7 +27,7 @@ import java.util.Map;
 @Setter
 @Table(value = "t_task", comment = "任务表")
 @NoArgsConstructor
-public class Task extends BaseEntity {
+public class Task extends BaseEntityWithLongId {
 
     @Column(nullable = true, comment = "任务名称")
     private String taskName;
@@ -48,6 +49,7 @@ public class Task extends BaseEntity {
 
     private List<Address> list;
 
+    @ToStringValue
     private PhoneNumber phoneNumber;
 
     private Map<String, Object> map;

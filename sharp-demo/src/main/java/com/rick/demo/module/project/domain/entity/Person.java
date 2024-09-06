@@ -3,7 +3,7 @@ package com.rick.demo.module.project.domain.entity;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializer;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Sql;
@@ -26,7 +26,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("t_person")
-public class Person extends BaseEntity {
+public class Person extends BaseEntityWithLongId {
 
     private String name;
 

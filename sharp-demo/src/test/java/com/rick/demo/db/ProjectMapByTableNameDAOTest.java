@@ -88,7 +88,7 @@ public class ProjectMapByTableNameDAOTest {
         project.put("status", UserStatusEnum.NORMAL);
         project.put("address", Address.builder().code("001").detail("苏州").build());
         project.put("list", Lists.newArrayList(Address.builder().code("001").detail("苏州").build()));
-        project.put("phone_number", PhoneNumber.builder().code("816").number("18888888888").build());
+        project.put("phone_number", PhoneNumber.builder().code("816").number("18888888888").build().toString());
         project.put(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, false);
         return project;
     }

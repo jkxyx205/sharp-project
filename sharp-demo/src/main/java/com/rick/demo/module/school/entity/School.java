@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializer;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.*;
 import com.rick.demo.module.project.domain.entity.Address;
 import lombok.AllArgsConstructor;
@@ -29,7 +29,7 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_school", comment = "学校")
-public class School extends BaseEntity {
+public class School extends BaseEntityWithLongId {
 
     @Column(comment = "学校名称")
     private String name;
@@ -62,6 +62,7 @@ public class School extends BaseEntity {
     private List<Float> scoreList;
 
     @Column(comment = "学校评价")
+    @ToStringValue
     private Evaluate evaluate;
 
     /**

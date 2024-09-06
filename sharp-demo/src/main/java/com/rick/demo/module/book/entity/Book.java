@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
 import com.rick.common.http.web.param.ParamName;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Sql;
@@ -28,7 +28,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_book", comment = "书")
-public class Book extends BaseEntity {
+public class Book extends BaseEntityWithLongId {
 
     private String title;
 

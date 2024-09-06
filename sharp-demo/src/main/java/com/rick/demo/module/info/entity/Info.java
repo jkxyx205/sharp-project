@@ -1,6 +1,6 @@
 package com.rick.demo.module.info.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +22,7 @@ import java.util.Map;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_info", comment = "用户信息")
-public class Info extends BaseEntity {
+public class Info extends BaseEntityWithLongId {
 
     private String name;
 

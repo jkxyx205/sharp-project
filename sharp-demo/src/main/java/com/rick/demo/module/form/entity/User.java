@@ -1,7 +1,7 @@
 package com.rick.demo.module.form.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ import java.util.Map;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_user", comment = "人员信息表")
-public class User extends BaseEntity {
+public class User extends BaseEntityWithLongId {
 
     @Column(comment = "姓名", nullable = false)
     private String name;

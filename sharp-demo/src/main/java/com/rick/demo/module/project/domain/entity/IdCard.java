@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.OneToMany;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Table("t_person_id_card")
-public class IdCard extends BaseEntity {
+public class IdCard extends BaseEntityWithLongId {
 
     private String idNum;
 

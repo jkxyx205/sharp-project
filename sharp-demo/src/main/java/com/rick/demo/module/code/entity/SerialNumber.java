@@ -1,7 +1,7 @@
 package com.rick.demo.module.code.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.BaseCodeEntity;
+import com.rick.db.dto.type.BaseCodeEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "mm_serial_number", comment = "序列号")
-public class SerialNumber extends BaseCodeEntity {
+public class SerialNumber extends BaseCodeEntityWithLongId {
 
     private SerialNumber.SerialNumberEnum status;
 

@@ -1,6 +1,6 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.Getter;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotBlank;
 @Setter
 @Table("t_project_detail1")
 @NoArgsConstructor
-public class ProjectDetail extends BaseEntity {
+public class ProjectDetail extends BaseEntityWithLongId {
 
     @NotBlank(message = "项目名称不能为空")
     private String title;
