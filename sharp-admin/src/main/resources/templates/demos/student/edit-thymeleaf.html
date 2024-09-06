@@ -14,7 +14,7 @@
         <div class="card">
             <div class="card-header">学生信息 thymeleaf 实现</div>
             <div class="card-body">
-                <form class="form-horizontal" id="form">
+                <form class="form-horizontal" id="form" name="form">
                     <input type="hidden" id="id" th:value="${student.id}">
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="code">编号</label>
@@ -88,23 +88,23 @@
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="category">分类</label>
                         <div class="col-4">
-                            <sp:select class="form-control" id="category" name="category" key="CategoryEnum" th:value="${student.category ne null ? student.category.name : ''}" required />
+                            <sp:select class="form-control" id="category" name="category" key="CategoryEnum" th:value="${student.category ne null ? student.category.name : ''}" required/>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-1 col-form-label required" for="attachments">attachments</label>
+                        <label class="col-1 col-form-label required" for="attachments_file">attachments</label>
                         <div class="col-11">
                             <div class="attachment">
                                 <div style="display: inline-block;" id="btn-file">
-                                    <label class="btn btn-primary btn-sm btn-upload" style="margin: 2px" for="attachments"><i class="fa fa-upload"></i> 上传</label>
+                                    <label class="btn btn-primary btn-sm btn-upload" style="margin: 2px" for="attachments_file"><i class="fa fa-upload"></i> 上传</label>
                                 </div>
-                                <input style="display:none;" type="text" th:value="${student.attachments ne null ? T(com.rick.common.util.JsonUtils).toJson(student.attachments) : '[]'}">
-                                <input style="display: none;" type="file" multiple name="attachments" id="attachments" data-group-name="attachments" onchange="attachmentUpload.ajaxFileUpload()">
+                                <input style="display:none;" type="text" id="attachments" name="attachments" th:value="${student.attachments ne null ? T(com.rick.common.util.JsonUtils).toJson(student.attachments) : '[]'}">
+                                <input style="display: none;" type="file" multiple name="attachments_file" id="attachments_file" data-group-name="attachments" onchange="form_attachments_file.ajaxFileUpload()">
                                 <div class="attachment-items">
                                     <th:block th:if="${student.attachments ne null}">
                                         <div class="item" th:each="f : ${student.attachments}">
                                             <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a>
-                                            <button type="button" class="btn btn-link attachment_delete_btn" th:onclick="attachmentUpload.deleteAttachment([[${f.id}]], this)">删除</button>
+                                            <button type="button" class="btn btn-link attachment_delete_btn" th:onclick="form_attachments_file.deleteAttachment([[${f.id}]], this)">删除</button>
                                         </div>
                                     </th:block>
                                 </div>
@@ -166,60 +166,63 @@
     <script th:src="@{/ajaxfileupload.js}"></script>
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
     <script th:inline="javascript">
-        let readonly = [[${query.readonly}]]
-        if (readonly === 'true') {
-            $("form :input").prop("disabled", true);
-            $('table .operator').hide()
-            // $('#okId').hide()
-        } else {
-            // $('#okId').show()
-        }
+        let hasAuthority = false
+        /*[# sec:authorize="${hasAuthority('student_edit') or hasAuthority('student_delete') }"]*/
+        // hasAuthority = true // TODO 根据业务配置
+        /*[/]*/
+
+        hasAuthority = true // 不进行权限控制
+
+        let readonly = !hasAuthority || [[${query.readonly}]]
 
         let formDOM = document.getElementById("form")
         let idDOM = document.getElementById("id")
-        let codeDOM = document.getElementById("code")
 
-        registerValid(formDOM, () => {
+        let originalFormData = /*[[${ student }]]*/
+        originalFormData.materialTypeList = [[${new com.rick.formflow.form.cpn.CheckBox().parseValue(student.materialTypeList)}]] || []
+
+        sharpFormInit(formDOM, idDOM, {
+                originalFormData,
+            p: [
+                {
+                    name: 'materialTypeList',
+                    configurer: {
+                        cpnType: 'MULTIPLE_SELECT',
+                    }
+                },
+                {
+                    name: 'category',
+                    configurer: {
+                        cpnType: 'SEARCH_SELECT',
+                    }
+                },
+                {
+                    name: 'birthday',
+                    configurer: {
+                        cpnType: 'DATE',
+
+                    }
+                },
+                {
+                    name: 'attachments',
+                    configurer: {
+                        cpnType: 'FILE'
+                    }
+                },
+            ],
+             readonly,
+             actionUrl: '/students',
+             method: "POST"
+            },
+            "student", () => {
             // 其他验证 + error 样式
             let valid = formDOM.validElse($("[name=hobbyList]:checked").length > 0, document.getElementById('hobbyList')) &
                 formDOM.validElse($('[name=gender]:checked').length > 0, document.getElementById('gender')) &
                 formDOM.validElse($('#materialTypeList').multipleSelect('getSelects').length > 0, document.getElementById('materialTypeList').nextSibling) &
                 formDOM.validElse($('#category').multipleSelect('getSelects').length > 0 && $('#category').multipleSelect('getSelects')[0] != '', document.getElementById('category').nextSibling) &
-                formDOM.validElse(attachmentUpload.getAttachments().length > 0, document.getElementById('btn-file'))
-
+                formDOM.validElse(form_attachments_file.getAttachments().length > 0, document.getElementById('btn-file'))
             return valid
         });
-
-        $('#birthday').datepicker({
-            language: "zh-CN",
-            autoclose: true,
-            clearBtn: true,
-            todayBtn: 'linked',
-            todayHighlight: true,
-            format: 'yyyy-mm-dd'
-        })
-
-        /**
-         * 查询多选
-         */
-        $('#materialTypeList').multipleSelect({
-            filter: true,
-            selectAll: true,
-            single: false,
-            placeholder: '选择物料类型'
-        }).multipleSelect("setSelects", [[${new com.rick.formflow.form.cpn.CheckBox().parseValue(student.materialTypeList)}]] || [])
-
-        /**
-         * 查询单选
-         */
-        $('#category').multipleSelect({
-            filter: true,
-            single: true,
-            placeholder: '选择分类'
-        })
-
-        // file
-        let attachmentUpload = new FileUpload("attachments");
 
         // image
         let imageUpload = new FileUpload("image_file", null, function uploadImage(attachments) {
@@ -231,7 +234,7 @@
             document.getElementById("avatar").removeAttribute("value")
             $('.avatar-container .item .delete-btn').hide()
         });
-        
+
         $('.avatar-container .item').hover(function () {
             document.getElementById("avatar").getAttribute("value") && $(this).find('.delete-btn').show()
         }, function () {
@@ -239,37 +242,16 @@
         })
 
         function send() {
-            if (formDOM.valid()) {
-                let formData = $('form').form2json({
-                    multiValSelector: '[type=checkbox]'
-                });
+            formDOM.save(null, formData => {
+                // 添加其他的参数
 
-                // 多选需要通过 multipleSelect 获取数据
+                // 多选
                 formData.materialTypeList = $('#materialTypeList').multipleSelect('getSelects')
                 // 文件
-                formData.attachments = attachmentUpload.getAttachments()
+                formData.attachments = form_attachments_file.getAttachments()
                 // 头像
                 formData.avatar = imageUpload.getAttachments().length > 0 ? imageUpload.getAttachments()[imageUpload.getAttachments().length - 1] : null
-
-                $.ajax ({
-                    url: "/students",
-                    type: "post",
-                    data: JSON.stringify(formData),
-                    dataType: "json",
-                    contentType: "application/json; charset=utf-8",
-                    success: function(res) {
-                        if (!res.success) {
-                            toastr.error(res.message)
-                        } else {
-                            idDOM.value = res.data.id
-                            codeDOM.value = res.data.code
-                            codeDOM.setAttribute("disabled", "true")
-                            toastr.success("保存成功")
-                            reloadTab('student')
-                        }
-                    }
-                });
-            }
+            })
         }
     </script>
 </th:block>
