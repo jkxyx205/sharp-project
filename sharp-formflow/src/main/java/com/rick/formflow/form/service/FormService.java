@@ -18,6 +18,7 @@ import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,9 +98,12 @@ public class FormService {
             FormUtils.update(formId, formCache);
         }
 
-        form = formCache.getForm();
-        configIdMap = formCache.getConfigIdMap();
-        formCpnList = formCache.getFormCpnList();
+        FormCache clone = new FormCache();
+        BeanUtils.copyProperties(formCache, clone);
+
+        form = clone.getForm();
+        configIdMap = clone.getConfigIdMap();
+        formCpnList = clone.getFormCpnList();
         propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
         Map<String, Object> valueMap = null;
