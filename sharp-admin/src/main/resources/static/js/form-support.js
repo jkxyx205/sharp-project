@@ -11,7 +11,11 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
 
     // 设置只读
     $(document).ready(function () {
-        if (options.readonly == 'true') {
+        if (options.readonly) {
+            formDOM.classList.add("readonly")
+        }
+
+        if (options.readonly == 'true' || options.readonly == true) {
             $("form.readonly :input").prop("disabled", true);
             $('table .operator').hide()
         } else {
@@ -38,10 +42,20 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         let multipleSelect = p.filter(c => c.configurer.cpnType == 'MULTIPLE_SELECT')
         multipleSelect.forEach(c => {
             $('#' + c.name).multipleSelect({
+                filter: true,
                 selectAll: true,
                 single: false,
                 placeholder: c.configurer.placeholder
             }).multipleSelect('setSelects', formDOM.originalFormData[c.name])
+        })
+        //
+        let searchSelect = p.filter(c => c.configurer.cpnType == 'SEARCH_SELECT')
+        searchSelect.forEach(c => {
+            $('#' + c.name).multipleSelect({
+                filter: true,
+                single: true,
+                placeholder: c.configurer.placeholder
+            })
         })
         // table
         formDOM.tables = p.filter(c => c.configurer.cpnType == 'TABLE')
@@ -71,7 +85,7 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         })
     }
 
-    formDOM.save = function (successCallback) {
+    formDOM.save = function (successCallback, beforeSave) {
         if (!formDOM.valid()) {
             return
         }
@@ -83,11 +97,11 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         formDOM.tables.forEach(c => {
             formData[c.name] = $('.' + c.name).editableTable('getValue')
         })
-
+        beforeSave && beforeSave(formData)
         console.log("formData = ", formData)
 
         $.ajax({
-            url: "/forms/ajax/" + options.actionUrl,
+            url: options.actionUrl.startsWith("/") ? options.actionUrl : "/forms/ajax/" + options.actionUrl,
             type: options.method,
             data: JSON.stringify(formData),
             dataType: "json",

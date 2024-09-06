@@ -18,8 +18,7 @@
             line-height: 33px;
         }
 
-        /*[(${(report.additionalInfo != null && report.additionalInfo['css'] != null ) ? report.additionalInfo['css'] : ''})]*/
-
+        /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
     </style>
 </head>
 <body class="app">
@@ -382,7 +381,7 @@
             $batchCpnBar.find('button').prop("disabled", nonChecked)
         })
 
-        /*[(${(report.additionalInfo != null && report.additionalInfo['js'] != null ) ? report.additionalInfo['js'] : ''})]*/
+        /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
     </script>
 </th:block>
 </body>
