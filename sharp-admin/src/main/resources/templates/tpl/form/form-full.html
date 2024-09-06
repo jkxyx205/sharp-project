@@ -10,6 +10,7 @@
             display: inline-block;
             position: relative;
         }
+        /*[(${formBO.form.getAdditionalInfo['css'] == null ? '' : formBO.form.getAdditionalInfo['css']})]*/
     </style>
 </head>
 <body>
@@ -24,7 +25,7 @@
     let p = [[${formBO.propertyList}]]
 
     var hasAuthority = false
-    /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+    /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') }"]*/
     hasAuthority = true
     /*[/]*/
     var readonly = !hasAuthority || [[${query.readonly}]]
@@ -33,5 +34,6 @@
     let idDOM = $(formDOM).find("#id")[0]
 
     sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
+    /*[(${formBO.form.getAdditionalInfo['js'] == null ? '' : formBO.form.getAdditionalInfo['js']})]*/
 </script>
 </html>
