@@ -148,6 +148,12 @@
     <script th:src="@{/plugins/lodash.min.js}"></script>
 
     <script th:inline="javascript">
+        var hasAuthority = false
+        /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+        hasAuthority = true
+        /*[/]*/
+        var readonly = !hasAuthority || [[${readonly}]]
+
         $.fn.multipleSelect.locales['zh-CN'] = {
             formatSelectAll: function () {
                 return '[全选]'

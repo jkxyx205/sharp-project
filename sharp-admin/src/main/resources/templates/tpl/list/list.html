@@ -177,12 +177,11 @@
     <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
 
     <script th:inline="javascript">
-        var readonly = true
-
-        readonly = /*[[${ readonly }]]*/
+        var hasAuthority = false
             /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
-            readonly = false
+            hasAuthority = true
         /*[/]*/
+        var readonly = !hasAuthority || [[${readonly}]]
 
         $.fn.multipleSelect.locales['zh-CN'] = {
             formatSelectAll: function () {

@@ -23,11 +23,11 @@
     let formCode = /*[[${formBO.form.code}]]*/
     let p = [[${formBO.propertyList}]]
 
-    var readonly = [[${query.readonly}]]
-
+    var hasAuthority = false
     /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
-    readonly = false
+    hasAuthority = true
     /*[/]*/
+    var readonly = !hasAuthority || [[${query.readonly}]]
 
     let formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
     sharpFormInit(formDOM, document.getElementById("id"), {originalFormData, formCode, p,readonly, actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
