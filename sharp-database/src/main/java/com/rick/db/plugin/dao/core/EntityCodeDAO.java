@@ -14,19 +14,19 @@ public interface EntityCodeDAO<T extends BaseCodeEntity, ID> extends EntityDAO<T
 
     List<T> selectByCodes(Collection<String> codes);
 
-    Long selectIdByCodeOrThrowException(String code);
+    ID selectIdByCodeOrThrowException(String code);
 
-    Optional<Long> selectIdByCode(String code);
+    Optional<ID> selectIdByCode(String code);
 
     Optional<String> selectDescriptionByCode(String code);
 
     <T2> Optional<T2> selectSingleValueByCode(String code, String columnName, Class<T2> clazz);
 
-    List<Long> selectIdsByCodes(Collection<String> codes);
+    List<ID> selectIdsByCodes(Collection<String> codes);
 
     Optional<String> selectCodeById(Long id);
 
-    Map<String, Long> selectCodeIdMap(Collection<String> codes);
+    Map<String, ID> selectCodeIdMap(Collection<String> codes);
 
     Map<String, T> selectByCodesAsMap(String... codes);
 

@@ -19,11 +19,11 @@ import java.io.Serializable;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SimpleEntity implements Serializable {
+public class SimpleEntity<ID> implements Serializable {
 
     @Id
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long id;
+    private ID id;
 
     @Override
     public boolean equals(Object obj) {

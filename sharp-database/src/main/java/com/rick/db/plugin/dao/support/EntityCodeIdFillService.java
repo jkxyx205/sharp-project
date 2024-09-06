@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.rick.common.http.exception.BizException;
 import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.plugin.dao.core.EntityCodeDAO;
 import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -100,12 +101,12 @@ public class EntityCodeIdFillService {
         return t;
     }
 
-    public <T extends BaseCodeEntity> Long fill(Class<T> clazz, Long id, String code) {
+    public <T extends BaseCodeEntity, ID> ID fill(Class<T> clazz, ID id, String code) {
         if (id != null || StringUtils.isBlank(code)) {
             return id;
         }
 
-        return ((EntityCodeDAOImpl) EntityDAOManager.getEntityDAO(clazz)).selectIdByCodeOrThrowException(code);
+        return (ID) ((EntityCodeDAO)(EntityCodeDAO)EntityDAOManager.getEntityDAO(clazz)).selectIdByCodeOrThrowException(code);
     }
 
     public <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {

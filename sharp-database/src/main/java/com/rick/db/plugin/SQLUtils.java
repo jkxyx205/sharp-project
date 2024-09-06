@@ -8,7 +8,6 @@ import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.PageModel;
 import com.rick.db.formatter.AbstractSqlFormatter;
-import com.rick.db.plugin.dao.core.EntityDAOManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -566,8 +565,6 @@ public final class SQLUtils {
             }
 
             return values.deleteCharAt(values.length() - 1);
-        } if (EntityDAOManager.isEntityClass((value.getClass()))) {
-            return EntityDAOManager.getIdValue(value);
         } else if (com.rick.common.util.ObjectUtils.mayPureObject(value)) {
             return JsonUtils.toJson(value);
         }

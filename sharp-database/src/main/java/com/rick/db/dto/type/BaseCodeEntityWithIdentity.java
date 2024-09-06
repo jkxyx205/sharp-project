@@ -1,7 +1,8 @@
-package com.rick.db.dto;
+package com.rick.db.dto.type;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.rick.db.dto.BaseCodeEntity;
 import com.rick.db.plugin.dao.annotation.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BaseEntityWithIdentity extends BaseEntity {
+public class BaseCodeEntityWithIdentity extends BaseCodeEntity<Long> {
 
     @Id(strategy = Id.GenerationType.IDENTITY)
     @JsonSerialize(using = ToStringSerializer.class)

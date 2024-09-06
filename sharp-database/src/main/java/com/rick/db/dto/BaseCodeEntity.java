@@ -23,7 +23,7 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class BaseCodeEntity extends BaseEntity {
+public class BaseCodeEntity<ID> extends BaseEntity<ID> {
 
     @Length(max = 32, message = "编号不能超过32个字符")
     @NotNull

@@ -1,6 +1,7 @@
 package com.rick.db.plugin.dao.support;
 
 import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.SimpleEntity;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
 
@@ -20,12 +21,16 @@ public class BaseEntityUtils {
         entity.setDeleted(null);
     }
 
-    public void copyProperties(Object source, BaseEntity target) {
-        copyProperties(source, target, (String[])null);
+    public void copyPropertiesAndResetAdditionalFields(Object source, BaseEntity target) {
+        copyPropertiesAndResetAdditionalFields(source, target, (String[])null);
     }
 
-    public void copyProperties(Object source, BaseEntity target, String... ignoreProperties) {
+    public void copyPropertiesAndResetAdditionalFields(Object source, BaseEntity target, String... ignoreProperties) {
         BeanUtils.copyProperties(source, target, ignoreProperties);
         BaseEntityUtils.resetAdditionalFields(target);
+    }
+
+    public boolean isEntityClass(Class<?> clazz) {
+        return SimpleEntity.class.isAssignableFrom(clazz);
     }
 }

@@ -19,7 +19,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class BaseCodeDescriptionEntity extends BaseCodeEntity {
+public class BaseCodeDescriptionEntity<ID> extends BaseCodeEntity<ID> {
 
     @NotBlank(message = "描述不能为空")
     @Length(max = 32, message = "描述不能超过32个字符")

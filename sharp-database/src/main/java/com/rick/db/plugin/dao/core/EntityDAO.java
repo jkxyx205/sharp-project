@@ -124,6 +124,8 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     Class<T> getEntityClass();
 
+    Class<ID> getIdClass();
+
     TableMeta getTableMeta();
 
     Map<String, Object> entityToMap(T entity);

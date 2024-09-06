@@ -14,7 +14,10 @@ import com.rick.db.constant.SharpDbConstants;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.SQLUtils;
 import com.rick.db.plugin.dao.annotation.Id;
+import com.rick.db.plugin.dao.annotation.ManyToOne;
 import com.rick.db.plugin.dao.annotation.Sql;
+import com.rick.db.plugin.dao.annotation.ToStringValue;
+import com.rick.db.plugin.dao.support.BaseEntityUtils;
 import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.ConditionAdvice;
 import com.rick.db.service.SharpService;
@@ -169,7 +172,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         Object refPropertyValue;
         if (reverseField.getType().isEnum()) {
             refPropertyValue = EnumUtils.valueOfCode(reverseField.getType(), (String) refValue);
-        } else if (SimpleEntity.class.isAssignableFrom(reverseField.getType())) {
+        } else if (BaseEntityUtils.isEntityClass(reverseField.getType())) {
             refPropertyValue = BeanUtils.instantiateClass(reverseField.getType());
             ((SimpleEntity)refPropertyValue).setId((Long) refValue);
         } else {
@@ -436,7 +439,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         Object[] mergedParams = new Object[size + params.length];
         for (int i = 0; i < size; i++) {
-            mergedParams[i] = resolveEntityValueToDbValue(EntityDAOManager.getPropertyValue(entity, columnNameToPropertyNameMap.get(this.updateColumnNameList.get(i))));
+            String propertyName = columnNameToPropertyNameMap.get(this.updateColumnNameList.get(i));
+            mergedParams[i] = resolveEntityValueToDbValue(propertyName, EntityDAOManager.getPropertyValue(entity, propertyName));
         }
 
         System.arraycopy(params, 0, mergedParams, size, params.length);
@@ -737,14 +741,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             if (Objects.nonNull(propertyValue)) {
                 Field field = tableMeta.getFieldMap().get(fieldName);
 
-                if (Map.class.isAssignableFrom(propertyValue.getClass()) && SimpleEntity.class.isAssignableFrom(field.getType())) {
+                if (Map.class.isAssignableFrom(propertyValue.getClass()) && BaseEntityUtils.isEntityClass(field.getType())) {
                     bw.setPropertyValue(fieldName, mapToEntity((Map<String, ?>) propertyValue, field.getType()));
                 } else if (Collection.class.isAssignableFrom(propertyValue.getClass()) && CollectionUtils.isNotEmpty((Collection<?>) propertyValue)) {
                     List originalList = (List) propertyValue;
                     List distList = Lists.newArrayListWithExpectedSize(originalList.size());
                     if (Map.class.isAssignableFrom(originalList.get(0).getClass())) {
                         Class<?> subEntityClass = ClassUtils.getFieldGenericClass(field);
-                        if (SimpleEntity.class.isAssignableFrom(subEntityClass)) {
+                        if (BaseEntityUtils.isEntityClass(subEntityClass)) {
                             for (Object object : originalList) {
                                 distList.add(mapToEntity((Map<String, ?>) object, subEntityClass));
                             }
@@ -799,6 +803,11 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
+    public Class<ID> getIdClass() {
+        return idClass;
+    }
+
+    @Override
     public TableMeta getTableMeta() {
         return this.tableMeta;
     }
@@ -811,7 +820,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         this.tableMeta = TableMetaResolver.resolve(this.entityClass);
-        this.idClass = (this.idClass == null) ? (Class<ID>) tableMeta.getIdField().getType() : this.idClass;
+        this.idClass = (this.idClass == null) ? (Class<ID>) tableMeta.getIdClass() : this.idClass;
 
         log.debug("properties: {}", tableMeta.getProperties());
 
@@ -853,11 +862,13 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
     }
 
-    protected Object resolveEntityValueToDbValue(Object value) {
+    protected Object resolveEntityValueToDbValue(String name, Object value) {
         return SQLUtils.resolveValue(value, v -> {
-            if (EntityDAOManager.isEntityClass((value.getClass()))) {
+            if (EntityDAOManager.isEntityClass((value.getClass())) && containsAnnotation(name, ManyToOne.class)) {
                 // 实体对象
                 return new Object[]{Boolean.TRUE, EntityDAOManager.getIdValue(value)};
+            } else if (containsAnnotation(name, ToStringValue.class)) {
+                return new Object[]{Boolean.TRUE, value == null ? null : value.toString()};
             }
 
             return new Object[]{Boolean.FALSE};
@@ -902,7 +913,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     private void setPropertyValue(Object t, Field field, Object propertyValue) {
-        if (field.getType() == this.tableMeta.getIdField().getType() && propertyValue != null && EntityDAOManager.isEntityClass((propertyValue.getClass()))) {
+        if (field.getType() == this.idClass && propertyValue != null && EntityDAOManager.isEntityClass((propertyValue.getClass()))) {
             propertyValue = this.getIdValue(propertyValue);
         }
 
@@ -912,7 +923,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     private Object[] instanceToParamsArray(T t, List<String> includePropertyList) {
         Object[] params = new Object[includePropertyList.size()];
         for (int i = 0; i < includePropertyList.size(); i++) {
-            params[i] = resolveEntityValueToDbValue(EntityDAOManager.getPropertyValue(t, includePropertyList.get(i)));
+            String propertyName = includePropertyList.get(i);
+            params[i] = resolveEntityValueToDbValue(propertyName, EntityDAOManager.getPropertyValue(t, propertyName));
         }
         return params;
     }
@@ -920,7 +932,8 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     protected Object[] instanceToParamsArray(T t) {
         Object[] params = new Object[this.columnNameList.size()];
         for (int i = 0; i < params.length; i++) {
-            Object param = resolveEntityValueToDbValue(EntityDAOManager.getPropertyValue(t, columnNameToPropertyNameMap.get(columnNameList.get(i))));
+            String propertyName = columnNameToPropertyNameMap.get(columnNameList.get(i));
+            Object param = resolveEntityValueToDbValue(propertyName, EntityDAOManager.getPropertyValue(t, propertyName));
             params[i] = param;
         }
         return params;
@@ -965,10 +978,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
                 String columnName = propertyNameToColumnNameMap.get(name);
                 if (columnName != null && !name.equals(columnName)) {
-                    mapParams.put(columnName, resolveEntityValueToDbValue(value));
+                    mapParams.put(columnName, resolveEntityValueToDbValue(name, value));
                 }
 
-                mapParams.put(dotValueToCamel(name), resolveEntityValueToDbValue(value));
+                mapParams.put(dotValueToCamel(name), resolveEntityValueToDbValue(name, value));
             }
         }
 
@@ -1442,5 +1455,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             value = com.rick.common.util.StringUtils.stringToCamel(com.rick.common.util.StringUtils.camelToSnake(value).replaceAll("\\.", "_"));
         }
         return value;
+    }
+
+    private boolean containsAnnotation(String name, Class annotationClazz) {
+        return (tableMeta.getFieldMap().get(name) != null && tableMeta.getFieldMap().get(name).getAnnotation(annotationClazz) != null) ||
+                (tableMeta.getColumnNameFieldMap().get(name)!= null && tableMeta.getColumnNameFieldMap().get(name).getAnnotation(annotationClazz) != null);
     }
 }

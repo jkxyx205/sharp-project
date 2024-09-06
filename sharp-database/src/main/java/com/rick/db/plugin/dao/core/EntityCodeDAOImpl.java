@@ -154,9 +154,9 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
     }
 
     @Override
-    public Long selectIdByCodeOrThrowException(String code) {
+    public ID selectIdByCodeOrThrowException(String code) {
         Assert.notNull(code, "code cannot be null");
-        Optional<Long> idOptional = selectIdByCode(code);
+        Optional<ID> idOptional = selectIdByCode(code);
         if (idOptional.isPresent()) {
             return idOptional.get();
         }
@@ -170,8 +170,8 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @return
      */
     @Override
-    public Optional<Long> selectIdByCode(String code) {
-        return selectSingleValueByCode(code, "id", Long.class);
+    public Optional<ID> selectIdByCode(String code) {
+        return selectSingleValueByCode(code, "id", getIdClass());
     }
 
     /**
@@ -199,9 +199,9 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @return
      */
     @Override
-    public List<Long> selectIdsByCodes(Collection<String> codes) {
+    public List<ID> selectIdsByCodes(Collection<String> codes) {
         Assert.notEmpty(codes, "codes cannot be empty");
-        List<Long> ids = selectByParams(Params.builder(1).pv("codes", codes).build(), "id", "code IN (:codes)", Long.class);
+        List<ID> ids = selectByParams(Params.builder(1).pv("codes", codes).build(), "id", "code IN (:codes)", getIdClass());
         return ids;
     }
 
@@ -226,7 +226,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      * @return
      */
     @Override
-    public Map<String, Long> selectCodeIdMap(Collection<String> codes) {
+    public Map<String, ID> selectCodeIdMap(Collection<String> codes) {
         return selectByParamsAsMap(Params.builder(1).pv("codes", codes).build(), "code, id", "code IN (:codes)");
     }
 
@@ -346,7 +346,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     private void fillEntityIdByCode(T t) {
         if (Objects.isNull(t.getId()) && StringUtils.isNotBlank(t.getCode())) {
-            Optional<Long> option = this.selectIdByCode(t.getCode());
+            Optional<ID> option = this.selectIdByCode(t.getCode());
             if (option.isPresent()) {
                 t.setId(option.get());
             }

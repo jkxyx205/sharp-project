@@ -3,8 +3,9 @@ package com.rick.db.plugin.dao.core;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.ClassUtils;
-import com.rick.db.dto.SimpleEntity;
+import com.rick.db.dto.type.*;
 import com.rick.db.plugin.dao.annotation.*;
+import com.rick.db.plugin.dao.support.BaseEntityUtils;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,8 +31,8 @@ class TableMetaResolver {
     private static final String DEFAULT_PRIMARY_COLUMN = "id";
 
     public static TableMeta resolve(Class<?> clazz) {
-        if (!SimpleEntity.class.isAssignableFrom(clazz)) {
-            log.warn(clazz.getSimpleName() + " forgot extends from BaseEntity?");
+        if (!BaseEntityUtils.isEntityClass(clazz)) {
+            log.warn(clazz.getSimpleName() + " forgot extends from Entity?");
         }
 
         Table tableAnnotation = clazz.getAnnotation(Table.class);
@@ -62,7 +63,7 @@ class TableMetaResolver {
 
         IdCollector idCollector = new IdCollector();
         VersionCollector versionCollector = new VersionCollector();
-        resolveFields(fields, "", "", idCollector, versionCollector, embeddedPropertyList, selectAnnotationList, sqlAnnotationList,
+        resolveFields(clazz, fields, "", "", idCollector, versionCollector, embeddedPropertyList, selectAnnotationList, sqlAnnotationList,
                 oneToManyAnnotationList, manyToOneAnnotationList,
                 manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                 columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
@@ -77,7 +78,8 @@ class TableMetaResolver {
 
         if (Objects.isNull(idCollector.id)) {
             idCollector.columnName = idCollector.propertyName = DEFAULT_PRIMARY_COLUMN;
-            idCollector.field = Arrays.stream(fields).filter(field -> field.getName().equals(DEFAULT_PRIMARY_COLUMN)).findFirst().get();
+            idCollector.field = fieldMap.get(idCollector.propertyName);
+            idCollector.clazz = getIdClass(clazz, idCollector.propertyName);
         }
 
         // 获取计算属性
@@ -92,12 +94,12 @@ class TableMetaResolver {
             }
         }
 
-        return new TableMeta(tableAnnotation, idCollector.id, idCollector.field, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
+        return new TableMeta(tableAnnotation, idCollector.id, idCollector.field, idCollector.clazz, new TableMeta.VersionProperty(versionCollector.columnName, versionCollector.propertyName), name, tableName, columnNamesBuilder.toString(), propertiesBuilder.toString(), updateColumnNamesBuilder.toString(),
                 updatePropertiesBuilder.toString(), idCollector.columnName, idCollector.propertyName, embeddedPropertyList, selectAnnotationList, sqlAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList, manyToManyAnnotationList
                 , columnNameFieldMap, fieldMap, columnNameMap, computedMethods);
     }
 
-    private void resolveFields(Field[] fields, String propertyNamePrefix, String columnPrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
+    private void resolveFields(Class clazz, Field[] fields, String propertyNamePrefix, String columnPrefix, IdCollector idCollector, VersionCollector versionCollector, List<TableMeta.EmbeddedProperty> embeddedPropertyList, List<TableMeta.SelectProperty> selectAnnotationList,
                                List<TableMeta.SqlProperty> sqlAnnotationList,
                                List<TableMeta.OneToManyProperty> oneToManyAnnotationList, List<TableMeta.ManyToOneProperty> manyToOneAnnotationList,
                                List<TableMeta.ManyToManyProperty> manyToManyAnnotationList, Map<String, Field> columnNameFieldMap, Map<String, Column> columnNameMap, Map<String, Field> fieldMap,
@@ -160,7 +162,7 @@ class TableMetaResolver {
             if (embedded != null) {
                 embeddedPropertyList.add(new TableMeta.EmbeddedProperty(embedded, field));
                 Field[] embeddedFields = ClassUtils.getAllFields(field.getType());
-                resolveFields(embeddedFields, propertyName + ".", embedded.columnPrefix(), idCollector, versionCollector, embeddedPropertyList,
+                resolveFields(clazz, embeddedFields, propertyName + ".", embedded.columnPrefix(), idCollector, versionCollector, embeddedPropertyList,
                         selectAnnotationList, sqlAnnotationList, oneToManyAnnotationList, manyToOneAnnotationList,
                         manyToManyAnnotationList, columnNameFieldMap, columnNameMap, fieldMap,
                         columnNamesBuilder, updateColumnNamesBuilder, propertiesBuilder, updatePropertiesBuilder);
@@ -176,6 +178,7 @@ class TableMetaResolver {
                     idCollector.columnName = StringUtils.isNotBlank(idCollector.id.value()) ? idCollector.id.value() : camelToSnake(field.getName());
                     idCollector.propertyName = propertyName;
                     idCollector.field = field;
+                    idCollector.clazz = getIdClass(clazz, idCollector.propertyName);
                 }
             }
 
@@ -204,6 +207,29 @@ class TableMetaResolver {
         }
     }
 
+    private Class getIdClass(Class<?> clazz, String propertyName) {
+        if (BaseEntityWithLongId.class.isAssignableFrom(clazz) ||
+                BaseEntityWithIdentity.class.isAssignableFrom(clazz) ||
+                BaseCodeEntityWithLongId.class.isAssignableFrom(clazz) ||
+                BaseCodeEntityWithIdentity.class.isAssignableFrom(clazz) ||
+                BaseCodeDescriptionEntityWithLongId.class.isAssignableFrom(clazz)) {
+            return Long.class;
+        } else if (BaseEntityWithStringId.class.isAssignableFrom(clazz) || BaseCodeEntityWithStringId.class.isAssignableFrom(clazz)) {
+            return String.class;
+        } else {
+            Class<?>[] classGenericsTypes = ClassUtils.getClassGenericsTypes(clazz);
+            if (classGenericsTypes != null) {
+                return classGenericsTypes[0];
+            }
+
+            try {
+                return ClassUtils.getField(clazz, propertyName).getType();
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private class IdCollector {
 
         private Id id;
@@ -213,6 +239,8 @@ class TableMetaResolver {
         private String propertyName;
 
         private Field field;
+
+        private Class clazz; // 从 field 获取的是 Object
 
     }
 

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BaseEntity extends SimpleEntity {
+public class BaseEntity<ID> extends SimpleEntity<ID> {
 
     @Column(updatable = false, comment = "创建人")
     @JsonSerialize(using = ToStringSerializer.class)
