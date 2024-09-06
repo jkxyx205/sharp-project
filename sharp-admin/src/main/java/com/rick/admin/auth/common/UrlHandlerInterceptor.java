@@ -67,6 +67,12 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /**
+     * 实现参考： https://www.cnblogs.com/leilcoding/p/15131470.html
+     * @param request
+     * @param username
+     * @param name
+     */
     private void writeAccessInfo(HttpServletRequest request, String username, String name) {
         UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader("user-agent"));
         //客户端类型
