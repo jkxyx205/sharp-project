@@ -6,6 +6,7 @@ import com.rick.formflow.form.cpn.core.FormCpn;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class FormCache {
+public class FormCache implements Serializable {
 
     Form form;
 

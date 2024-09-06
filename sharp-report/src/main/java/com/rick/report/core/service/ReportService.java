@@ -6,6 +6,7 @@ import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
+import com.rick.common.util.JsonUtils;
 import com.rick.common.util.Time2StringUtils;
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
@@ -23,7 +24,6 @@ import com.rick.report.core.model.ReportDTO;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -77,7 +77,6 @@ public class ReportService {
 
     public Optional<Report> findById(Long id) {
         Report report = reportCacheMap.get(id);
-        Report clone = new Report();
 
         if (report == null) {
             Optional<Report> optional = reportDAO.selectById(id);
@@ -92,8 +91,7 @@ public class ReportService {
             }
         }
 
-        BeanUtils.copyProperties(report,clone);
-        return Optional.of(clone);
+        return Optional.of(JsonUtils.toObject(JsonUtils.toJson(report), Report.class));
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {

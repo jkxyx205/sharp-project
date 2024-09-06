@@ -17,8 +17,8 @@ import com.rick.formflow.form.service.model.FormCache;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,8 +98,7 @@ public class FormService {
             FormUtils.update(formId, formCache);
         }
 
-        FormCache clone = new FormCache();
-        BeanUtils.copyProperties(formCache, clone);
+        FormCache clone = SerializationUtils.clone(formCache);
 
         form = clone.getForm();
         configIdMap = clone.getConfigIdMap();
