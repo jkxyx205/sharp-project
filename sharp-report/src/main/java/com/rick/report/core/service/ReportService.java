@@ -96,7 +96,6 @@ public class ReportService {
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
         Report report = findById(id).get();
-        init(report);
         mergeParams(report, requestMap);
         if (StringUtils.isBlank(report.getQuerySql())) {
             return fetchDataWithoutSql(report, requestMap);

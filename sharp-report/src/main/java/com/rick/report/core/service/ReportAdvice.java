@@ -13,6 +13,10 @@ import java.util.Map;
  */
 public interface ReportAdvice {
 
+    /**
+     * list 页面加载的执行
+     * @param report
+     */
     default void init(Report report) {};
 
     default void beforeQuery(Report report, Map<String, Object> requestMap) {};

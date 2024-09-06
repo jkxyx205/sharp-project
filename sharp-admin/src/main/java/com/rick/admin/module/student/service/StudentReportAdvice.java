@@ -43,10 +43,14 @@ public class StudentReportAdvice extends OperatorReportAdvice {
             }
 
         }
+    }
+
+    @Override
+    public void init(Report report) {
+        super.init(report);
 
         report.getAdditionalInfo().put(ReportConstants.ADDITIONAL_JS, "$('table tr').find('td:eq(10)').each(function(){\n" +
                 "    $(this).html('<img height=\"20\" src=\"'+$(this).text()+'\"/>')\n" +
                 "})");
-
     }
 }
