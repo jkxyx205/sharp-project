@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.admin.module.common.entity.CodeDescription;
 import com.rick.admin.module.demo.model.EmbeddedValue;
 import com.rick.common.http.json.deserializer.EntityWithCodePropertyDeserializer;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Embedded;
 import com.rick.db.plugin.dao.annotation.Sql;
@@ -35,7 +35,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "t_complex_model", comment = "测试")
-public class ComplexModel extends BaseEntity {
+public class ComplexModel extends BaseEntityWithLongId {
 
     @NotBlank
     String name;

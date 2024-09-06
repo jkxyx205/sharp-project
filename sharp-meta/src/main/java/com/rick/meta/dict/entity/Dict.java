@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "sys_dict", comment = "字典表")
-public class Dict extends SimpleEntity {
+public class Dict extends SimpleEntity<Long> {
 
     String type;
 

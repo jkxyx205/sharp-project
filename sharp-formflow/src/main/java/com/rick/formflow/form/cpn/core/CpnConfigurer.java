@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.util.ReflectUtils;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.dao.annotation.Transient;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_form_configurer")
-public class CpnConfigurer extends BaseEntity {
+public class CpnConfigurer extends BaseEntityWithLongId {
 
     @NotEmpty
     @Column(nullable = false, updatable = false)

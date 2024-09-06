@@ -18,6 +18,7 @@ import com.rick.report.core.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -92,7 +93,9 @@ public class ReportController {
     }
 
     @GetMapping("{id}")
-    public String index(@PathVariable Long id, boolean readonly, Model model, HttpServletRequest request) {
+    public String index(@PathVariable Long id, Boolean readonly, Model model, HttpServletRequest request) {
+        model.addAttribute("readonly", ObjectUtils.defaultIfNull(readonly, false));
+
         Report report = reportService.findById(id).get();
         if (report.getTplName() != null && report.getTplName().indexOf("ajax") > -1) {
             return ajaxIndex(id, model, request);
@@ -121,7 +124,6 @@ public class ReportController {
         model.addAttribute("id", id);
         model.addAttribute("params", params);
         model.addAttribute("pageInfo", PaginationHelper.limitPages(grid.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : grid.getPageSize(), grid.getPage()));
-        model.addAttribute("readonly", readonly);
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 

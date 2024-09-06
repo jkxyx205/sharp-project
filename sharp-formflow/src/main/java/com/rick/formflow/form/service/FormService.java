@@ -3,11 +3,10 @@ package com.rick.formflow.form.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.common.util.IdGenerator;
-import com.rick.db.dto.BaseEntity;
-import com.rick.db.dto.BaseEntityWithAssign;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.MapDAO;
 import com.rick.db.plugin.dao.core.MapDAOImpl;
+import com.rick.db.plugin.dao.support.BaseEntityUtils;
 import com.rick.formflow.form.cpn.core.*;
 import com.rick.formflow.form.dao.CpnConfigurerDAO;
 import com.rick.formflow.form.dao.FormCpnDAO;
@@ -286,7 +285,7 @@ public class FormService {
             if (StringUtils.isNotBlank(form.getRepositoryName())) {
                 EntityDAO entityDAO = applicationContext.getBean(form.getRepositoryName(), EntityDAO.class);
 
-                if (BaseEntity.class.isAssignableFrom(entityDAO.getEntityClass()) || BaseEntityWithAssign.class.isAssignableFrom(entityDAO.getEntityClass())) {
+                if (BaseEntityUtils.isEntityClass(entityDAO.getEntityClass())) {
                     return entityDAO.deleteLogicallyById(instanceId);
                 }
 

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.admin.module.common.entity.CodeDescription;
 import com.rick.common.http.json.deserializer.BooleanPropertyDeserializer;
 import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
-import com.rick.db.dto.BaseCodeEntity;
+import com.rick.db.dto.type.BaseCodeEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Embedded;
 import com.rick.db.plugin.dao.annotation.Table;
@@ -38,7 +38,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "t_student", comment = "学生表")
-public class Student extends BaseCodeEntity {
+public class Student extends BaseCodeEntityWithLongId {
 
 
 //    String name; 可以直接属性，其他默认

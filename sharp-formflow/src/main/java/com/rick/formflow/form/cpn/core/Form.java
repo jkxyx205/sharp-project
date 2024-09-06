@@ -23,7 +23,7 @@ import java.util.Map;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_form")
-public class Form extends BaseCodeEntity {
+public class Form extends BaseCodeEntity<Long> {
 
     @NotBlank
     private String name;

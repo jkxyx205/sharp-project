@@ -2,7 +2,7 @@ package com.rick.admin.sys.role.entity;
 
 import com.rick.admin.sys.permission.entity.Permission;
 import com.rick.admin.sys.user.entity.User;
-import com.rick.db.dto.BaseCodeEntity;
+import com.rick.db.dto.type.BaseCodeEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.*;
@@ -22,7 +22,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "sys_role", comment = "角色")
-public class Role extends BaseCodeEntity {
+public class Role extends BaseCodeEntityWithLongId {
 
     String name;
 

@@ -1,6 +1,6 @@
 package com.rick.formflow.form.cpn.core;
 
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.type.BaseEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +21,7 @@ import java.util.Map;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_form_cpn_configurer")
-public class FormCpn extends BaseEntity {
+public class FormCpn extends BaseEntityWithLongId {
 
     @NotNull
     private Long formId;
