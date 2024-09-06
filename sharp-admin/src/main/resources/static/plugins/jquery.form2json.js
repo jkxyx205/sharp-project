@@ -91,7 +91,9 @@
                     }
                 } else {
                     //data doesn't have the item yet, create it
-                    obj[prop] = val;
+                    if (val) {
+                        obj[prop] = [val]; // 多选提交数组，一个值也放到数组中
+                    }
                 }
             }
         });
