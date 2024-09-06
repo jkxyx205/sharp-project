@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">学生信息 thymeleaf 实现</div>
+            <div class="card-body">
+                <form class="form-horizontal" id="form">
+                    <input type="hidden" id="id" th:value="${student.id}">
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="code">编号</label>
+                        <div class="col-4"><input class="form-control" type="text" id="code" name="code" pattern="^[0-9a-zA-Z_\/%\-]{1,}$" th:value="${student.code}" th:disabled="${student.code}" required></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="name">姓名</label>
+                        <div class="col-4 col-form-label"><input class="form-control" type="text" id="name" name="name" required th:value="${student.name}"></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required">gender</label>
+                        <div class="col-4 col-form-label">
+                            <div class="form-check-group" id="gender">
+                                <div class="form-check form-check-inline mr-2" th:each="dict : ${GenderEnum}">
+                                    <input class="form-check-input" type="radio" th:id="${'radio_' + dict.name}" th:value="${dict.name}" name="gender" th:checked="${student.gender ne null &amp;&amp; dict.name == student.gender.name}">
+                                    <label class="form-check-label" th:for="${'radio_' + dict.name}" th:text="${dict.label}"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="birthday">出生日期</label>
+                        <div class="col-4">
+                            <input type="text" class="form-control" id="birthday" name="birthday" th:value="${student.birthday}" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="age">年龄</label>
+                        <div class="col-4">
+                            <input class="form-control" type="number" id="age" name="age" th:value="${student.age}" pattern="-?\d+(\.\d+)?" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="marriage">婚否</label>
+                        <div class="col-4 col-form-label">
+                            <div class="form-check form-check-inline mr-2">
+                                <input class="form-check-input" type="checkbox" th:id="marriage" th:value="1" name="marriage" th:checked="${student.marriage ne null &amp;&amp; student.marriage == true }">
+                                <label class="form-check-label" th:for="marriage"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="email">email</label>
+                        <div class="col-4">
+                            <input class="form-control" type="text" id="email" name="email" th:value="${student.email}" pattern="^(.+)@(\S+)$" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required">hobbyList</label>
+                        <div class="col-4 col-form-label form-group-check-container">
+                            <div class="form-check-group" id="hobbyList">
+                                <div class="form-check form-check-inline mr-2" th:each="dict : ${HobbyEnum}" th:with="hobbyList=${new com.rick.formflow.form.cpn.CheckBox().parseValue(student.hobbyList ne null ? student.hobbyList : null)}">
+                                    <input class="form-check-input" type="checkbox" th:id="${'checkbox_' + dict.name}" th:value="${dict.name}" name="hobbyList" th:checked="${hobbyList ne null &amp;&amp; #sets.contains(hobbyList, dict.name)}">
+                                    <label class="form-check-label" th:for="${'checkbox_' + dict.name}" th:text="${dict.label}"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="unitCode">单位code</label>
+                        <div class="col-4">
+                            <sp:select class="form-control" id="unitCode" name="unitCode" key="UNIT" th:value="${student.unit ne null ? student.unit.code : ''}" required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="materialTypeList">物料类型</label>
+                        <div class="col-4">
+                            <sp:select class="form-control" id="materialTypeList" name="materialTypeList" key="MATERIAL" th:value="${student.materialTypeList ne null ? student.materialTypeList : ''}" hideDummyItemText required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="category">分类</label>
+                        <div class="col-4">
+                            <sp:select class="form-control" id="category" name="category" key="CategoryEnum" th:value="${student.category ne null ? student.category.name : ''}" required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="attachments">attachments</label>
+                        <div class="col-11">
+                            <div class="attachment">
+                                <div style="display: inline-block;" id="btn-file">
+                                    <label class="btn btn-primary btn-sm btn-upload" style="margin: 2px" for="attachments"><i class="fa fa-upload"></i> 上传</label>
+                                </div>
+                                <input style="display:none;" type="text" th:value="${student.attachments ne null ? T(com.rick.common.util.JsonUtils).toJson(student.attachments) : '[]'}">
+                                <input style="display: none;" type="file" multiple name="attachments" id="attachments" data-group-name="attachments" onchange="attachmentUpload.ajaxFileUpload()">
+                                <div class="attachment-items">
+                                    <th:block th:if="${student.attachments ne null}">
+                                        <div class="item" th:each="f : ${student.attachments}">
+                                            <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a>
+                                            <button type="button" class="btn btn-link attachment_delete_btn" th:onclick="attachmentUpload.deleteAttachment([[${f.id}]], this)">删除</button>
+                                        </div>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 自定义附件 -->
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required">头像</label>
+                        <div class="col-11 col-form-label">
+                            <div class="avatar-container">
+                                <input type="text" style="display:none;"
+                                       th:value="${student.avatar ne null ? '[' + T(com.rick.common.util.JsonUtils).toJson(student.avatar) + ']' : '[]'}">
+                                <input style="display: none;" type="file" name="image_file" id="image_file"
+                                       accept="image/*" data-group-name="images"
+                                       onchange="imageUpload.ajaxFileUpload()">
+                                <div class="attachment-items">
+                                    <div class="item" style="display: inline-block" th:with="avatar = ${ student.avatar ne null ? student.avatar.url : '/img/default_avatar.png'}">
+                                        <div style="position: relative; border-radius: 100%; width: 100px; height: 100px; max-width: 100%; max-height: 100%; display: flex; align-items: center; justify-content: center; user-select: none; opacity: 1;">
+                                            <a class="delete-btn" style="display: none; position: absolute; right: 0; top:0; border-radius: 50%; border: 1px solid #20a8d8; width: 20px; height: 20px; text-align: center; line-height: 15px;" href="javascript:;" onclick="imageUpload.deleteAttachment(document.getElementById('avatar').getAttribute('value'), this)">x</a>
+                                            <img id="avatar" th:src="${avatar}"
+                                                 style="display: block; object-fit: cover; border-radius: 100%; width: 100%; height: 100%; cursor: pointer"
+                                                 onclick="document.getElementById('image_file').click()"
+                                                 alt="avatar" th:value="${student.avatar ne null ? student.avatar.id : ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="remark">简介</label>
+                        <div class="col-4"><textarea class="form-control" id="remark" name="remark" th:text="${student.remark}" required></textarea></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="available">状态</label>
+                        <div class="col-4">
+                            <label class="switch switch-pill switch-primary">
+                                <input class="switch-input" type="checkbox" id="available" name="available" th:checked="${student.available ne null && student.available == true }">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="offset-1 col-11"> <button class="btn btn-primary mr-4" type="button" onclick="send()">
+                            <i class="fa fa-send"></i> 保存</button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/js/form-support.js}"></script>
+    <script th:src="@{/plugins/jquery.form2json.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+
+    <script th:src="@{/ajaxfileupload.js}"></script>
+    <script type="text/javascript" th:src="@{/js/upload.js}"></script>
+    <script th:inline="javascript">
+        let readonly = [[${query.readonly}]]
+        if (readonly === 'true') {
+            $("form :input").prop("disabled", true);
+            $('table .operator').hide()
+            // $('#okId').hide()
+        } else {
+            // $('#okId').show()
+        }
+
+        let formDOM = document.getElementById("form")
+        let idDOM = document.getElementById("id")
+        let codeDOM = document.getElementById("code")
+
+        registerValid(formDOM, () => {
+            // 其他验证 + error 样式
+            let valid = formDOM.validElse($("[name=hobbyList]:checked").length > 0, document.getElementById('hobbyList')) &
+                formDOM.validElse($('[name=gender]:checked').length > 0, document.getElementById('gender')) &
+                formDOM.validElse($('#materialTypeList').multipleSelect('getSelects').length > 0, document.getElementById('materialTypeList').nextSibling) &
+                formDOM.validElse($('#category').multipleSelect('getSelects').length > 0 && $('#category').multipleSelect('getSelects')[0] != '', document.getElementById('category').nextSibling) &
+                formDOM.validElse(attachmentUpload.getAttachments().length > 0, document.getElementById('btn-file'))
+
+            return valid
+        });
+
+        $('#birthday').datepicker({
+            language: "zh-CN",
+            autoclose: true,
+            clearBtn: true,
+            todayBtn: 'linked',
+            todayHighlight: true,
+            format: 'yyyy-mm-dd'
+        })
+
+        /**
+         * 查询多选
+         */
+        $('#materialTypeList').multipleSelect({
+            filter: true,
+            selectAll: true,
+            single: false,
+            placeholder: '选择物料类型'
+        }).multipleSelect("setSelects", [[${new com.rick.formflow.form.cpn.CheckBox().parseValue(student.materialTypeList)}]] || [])
+
+        /**
+         * 查询单选
+         */
+        $('#category').multipleSelect({
+            filter: true,
+            single: true,
+            placeholder: '选择分类'
+        })
+
+        // file
+        let attachmentUpload = new FileUpload("attachments");
+
+        // image
+        let imageUpload = new FileUpload("image_file", null, function uploadImage(attachments) {
+            // 上传照片
+            document.getElementById("avatar").src = attachments[0].url
+            document.getElementById("avatar").setAttribute("value", attachments[0].id)
+        }, function deleteImage(attachmentId, deleteBtn) {
+            document.getElementById("avatar").src = '/img/default_avatar.png'
+            document.getElementById("avatar").removeAttribute("value")
+            $('.avatar-container .item .delete-btn').hide()
+        });
+
+        $('.avatar-container .item').hover(function () {
+            document.getElementById("avatar").getAttribute("value") && $(this).find('.delete-btn').show()
+        }, function () {
+            $(this).find('.delete-btn').hide()
+        })
+
+        function send() {
+            if (formDOM.valid()) {
+                let formData = $('form').form2json({
+                    multiValSelector: '[type=checkbox]'
+                });
+
+                // 多选需要通过 multipleSelect 获取数据
+                formData.materialTypeList = $('#materialTypeList').multipleSelect('getSelects')
+                // 文件
+                formData.attachments = attachmentUpload.getAttachments()
+                // 头像
+                formData.avatar = imageUpload.getAttachments().length > 0 ? imageUpload.getAttachments()[imageUpload.getAttachments().length - 1] : null
+
+                $.ajax ({
+                    url: "/students",
+                    type: "post",
+                    data: JSON.stringify(formData),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function(res) {
+                        if (!res.success) {
+                            toastr.error(res.message)
+                        } else {
+                            idDOM.value = res.data.id
+                            codeDOM.value = res.data.code
+                            codeDOM.setAttribute("disabled", "true")
+                            toastr.success("保存成功")
+                            reloadTab('student')
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>
