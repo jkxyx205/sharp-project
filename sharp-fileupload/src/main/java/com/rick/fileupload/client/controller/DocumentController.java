@@ -10,6 +10,7 @@ import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileMetaUtils;
 import com.rick.fileupload.plugin.image.ImageParam;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -48,8 +49,10 @@ public class DocumentController {
      * @return
      */
     @PostMapping("/upload")
-    public Result<List<?>> fileUpload(MultipartHttpServletRequest multipartRequest) throws IOException {
-        return ResultUtils.success(documentService.store(FileMetaUtils.parse(multipartRequest, UPLOAD_NAME), UPLOAD_GROUP_NAME));
+    public Result<List<?>> fileUpload(MultipartHttpServletRequest multipartRequest, String groupName) throws IOException {
+        return ResultUtils.success(documentService.store(FileMetaUtils.parse(multipartRequest,
+                StringUtils.defaultString(multipartRequest.getParameter("name"), UPLOAD_NAME)),
+                StringUtils.defaultString(groupName, UPLOAD_GROUP_NAME)));
     }
 
     /**
