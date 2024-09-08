@@ -60,7 +60,9 @@
                             <i class="fa fa-plus"></i> 新增</button>
 
 <!--                        <input type="file" multiple="multiple" name="upload" id="upload" accept="image/*" data-group-name="image" onchange="ajaxFileUpload()" style="width: 99px;">-->
-                        <input type="file" multiple="multiple" name="upload" id="upload" data-group-name="image" onchange="ajaxFileUpload()" style="width: 99px;">
+<!--                        <input type="file" multiple="multiple" name="upload" id="upload" data-group-name="image" onchange="ajaxFileUpload()" style="width: 99px;">-->
+<!--                        <sp:file name="upload" group="link" accept="image/*"></sp:file>-->
+                        <sp:file name="upload" group="link"></sp:file>
                     </div>
                 </form>
             </div>
@@ -171,6 +173,7 @@
     <script type="text/javascript" th:src="@{/js/table/jquery.exportTable.js}"></script>
     <script th:src="@{/editable-table/editable-table.js}"></script>
     <script th:src="@{/ajaxfileupload.js}"></script>
+    <script type="text/javascript" th:src="@{/js/upload.js}"></script>
 
     <script th:inline="javascript">
         $('table tr').find('td:eq(1)').each(function(){
@@ -341,24 +344,12 @@
 
         /*[(${(report.additionalInfo != null && report.additionalInfo['js'] != null ) ? report.additionalInfo['js'] : ''})]*/
 
-        function ajaxFileUpload() {
-            $.ajaxFileUpload
-            (
-                {
-                    url: '/documents/upload?name=upload&groupName=link', //用于文件上传的服务器端请求地址
-                    secureuri: false, //是否需要安全协议，一般设置为false
-                    fileElementId: 'upload', //文件上传域的ID
-                    dataType: 'json', //返回值类型 一般设置为json
-                    success: function (data, status) { //服务器成功响应处理函数
-                        window.location.reload()
-                    },
-                    error: function (data, status, e) { //服务器响应失败处理函数
-                        alert(e);
-                    }
-                }
-            )
-            return false;
-        }
+        let form_upload_file = new FileUpload("upload_file", null, function (attachments) {
+            console.log("attachments = ", attachments)
+            window.location.reload()
+        }, function (attachmentId, deleteBtn) {
+
+        });
 
         function copyToClipboard(text) {
             if (navigator.clipboard) {
