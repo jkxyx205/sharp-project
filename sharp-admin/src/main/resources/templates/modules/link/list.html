@@ -344,7 +344,7 @@
 
         /*[(${(report.additionalInfo != null && report.additionalInfo['js'] != null ) ? report.additionalInfo['js'] : ''})]*/
 
-        let form_upload_file = new FileUpload("upload_file", null, function (attachments) {
+        let form_upload_file = new FileUpload("upload_file", false, function (attachments) {
             console.log("attachments = ", attachments)
             window.location.reload()
         }, function (attachmentId, deleteBtn) {

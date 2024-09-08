@@ -225,7 +225,7 @@
         }
 
         // image
-        let imageUpload = new FileUpload("image_file", null, function uploadImage(attachments) {
+        let imageUpload = new FileUpload("image_file", false, function uploadImage(attachments) {
             // 上传照片
             document.getElementById("avatar").src = attachments[0].url
             document.getElementById("avatar").setAttribute("value", attachments[0].id)
