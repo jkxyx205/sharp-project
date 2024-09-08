@@ -29,6 +29,9 @@
 
             <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">
                 <div class="attachment">
+                    <sp:file th:attr="form-name=${formBO.form.code}" th:name="${p.name}" sp:value="${p.value}"></sp:file>
+
+                    <!--/* Thymeleaf 解析器级别的注释块 https://www.aizws.net/course/thymeleaf/thymeleaf-28316
                     <div style="display: inline-block;">
                         <label class="btn btn-primary btn-sm btn-upload" style="margin: 2px" th:for="${p.name} + '_file'"><i class="fa fa-upload"></i> 上传</label>
                     </div>
@@ -41,6 +44,7 @@
                             </div>
                         </th:block>
                     </div>
+                     */-->
                 </div>
                 <!--前端验证所有验证信息-->
                 <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"

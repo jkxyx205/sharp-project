@@ -1,9 +1,7 @@
 package com.rick.admin.config.dialect;
 
 import com.google.common.collect.Sets;
-import com.rick.admin.config.dialect.processor.SelectOptionProcessor;
-import com.rick.admin.config.dialect.processor.SelectProcessor;
-import com.rick.admin.config.dialect.processor.SharpFormProcessor;
+import com.rick.admin.config.dialect.processor.*;
 import com.rick.db.service.SharpService;
 import com.rick.formflow.form.service.FormService;
 import com.rick.meta.dict.service.DictService;
@@ -47,6 +45,8 @@ public class CustomizeProcessorDialectDialect extends AbstractProcessorDialect {
         processors.add(new SelectProcessor(DIALECT_PREFIX, dictService, sharpService));
         processors.add(new SelectOptionProcessor(DIALECT_PREFIX, dictService, sharpService));
         processors.add(new SharpFormProcessor(DIALECT_PREFIX, formService));
+        processors.add(new FileUploadProcessor(DIALECT_PREFIX));
+        processors.add(new DataAttributeTagProcessor(DIALECT_PREFIX));
         return processors;
     }
 }

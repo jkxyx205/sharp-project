@@ -46,6 +46,11 @@ public abstract class AbstractControlGenerator {
             formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType, "<sp:select class=\"form-control\" id=\"" + name + "\" name=\"" + name + "\" key=\"" + dictType + "\" th:value=\"${" + entityName + "." + StringUtils.substringBefore(embeddedClassPathName, ".") + " ne null ? " + entityName + "." + embeddedClassPathName + " : ''}\" required/>"));
         } else if (cpnType == CpnTypeEnum.FILE) {
             formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType,
+                    "<sp:file name=\""+name+"\" sp:value=\"${"+entityName+"."+name+"}\"></sp:file>\n" +
+                            "<!-- file: ${fileName}_"+name+"_file -->\n" +
+                            "<!-- ${fileName} 当前所属表单的 name 值 -->"));
+
+            formGroupWrap(htmlBuilder, formLayout, cpnType, labelHtml + horizontalFormWrap(formLayout, cpnType,
                     "<div class=\"attachment\">\n" +
                             "    <div style=\"display: inline-block;\" id=\"btn-file\" >\n" +
                             "        <label class=\"btn btn-primary btn-sm btn-upload\" style=\"margin: 2px\" for=\""+name+"\"><i class=\"fa fa-upload\"></i> 上传</label>\n" +

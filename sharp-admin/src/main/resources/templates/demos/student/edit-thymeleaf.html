@@ -94,21 +94,7 @@
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="attachments_file">attachments</label>
                         <div class="col-11">
-                            <div class="attachment">
-                                <div style="display: inline-block;" id="btn-file">
-                                    <label class="btn btn-primary btn-sm btn-upload" style="margin: 2px" for="attachments_file"><i class="fa fa-upload"></i> 上传</label>
-                                </div>
-                                <input style="display:none;" type="text" id="attachments" name="attachments" th:value="${student.attachments ne null ? T(com.rick.common.util.JsonUtils).toJson(student.attachments) : '[]'}">
-                                <input style="display: none;" type="file" multiple name="attachments_file" id="attachments_file" data-group-name="attachments" onchange="form_attachments_file.ajaxFileUpload()">
-                                <div class="attachment-items">
-                                    <th:block th:if="${student.attachments ne null}">
-                                        <div class="item" th:each="f : ${student.attachments}">
-                                            <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a>
-                                            <button type="button" class="btn btn-link attachment_delete_btn" th:onclick="form_attachments_file.deleteAttachment([[${f.id}]], this)">删除</button>
-                                        </div>
-                                    </th:block>
-                                </div>
-                            </div>
+                            <sp:file form-name="form" name="attachments" sp:value="${student.attachments}"></sp:file>
                         </div>
                     </div>
                     <!-- 自定义附件 -->

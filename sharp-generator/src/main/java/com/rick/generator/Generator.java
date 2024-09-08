@@ -376,7 +376,7 @@ public class Generator {
         Assert.hasText(controlPath);
 
         StringBuilder htmlStringBuilder = new StringBuilder();
-        htmlStringBuilder.append("<form class=\"form-"+formLayout.getCode().toLowerCase()+" row\" id=\"form\" onsubmit=\"return false\">\n");
+        htmlStringBuilder.append("<form class=\"form-"+formLayout.getCode().toLowerCase()+" row\" id=\"form\" name=\"form\" onsubmit=\"return false\">\n");
         tableResolver(entityClass, resolverInfo -> {
             Field field = resolverInfo.field;
             String type = resolverInfo.dictTypeValue;
