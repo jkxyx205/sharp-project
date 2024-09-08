@@ -6,6 +6,10 @@ head.appendChild(style)
 
  /**
   *  type = file 的name
+  *  $itemContainer
+  *     - false file 不写入 $itemContainer
+  *     - null 自动获取 $itemContainer
+  *     - 指定 $itemContainer
  * @param name
  * @constructor
  */
@@ -14,7 +18,7 @@ function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer) {
     this.$fileUpload = $('#' + name)
     this.fileUploadHtml = this.$fileUpload.prop('outerHTML')
 
-    this.$itemContainer = $itemContainer || this.$fileUpload.next()
+    this.$itemContainer = $itemContainer === false ? false : ($itemContainer || this.$fileUpload.next())
     this.$valueContainer = this.$fileUpload.prev()
     this.attachmentList = JSON.parse(this.$valueContainer.val())
 
@@ -64,7 +68,7 @@ FileUpload.prototype.appendAttachment = function(attachments, consumer) {
     this.attachmentList = this.attachmentList.concat(attachments)
     this.$valueContainer.val(JSON.stringify(this.attachmentList))
 
-    if (this.$itemContainer.length == 0) {
+    if (this.$itemContainer === false || this.$itemContainer.length == 0) {
         console.log("$itemContainer 不存在！！")
         return;
     }

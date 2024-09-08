@@ -3,7 +3,6 @@ package com.rick.fileupload.client.support;
 import com.google.common.collect.Lists;
 import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.util.ZipUtils;
-import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.model.FileMeta;
 import com.rick.fileupload.core.support.FileUploadProperties;
@@ -14,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,10 +31,11 @@ import java.util.zip.ZipOutputStream;
  * @author Rick
  * @createdAt 2021-09-29 18:15:00
  */
+@Service
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    private final EntityDAO<Document, Long> documentDAO;
+    private final DocumentDAO documentDAO;
 
     private final FileStore fileStore;
 

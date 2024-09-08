@@ -1,8 +1,5 @@
 package com.rick.fileupload.core.config;
 
-import com.rick.db.plugin.dao.core.EntityDAOManager;
-import com.rick.fileupload.client.support.Document;
-import com.rick.fileupload.client.support.DocumentServiceImpl;
 import com.rick.fileupload.core.FileStore;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.core.support.FileUploadProperties;
@@ -60,9 +57,4 @@ public class FileUploadAutoConfig {
         return new ImageService(inputStreamStore);
     }
 
-    @Bean
-    public DocumentServiceImpl documentService(FileStore fileStore,
-                                               FileUploadProperties fileUploadProperties, ImageService imageService) {
-        return new DocumentServiceImpl(EntityDAOManager.getEntityDAO(Document.class), fileStore, fileUploadProperties, imageService);
-    }
 }

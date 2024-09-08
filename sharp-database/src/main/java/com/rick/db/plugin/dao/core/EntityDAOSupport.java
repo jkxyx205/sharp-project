@@ -57,8 +57,6 @@ public class EntityDAOSupport {
     @Autowired
     private SharpDatabaseProperties sharpDatabaseProperties;
 
-    private static final String FILE_UPLOAD_ENTITY_PACKAGE = "com.rick.fileupload.client.support";
-
     public <T, ID> EntityDAO<T, ID> getEntityDAO(@NonNull Class<?> entityClass) {
         EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
         boolean isNotInstance = (entityDAO == null);
@@ -144,7 +142,6 @@ public class EntityDAOSupport {
             registerDAO(provider, packagePath);
         }
 
-        registerDAO(provider, FILE_UPLOAD_ENTITY_PACKAGE);
     }
 
     private void registerDAO(ClassPathScanningCandidateComponentProvider provider, String packagePath) throws ClassNotFoundException {
