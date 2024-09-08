@@ -55,19 +55,20 @@ FileUpload.prototype.appendAttachment = function(attachments, consumer) {
         return
     }
 
+    if (consumer) {
+        if (consumer(attachments, this.$itemContainer) === false) {
+            return
+        }
+    }
+
     this.attachmentList = this.attachmentList.concat(attachments)
     this.$valueContainer.val(JSON.stringify(this.attachmentList))
-
-    if (consumer) {
-        consumer(attachments, this.$itemContainer)
-        return;
-    }
 
     if (this.$itemContainer.length == 0) {
         console.log("$itemContainer 不存在！！")
         return;
-
     }
+
     for (let attachment of attachments) {
         let $item = $("<div class=\"item\">\n" +
             "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" onclick=\"this.upload.deleteAttachment('"+attachment.id+"', this)\">删除</button>\n" +
@@ -81,17 +82,19 @@ FileUpload.prototype.appendAttachment = function(attachments, consumer) {
 }
 
 FileUpload.prototype.deleteAttachment = function (attachmentId, deleteBtn) {
+    if (this.deleteConsumer) {
+        if (this.deleteConsumer(attachmentId, deleteBtn) === false) {
+            return
+        }
+    }
+
     this.attachmentList = this.attachmentList.filter(function (m) {
         return m.id !== attachmentId;
     })
 
     this.$valueContainer.val(JSON.stringify(this.attachmentList))
 
-    if (this.deleteConsumer) {
-        this.deleteConsumer(attachmentId, deleteBtn)
-    } else {
-        $(deleteBtn).parent(".item").remove()
-    }
+    $(deleteBtn).parent(".item").remove()
 }
 
 FileUpload.prototype.getAttachments = function () {

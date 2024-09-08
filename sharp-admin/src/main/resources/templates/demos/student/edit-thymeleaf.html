@@ -147,6 +147,7 @@
     <script th:src="@{/js/form-support.js}"></script>
     <script th:src="@{/plugins/jquery.form2json.js}"></script>
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
     <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
 
     <script th:src="@{/ajaxfileupload.js}"></script>
@@ -209,6 +210,19 @@
                 formDOM.validElse(form_attachments_file.getAttachments().length > 0, document.getElementById('btn-file'))
             return valid
         });
+
+        // file uploadConsumer callback
+        function form_attachments_file_uploadConsumer(attachments) {
+            console.log("attachments = ", attachments)
+            return true
+        }
+
+        // file deleteConsumer callback
+        function form_attachments_file_deleteConsumer(attachmentId, deleteBtn) {
+            console.log("attachmentId = ", attachmentId)
+            console.log("deleteBtn = ", deleteBtn)
+            return true
+        }
 
         // image
         let imageUpload = new FileUpload("image_file", null, function uploadImage(attachments) {

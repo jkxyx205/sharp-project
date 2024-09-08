@@ -2,6 +2,7 @@ package com.rick.admin.config.dialect.processor;
 
 import com.rick.admin.common.util.ThymeleafRenderHelper;
 import com.rick.common.util.JsonUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
@@ -34,6 +35,11 @@ public class FileUploadProcessor extends AbstractElementTagProcessor {
 
     private static final String PROP_VALUE = "value";
 
+    private static final String PROP_ACCEPT = "accept";
+
+    private static final String PROP_GROUP = "group";
+
+
     public FileUploadProcessor(String dialectPrefix) {
         super(
                 // 此处理器将仅应用于HTML模式
@@ -63,14 +69,16 @@ public class FileUploadProcessor extends AbstractElementTagProcessor {
     protected void doProcess(ITemplateContext iTemplateContext, IProcessableElementTag iProcessableElementTag, IElementTagStructureHandler iElementTagStructureHandler) {
         Map<String, String> attrMap = iProcessableElementTag.getAttributeMap();
         String name = attrMap.get(PROP_NAME);
-        String formName = attrMap.get(PROP_FORM_NAME);
+        String formName = StringUtils.defaultString(attrMap.get(PROP_FORM_NAME), "form");
+        String accept = attrMap.get(PROP_ACCEPT);
+        String group = StringUtils.defaultString(attrMap.get(PROP_GROUP), "upload");
 
         String template = "<div class=\"attachment\">\n" +
                 "                                <div style=\"display: inline-block;\" id=\"btn-file\">\n" +
                 "                                    <label class=\"btn btn-primary btn-sm btn-upload\" style=\"margin: 2px\" for=\""+name+"_file\"><i class=\"fa fa-upload\"></i> 上传</label>\n" +
                 "                                </div>\n" +
                 "                                <input style=\"display: none;\" type=\"text\" id=\""+name+"\" name=\""+name+"\" th:value=\"${value ne null ? T(com.rick.common.util.JsonUtils).toJson(value) : '[]'}\">\n" +
-                "                                <input style=\"display: none;\" type=\"file\" id=\""+name+"_file\" name=\""+name+"_file\" multiple data-group-name=\""+name+"\" onchange=\""+formName+"_"+name+"_file.ajaxFileUpload()\">\n" +
+                "                                <input style=\"display: none;\" type=\"file\" id=\""+name+"_file\" name=\""+name+"_file\" multiple "+ (StringUtils.isBlank(accept) ? "" : "accept=\""+accept+"\" ") +"data-group-name=\""+group+"\" onchange=\""+formName+"_"+name+"_file.ajaxFileUpload()\">\n" +
                 "                                <div class=\"attachment-items\">\n" +
                 "                                    <th:block th:if=\"${value ne null}\">\n" +
                 "                                        <div class=\"item\" th:each=\"f : ${value}\">\n" +

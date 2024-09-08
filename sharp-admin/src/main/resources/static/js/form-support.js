@@ -81,7 +81,10 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         // file
         let files = p.filter(c => c.configurer.cpnType == 'FILE')
         files.forEach(c => {
-            window[formDOM.getAttribute("name") + '_' + c.name + '_file'] = new FileUpload(c.name + '_file')
+            window[formDOM.getAttribute("name") + '_' + c.name + '_file'] = new FileUpload(c.name + '_file',
+                null,
+                window[formDOM.getAttribute("name") + '_' + c.name + '_file_uploadConsumer'],
+                window[formDOM.getAttribute("name") + '_' + c.name + '_file_deleteConsumer'])
         })
     }
 

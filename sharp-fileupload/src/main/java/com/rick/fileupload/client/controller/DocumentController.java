@@ -61,8 +61,8 @@ public class DocumentController {
      * @return
      */
     @PostMapping("/upload2")
-    public Result<List<?>> fileUpload2(@RequestParam(UPLOAD_NAME) List<MultipartFile> fileList) throws IOException {
-        return ResultUtils.success(documentService.store(FileMetaUtils.parse(fileList), UPLOAD_GROUP_NAME));
+    public Result<List<?>> fileUpload2(@RequestParam(UPLOAD_NAME) List<MultipartFile> fileList, String groupName) throws IOException {
+        return ResultUtils.success(documentService.store(FileMetaUtils.parse(fileList), StringUtils.defaultString(groupName, UPLOAD_GROUP_NAME)));
     }
 
     /**
@@ -71,8 +71,8 @@ public class DocumentController {
      * @return
      */
     @PostMapping("/upload3")
-    public Result<List<?>> fileUpload3(@RequestBody List<FileMeta> fileMetaList) throws IOException {
-        return ResultUtils.success(documentService.store(fileMetaList, UPLOAD_GROUP_NAME));
+    public Result<List<?>> fileUpload3(@RequestBody List<FileMeta> fileMetaList, String groupName) throws IOException {
+        return ResultUtils.success(documentService.store(fileMetaList, StringUtils.defaultString(groupName, UPLOAD_GROUP_NAME)));
     }
 
     /**
