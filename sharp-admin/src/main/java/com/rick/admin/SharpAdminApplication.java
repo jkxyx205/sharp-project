@@ -1,6 +1,8 @@
 package com.rick.admin;
 
 import com.rick.fileupload.client.controller.DocumentController;
+import com.rick.fileupload.client.support.DocumentDAO;
+import com.rick.fileupload.client.support.DocumentServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -14,7 +16,7 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @EnableCaching
 @DependsOn("entityDAOSupport")
-@Import(DocumentController.class)
+@Import({DocumentDAO.class, DocumentServiceImpl.class, DocumentController.class})
 public class SharpAdminApplication {
 
     public static void main(String[] args) {
