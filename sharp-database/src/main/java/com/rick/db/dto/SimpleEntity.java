@@ -43,4 +43,9 @@ public class SimpleEntity<ID> implements Serializable {
         return new HashCodeBuilder(17, 37)
                 .append(id).toHashCode();
     }
+
+    @Override
+    public String toString() {
+        return id == null ? "" : String.valueOf(id);
+    }
 }

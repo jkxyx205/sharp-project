@@ -105,7 +105,7 @@ public class FormService {
         formCpnList = clone.getFormCpnList();
         propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
-        Map<String, Object> valueMap = null;
+        Map<String, Object> valueMap = new HashMap<>();;
         Map<Long, FormCpnValue> formCpnValueMap = null;
 
         if (isInstanceForm) {
@@ -170,6 +170,7 @@ public class FormService {
             value = value == null ? null : cpn.parseValue(value);
 
             propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
+            valueMap.put(cpnConfigurer.getName(), value);
         }
 
         if (isInstanceForm) {
@@ -179,7 +180,7 @@ public class FormService {
             }
         }
 
-        return new FormBO(form, instanceId, propertyList);
+        return new FormBO(form, instanceId, propertyList, valueMap);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -196,12 +197,12 @@ public class FormService {
         FormBO form = getFormBOById(formId);
 
         values.put("formId", formId);
-        values.put("instanceId", instanceId);
         values.put("id", instanceId);
 
         Long innerTableId = instanceId == null ? IdGenerator.getSequenceId() : instanceId;
+        values.put("instanceId", innerTableId);
 
-        List<FormCpnValue> FormCpnValueList = Lists.newArrayListWithExpectedSize(form.getPropertyList().size());
+        List<FormCpnValue> formCpnValueList = Lists.newArrayListWithExpectedSize(form.getPropertyList().size());
 
         Map<String, Object> map = Maps.newHashMap();
         BindingResult bindingResult = new MapBindingResult(map, getClass().getName());
@@ -216,7 +217,7 @@ public class FormService {
             String value = processor.getParamValue();
             values.put(property.getName(), processor.getCpnValue());
 
-            FormCpnValueList.add(FormCpnValue.builder()
+            formCpnValueList.add(FormCpnValue.builder()
                     .value(value)
                     .formCpnId(property.getId())
                     .instanceId(innerTableId)
@@ -237,7 +238,7 @@ public class FormService {
 
         if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
             formCpnValueDAO.deleteByInstanceId(instanceId);
-            formCpnValueDAO.insert(FormCpnValueList);
+            formCpnValueDAO.insert(formCpnValueList);
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
             boolean customInsertOrUpdate = false;
 
@@ -264,6 +265,8 @@ public class FormService {
         if (formAdvice != null) {
             formAdvice.afterInstanceHandle(form, instanceId, values);
         }
+
+        values.put("id", innerTableId);
     }
 
     public int delete(Long formId, Long[] instanceIds) {

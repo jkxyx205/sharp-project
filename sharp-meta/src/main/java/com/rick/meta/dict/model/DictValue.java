@@ -34,4 +34,9 @@ public class DictValue {
     public DictValue(String code) {
         this.code = code;
     }
+
+    @Override
+    public String toString() {
+        return code;
+    }
 }

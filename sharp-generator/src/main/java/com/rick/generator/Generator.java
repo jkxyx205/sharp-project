@@ -48,6 +48,10 @@ public class Generator {
 
     private final TableGenerator tableGenerator;
 
+    public static final String PROJECT = "project";
+
+    public static final String CREATE_TABLE = "create_table";
+
     public static final String GENERATOR_CODE = "generator_code";
 
     public static final String FORM_PAGE = "formPage";
@@ -81,7 +85,9 @@ public class Generator {
         String rootPackageName = StringUtils.substringBeforeLast(entityClass.getPackage().getName(), ".");
 
         // 1. 创建 table
-        tableGenerator.createTable(entityClass);
+        if (!Objects.equals(config.get(CREATE_TABLE), false)) {
+            tableGenerator.createTable(entityClass);
+        }
 
         if (config.get(GENERATOR_CODE) == null || (Boolean) config.get(GENERATOR_CODE) == true) {
             boolean overwrite = Objects.equals(config.get(GENERATOR_CODE), true);
@@ -92,7 +98,7 @@ public class Generator {
             // 2.2 service
             generatorService(overwrite, entityName, rootPackageName, rootPackagePath,  "service");
             // 2.3 controller
-            generatorBaseFormController(overwrite, entityName, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
+            generatorBaseFormController((String) config.get(PROJECT), overwrite, entityName, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
             // 2.4 report
             if ((Boolean) config.get(REPORT) == true) {
                 generatorReport(entityClass, entityName, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
@@ -120,13 +126,13 @@ public class Generator {
         }
     }
 
-    private void generatorDAO(boolean overwrite, String name, String rootPackageName, String rootPackagePath, String curPackageName, boolean isCodeEntity) throws IOException {
-        String daoCodeTemplate = daoCodeTemplate(name, rootPackageName, isCodeEntity);
+    private void generatorDAO(boolean overwrite, String entityName, String rootPackageName, String rootPackagePath, String curPackageName, boolean isCodeEntity) throws IOException {
+        String daoCodeTemplate = daoCodeTemplate(entityName, rootPackageName, isCodeEntity);
         // 写文件
-        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, name + "DAO.java", daoCodeTemplate);
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, entityName + "DAO.java", daoCodeTemplate);
     }
 
-    private String daoCodeTemplate(String name, String rootPackageName, boolean isCodeEntity) {
+    private String daoCodeTemplate(String entityName, String rootPackageName, boolean isCodeEntity) {
         String template = "package ${PACKAGE_NAME}.dao;\n" +
                 "\n" +
                 "import com.rick.db.plugin.dao.core.Entity"+(isCodeEntity ? "Code" : "")+"DAOImpl;\n" +
@@ -143,17 +149,17 @@ public class Generator {
                 "}";
 
         return template.replace("${PACKAGE_NAME}", rootPackageName)
-                .replace("${NAME}", name);
+                .replace("${NAME}", entityName);
     }
 
-    private void generatorService(boolean overwrite, String name, String rootPackageName, String rootPackagePath, String curPackageName) throws IOException {
-        String serviceCodeTemplate = serviceCodeTemplate(name, rootPackageName);
+    private void generatorService(boolean overwrite, String entityName, String rootPackageName, String rootPackagePath, String curPackageName) throws IOException {
+        String serviceCodeTemplate = serviceCodeTemplate(entityName, rootPackageName);
         // 写文件
-        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, name + "Service.java", serviceCodeTemplate);
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, entityName + "Service.java", serviceCodeTemplate);
     }
 
-    private String serviceCodeTemplate(String name, String rootPackageName) {
-        String camelName = (name.substring(0,1).toLowerCase() + name.substring(1));
+    private String serviceCodeTemplate(String entityName, String rootPackageName) {
+        String camelName = (entityName.substring(0,1).toLowerCase() + entityName.substring(1));
         String template = "package ${PACKAGE_NAME}.service;\n" +
                 "\n" +
                 "import ${PACKAGE_NAME}.dao.${NAME}DAO;\n" +
@@ -176,24 +182,27 @@ public class Generator {
 
 
         return template.replace("${PACKAGE_NAME}", rootPackageName)
-                .replace("${NAME}", name);
+                .replace("${NAME}", entityName);
     }
 
-    private void generatorBaseFormController(boolean overwrite, String name, String rootPackageName, String rootPackagePath, String curPackageName, String formPage) throws IOException {
-        Assert.hasText(formPage);
-        String controllerCodeTemplate = controllerCodeTemplate(name, rootPackageName, formPage);
+    private void generatorBaseFormController(String project, boolean overwrite, String entityName, String rootPackageName, String rootPackagePath, String curPackageName, String formPage) throws IOException {
+        Assert.hasText(project);
+        if (StringUtils.isBlank(formPage)) {
+            return;
+        }
+        String controllerCodeTemplate = controllerCodeTemplate(project, entityName, rootPackageName, formPage);
         // 写文件
-        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, name + "Controller.java", controllerCodeTemplate);
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, entityName + "Controller.java", controllerCodeTemplate);
     }
 
-    private String controllerCodeTemplate(String name, String rootPackageName, String formPage) {
-        String camelName = (name.substring(0,1).toLowerCase() + name.substring(1));
+    private String controllerCodeTemplate(String project, String entityName, String rootPackageName, String formPage) {
+        String camelName = (entityName.substring(0,1).toLowerCase() + entityName.substring(1));
         String template = "package ${PACKAGE_NAME}.controller;\n" +
                 "\n" +
-                "import com.rick.admin.common.api.BaseFormController;\n" +
-                "import com.rick.admin.common.exception.ResourceNotFoundException;\n" +
-                "import com.rick.admin.module.student.entity.Student;\n" +
-                "import com.rick.admin.module.student.service.StudentService;\n" +
+                "import com.rick."+project+".common.api.BaseFormController;\n" +
+                "import com.rick."+project+".common.exception.ResourceNotFoundException;\n" +
+                "import com.rick."+project+".module."+camelName+".entity."+entityName+";\n" +
+                "import com.rick."+project+".module."+camelName+".service."+entityName+"Service;\n" +
                 "import com.rick.db.plugin.dao.core.EntityDAOManager;\n" +
                 "import lombok.AccessLevel;\n" +
                 "import lombok.experimental.FieldDefaults;\n" +
@@ -212,10 +221,10 @@ public class Generator {
                 "@Controller\n" +
                 "@RequestMapping(\""+camelName+"s\")\n" +
                 "@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)\n" +
-                "public class StudentController extends BaseFormController<${NAME}, StudentService> {\n" +
+                "public class "+entityName+"Controller extends BaseFormController<${NAME}, "+entityName+"Service> {\n" +
                 "\n" +
-                "    public StudentController(StudentService studentService) {\n" +
-                "        super(studentService, \""+formPage+"\");\n" +
+                "    public "+entityName+"Controller("+entityName+"Service "+camelName+"Service) {\n" +
+                "        super("+camelName+"Service, \""+formPage+"\");\n" +
                 "    }\n" +
                 "\n" +
                 "    @GetMapping(\"{id}\")\n" +
@@ -239,18 +248,18 @@ public class Generator {
                 "}";
 
         return template.replace("${PACKAGE_NAME}", rootPackageName)
-                .replace("${NAME}", name);
+                .replace("${NAME}", entityName);
     }
 
-    private void generatorReport(Class<? extends SimpleEntity> entityClass, String name, String reportTestPath, String reportTestPackage) throws IOException {
+    private void generatorReport(Class<? extends SimpleEntity> entityClass, String entityName, String reportTestPath, String reportTestPackage) throws IOException {
         Assert.hasText(reportTestPath);
         Assert.hasText(reportTestPackage);
-        String reportCodeTemplate = reportCodeTemplate(entityClass, name, reportTestPackage);
+        String reportCodeTemplate = reportCodeTemplate(entityClass, entityName, reportTestPackage);
         // 写文件
-        FileUtils.writeStringToFile(new File(new File(reportTestPath),name + "Test.java"), reportCodeTemplate, "UTF-8");
+        FileUtils.writeStringToFile(new File(new File(reportTestPath),entityName + "Test.java"), reportCodeTemplate, "UTF-8");
     }
 
-    private String reportCodeTemplate(Class<? extends SimpleEntity> entityClass, String name, String reportTestPackage) {
+    private String reportCodeTemplate(Class<? extends SimpleEntity> entityClass, String entityName, String reportTestPackage) {
         StringBuilder queryFiledBuilder = new StringBuilder();
         StringBuilder columBuilder = new StringBuilder();
 
@@ -349,7 +358,7 @@ public class Generator {
                 "                .name(\""+StringUtils.defaultString(entityDAO.getTableMeta().getTable().comment(), entityDAO.getTableMeta().getTableName())+"\")\n" +
                 "                .reportAdviceName(\"operatorReportAdvice\")\n" +
                 "                .additionalInfo(Params.builder(1).pv(\"operator-bar\", true) // 显示操作按钮\n" +
-                "                        .pv(\"endpoint\", \""+(camelToSpinal(name) + "s")+"\")\n" +
+                "                        .pv(\"endpoint\", \""+(camelToSpinal(entityName) + "s")+"\")\n" +
                 "                        .build()) // 显示操作按钮\n" +
                 "                .querySql(\""+entityDAO.getSelectConditionSQL(Collections.emptyMap()).replace("\"", "\\\"").replaceAll(":is_deleted", "0")+"\")\n" +
                 "                .queryFieldList(Arrays.asList(\n" +
@@ -369,11 +378,13 @@ public class Generator {
                 "    }\n" +
                 "}\n";
 
-        return template.replace("${NAME}", name);
+        return template.replace("${NAME}", entityName);
     }
 
     private void generatorHtml(Class<? extends SimpleEntity> entityClass, FormLayoutEnum formLayout, String controlPath, RenderTypeEnum renderType, boolean ifGeneratorLabel) throws IOException {
-        Assert.hasText(controlPath);
+        if (StringUtils.isBlank(controlPath)) {
+            return;
+        }
 
         StringBuilder htmlStringBuilder = new StringBuilder();
         htmlStringBuilder.append("<form class=\"form-"+formLayout.getCode().toLowerCase()+" row\" id=\"form\" name=\"form\" onsubmit=\"return false\">\n");

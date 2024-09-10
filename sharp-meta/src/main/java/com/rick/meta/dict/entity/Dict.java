@@ -26,4 +26,11 @@ public class Dict extends SimpleEntity<Long> {
     String label;
 
     Integer sort;
+
+    String remark;
+
+    public Dict(String type, String name, String label, Integer sort) {
+        this(type, name, label, sort, null);
+    }
+
 }
