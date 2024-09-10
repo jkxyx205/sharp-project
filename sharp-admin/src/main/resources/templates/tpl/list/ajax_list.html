@@ -313,11 +313,12 @@
             }
 
         $('#okId').on('click', function () {
-            saveForm(() => {
+            window[$(this).parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
+                toastr.success("保存成功")
                 $modal.modal('hide');
                 setTimeout(() => {
-                    $listTable.ajaxTable('reload')
-                    toastr.success("保存成功")
+                    // $('[name=reset]').click()
+                    window.location.reload()
                 }, 1000)
             })
         })

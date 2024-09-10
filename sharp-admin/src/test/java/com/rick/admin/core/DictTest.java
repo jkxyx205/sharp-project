@@ -64,6 +64,7 @@ public class DictTest {
                 .code("sys_dict")
                 .tableName("sys_dict")
                 .tplName("tpl/form/form-full") // 弹出框显示必须是 form-full 不能是form
+                .additionalInfo(Params.builder(1).pv("showSaveFormBtn", false).build())
                 .formAdviceName("dictFormService")
                 .name("字典")
                 .repositoryName("dictDAO")

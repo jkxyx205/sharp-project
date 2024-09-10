@@ -46,6 +46,8 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
 
     private static final String FORM_RELOAD_TAB = "reload-tab";
 
+    private static final String FORM_HIDE_FORM_TAG = "hide-form-tag";
+
     public SharpFormProcessor(String dialectPrefix, FormService formService) {
         super(
                 // 此处理器将仅应用于HTML模式
@@ -89,6 +91,10 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
         params.put("reloadTab", attrMap.get(FORM_RELOAD_TAB));
 
         String htmlContent = ThymeleafRenderHelper.renderByTemplateName(attrMap.get(FORM_PAGE), params);
+        if (HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_HIDE_FORM_TAG)) {
+            htmlContent = htmlContent.replace("form", "div");
+        }
+
         iElementTagStructureHandler.replaceWith(htmlContent, false);
     }
 
