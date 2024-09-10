@@ -241,7 +241,7 @@
         function send() {
             if (formDOM.valid()) {
                 let formData = $('form').form2json({
-                    multiValSelector: '[type=checkbox]'
+                    multiValSelector: '[type=checkbox], select[multiple]'
                 });
 
                 // 多选需要通过 multipleSelect 获取数据

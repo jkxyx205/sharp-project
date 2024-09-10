@@ -20,9 +20,9 @@
             <textarea th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXTAREA}" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                       th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" th:text="${p.value}"></textarea>
 
-            <select th:attr="disabled=${(p.name eq 'type' && formBO.form.code eq 'sys_dict') && formBO.instanceId != null}" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
+            <select th:attr="disabled=${(p.name eq 'type' && formBO.form.code eq 'sys_dict') && formBO.instanceId != null}" th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT or p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SEARCH_SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
                     th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
-                <sp:option dummyItemText th:if="${p.configurer.datasource != null}" th:attr="key=${p.configurer.datasource},group=${(p.configurer.getAdditionalInfo == null || p.configurer.getAdditionalInfo().get('group') == null) ? null : 'group'}" th:value="${p.value}"/>
+                <sp:option th:if="${p.configurer.datasource != null}" th:attr="key=${p.configurer.datasource},group=${(p.configurer.getAdditionalInfo == null || p.configurer.getAdditionalInfo().get('group') == null) ? null : 'group'}" th:value="${p.value}"/>
             </select>
 
             <sp:select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).MULTIPLE_SELECT}" th:id="${p.name}" class="form-control" th:name="${p.name}" multiple th:attr="key=${p.configurer.datasource}" th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" hideDummyItemText/>

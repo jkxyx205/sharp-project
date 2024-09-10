@@ -72,7 +72,7 @@
         .form-control.is-valid, .was-validated .form-control:valid {
             border-color: #e4e7ea;
             padding-right: .75rem;
-            background: none;
+            background: #FFFFFF;
         }
 
         form div.is-invalid {
@@ -349,6 +349,7 @@
         }
 
         .form-inline .form-group {
+            align-items: flex-start;
             margin-bottom: 1rem;
         }
 
@@ -378,16 +379,17 @@
 
             .form-inline label.col-form-label {
                 max-width: 110px;
+                width: 75px;
                 padding-left: 15px;
                 padding-right: 15px;
             }
 
-            .form-inline label.switch {
-                display: inline-block;;
+            .form-inline .form-control {
+                width: calc(100% - 75px)
             }
 
-            .form-inline .form-control {
-                width: calc(100% - 110px)
+            .form-inline label.switch {
+                display: inline-block;;
             }
 
             .card-body-scroll-panel {

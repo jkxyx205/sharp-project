@@ -84,18 +84,20 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
             window[formDOM.getAttribute("name") + '_' + c.name + '_file'] = new FileUpload(c.name + '_file',
                 null,
                 window[formDOM.getAttribute("name") + '_' + c.name + '_file_uploadConsumer'],
-                window[formDOM.getAttribute("name") + '_' + c.name + '_file_deleteConsumer'])
+                window[formDOM.getAttribute("name") + '_' + c.name + '_file_deleteConsumer'],
+                window[formDOM.getAttribute("name") + '_' + c.name + '_file_itemSupplier']
+                )
         })
     }
 
     formDOM.save = function (successCallback, beforeSave) {
-        if (!formDOM.valid()) {
+        if (this.tagName === 'FORM' && !formDOM.valid()) {
             return
         }
 
         let formData = $(formDOM).form2json({
-            multiValSelector: '[type=checkbox]'
-        });
+            multiValSelector: '[type=checkbox], select[multiple]'
+        }) || {};
 
         formDOM.tables.forEach(c => {
             formData[c.name] = $('.' + c.name).editableTable('getValue')

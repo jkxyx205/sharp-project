@@ -220,7 +220,7 @@
                 send: function () {
                     if (formDOM.valid()) {
                         // let formData = $('form').form2json({
-                        //     multiValSelector: '[type=checkbox]'
+                        //     multiValSelector: '[type=checkbox], select[multiple]'
                         // });
                         this.form.birthday = document.getElementById("birthday").value // 必须手动获取，Vue 获取不到
                         this.form.materialTypeList = $('#materialTypeList').multipleSelect('getSelects')

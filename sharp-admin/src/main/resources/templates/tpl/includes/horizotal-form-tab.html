@@ -26,7 +26,7 @@
                         <textarea th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TEXTAREA}" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                                   th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" th:text="${p.value}"></textarea>
 
-                        <select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
+                        <select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SELECT or p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SEARCH_SELECT}" class="form-control" th:id="${p.name}" th:name="${p.name}"
                                 th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}">
                             <option th:each="option : ${p.configurer.options}" th:value="${option.name}" th:text="${option.label}" th:selected="${option.name eq p.value}"></option>
                         </select>

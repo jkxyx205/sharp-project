@@ -24,7 +24,7 @@
 
             window[formCode + 'FormData'] = function () {
                 let formData = window['$' + formCode + 'FormDOM'].form2json({
-                    multiValSelector: '[type=checkbox]'
+                    multiValSelector: '[type=checkbox], select[multiple]'
                 });
                 console.log(formData)
                 return formData

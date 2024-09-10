@@ -34,7 +34,7 @@
                                 <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
                                 <input class="form-control" th:id="${f.name}" type="checkbox" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'CHECKBOX'}" th:value="1" th:placeholder="${f.placeholder}">
                                 <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'DATE'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
-                                <sp:select th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT'}" th:value="${f.value}"/>
+                                <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT' or f.type.name() == 'SEARCH_SELECT'}"/>
                                 <sp:select th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}" th:value="${f.value}"/>
                                 <sp:select th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText th:value="${f.value}"/>
                             </th:block>
@@ -175,9 +175,20 @@
 
         /*<![CDATA[*/
         var fz = [[${report.queryFieldList}]]
+
+        var searchSelect = fz.filter(f => f.type == 'SEARCH_SELECT')
+        searchSelect.forEach(f => {
+            let value = urlObject[f.name]
+            $('#' + f.name).multipleSelect({
+                filter: true,
+                single: true,
+                placeholder: '请输入' + f.label
+            }).multipleSelect('setSelects', !value ? '' : [value])
+        })
+
         var multipleSelect = fz.filter(f => f.type == 'MULTIPLE_SELECT')
         multipleSelect.forEach(f => {
-            var value = urlObject[f.name]
+            let value = urlObject[f.name]
             $('#' + f.name).multipleSelect({
                 selectAll: true,
                 single: false,

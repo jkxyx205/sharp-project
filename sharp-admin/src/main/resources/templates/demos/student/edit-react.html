@@ -93,7 +93,7 @@
         function send() {
             if (formDOM.valid()) {
                 let formData = $('form').form2json({
-                    multiValSelector: '[type=checkbox]'
+                    multiValSelector: '[type=checkbox], select[multiple]'
                 });
 
                 $.ajax ({

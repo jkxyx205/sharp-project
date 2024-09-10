@@ -13,17 +13,22 @@ head.appendChild(style)
  * @param name
  * @constructor
  */
-function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer) {
+function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer, itemSupplier) {
     this.name = name || 'attachment_file'
     this.$fileUpload = $('#' + name)
+    if (!this.$fileUpload.length) {
+        console.log("input file name = ", name, " 找不到")
+        return
+    }
     this.fileUploadHtml = this.$fileUpload.prop('outerHTML')
 
     this.$itemContainer = $itemContainer === false ? false : ($itemContainer || this.$fileUpload.next())
     this.$valueContainer = this.$fileUpload.prev()
     this.attachmentList = JSON.parse(this.$valueContainer.val())
 
-    this.uploadConsumer = uploadConsumer;
-    this.deleteConsumer = deleteConsumer;
+    this.uploadConsumer = uploadConsumer
+    this.deleteConsumer = deleteConsumer
+    this.itemSupplier = itemSupplier
 }
 
 FileUpload.prototype.ajaxFileUpload = function () {
@@ -36,7 +41,7 @@ FileUpload.prototype.ajaxFileUpload = function () {
             fileElementId: this.name, //文件上传域的ID
             dataType: 'json', //返回值类型 一般设置为json
             success: (data, status)=> { //服务器成功响应处理函数
-                this.appendAttachment(data.data, this.uploadConsumer)
+                this.appendAttachment(data.data, this.uploadConsumer, this.itemSupplier)
             },
             error: function (data, status, e) { //服务器响应失败处理函数
                 alert(e);
@@ -54,7 +59,7 @@ FileUpload.prototype.ajaxFileUpload = function () {
 }
 
 // 附件列表(上传文件默认样式)
-FileUpload.prototype.appendAttachment = function(attachments, consumer) {
+FileUpload.prototype.appendAttachment = function(attachments, consumer, itemSupplier) {
     if (!attachments) {
         return
     }
@@ -74,7 +79,12 @@ FileUpload.prototype.appendAttachment = function(attachments, consumer) {
     }
 
     for (let attachment of attachments) {
-        let $item = $("<div class=\"item\">\n" +
+        let $item
+        if (itemSupplier) {
+            $item = $(itemSupplier(attachment))
+        }
+
+        $item = $item ? $item : $("<div class=\"item\">\n" +
             "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link attachment_delete_btn\" onclick=\"this.upload.deleteAttachment('"+attachment.id+"', this)\">删除</button>\n" +
             "</div>")
         this.$itemContainer.append($item)
