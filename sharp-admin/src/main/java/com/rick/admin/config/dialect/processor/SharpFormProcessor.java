@@ -92,7 +92,7 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
 
         String htmlContent = ThymeleafRenderHelper.renderByTemplateName(attrMap.get(FORM_PAGE), params);
         if (HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_HIDE_FORM_TAG)) {
-            htmlContent = htmlContent.replace("form", "div");
+            htmlContent = htmlContent.replace("<form", "<div").replace("</form", "</div");
         }
 
         iElementTagStructureHandler.replaceWith(htmlContent, false);
