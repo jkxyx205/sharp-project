@@ -128,11 +128,11 @@ public class FormService {
                     valueMap = mapOptional.get();
                 }
             }
+        }
 
-            FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
-            if (formAdvice != null) {
-                formAdvice.beforeGetInstance(instanceId, valueMap);
-            }
+        FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
+        if (formAdvice != null) {
+            formAdvice.beforeGetInstance(instanceId, valueMap);
         }
 
         for (FormCpn formCpn : formCpnList) {
@@ -173,11 +173,8 @@ public class FormService {
             valueMap.put(cpnConfigurer.getName(), value);
         }
 
-        if (isInstanceForm) {
-            FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
-            if (formAdvice != null) {
-                formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
-            }
+        if (formAdvice != null) {
+            formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
         }
 
         return new FormBO(form, instanceId, propertyList, valueMap);
