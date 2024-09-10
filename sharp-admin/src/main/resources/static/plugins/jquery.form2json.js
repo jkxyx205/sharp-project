@@ -2,7 +2,7 @@
 
     var defaults = {
             inputSelectors: 'input:not([type=radio], [type=checkbox], [type=reset]), input[type=checkbox], input[type=radio]:checked, textarea, select',
-            multiValSelector: '[type=checkbox], select',
+            multiValSelector: '[type=checkbox], select[multiple]',
             keyAttr: 'name',
             wrapped: false,
             allowEmptyMultiVal: false,
