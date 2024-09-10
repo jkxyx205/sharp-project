@@ -26,6 +26,8 @@ public class FormBO {
 
     private List<Property> propertyList;
 
+    private  Map<String, Object> data;
+
     @AllArgsConstructor
     @Getter
     public static class Property {
@@ -54,6 +56,10 @@ public class FormBO {
     }
 
     public Map<String, Object> getData() {
+        return data;
+    }
+
+    public Map<String, Object> getPropertyData() {
         return propertyList.stream()
                 .collect(HashMap::new, (m, v) -> m.put(v.name, v.value), HashMap::putAll);
     }

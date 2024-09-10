@@ -56,7 +56,7 @@ public class TableGenerator {
         Assert.notNull(idField, "cannot find id field, forgot to extends BaseEntity??");
         createTableSql.append(tableMeta.getTableName())
                 .append("(")
-                .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" " + determineSqlType(idField.getType()))+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
+                .append(""+(strategy == Id.GenerationType.ASSIGN ? ""+tableMeta.getIdColumnName()+" varchar(32)" : ""+tableMeta.getIdColumnName()+" " + determineSqlType(tableMeta.getIdClass()))+" not null"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" comment '主键' primary key,");
 
         List<String> columnNames = tableMeta.getSortedColumns();
 
