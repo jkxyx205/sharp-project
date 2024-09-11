@@ -22,12 +22,13 @@ public interface FormAdvice {
      */
     default void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {}
 
+    default void init(Form form, Long instanceId, Map<String, Object> values) {}
     /**
      * 获取实例之前
      * @param instanceId
      * @param values
      */
-    default void beforeGetInstance(Long instanceId, Map<String, Object> values) {}
+    default void beforeGetInstance(Form form, Long instanceId, Map<String, Object> values) {}
 
     /**
      * 获取实例之后

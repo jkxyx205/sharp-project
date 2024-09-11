@@ -107,6 +107,10 @@ public class FormService {
 
         Map<String, Object> valueMap = new HashMap<>();;
         Map<Long, FormCpnValue> formCpnValueMap = null;
+        FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
+        if (formAdvice != null) {
+            formAdvice.init(form, instanceId, valueMap);
+        }
 
         if (isInstanceForm) {
             if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
@@ -127,12 +131,11 @@ public class FormService {
                     Optional<Map<String, Object>> mapOptional = dao.selectById(instanceId);
                     valueMap = mapOptional.get();
                 }
-            }
-        }
 
-        FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
-        if (formAdvice != null) {
-            formAdvice.beforeGetInstance(instanceId, valueMap);
+                if (formAdvice != null) {
+                    formAdvice.beforeGetInstance(form, instanceId, valueMap);
+                }
+            }
         }
 
         for (FormCpn formCpn : formCpnList) {
@@ -171,10 +174,12 @@ public class FormService {
 
             propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
             valueMap.put(cpnConfigurer.getName(), value);
-        }
 
-        if (formAdvice != null) {
-            formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
+            if (isInstanceForm) {
+                if (formAdvice != null) {
+                    formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
+                }
+            }
         }
 
         return new FormBO(form, instanceId, propertyList, valueMap);
