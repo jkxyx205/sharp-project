@@ -85,7 +85,7 @@
                     <span class="switch-slider"></span>
                 </label>
             </div>
-            <table th:class="${p.name + ' table'}"
+            <table th:class="${p.name + ' table editable-table table-bordered table-responsive-sm table-sm'}"
                    th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).TABLE}" th:id="${p.name}" th:name="${p.name}">
                 <thead>
                 <tr>

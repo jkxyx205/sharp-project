@@ -24,7 +24,10 @@ function FileUpload(name, $itemContainer, uploadConsumer, deleteConsumer, itemSu
 
     this.$itemContainer = $itemContainer === false ? false : ($itemContainer || this.$fileUpload.next())
     this.$valueContainer = this.$fileUpload.prev()
-    this.attachmentList = JSON.parse(this.$valueContainer.val())
+
+    if (this.$valueContainer[0].tagName === 'INPUT' && (this.$valueContainer[0].type === 'text' || this.$valueContainer[0].type === 'hidden')) {
+        this.attachmentList = JSON.parse(this.$valueContainer.val())
+    }
 
     this.uploadConsumer = uploadConsumer
     this.deleteConsumer = deleteConsumer

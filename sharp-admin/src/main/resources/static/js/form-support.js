@@ -60,7 +60,7 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         // table
         formDOM.tables = p.filter(c => c.configurer.cpnType == 'TABLE')
         formDOM.tables.forEach(c => {
-            $('.' + c.name).editableTable({
+            $('#' + c.name).editableTable({
                 columns: c.configurer.additionalInfo.columns.length
             })
         })
@@ -100,7 +100,7 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         }) || {};
 
         formDOM.tables.forEach(c => {
-            formData[c.name] = $('.' + c.name).editableTable('getValue')
+            formData[c.name] = $('#' + c.name).editableTable('getValue')
         })
         beforeSave && beforeSave(formData)
         console.log("formData = ", formData)
