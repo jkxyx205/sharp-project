@@ -297,11 +297,11 @@ public class Generator {
             }
             // 设置 ReportColumn
             if (field.getType() == LocalDate.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+columnName+"\", \""+comment+"\", true).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATE),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+columnName+"\", \""+comment+"\", true).setColumnWidth(80).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATE),\n");
             } else if (field.getType() == LocalDateTime.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")).setColumnWidth(120).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME),\n");
             } else if (field.getType() == Boolean.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")).setAlign(AlignEnum.CENTER),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")).setColumnWidth(80).setAlign(AlignEnum.CENTER),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz.isEnum()) {
