@@ -101,7 +101,6 @@ public class ReportController {
             return ajaxIndex(id, model, request);
         }
 
-        reportService.init(report);
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
         ReportDTO reportDTO = reportService.list(id, params);
 
