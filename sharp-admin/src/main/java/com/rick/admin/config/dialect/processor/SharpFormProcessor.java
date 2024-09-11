@@ -3,6 +3,7 @@ package com.rick.admin.config.dialect.processor;
 import com.rick.admin.common.util.ThymeleafRenderHelper;
 import com.rick.common.util.HtmlTagUtils;
 import com.rick.db.service.support.Params;
+import com.rick.formflow.form.service.FormConstants;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +82,7 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
 
         FormBO formBO = formService.getFormBO(Long.parseLong(attrMap.get(FORM_ID)), StringUtils.isBlank(attrMap.get(FORM_INSTANCE_ID)) ? null : Long.parseLong(attrMap.get(FORM_INSTANCE_ID)));
 
-        formBO.getForm().getAdditionalInfo().put("showSaveFormBtn", HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_SHOW_BTN));
+        formBO.getForm().getAdditionalInfo().put(FormConstants.ADDITIONAL_SHOW_SAVE_FORM_BTN, HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_SHOW_BTN));
 
         Map<String, Object> params = new HashMap<>();
         params.put("formBO", formBO);

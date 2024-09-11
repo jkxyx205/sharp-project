@@ -6,11 +6,13 @@ package com.rick.formflow.form.service;
  */
 public class FormConstants {
 
-    private static final String ADDITIONAL_LABEL_COL= "label-col";
+    public static final String ADDITIONAL_SHOW_SAVE_FORM_BTN = "showSaveFormBtn";
 
-    private static final String ADDITIONAL_PANE_LIST= "pane-list";
+    public static final String ADDITIONAL_LABEL_COL = "label-col";
 
-    public static final String ADDITIONAL_CSS= "css";
+    public static final String ADDITIONAL_PANE_LIST = "pane-list";
 
-    public static final String ADDITIONAL_JS= "js";
+    public static final String ADDITIONAL_CSS = "css";
+
+    public static final String ADDITIONAL_JS = "js";
 }
