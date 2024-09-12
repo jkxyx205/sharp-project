@@ -10,6 +10,7 @@
             display: inline-block;
             position: relative;
         }
+
         /*[(${formBO.form.getAdditionalInfo['css'] == null ? '' : formBO.form.getAdditionalInfo['css']})]*/
     </style>
 </head>
@@ -19,19 +20,19 @@
 </div>
 </body>
 <script th:inline="javascript">
-    let formBO = /*[[${ formBO }]]*/
-    let originalFormData = /*[[${ formBO.data }]]*/
-    let formCode = /*[[${formBO.form.code}]]*/
-    let p = [[${formBO.propertyList}]]
+    var formBO = /*[[${ formBO }]]*/
+    var originalFormData = /*[[${ formBO.data }]]*/
+    var formCode = /*[[${formBO.form.code}]]*/
+    var p = [[${formBO.propertyList}]]
 
     var hasAuthority = false
     /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') }"]*/
     hasAuthority = true
     /*[/]*/
-    var readonly = !hasAuthority || [[${query.readonly}]]
+    var readonly = !hasAuthority || JSON.parse([[${query.readonly}]])
 
-    let formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
-    let idDOM = $(formDOM).find("#id")[0]
+    var formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
+    var idDOM = $(formDOM).find("#id")[0]
 
     sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
     /*[(${formBO.form.getAdditionalInfo['js'] == null ? '' : formBO.form.getAdditionalInfo['js']})]*/

@@ -174,7 +174,7 @@
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
     <script th:src="@{/js/download.js}"></script>
     <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
-
+    <script th:src="@{/js/jquery.dialog.js}"></script>
     <script th:inline="javascript">
         var hasAuthority = false
             /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
@@ -270,7 +270,11 @@
 
         function gotoDetail(title, id) {
             if (form_id) {
-                if (!readonly) {
+                if (readonly || !title) {
+                    title = '查看'
+                }
+
+                if (title === '查看' && !readonly) {
                     title = '编辑'
                 }
                 $('#dialog-title').text(title)
@@ -279,29 +283,28 @@
                 if (formAction === 'link') {
                     openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,  report.name);
                 } else {
-                    $.get('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, function (res) {
-                        $modal.find('.modal-body').html(res)
-                        $modal.modal({
-                            show: true,
-                            backdrop: 'static'
-                        })
+                    $.dialog({
+                        title,
+                        url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,
+                        ok: {
+                            label: '保存',
+                            success: function (value) {
+                                window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
+                                    toastr.success("保存成功")
+                                    $modal.modal('hide');
+                                    setTimeout(() => {
+                                        // $('[name=reset]').click()
+                                        window.location.reload()
+                                    }, 1000)
+                                })
+                            }
+                        }
                     })
                 }
             } else { // 自定义 endpoint 跳转页面详情
                 openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly,  report.name);
             }
         }
-
-        $('#okId').on('click', function () {
-            window[$(this).parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
-                toastr.success("保存成功")
-                $modal.modal('hide');
-                setTimeout(() => {
-                    // $('[name=reset]').click()
-                    window.location.reload()
-                }, 1000)
-            })
-        })
 
         function deleteRow(id) {
             if (confirm('确定要删除该条记录吗？')) {

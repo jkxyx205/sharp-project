@@ -20,18 +20,18 @@
 </div>
 </body>
 <script th:inline="javascript">
-    let formBO = /*[[${ formBO }]]*/
-    let originalFormData = /*[[${ formBO.data }]]*/
-    let formCode = /*[[${formBO.form.code}]]*/
-    let p = [[${formBO.propertyList}]]
+    var formBO = /*[[${ formBO }]]*/
+    var originalFormData = /*[[${ formBO.data }]]*/
+    var formCode = /*[[${formBO.form.code}]]*/
+    var p = [[${formBO.propertyList}]]
 
     var hasAuthority = false
     /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') }"]*/
     hasAuthority = true
     /*[/]*/
-    var readonly = !hasAuthority || [[${query.readonly}]]
+    var readonly = !hasAuthority || JSON.parse([[${query.readonly}]])
 
-    let formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
+    var formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
     sharpFormInit(formDOM, document.getElementById("id"), {originalFormData, formCode, p,readonly, actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
     /*[(${formBO.form.getAdditionalInfo['js'] == null ? '' : formBO.form.getAdditionalInfo['js']})]*/
 </script>
