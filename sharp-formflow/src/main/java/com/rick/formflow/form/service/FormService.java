@@ -83,7 +83,7 @@ public class FormService {
 
         Form form;
         Map<Long, CpnConfigurer> configIdMap;
-        List<FormBO.Property> propertyList;;
+        List<FormBO.Property> propertyList;
         List<FormCpn> formCpnList;
 
         if (formCache == null) {
@@ -174,11 +174,11 @@ public class FormService {
 
             propertyList.add(new FormBO.Property(formCpn.getId(), cpnConfigurer.getName(), cpnConfigurer, value));
             valueMap.put(cpnConfigurer.getName(), value);
+        }
 
-            if (isInstanceForm) {
-                if (formAdvice != null) {
-                    formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
-                }
+        if (isInstanceForm) {
+            if (formAdvice != null) {
+                formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
             }
         }
 
@@ -239,7 +239,9 @@ public class FormService {
         }
 
         if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
-            formCpnValueDAO.deleteByInstanceId(instanceId);
+            if (Objects.nonNull(instanceId)) {
+                formCpnValueDAO.deleteByInstanceId(instanceId);
+            }
             formCpnValueDAO.insert(formCpnValueList);
         } else if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
             boolean customInsertOrUpdate = false;

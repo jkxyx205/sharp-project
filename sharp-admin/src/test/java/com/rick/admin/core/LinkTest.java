@@ -8,6 +8,7 @@ import com.rick.report.core.model.SordEnum;
 import com.rick.report.core.service.ReportService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
@@ -22,6 +23,9 @@ public class LinkTest {
     @Autowired
     private ReportService reportService;
 
+    @Value("${fileupload.local.server-url}")
+    private String serverUrl;
+
     @Test
     public void testReport() {
         reportService.saveOrUpdate(Report.builder()
@@ -29,7 +33,7 @@ public class LinkTest {
                 .tplName("modules/link/list")
                 .name("图片管理")
                 .reportAdviceName("linkReportAdvice")
-                .querySql("select id, name, concat('http://localhost:7892/', group_name, '/', path) url, extension, content_type, ROUND(size / (1024 * 1024), 1) size, create_time, '' copy from sys_document where name like :name and group_name = 'link'")
+                .querySql("select id, name, concat('"+serverUrl+"', group_name, '/', path) url, extension, content_type, ROUND(size / (1024 * 1024), 1) size, create_time, '' copy from sys_document where name like :name and group_name = 'link'")
                 .queryFieldList(Arrays.asList(
                         new QueryField("name", "名称")
                 ))
