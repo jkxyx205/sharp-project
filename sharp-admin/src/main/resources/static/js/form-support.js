@@ -128,7 +128,9 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
                         // }, 1000)
                     }
 
-                    _reloadTab(reloadTabIds)
+                    setTimeout(() => {
+                        _reloadTab(reloadTabIds)
+                    }, 1000)
                 }
             }
         });
