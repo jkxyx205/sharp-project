@@ -114,6 +114,14 @@ FileUpload.prototype.deleteAttachment = function (attachmentId, deleteBtn) {
     $(deleteBtn).parent(".item").remove()
 }
 
+FileUpload.prototype.deleteAllAttachment = function () {
+    this.attachmentList = []
+    this.$valueContainer.val("[]")
+    if (this.$itemContainer) {
+        this.$itemContainer.html('')
+    }
+}
+
 FileUpload.prototype.getAttachments = function () {
     return this.attachmentList
 }
