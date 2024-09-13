@@ -44,7 +44,7 @@ public final class HttpServletResponseUtils {
 
     public static OutputStream getOutputStream(HttpServletRequest request, HttpServletResponse response, String fileName, String type) throws IOException {
         String formatedFileName = fileName.replaceAll("[/:*?\"<>[|]]", "");
-        String encodeFileName = java.net.URLEncoder.encode(formatedFileName,StandardCharsets.UTF_8.name());
+        String encodeFileName = java.net.URLEncoder.encode(formatedFileName,StandardCharsets.UTF_8.name()).replace("+", "%20");
         String browserType = request.getHeader("User-Agent").toLowerCase();
 
         if(browserType.indexOf("firefox") > -1) { //FF
