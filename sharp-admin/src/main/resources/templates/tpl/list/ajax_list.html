@@ -93,12 +93,12 @@
                                 {{ scope.row.<th:block th:text="${n.name}"></th:block> | formatDecimal}}
                             </template>
                             <template slot-scope="scope" th:if="${nStat.index == 1}">
-                                {{openDetailLink('查看', scope.row.id, scope.row.<th:block th:text="${n.name}"></th:block>)}}
+                                {{openDetailLink('查看', scope.row.id, scope.row.<th:block th:text="${n.name}"></th:block>, scope.row.<th:block th:text="${n.name}"></th:block>)}}
                             </template>
                         </table-column>
                         <table-column label="操作" align="center" category="column" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                             <template slot-scope="scope">
-                                {{ openDetailLink('编辑', scope.row.id, '编辑', true) }}
+                                {{ openDetailLink('编辑', scope.row.id, scope.row.<th:block th:text="${report.reportColumnList[1].name}"></th:block>, '编辑')}}
                                 {{ deleteLink(scope.row.id) }}
                                 <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
                             </template>
@@ -276,8 +276,8 @@
         // listRequest({})
         $('button[name=search]').click()
 
-        function openDetailLink(title, id, name) {
-            return '<a href="javascript:;" onclick="gotoDetail(\''+title+'\', \''+id+'\')">'+name+'</a>'
+        function openDetailLink(title, id, name, text) {
+            return '<a href="javascript:;" onclick="gotoDetail(\''+title+'\', \''+id+'\', \''+name+'\')">'+text+'</a>'
         }
 
         function deleteLink(id) {
@@ -287,7 +287,7 @@
         let $modal = $('#dialog')
         let report = [[${report}]]
         let form_id =/*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
-       let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
+        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
             // function gotoDetail(title, id) {
             //     if (readonly === false && title !== '复制') {
@@ -305,37 +305,42 @@
             //     })
             // }
 
-        function gotoDetail(title, id) {
-            if (form_id) {
-                if (readonly || !title) {
-                    title = '查看'
-                }
-
-                if (title === '查看' && !readonly) {
-                    title = '编辑'
-                }
-
-                $.dialog({
-                    title,
-                    url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,
-                    ok: {
-                        label: '保存',
-                        success: function (value) {
-                            window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
-                                toastr.success("保存成功")
-                                $modal.modal('hide');
-                                setTimeout(() => {
-                                    // $('[name=reset]').click()
-                                    window.location.reload()
-                                }, 1000)
-                            })
-                        }
+            function gotoDetail(title, id, name) {
+                if (form_id) {
+                    if (readonly || !title) {
+                        title = '查看'
                     }
-                })
-            } else { // 跳转页面详情
-                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly,  report.name);
+
+                    if (title === '查看' && !readonly) {
+                        title = '编辑'
+                    }
+
+                    let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
+                    if (formAction === 'link') {
+                        openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, name || report.name);
+                    } else {
+                        $.dialog({
+                            title,
+                            url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,
+                            ok: {
+                                label: '保存',
+                                success: function (value) {
+                                    window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
+                                        toastr.success("保存成功")
+                                        $modal.modal('hide');
+                                        setTimeout(() => {
+                                            // $('[name=reset]').click()
+                                            window.location.reload()
+                                        }, 1000)
+                                    })
+                                }
+                            }
+                        })
+                    }
+                } else { // 自定义 endpoint 跳转页面详情
+                    openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, name || report.name);
+                }
             }
-        }
 
         function deleteRow(id) {
             if (confirm('确定要删除该条记录吗？')) {

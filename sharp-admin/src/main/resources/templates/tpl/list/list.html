@@ -82,12 +82,12 @@
                             <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
                             <td class="text-center" th:if="${'multiple' eq params['mode']}"><input type="checkbox" th:name="check_key" th:value="${m[0]}"/></td>
                             <td th:each="v : ${grid.rows[mStat.index]}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}" th:if="${!report.reportColumnList.get(vStat.index).hidden}">
-                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="gotoDetail('查看', [[${m[0]}]])"></a>
+                                <a href="javascript:;" th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index == 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }" th:onclick="gotoDetail('查看', [[${m[0]}]], [[${m[1]}]])"></a>
                                 <span th:name="${report.reportColumnList.get(vStat.index).name}" th:if="${vStat.index > 1}" th:text="${report.reportColumnList.get(vStat.index).type.name() eq 'NUMERIC' ? #numbers.formatInteger(v, 0, 'COMMA') : (report.reportColumnList.get(vStat.index).type.name() eq 'DECIMAL' ? #numbers.formatDecimal(v,1,'COMMA',2,'POINT') : v) }"></span>
                             </td>
                             <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
-<!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
-                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('编辑', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
+                                <!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
+                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('编辑', [[${m[0]}]], [[${m[1]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
                                 <a href="javascript:;" th:onclick="deleteRow([[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
                             </td>
                             <input type="hidden" th:each="v : ${grid.rows[mStat.index]}" th:if="${report.reportColumnList.get(vStat.index).hidden}" th:name="${report.reportColumnList.get(vStat.index).name}" th:value="${v}" />
@@ -119,7 +119,7 @@
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group" role="group">
                                 <button class="btn btn-light" style="padding: .075rem .45rem" type="button" onclick="batchDelete()" disabled><i class="fa fa-trash-o fa-lg"></i></button>
-<!--                                <button class="btn btn-light" style="padding: .075rem .45rem" type="button"><i class="fa fa-trash-o fa-lg"></i></button>-->
+                                <!--                                <button class="btn btn-light" style="padding: .075rem .45rem" type="button"><i class="fa fa-trash-o fa-lg"></i></button>-->
                             </div>
                         </div>
                     </div>
@@ -177,8 +177,8 @@
     <script th:src="@{/js/jquery.dialog.js}"></script>
     <script th:inline="javascript">
         var hasAuthority = false
-            /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
-            hasAuthority = true
+        /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+        hasAuthority = true
         /*[/]*/
         var readonly = !hasAuthority || [[${readonly}]]
 
@@ -266,44 +266,44 @@
         let report = [[${report}]]
         let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
 
-        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
+            let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
-        function gotoDetail(title, id) {
-            if (form_id) {
-                if (readonly || !title) {
-                    title = '查看'
-                }
+            function gotoDetail(title, id, name) {
+                if (form_id) {
+                    if (readonly || !title) {
+                        title = '查看'
+                    }
 
-                if (title === '查看' && !readonly) {
-                    title = '编辑'
-                }
+                    if (title === '查看' && !readonly) {
+                        title = '编辑'
+                    }
 
-                let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
-                if (formAction === 'link') {
-                    openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,  report.name);
-                } else {
-                    $.dialog({
-                        title,
-                        url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,
-                        ok: {
-                            label: '保存',
-                            success: function (value) {
-                                window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
-                                    toastr.success("保存成功")
-                                    $modal.modal('hide');
-                                    setTimeout(() => {
-                                        // $('[name=reset]').click()
-                                        window.location.reload()
-                                    }, 1000)
-                                })
+                    let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
+                    if (formAction === 'link') {
+                        openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, name || report.name);
+                    } else {
+                        $.dialog({
+                            title,
+                            url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,
+                            ok: {
+                                label: '保存',
+                                success: function (value) {
+                                    window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
+                                        toastr.success("保存成功")
+                                        $modal.modal('hide');
+                                        setTimeout(() => {
+                                            // $('[name=reset]').click()
+                                            window.location.reload()
+                                        }, 1000)
+                                    })
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
+                } else { // 自定义 endpoint 跳转页面详情
+                    openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, name || report.name);
                 }
-            } else { // 自定义 endpoint 跳转页面详情
-                openOnNewTab(id, '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly,  report.name);
             }
-        }
 
         function deleteRow(id) {
             if (confirm('确定要删除该条记录吗？')) {
