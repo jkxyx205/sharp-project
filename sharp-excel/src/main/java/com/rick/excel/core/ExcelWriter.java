@@ -3,23 +3,27 @@ package com.rick.excel.core;
 import com.rick.excel.core.model.ExcelCell;
 import com.rick.excel.core.model.ExcelColumn;
 import com.rick.excel.core.model.ExcelRow;
+import com.rick.excel.core.support.ExcelUtils;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.*;
+import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -41,6 +45,12 @@ public class ExcelWriter {
     @Getter
     private XSSFSheet activeSheet;
 
+    private static final Map<String, Integer> PICTURE_TYPE_MAPPING = new HashMap<>();
+
+    static {
+        PICTURE_TYPE_MAPPING.put("png", XSSFWorkbook.PICTURE_TYPE_PNG);
+        PICTURE_TYPE_MAPPING.put("jpeg", XSSFWorkbook.PICTURE_TYPE_JPEG);
+    }
 
     public ExcelWriter() {
         this(true);
@@ -172,6 +182,18 @@ public class ExcelWriter {
         }
     }
 
+    /**
+     * 数据从第一列（x = 1）开始写，复用插入行下面行的样式
+     * @param y
+     * @param dataList
+     * @param hook
+     */
+    public void insertAndWriteRowWithAfterRowStyle(int y, List<Object[]> dataList, ExcelWriterHook hook) {
+        XSSFCellStyle[] copyCellStyle = ExcelUtils.getSheetXSSFCellStyle(getActiveSheet(), y);
+        Row row = activeSheet.getRow(y - 1);
+        insertAndWriteRow(1, y, dataList, row.getHeightInPoints(), copyCellStyle, hook);
+    }
+
     public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle cellStyle) {
         insertAndWriteRow(x, y, dataList, heightInPoints, cellStyle, null);
     }
@@ -185,11 +207,50 @@ public class ExcelWriter {
     }
 
     public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle[] cellStyles, ExcelWriterHook hook) {
-        insertAndWriteRow(x, y, dataList, heightInPoints, row -> row.setCellStyles(cellStyles), hook);
+        insertAndWriteRow(x, y, dataList, heightInPoints, row -> { if (cellStyles != null) row.setCellStyles(cellStyles);}, hook);
     }
 
     public void insertRows(int y, int n) {
         this.getActiveSheet().shiftRows(y - 1, activeSheet.getLastRowNum(), n, true, false);
+    }
+
+    public void removeRow(int y) {
+        removeRows(y, 1);
+    }
+
+    public void removeRows(int y, int n) {
+        Row row = getActiveSheet().getRow(y - 1);
+        removeRows(row, n);
+    }
+
+    private void removeRows(Row row, int n) {
+        int lastRowNum = activeSheet.getLastRowNum();
+        int rowNum = row.getRowNum();
+        if (rowNum >= 0 && rowNum < lastRowNum) {
+            activeSheet.shiftRows(rowNum + 1, lastRowNum, -1 * n);
+        }
+        if (rowNum == lastRowNum) {
+            if (row != null) {
+                activeSheet.removeRow(row);
+            }
+        }
+    }
+
+    public void createPicture(PathType pathType, String path, String extension, int col1, int row1, int col2, int row2) throws IOException {
+        BufferedImage bufferImg = ImageIO.read(pathType.read(path));
+
+        //先把读进来的图片放到一个ByteArrayOutputStream中，以便产生ByteArray
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+        ImageIO.write(bufferImg, extension, byteArrayOut);
+
+        //画图的顶级管理器，一个sheet只能获取一个（一定要注意这点）
+        XSSFDrawing patriarch = activeSheet.createDrawingPatriarch();
+        //anchor主要用于设置图片的属性
+        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0,  col1, row1, col2,  row2);
+        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
+        //插入图片
+        patriarch.createPicture(anchor, book.addPicture(byteArrayOut.toByteArray(),
+                ObjectUtils.defaultIfNull(PICTURE_TYPE_MAPPING.get(extension.toLowerCase()), XSSFWorkbook.PICTURE_TYPE_PNG)));
     }
 
     public void toFile(OutputStream os) throws IOException {
@@ -267,9 +328,31 @@ public class ExcelWriter {
                 Object[] rowData = dataList.get(i);
                 ExcelRow excelRow = new ExcelRow(x, y++, rowData);
                 consumer.accept(excelRow);
-                excelRow.setHeightInPoints(heightInPoints);
+                if (heightInPoints >= 0) {
+                    excelRow.setHeightInPoints(heightInPoints);
+                }
                 writeRow(excelRow, hook);
             }
+        }
+    }
+
+    public static enum PathType {
+        URL,
+        CLASS_PATH,
+        ABSOLUTE_PATH;
+
+        public InputStream read(String path) throws IOException {
+            if (this == URL) {
+                URL pictureURL = new URL(path);
+                return pictureURL.openStream();
+            } else if (this == CLASS_PATH) {
+                final ClassPathResource classPathResource = new ClassPathResource(path);
+                return classPathResource.getInputStream();
+            } else if (this == ABSOLUTE_PATH) {
+                return new FileInputStream(path);
+            }
+
+            return null;
         }
     }
 }
