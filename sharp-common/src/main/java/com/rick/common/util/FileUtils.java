@@ -82,15 +82,15 @@ public class FileUtils {
         } else if (fileName.equals("jar") || fileName.equals("var")
                 || fileName.equals("ear")) {
             contentType = "application/java-archive";
-        } else if (fileName.equals("doc")) {
+        } else if (fileName.equals("doc") || fileName.equals("docx")) {
             contentType = "application/msword";
         } else if (fileName.equals("pdf")) {
             contentType = "application/pdf";
         } else if (fileName.equals("rtf")) {
             contentType = "application/rtf";
-        } else if (fileName.equals("xls")) {
+        } else if (fileName.equals("xls") || fileName.equals("xlsx")) {
             contentType = "application/vnd.ms-excel";
-        } else if (fileName.equals("ppt")) {
+        } else if (fileName.equals("ppt") || fileName.equals("pptx")) {
             contentType = "application/vnd.ms-powerpoint";
         } else if (fileName.equals("7z")) {
             contentType = "application/x-7z-compressed";
