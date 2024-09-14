@@ -105,12 +105,9 @@ public class FormService {
         formCpnList = clone.getFormCpnList();
         propertyList = Lists.newArrayListWithExpectedSize(formCpnList.size());
 
-        Map<String, Object> valueMap = new HashMap<>();;
+        Map<String, Object> valueMap = null;
         Map<Long, FormCpnValue> formCpnValueMap = null;
         FormAdvice formAdvice = formAdviceMap.get(form.getFormAdviceName());
-        if (formAdvice != null) {
-            formAdvice.init(form, instanceId, valueMap);
-        }
 
         if (isInstanceForm) {
             if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
@@ -136,6 +133,14 @@ public class FormService {
                     formAdvice.beforeGetInstance(form, instanceId, valueMap);
                 }
             }
+        }
+
+        if (Objects.isNull(valueMap)) {
+            valueMap = new HashMap<>();
+        }
+
+        if (formAdvice != null) {
+            formAdvice.init(form, instanceId, valueMap);
         }
 
         for (FormCpn formCpn : formCpnList) {
@@ -180,6 +185,10 @@ public class FormService {
             if (formAdvice != null) {
                 formAdvice.afterGetInstance(form, instanceId, propertyList, valueMap);
             }
+        }
+
+        if (formAdvice != null) {
+            formAdvice.beforeReturn(form, instanceId, propertyList, valueMap);
         }
 
         return new FormBO(form, instanceId, propertyList, valueMap);

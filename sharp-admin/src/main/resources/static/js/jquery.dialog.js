@@ -31,7 +31,7 @@
             '            <div class="modal-body">\n' +
             '            </div>\n' +
             '            <div class="modal-footer">\n' +
-            '                <button class="btn btn-primary ok-show" id="{{okId}}"><i class="fa fa-cog"></i> {{ok.label}}</button>\n' +
+            '                <button class="btn btn-primary ok-show" id="{{okId}}"><i class="fa fa-save"></i> {{ok.label}}</button>\n' +
             '                <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fa fa-remove"></i> 关闭</button>\n' +
             '            </div>\n' +
             '        </div>\n' +

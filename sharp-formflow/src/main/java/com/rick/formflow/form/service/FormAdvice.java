@@ -22,19 +22,23 @@ public interface FormAdvice {
      */
     default void afterInstanceHandle(FormBO form, Long instanceId, Map<String, Object> values) {}
 
-    default void init(Form form, Long instanceId, Map<String, Object> values) {}
+    @Deprecated
+    default void init(Form form, Long instanceId, Map<String, Object> valueMap) {}
     /**
-     * 获取实例之前
+     * 获取实例之前, 这个方法不推荐使用，请使用 afterGetInstance 代替
      * @param instanceId
-     * @param values
+     * @param valueMap
      */
-    default void beforeGetInstance(Form form, Long instanceId, Map<String, Object> values) {}
+    @Deprecated
+    default void beforeGetInstance(Form form, Long instanceId, Map<String, Object> valueMap) {}
 
     /**
      * 获取实例之后
      * @param instanceId
      */
     default void afterGetInstance(Form form, Long instanceId, List<FormBO.Property> propertyList, Map<String, Object> valueMap) {}
+
+    default void beforeReturn(Form form, Long instanceId, List<FormBO.Property> propertyList, Map<String, Object> valueMap) {}
 
     /**
      * 删除实例之前
