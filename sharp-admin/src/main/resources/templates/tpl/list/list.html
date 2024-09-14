@@ -21,6 +21,7 @@
         /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
     </style>
 </head>
+[(${report.additionalInfo['link'] != null ? report.additionalInfo['link'] : ''})]
 <body class="app">
 <th:block th:replace="includes/base :: common_content(~{::div})">
     <div class="container-fluid">
@@ -317,8 +318,8 @@
         function batchDelete() {
             let selectedIds = []
             $('table > tbody td:nth-child(2) > input[type=checkbox]:checked').each(function () {
-                console.log($(this).prop("name"), '...')
-                selectedIds.push($(this).prop("name"))
+                console.log($(this).val(), '...')
+                selectedIds.push($(this).val())
             })
             if (!selectedIds.length) {
                 alert('请选择要删除的行！')
@@ -373,5 +374,6 @@
         /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
     </script>
 </th:block>
+[(${report.additionalInfo['script'] != null ? report.additionalInfo['script'] : ''})]
 </body>
 </html>

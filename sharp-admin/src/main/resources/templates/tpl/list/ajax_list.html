@@ -21,6 +21,7 @@
         /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
     </style>
 </head>
+[(${report.additionalInfo['link'] != null ? report.additionalInfo['link'] : ''})]
 <body class="app">
 <th:block th:replace="includes/base :: common_content(~{::div})">
     <div class="container-fluid">
@@ -356,5 +357,6 @@
         }
     </script>
 </th:block>
+[(${report.additionalInfo['script'] != null ? report.additionalInfo['script'] : ''})]
 </body>
 </html>
