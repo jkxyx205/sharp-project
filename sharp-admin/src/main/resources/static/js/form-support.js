@@ -86,13 +86,18 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
                 window[formDOM.getAttribute("name") + '_' + c.name + '_file_uploadConsumer'],
                 window[formDOM.getAttribute("name") + '_' + c.name + '_file_deleteConsumer'],
                 window[formDOM.getAttribute("name") + '_' + c.name + '_file_itemSupplier']
-                )
+            )
         })
     }
 
     formDOM.save = function (successCallback, beforeSave) {
         if (this.tagName === 'FORM' && !formDOM.valid()) {
             return
+        }
+
+        let $code = $(formDOM).find("#code");
+        if ($code.length !== 0) {
+            $code.val($code.val().toUpperCase())
         }
 
         let formData = $(formDOM).form2json({
@@ -102,6 +107,7 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
         formDOM.tables.forEach(c => {
             formData[c.name] = $('#' + c.name).editableTable('getValue')
         })
+
         beforeSave && beforeSave(formData)
         console.log("formData = ", formData)
 
@@ -126,6 +132,10 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
                         // setTimeout(() => {
                         //     window.location.reload()
                         // }, 1000)
+                    }
+
+                    if ($code.length !== 0) {
+                        $code.attr("disabled", true)
                     }
 
                     setTimeout(() => {
