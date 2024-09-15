@@ -92,7 +92,7 @@
                                     th:with="isRequired = ${c.validatorProperties.get('Required.required') eq null ? false : c.validatorProperties.get('Required.required')}">
                                     <label class="col-form-label" th:classappend="${isRequired ? 'required' : ''}" th:text="${c.label}"></label>
                                 </th>
-                                <th></th>
+                                <th class="operator-label"></th>
                             </tr>
                             </thead>
                             <tbody>
