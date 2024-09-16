@@ -7,7 +7,6 @@ import com.rick.fileupload.client.support.DocumentService;
 import com.rick.fileupload.core.support.FileMetaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -18,7 +17,7 @@ import java.util.List;
  * FastDFS文件上传功能
  */
 @RestController
-@RequestMapping("/documents")
+//@RequestMapping("/documents")
 @RequiredArgsConstructor
 public class DocumentController {
 
