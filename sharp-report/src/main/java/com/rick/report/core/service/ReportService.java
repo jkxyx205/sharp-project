@@ -55,9 +55,9 @@ public class ReportService {
 
     private final Map<String, ValueConverter> valueConverterMap;
 
-    private final  Map<String, ReportAdvice> reportAdviceMap;
+    private final Map<String, ReportAdvice> reportAdviceMap;
 
-    public static Map<Long, Report> reportCacheMap = new HashMap<>();
+    public static final Map<Long, Report> reportCacheMap = new HashMap<>();
 
     /**
      * 创建报表

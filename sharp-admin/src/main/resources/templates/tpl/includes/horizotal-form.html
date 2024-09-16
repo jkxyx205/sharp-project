@@ -25,6 +25,8 @@
                 <sp:option th:if="${p.configurer.datasource != null}" th:attr="key=${p.configurer.datasource},group=${(p.configurer.getAdditionalInfo == null || p.configurer.getAdditionalInfo().get('group') == null) ? null : 'group'}" th:value="${p.value}"/>
             </select>
 
+            <sp:select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).GROUP_SELECT}" th:id="${p.name}" class="form-control" th:name="${p.name}" th:attr="key=${p.configurer.datasource}" th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" group th:value="${p.value}"/>
+
             <sp:select th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).MULTIPLE_SELECT}" th:id="${p.name}" class="form-control" th:name="${p.name}" multiple th:attr="key=${p.configurer.datasource}" th:placeholder="${p.configurer.placeholder}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" hideDummyItemText/>
 
             <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).FILE}">

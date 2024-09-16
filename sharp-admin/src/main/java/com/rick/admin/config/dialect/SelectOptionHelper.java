@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.rick.db.service.SharpService;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
-import com.rick.meta.props.service.PropertyUtils;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.thymeleaf.model.IModel;
@@ -12,6 +11,7 @@ import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +27,8 @@ public class SelectOptionHelper {
     private DictService dictService;
 
     private SharpService sharpService;
+
+    private static final Map<String, List<Map<String, Object>>> groupDataMap = new HashMap<>();
 
     public void appendOptions(IModelFactory modelFactory, IModel model, IProcessableElementTag iProcessableElementTag, IElementTagStructureHandler iElementTagStructureHandler) {
         //  获取前端页面传递的属性
@@ -74,9 +76,13 @@ public class SelectOptionHelper {
     }
 
     private void initGroupOptions(IModelFactory modelFactory, IModel model, String key, String excludeValues, String selected) {
-        // 进行数据的查询 根据 key 查询
-        String querySql = PropertyUtils.getProperty(key);
-        List<Map<String, Object>> valueList = sharpService.query(querySql, null);
+        List<Map<String, Object>> valueList = groupDataMap.get(key);
+        if (valueList == null) {
+            // 进行数据的查询 根据 key 查询
+            String querySql =  dictService.getDictPropertyItemByType(key).getSql(); //PropertyUtils.getProperty(key);
+            valueList = sharpService.query(querySql, null);
+            groupDataMap.put(key, valueList);
+        }
 
         if (StringUtils.isNotBlank(excludeValues)) {
             List<String> excludeValueArr = Lists.newArrayList(excludeValues.split(","));
