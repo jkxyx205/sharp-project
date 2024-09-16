@@ -33,6 +33,11 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private static final String SELECT_SQL = "SELECT id, type, name, label, sort, remark FROM sys_dict WHERE type = :type ORDER BY sort";
 
+    @Override
+    public DictProperties.Item getDictPropertyItemByType(String type) {
+        return dictProperties.getItemByType(type);
+    }
+
     public Map<String, List<Dict>> getDictsByCodes(String... codes) {
         if (ArrayUtils.isNotEmpty(codes)) {
             return getDictsByCodes(Arrays.asList(codes));

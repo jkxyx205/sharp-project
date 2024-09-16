@@ -180,7 +180,7 @@ public abstract class AbstractSqlFormatter {
                     srcSql = ignoreAndReturnSQL(srcSql, h);
                 }
 			} else if("LIKE".equalsIgnoreCase(h.operator)) {
-				 srcSql = srcSql.replace(h.full, new StringBuilder("UPPER(").append(h.column).append(") ").append(h.operator).append(contactString(name)).append(" ").append(escapeString()));
+				 srcSql = srcSql.replaceAll("\\b" + h.full + "\\b", Matcher.quoteReplacement(new StringBuilder("UPPER(").append(h.column).append(") ").append(h.operator).append(contactString(name)).append(" ").append(escapeString()).toString()));
 				 formatMap.put(name, likeEscape(value + ""));
 			} else {
 				formatMap.put(name, value);

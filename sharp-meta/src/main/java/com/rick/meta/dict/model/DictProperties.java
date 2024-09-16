@@ -28,4 +28,9 @@ public class DictProperties {
 
         private List<String> list;
     }
+
+    public Item getItemByType(String type) {
+        return items.stream().filter(item -> item.getType().equals(type)).findFirst().get();
+    }
+
 }

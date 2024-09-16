@@ -2,6 +2,7 @@ package com.rick.meta.dict.service;
 
 
 import com.rick.meta.dict.entity.Dict;
+import com.rick.meta.dict.model.DictProperties;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.Optional;
  * @createdAt 2021-09-07 04:40:00
  */
 public interface DictService {
+
+    DictProperties.Item getDictPropertyItemByType(String type);
 
     Map<String, List<Dict>> getDictsByCodes(Collection<String> codes);
 
