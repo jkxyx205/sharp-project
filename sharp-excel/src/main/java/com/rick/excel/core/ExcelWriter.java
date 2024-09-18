@@ -9,6 +9,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.CellCopyPolicy;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Row;
@@ -192,6 +193,27 @@ public class ExcelWriter {
         XSSFCellStyle[] copyCellStyle = ExcelUtils.getSheetXSSFCellStyle(getActiveSheet(), y);
         Row row = activeSheet.getRow(y - 1);
         insertAndWriteRow(1, y, dataList, row.getHeightInPoints(), copyCellStyle, hook);
+    }
+
+    /**
+     * 数据从第一列（x = 1）开始写，复用插入行下面行(样式、公式、格式化)
+     * @param y
+     * @param dataList
+     * @param hook
+     */
+    public void insertAndWriteRowWithAfterRowStyle2(int y, List<Object[]> dataList, ExcelWriterHook hook) {
+        if (CollectionUtils.isNotEmpty(dataList)) {
+            Row row = getActiveSheet().getRow(y - 1);
+            insertRows(y, dataList.size());
+
+            for (int i = 0; i < dataList.size(); i++) {
+                getActiveSheet().copyRows(Arrays.asList(row), y - 1 + i, new CellCopyPolicy());
+
+                Object[] rowData = dataList.get(i);
+                ExcelRow excelRow = new ExcelRow(1, y + i, rowData);
+                writeRow(excelRow, hook);
+            }
+        }
     }
 
     public void insertAndWriteRow(int x, int y, List<Object[]> dataList, float heightInPoints, XSSFCellStyle cellStyle) {
