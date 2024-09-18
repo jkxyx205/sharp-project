@@ -2,6 +2,7 @@ package com.rick.meta.dict.convert;
 
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,7 +27,12 @@ public class DictConverter implements ValueConverter<String, Object> {
             return arrayDictConverter.convert(dictType, ((String)value));
         }
 
-        return dictService.getDictByTypeAndName(dictType, String.valueOf(value))
+        String stringValue = String.valueOf(value);
+        if (StringUtils.isBlank(stringValue)) {
+            return "";
+        }
+
+        return dictService.getDictByTypeAndName(dictType, stringValue)
                 .orElseThrow(() -> new IllegalArgumentException(dictType + " doesn't contain " + value)).getLabel();
     }
 }
