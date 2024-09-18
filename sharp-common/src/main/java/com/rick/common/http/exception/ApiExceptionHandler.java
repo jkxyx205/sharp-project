@@ -18,6 +18,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -72,6 +73,18 @@ public class ApiExceptionHandler {
         request.getRequestDispatcher("/error/index").forward(request, response);
         return null;
     }
+
+    /**
+     * 文件上传超过最大限制
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public Result maxUploadSizeExceededExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) throws IOException, ServletException {
+        return exceptionHandler(request, response, ex, 5001, "文件大小不能超出5M", null);
+    }
+
 
     /**
      * 未授权异常
@@ -134,7 +147,7 @@ public class ApiExceptionHandler {
             this.logStackTrace(ex);
         }
 
-        if (HttpServletRequestUtils.isAjaxRequest(request)) {
+        if (HttpServletRequestUtils.isAjaxRequest(request) || request.getRequestURI().equals("/documents/upload")) {
             return ResultUtils.fail(code, message, data);
         }
 

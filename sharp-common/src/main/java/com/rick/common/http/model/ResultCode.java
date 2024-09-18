@@ -19,8 +19,8 @@ public enum ResultCode {
     OK(200, "OK"),
     ARGUMENT_NOT_VALID(400, "参数验证失败"),
     ACCESS_FORBIDDEN_ERROR(403, "访问未授权"),
-    RESOURCE_NOT_EXISTS_ERROR(404, "资源不存在");
-
+    RESOURCE_NOT_EXISTS_ERROR(404, "资源不存在"),
+    UNPROCESSABLE_ENTITY_ERROR(422, "请求出现错误");
 
     private int code;
 

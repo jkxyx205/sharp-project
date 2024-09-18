@@ -44,7 +44,11 @@ FileUpload.prototype.ajaxFileUpload = function () {
             fileElementId: this.name, //文件上传域的ID
             dataType: 'json', //返回值类型 一般设置为json
             success: (data, status)=> { //服务器成功响应处理函数
-                this.appendAttachment(data.data, this.uploadConsumer, this.itemSupplier)
+                if (data.success) {
+                    this.appendAttachment(data.data, this.uploadConsumer, this.itemSupplier)
+                } else {
+                    toastr.error(data.message)
+                }
             },
             error: function (data, status, e) { //服务器响应失败处理函数
                 alert(e);
