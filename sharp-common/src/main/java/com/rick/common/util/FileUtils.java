@@ -232,7 +232,7 @@ public class FileUtils {
     public Boolean maximumSize(HttpServletRequest request, String name, int size) {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         long fileSize = multipartRequest.getFile(name).getSize();
-        if (size * 1024 * 1024 < fileSize) {
+        if (size * 1024 * 1024 <= fileSize) {
             return true;
         }
 
