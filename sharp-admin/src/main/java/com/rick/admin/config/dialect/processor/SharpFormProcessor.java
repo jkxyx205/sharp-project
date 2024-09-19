@@ -84,7 +84,7 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
 
         formBO.getForm().getAdditionalInfo().put(FormConstants.ADDITIONAL_SHOW_SAVE_FORM_BTN, HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_SHOW_BTN));
 
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>(attrMap);
         params.put("formBO", formBO);
         params.put("query", Params.builder(1)
                 .pv(FORM_READONLY, HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_READONLY))
