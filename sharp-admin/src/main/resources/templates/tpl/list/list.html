@@ -90,6 +90,7 @@
                                 <!--                                <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', [[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
                                 <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('编辑', [[${m[0]}]], [[${m[1]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
                                 <a href="javascript:;" th:onclick="deleteRow([[${m[0]}]])" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
+                                <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
                             </td>
                             <input type="hidden" th:each="v : ${grid.rows[mStat.index]}" th:if="${report.reportColumnList.get(vStat.index).hidden}" th:name="${report.reportColumnList.get(vStat.index).name}" th:value="${v}" />
                         </tr>
@@ -248,7 +249,7 @@
 
         let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
-        function gotoDetail(title, id, name) {
+        function gotoDetail(title, id, name, params) {
             if (form_id) {
                 if (readonly || !title) {
                     title = '查看'
@@ -260,7 +261,7 @@
 
                 let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
                 if (formAction === 'link') {
-                    openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, name || report.name);
+                    openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly + ((params ? ("&" + $.param(params)) : "")), name || report.name);
                 } else {
                     $.dialog({
                         title,

@@ -270,7 +270,7 @@
         let form_id =/*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
         let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
-        function gotoDetail(title, id, name) {
+        function gotoDetail(title, id, name, params) {
             if (form_id) {
                 if (readonly || !title) {
                     title = '查看'
@@ -282,7 +282,7 @@
 
                 let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
                 if (formAction === 'link') {
-                    openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly, name || report.name);
+                    openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly + ((params ? ("&" + $.param(params)) : "")), name || report.name);
                 } else {
                     $.dialog({
                         title,
