@@ -85,11 +85,16 @@ public class SharpFormProcessor extends AbstractElementTagProcessor {
         formBO.getForm().getAdditionalInfo().put(FormConstants.ADDITIONAL_SHOW_SAVE_FORM_BTN, HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_SHOW_BTN));
 
         Map<String, Object> params = new HashMap<>(attrMap);
-        params.put("formBO", formBO);
         params.put("query", Params.builder(1)
                 .pv(FORM_READONLY, HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_READONLY))
                 .build());
         params.put("reloadTab", attrMap.get(FORM_RELOAD_TAB));
+
+        if (formBO.getFormAdvice() != null) {
+            formBO = formBO.getFormAdvice().beforeRender(params, formBO);
+        }
+
+        params.put("formBO", formBO);
 
         String htmlContent = ThymeleafRenderHelper.renderByTemplateName(attrMap.get(FORM_PAGE), params);
         if (HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, FORM_HIDE_FORM_TAG)) {

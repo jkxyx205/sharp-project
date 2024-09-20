@@ -1,12 +1,11 @@
 package com.rick.admin.demo;
 
 import com.google.common.collect.Lists;
+import com.rick.admin.core.FormSupport;
 import com.rick.db.service.support.Params;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.cpn.core.Form;
-import com.rick.formflow.form.service.CpnConfigurerService;
-import com.rick.formflow.form.service.FormCpnService;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.valid.CustomizeRegex;
 import com.rick.formflow.form.valid.Length;
@@ -22,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Rick.Xu
@@ -35,19 +33,13 @@ public class FormTagTest {
     private ReportService reportService;
 
     @Autowired
-    private FormCpnService formCpnService;
-
-    @Autowired
-    private CpnConfigurerService cpnConfigurerService;
-
-    @Autowired
     private FormService formService;
+
+    @Autowired
+    private FormSupport formSupport;
 
     @Test
     public void testForm() {
-        // 设计控件
-        List<CpnConfigurer> cpnConfigurerList = createCpnConfigurerList();
-        cpnConfigurerService.saveOrUpdate(cpnConfigurerList);
         // 创建表
         Form form = formService.saveOrUpdate(Form.builder()
                 .code("sys_user_form_tag")
@@ -61,8 +53,13 @@ public class FormTagTest {
                 .repositoryName("userDAO")
                 .storageStrategy(Form.StorageStrategyEnum.CREATE_TABLE)
                 .build());
-        // 关联关系
-        formCpnService.saveOrUpdateByConfigIds(form.getId(), cpnConfigurerList.stream().map(CpnConfigurer::getId).collect(Collectors.toList()));
+
+        // 设计控件
+        List<CpnConfigurer> cpnConfigurerList = createCpnConfigurerList();
+
+        formSupport.bind(form.getId(), cpnConfigurerList);
+
+        System.out.println("form id = " + form.getId());
     }
 
     private List<CpnConfigurer> createCpnConfigurerList() {

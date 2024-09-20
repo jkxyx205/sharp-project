@@ -41,6 +41,16 @@ public interface FormAdvice {
     default void beforeReturn(Form form, Long instanceId, List<FormBO.Property> propertyList, Map<String, Object> valueMap) {}
 
     /**
+     * thymeleaf 渲染页面之前可以对数据进行处理
+     * @param parameterMap 参数
+     * @param formBO 获取的BO
+     * @return
+     */
+    default FormBO beforeRender(Map<String, ?> parameterMap, FormBO formBO) {
+        return formBO;
+    }
+
+    /**
      * 删除实例之前
      * @param instanceId
      */

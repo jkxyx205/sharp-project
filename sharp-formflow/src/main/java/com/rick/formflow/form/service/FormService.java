@@ -17,6 +17,7 @@ import com.rick.formflow.form.service.model.FormCache;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
@@ -92,7 +93,7 @@ public class FormService {
                 form.setAdditionalInfo(new HashMap<>());
             }
             formCpnList = formCpnDAO.listByFormId(formId);
-            configIdMap = cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
+            configIdMap = CollectionUtils.isEmpty(formCpnList) ? Collections.emptyMap() : cpnConfigurerDAO.selectByIdsAsMap(formCpnList.stream().map(fc -> fc.getConfigId()).collect(Collectors.toSet()));
             formCache = new FormCache(form, formCpnList, configIdMap);
 
             FormUtils.update(formId, formCache);
@@ -191,7 +192,7 @@ public class FormService {
             formAdvice.beforeReturn(form, instanceId, propertyList, valueMap);
         }
 
-        return new FormBO(form, instanceId, propertyList, valueMap);
+        return new FormBO(form, instanceId, propertyList, valueMap, formAdvice);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -313,5 +314,9 @@ public class FormService {
         }
 
         return 0;
+    }
+
+    public FormAdvice getFormAdviceByName(String formAdviceName) {
+        return formAdviceMap.get(formAdviceName);
     }
 }

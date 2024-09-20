@@ -6,8 +6,6 @@ import com.rick.db.service.support.Params;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.cpn.core.Form;
-import com.rick.formflow.form.service.CpnConfigurerService;
-import com.rick.formflow.form.service.FormCpnService;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.valid.CustomizeRegex;
 import com.rick.formflow.form.valid.Length;
@@ -29,7 +27,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,20 +41,13 @@ public class DictTest {
     private ReportService reportService;
 
     @Autowired
-    private FormCpnService formCpnService;
-
-    @Autowired
-    private CpnConfigurerService cpnConfigurerService;
-
-    @Autowired
     private FormService formService;
 
+    @Autowired
+    private FormSupport formSupport;
 
     @Test
     public void testForm() {
-        // 设计控件
-        List<CpnConfigurer> cpnConfigurerList = createCpnConfigurerList();
-        cpnConfigurerService.saveOrUpdate(cpnConfigurerList);
         // 创建表
         Form form = formService.saveOrUpdate(Form.builder()
                 .id(695312747063197696L)
@@ -70,8 +60,13 @@ public class DictTest {
                 .repositoryName("dictDAO")
                 .storageStrategy(Form.StorageStrategyEnum.CREATE_TABLE)
                 .build());
-        // 关联关系
-        formCpnService.saveOrUpdateByConfigIds(form.getId(), cpnConfigurerList.stream().map(CpnConfigurer::getId).collect(Collectors.toList()));
+
+        // 设计控件
+        List<CpnConfigurer> cpnConfigurerList = createCpnConfigurerList();
+
+        formSupport.bind(form.getId(), cpnConfigurerList);
+
+        System.out.println("form id = " + form.getId());
     }
 
     private List<CpnConfigurer> createCpnConfigurerList() {

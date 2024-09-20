@@ -2,6 +2,7 @@ package com.rick.formflow.form.service.bo;
 
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.Form;
+import com.rick.formflow.form.service.FormAdvice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,9 @@ public class FormBO {
 
     private List<Property> propertyList;
 
-    private  Map<String, Object> data;
+    private Map<String, Object> data;
+
+    private FormAdvice formAdvice;
 
     @AllArgsConstructor
     @Getter

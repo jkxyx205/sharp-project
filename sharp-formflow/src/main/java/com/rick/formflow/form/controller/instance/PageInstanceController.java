@@ -3,6 +3,7 @@ package com.rick.formflow.form.controller.instance;
 import com.google.common.collect.Maps;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.util.HtmlTagUtils;
+import com.rick.formflow.form.service.FormAdvice;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,8 @@ public class PageInstanceController {
 
     private final FormService formService;
 
+    private final Map<String, FormAdvice> formAdviceMap;
+
     /**
      * http://localhost:8080/form/487677232379494400/487684156282011648
      * @return
@@ -41,12 +44,18 @@ public class PageInstanceController {
     public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model, HttpServletRequest request) {
         FormBO formBO = formService.getFormBO(formId, instanceId);
         Map<String, String> parameterMap = HttpServletRequestUtils.getParameterStringMap(request);
+        // 这个是必须的字段，用于界面显示
+        HtmlTagUtils.isTagPropertyTrueAndPut(parameterMap, "readonly");
+
+        FormAdvice formAdvice = formAdviceMap.get(formBO.getForm().getFormAdviceName());
+
+        if (formAdvice != null) {
+            formBO = formAdvice.beforeRender(parameterMap, formBO);
+        }
+
         model.addAttribute("formBO", formBO);
         model.addAttribute("model", getDataModel(formBO.getPropertyList()));
         model.addAttribute("query", parameterMap);
-
-        // 这个是必须的字段，用于界面显示
-        HtmlTagUtils.isTagPropertyTrueAndPut(parameterMap, "readonly");
 
         return StringUtils.defaultString(formBO.getForm().getTplName(),"tpl/form/form");
     }
