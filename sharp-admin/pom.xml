@@ -6,7 +6,7 @@
 
     <groupId>com.rick.admin</groupId>
     <artifactId>sharp-admin</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>${sharp.version}</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -17,6 +17,7 @@
 
     <properties>
         <thymeleaf-extras-springsecurity5-version>3.0.4.RELEASE</thymeleaf-extras-springsecurity5-version>
+        <sharp.version>2.0-SNAPSHOT</sharp.version>
     </properties>
 
     <dependencies>
@@ -68,42 +69,42 @@
         <dependency>
             <groupId>com.rick.meta</groupId>
             <artifactId>sharp-meta</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick.db</groupId>
             <artifactId>sharp-database</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick.excel</groupId>
             <artifactId>sharp-excel</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick.fileupload</groupId>
             <artifactId>sharp-fileupload</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick.formflow</groupId>
             <artifactId>sharp-formflow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick.report</groupId>
             <artifactId>sharp-report</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick.mail</groupId>
             <artifactId>sharp-mail</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rick</groupId>
             <artifactId>sharp-generator</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>${sharp.version}</version>
         </dependency>
         <!-- sharp-component end -->
         <dependency>

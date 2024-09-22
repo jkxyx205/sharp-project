@@ -7,7 +7,7 @@
     <groupId>com.rick.common</groupId>
     <artifactId>sharp-common</artifactId>
     <packaging>jar</packaging>
-    <version>2.0-SNAPSHOT</version>
+    <version>${sharp.version}</version>
 
     <parent>
         <artifactId>sharp-dependencies</artifactId>
