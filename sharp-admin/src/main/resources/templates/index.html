@@ -224,6 +224,10 @@
     <script th:src="@{/plugins/jquery-validate/jquery.validate.min.js}"></script>
     <script th:src="@{/plugins/jquery-validate/jqurey.messages_zh.min.js}"></script>
     <script th:src="@{/plugins/axios.min.js}"></script>
+
+    <script th:src="@{/plugins/socket/sockjs.min.js}"></script>
+    <script th:src="@{/plugins/socket/stomp.min.js}"></script>
+
     <script th:src="@{/js/main.js}"></script>
     <script th:inline="javascript">
         var username = /*[[${session.user.code}]]*/
@@ -245,7 +249,30 @@
     </script>
 
     <script>
+        var socket
+        var stompClient
+        function connect() {
+            socket = new SockJS('/ws/message');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/user/queue/message', function (response) {
+                    console.log(JSON.parse(response.body).content);
+                });
+            });
+        }
+
+        function disconnect() { // 断开连接
+            if (socket && stompClient) {
+                console.log('...disconnect')
+                stompClient.disconnect();
+                socket.close()
+            }
+        }
+
         $(function() {
+            connect()
+
             // nthTabs.addTab({
             //     id: "student",
             //     title: '测试form-thymeleaf',
