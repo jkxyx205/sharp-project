@@ -22,10 +22,11 @@
                 // 处理日期时间: 约定优于配置
                 for(let key in params) {
                     if (key.endsWith("0")) {
-                        params[key] = (params[key] ? params[key] + " 00:00:00" :  params[key])
+                        params[key] = (params[key] && params[key].length == 10  ? params[key] + " 00:00:00" :  params[key])
                     } else if (key.endsWith("1")) {
-                        params[key] = (params[key] ? params[key] + " 23:59:59" :  params[key])
+                        params[key] = (params[key] && params[key].length == 10 ? params[key] + " 23:59:59" :  params[key])
                     }
+
                 }
                 search(params)
             })
