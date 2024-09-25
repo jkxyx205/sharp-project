@@ -135,7 +135,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         if (Objects.isNull(getIdValue(entity))) {
             return insert(entity);
         } else {
-            int count =  update(entity);
+            int count = update(entity);
             if (strategy == ASSIGN && count == 0) {
                 return insert(entity);
             }
@@ -147,8 +147,24 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int[] insertOrUpdate(Collection<T> entities) {
-        int[] updateCount = update(entities.stream().filter(t -> Objects.nonNull(getIdValue(t))).collect(Collectors.toList()));
+        List<T> updateList = entities.stream().filter(t -> Objects.nonNull(getIdValue(t))).collect(Collectors.toList());
+        int[] updateCount = update(updateList);
         int[] insertCount = insert(entities.stream().filter(t -> Objects.isNull(getIdValue(t))).collect(Collectors.toList()));
+
+        if (strategy == ASSIGN && updateCount.length > 0) {
+            Collection<T> insertList = new ArrayList<>();
+            for (int i = 0; i < updateCount.length; i++) {
+                if (updateCount[i] == 0) {
+                    insertList.add(updateList.get(i));
+                }
+
+                updateCount[i] = 1;
+            }
+
+            if (CollectionUtils.isNotEmpty(insertList)) {
+                insert(insertList);
+            }
+        }
 
         return ArrayUtils.addAll(insertCount, updateCount);
     }
@@ -257,7 +273,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     .usingGeneratedKeyColumns(idColumnName)
                     .executeAndReturnKey(mapParams);
             setPropertyValue(entity, tableMeta.getIdPropertyName(), idValueResolverFromNumber(id));
-
         } else {
             count = SQLUtils.insert(this.tableName, this.columnNames, params);
         }

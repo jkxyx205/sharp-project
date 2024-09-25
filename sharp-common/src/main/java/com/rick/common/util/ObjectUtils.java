@@ -13,6 +13,14 @@ import java.util.Map;
 @UtilityClass
 public class ObjectUtils {
 
+    public boolean mayPureObject(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        return mayPureObject(obj.getClass());
+    }
+
     public boolean mayPureObject(Class clazz) {
         if (clazz == null) {
             return false;
@@ -39,13 +47,5 @@ public class ObjectUtils {
         }
 
         return true;
-    }
-
-    public boolean mayPureObject(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        return mayPureObject(obj.getClass());
     }
 }
