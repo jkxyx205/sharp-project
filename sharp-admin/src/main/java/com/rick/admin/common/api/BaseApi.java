@@ -81,6 +81,13 @@ public class BaseApi<T extends BaseEntity, S extends BaseServiceImpl<? extends E
         return getEntityFromOptional(baseService.findById(id), id);
     }
 
+    @PutMapping("{id}")
+    public SimpleEntity update(@PathVariable Long id, @RequestBody T t) {
+        t.setId(id);
+        baseService.update(t);
+        return t;
+    }
+
     @PostMapping
     public SimpleEntity saveOrUpdate(@RequestBody T t) {
         baseService.saveOrUpdate(t);

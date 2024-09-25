@@ -82,6 +82,21 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
         return this.formPage;
     }
 
+//    @PostMapping
+//    @ResponseBody
+//    public Result save(@RequestBody E e) {
+//        baseService.save(e);
+//        return ResultUtils.success(e);
+//    }
+
+    @PutMapping("{id}")
+    @ResponseBody
+    public Result update(@PathVariable Long id, @RequestBody E e) {
+        e.setId(id);
+        baseService.update(e);
+        return ResultUtils.success(e);
+    }
+
     @PostMapping
     @ResponseBody
     public Result saveOrUpdate(@RequestBody E e) {
