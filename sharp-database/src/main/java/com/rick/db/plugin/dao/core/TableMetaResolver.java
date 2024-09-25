@@ -217,9 +217,15 @@ class TableMetaResolver {
         } else if (BaseEntityWithStringId.class.isAssignableFrom(clazz) || BaseCodeEntityWithStringId.class.isAssignableFrom(clazz)) {
             return String.class;
         } else {
-            Class<?>[] classGenericsTypes = ClassUtils.getClassGenericsTypes(clazz);
-            if (classGenericsTypes != null) {
-                return classGenericsTypes[0];
+            Class<?>[] classGenericsTypes;
+            Class<?> curClazz = clazz;
+
+            while (curClazz != Object.class) {
+                classGenericsTypes = ClassUtils.getClassGenericsTypes(curClazz);
+                if (classGenericsTypes != null) {
+                    return classGenericsTypes[0];
+                }
+                curClazz = curClazz.getSuperclass();
             }
 
             try {
