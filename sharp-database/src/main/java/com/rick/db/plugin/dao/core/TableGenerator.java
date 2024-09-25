@@ -109,7 +109,6 @@ public class TableGenerator {
         createManyToManyTable(tableMeta.getManyToManyAnnotationList());
 
         jdbcTemplate.execute(createTableSql.toString());
-        log.info(createTableSql.toString());
         tableNameCreatedContainer.get().add(tableMeta.getTableName());
     }
 
@@ -166,11 +165,13 @@ public class TableGenerator {
             return "date";
         } else if (type == LocalTime.class) {
             return "time";
-        } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type) || ObjectUtils.mayPureObject(type)) {
+        } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type)) {
 //            return "text";
             return "json";
         } else if (BaseEntityUtils.isEntityClass(type)) {
             return "bigint";
+        } else if (ObjectUtils.mayPureObject(type)) {
+            return "json";
         }
 
         return "varchar(32)";
