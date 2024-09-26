@@ -70,6 +70,11 @@ public class DemoController {
         return "demos/dict";
     }
 
+    @GetMapping("code-input")
+    public String codeInput(Model model) {
+        return "demos/code-input";
+    }
+
     @GetMapping("complex_models")
     @ResponseBody
     public Result getData() {

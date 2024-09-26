@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../../../static/coreui/css/style.min.css">
+	<link rel="stylesheet" type="text/css" href="code-input.css">
+	<title>code input demp</title>
+</head>
+<body>
+	<div class="container">
+		<div class="row mt-3">
+			<div class="col-12 col-sm-6">
+				<div id="material-code">
+					<div>
+						<input class="form-control code-input" type="text" autocomplete="off">
+					</div>
+					<div class="code-input-table">
+						<table>
+							<thead class="code-input-table-fixed-head">
+								<tr>
+									<th>物料</th>
+									<th>描述</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr data-id="1" data-code="00010001000100010001000100010001" data-description="物料组1">
+									<td>00010001000100010001000100010001</td>
+									<td>物料组1</td>
+								</tr>
+								<tr data-id="2" data-code="0002" data-description="物料组2">
+									<td>0002</td>
+									<td>物料组2</td>
+								</tr>
+								<tr data-id="3" data-code="0003" data-description="物料组3">
+									<td>0003</td>
+									<td>物料组3</td>
+								</tr>
+								<tr data-id="4" data-code="00010001000100010001000100010001" data-description="物料组1">
+									<td>00010001000100010001000100010001</td>
+									<td>物料组1</td>
+								</tr>
+								<tr data-id="5" data-code="0005" data-description="物料组2">
+									<td>0005</td>
+									<td>物料组2</td>
+								</tr>
+								<tr data-id="6" data-code="0006" data-description="物料组3">
+									<td>0006</td>
+									<td>物料组3</td>
+								</tr>
+								<tr data-id="9" data-code="0009" data-description="物料组1">
+									<td>0009</td>
+									<td>物料组1</td>
+								</tr>
+								<tr data-id="7" data-code="0007" data-description="物料组2">
+									<td>0007</td>
+									<td>物料组2</td>
+								</tr>
+								<tr data-id="8" data-code="0008" data-description="物料组3">
+									<td>0008</td>
+									<td>物料组3</td>
+								</tr>
+
+							</tbody>
+						</table>
+						<div class="code-input-table-empty">暂无数据</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-12"><button class="form-control mt-3" id="btn-submit">提交</button></div>
+		</div>
+	</div>
+	<script src="./code-input.min.js"></script>
+
+	<script type="text/javascript">
+		let materialCodeInput = new CodeInput({
+			id: 'material-code',
+			data: [],
+			input: "code", // 显示的字段 description,
+			search: 'code, description',
+			// value: '0002',
+			// value: {
+			// 	id: "2",
+			// 	code: "0002",
+			// }
+		})
+
+		document.getElementById("btn-submit").addEventListener('click', () => {
+			console.log('value = ', materialCodeInput.getValue())
+		})
+	</script>
+</body>
+</html>

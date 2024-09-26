@@ -2,6 +2,7 @@ package com.rick.admin.config.dialect;
 
 import com.google.common.collect.Sets;
 import com.rick.admin.config.dialect.processor.*;
+import com.rick.admin.module.codeinput.service.CodeInputService;
 import com.rick.db.service.SharpService;
 import com.rick.formflow.form.service.FormService;
 import com.rick.meta.dict.service.DictService;
@@ -30,11 +31,14 @@ public class CustomizeProcessorDialectDialect extends AbstractProcessorDialect {
 
     private final FormService formService;
 
-    public CustomizeProcessorDialectDialect(DictService dictService, SharpService sharpService, FormService formService) {
+    private final CodeInputService codeInputService;
+
+    public CustomizeProcessorDialectDialect(DictService dictService, SharpService sharpService, FormService formService, CodeInputService codeInputService) {
         super(DIALECT_NAME, DIALECT_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE);
         this.dictService = dictService;
         this.sharpService = sharpService;
         this.formService = formService;
+        this.codeInputService = codeInputService;
     }
 
     @Override
@@ -47,6 +51,7 @@ public class CustomizeProcessorDialectDialect extends AbstractProcessorDialect {
         processors.add(new SharpFormProcessor(DIALECT_PREFIX, formService));
         processors.add(new FileUploadProcessor(DIALECT_PREFIX));
         processors.add(new DataAttributeTagProcessor(DIALECT_PREFIX));
+        processors.add(new CodeInputProcessor(DIALECT_PREFIX, codeInputService));
         return processors;
     }
 }

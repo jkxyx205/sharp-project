@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sp="http://www.w3.org/1999/html">
+<head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
+    <link rel="stylesheet" th:href="@{/css/tab-common.css}">
+    <link rel="stylesheet" th:href="@{/plugins/code-input/code-input.css}">
+    <style>
+
+    </style>
+</head>
+<body class="app">
+<th:block th:replace="includes/base :: common_content(~{::div})">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">测试 code input</div>
+            <div class="card-body row">
+                <div class="col-6">
+                    <div id="material-code">
+                        <div>
+                            <input class="form-control code-input" type="text" autocomplete="off">
+                        </div>
+                        <div class="code-input-table">
+                            <table class="table table-responsive-sm">
+                                <thead class="code-input-table-fixed-head">
+                                <tr>
+                                    <th>物料</th>
+                                    <th>描述</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr data-id="1" data-code="00010001000100010001000100010001" data-description="物料组1">
+                                    <td>00010001000100010001000100010001</td>
+                                    <td>物料组1</td>
+                                </tr>
+                                <tr data-id="2" data-code="0002" data-description="物料组2">
+                                    <td>0002</td>
+                                    <td>物料组2</td>
+                                </tr>
+                                <tr data-id="3" data-code="0003" data-description="物料组3">
+                                    <td>0003</td>
+                                    <td>物料组3</td>
+                                </tr>
+                                <tr data-id="4" data-code="00010001000100010001000100010001" data-description="物料组1">
+                                    <td>00010001000100010001000100010001</td>
+                                    <td>物料组1</td>
+                                </tr>
+                                <tr data-id="5" data-code="0005" data-description="物料组2">
+                                    <td>0005</td>
+                                    <td>物料组2</td>
+                                </tr>
+                                <tr data-id="6" data-code="0006" data-description="物料组3">
+                                    <td>0006</td>
+                                    <td>物料组3</td>
+                                </tr>
+                                <tr data-id="9" data-code="0009" data-description="物料组1">
+                                    <td>0009</td>
+                                    <td>物料组1</td>
+                                </tr>
+                                <tr data-id="7" data-code="0007" data-description="物料组2">
+                                    <td>0007</td>
+                                    <td>物料组2</td>
+                                </tr>
+                                <tr data-id="8" data-code="0008" data-description="物料组3">
+                                    <td>0008</td>
+                                    <td>物料组3</td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+                            <div class="code-input-table-empty">暂无数据</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <button class="form-control" id="btn-submit">提交</button>
+                </div>
+
+                <div class="col-12">&nbsp;</div>
+
+                <div class="col-6">
+                    <sp:code-input id="user-code" key="users" hide-header="false" />
+                </div>
+                <div class="col-6">
+                    <button class="form-control" id="btn-submit2">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="includes/base :: common_js(~{::script})">
+    <script th:src="@{/plugins/code-input/code-input.min.js}"></script>
+    <script>
+        let materialCodeInput = new CodeInput({
+            id: 'material-code',
+            input: "code", // 显示的字段 description,
+            search: 'code, description',
+            // value: '0002',
+            // value: {
+            // 	id: "2",
+            // 	code: "0002",
+            // }
+        })
+
+        document.getElementById("btn-submit").addEventListener('click', () => {
+            console.log('value = ', materialCodeInput.getValue())
+        })
+
+        let userCodeInput = new CodeInput({
+            id: 'user-code',
+            input: "code", // 显示的字段 description,
+            search: 'code, name',
+            value: 'admin',
+            // value: {
+            // 	id: "2",
+            // 	code: "0002",
+            // }
+        })
+
+        document.getElementById("btn-submit2").addEventListener('click', () => {
+            console.log('value = ', userCodeInput.getValue())
+        })
+    </script>
+</th:block>
+</body>
+</html>
