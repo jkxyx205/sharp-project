@@ -30,6 +30,10 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
 
     private static final String PROP_HIDE_HEADER = "hide-header";
 
+    private static final String PROP_REMOTE = "remote";
+
+    private static final String PROP_SHOW_REPORT = "show-report";
+
     private static final String PROP_ID = "id";
 
     private static final String PROP_KEY = "key";
@@ -69,28 +73,37 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
         Map<String, String> attrMap = iProcessableElementTag.getAttributeMap();
         String key = attrMap.get(PROP_KEY);
         String id = attrMap.get(PROP_ID);
+        boolean remote = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_REMOTE);
+        boolean showReport = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_SHOW_REPORT);
 
-        Map<String, Object> dataMap = codeInputService.codeSearchResult(key, null, null);
-        List<Map> columnProperties = (List<Map>) dataMap.get("columnProperties");
+        Map<String, Object> dataMap;
+        StringBuilder attrBuilder;
+        if (remote) {
+            dataMap = codeInputService.codeSearchResult(key);
+            attrBuilder = new StringBuilder();
+        } else {
+            dataMap = codeInputService.codeSearchResult(key, null, null);
+            List<Map> columnProperties = (List<Map>) dataMap.get("columnProperties");
 
-        StringBuilder attrBuilder = new StringBuilder(" th:attr=\"");
-        for (Map columnProperty : columnProperties) {
-            String name = (String) columnProperty.get("name");
+            attrBuilder = new StringBuilder(" th:attr=\"");
+            for (Map columnProperty : columnProperties) {
+                String name = (String) columnProperty.get("name");
+                // data-id=${d.id}, data-code=${d.code}, data-name=${d.name}
+                attrBuilder.append("data-"+name+"=${d."+name+"}").append(",");
+            }
 
-            // data-id=${d.id}, data-code=${d.code}, data-name=${d.name}
-            attrBuilder.append("data-"+name+"=${d."+name+"}").append(",");
+            attrBuilder = attrBuilder.deleteCharAt(attrBuilder.length() - 1);
+            attrBuilder.append("\"");
         }
-
-        attrBuilder = attrBuilder.deleteCharAt(attrBuilder.length() - 1);
-        attrBuilder.append("\"");
 
         // language=HTML
         String template = "<div id=\""+id+"\">\n" +
-                "    <div>\n" +
+                "    <div class=\"code-input-container\">\n" +
                 "        <input class=\"form-control code-input\" type=\"text\" autocomplete=\"off\">\n" +
+                "        "+(showReport ? "<i class=\"fa fa-list\"></i>\n" : "") +
                 "    </div>\n" +
                 "    <div class=\"code-input-table\">\n" +
-                "        <table class='table table-responsive-sm' style='margin-bottom: 0'>\n" +
+                "        <table class='table table-responsive-sm'>\n" +
                 "            <thead class=\"code-input-table-fixed-head\" th:if=\"${!hideHeader}\">\n" +
                 "            <tr>\n" +
                 "                <th th:each=\"prop : ${columnProperties}\" th:if=\"${prop.name != 'id'}\" th:text=\"${prop.label}\" th:data-name=\"${prop.name}\"></th>\n" +

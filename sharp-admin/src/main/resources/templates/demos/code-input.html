@@ -15,7 +15,7 @@
             <div class="card-body row">
                 <div class="col-6">
                     <div id="material-code">
-                        <div>
+                        <div class="code-input-container">
                             <input class="form-control code-input" type="text" autocomplete="off">
                         </div>
                         <div class="code-input-table">
@@ -82,11 +82,37 @@
                 <div class="col-6">
                     <button class="form-control" id="btn-submit2">提交</button>
                 </div>
+
+
+                <div class="col-12">&nbsp;</div>
+
+                <div class="col-6">
+                    <sp:code-input id="user-remote-code" key="users" hide-header="false" remote/>
+                </div>
+                <div class="col-6">
+                    <button class="form-control" id="btn-submit3">提交</button>
+                </div>
+
+                <div class="col-12">&nbsp;</div>
+
+                <div class="col-6">
+                    <sp:code-input id="user-remote-code2" key="users" hide-header remote show-report/>
+                </div>
+                <div class="col-6">
+                    <button class="form-control" id="btn-submit4">提交</button>
+                </div>
             </div>
         </div>
     </div>
 </th:block>
 <th:block th:replace="includes/base :: common_js(~{::script})">
+    <script src="../../../coreui/vendors/jquery/js/jquery.min.js"></script>
+    <script src="../../../coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
+
+    <script src="../../../js/jquery.dialog.js"></script>
+    <script src="../../../js/jquery.dialog-reportpicker.js"></script>
+
     <script th:src="@{/plugins/code-input/code-input.min.js}"></script>
     <script>
         let materialCodeInput = new CodeInput({
@@ -117,6 +143,40 @@
 
         document.getElementById("btn-submit2").addEventListener('click', () => {
             console.log('value = ', userCodeInput.getValue())
+        })
+
+        let userRemoteCodeInput = new CodeInput({
+            id: 'user-remote-code',
+            input: "code", // 显示的字段 description,
+            // search: 'code, name', // 通过 sql 的 where 控制
+            method: 'remote',
+            value: 'admin',
+            // value: {
+            // 	id: "2",
+            // 	code: "0002",
+            // }
+        })
+
+        document.getElementById("btn-submit3").addEventListener('click', () => {
+            console.log('value = ', userRemoteCodeInput.getValue())
+        })
+
+
+        let userRemoteDialogCodeInput = new CodeInput({
+            id: 'user-remote-code2',
+            input: "name", // 显示的字段 name,
+            // search: 'code, name', // 通过 sql 的 where 控制
+            method: 'remote',
+            value: 'admin',
+            reportId: "786015805669142528", // 显示 search help
+            // value: {
+            // 	id: "2",
+            // 	code: "0002",
+            // }
+        })
+
+        document.getElementById("btn-submit4").addEventListener('click', () => {
+            console.log('value = ', userRemoteDialogCodeInput.getValue())
         })
     </script>
 </th:block>

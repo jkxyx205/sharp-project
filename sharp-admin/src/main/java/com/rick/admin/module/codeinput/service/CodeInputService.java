@@ -26,7 +26,7 @@ public class CodeInputService {
 
     {
         // 用户信息
-        String unitSql = "select id, code, name from sys_user where code like :code and name like :name";
+        String unitSql = "select id, code, name from sys_user where code like :code OR name like :code";
         SQL_MAPPING.put("users",
                 new CodeInputService.CodeInputContext(Arrays.asList("id", "编号", "姓名"), Arrays.asList("id", "code", "name"),
                         unitSql)
@@ -37,8 +37,27 @@ public class CodeInputService {
         );
     }
 
+    /**
+     * 获取 columnProperties 信息
+     * @param key
+     * @return
+     */
+    public Map<String, Object> codeSearchResult(String key) {
+        CodeInputService.CodeInputContext context = SQL_MAPPING.get(key);
+        List<Map<String, Object>> list = Collections.emptyList();
+        return Params.builder(2)
+                .pv("columnProperties", handlerData(context, list))
+                .pv("data", list)
+                .build();
+    }
+
     public Map<String, Object> codeSearchResult(String key, String code, Map<String, Object> params) {
         CodeInputService.CodeInputContext context = SQL_MAPPING.get(key);
+
+        if (Objects.nonNull(code)) {
+            code = code.trim();
+        }
+
         if (Objects.isNull(context)) {
             throw new ResourceNotFoundException(key);
         }
@@ -67,7 +86,6 @@ public class CodeInputService {
         }
 
         Grid<Map<String, Object>> grid = GridUtils.list(context.sql, params);
-
         List<Map<String, Object>> columnProperties = handlerData(context, grid.getRows());
 
         return Params.builder(2)
