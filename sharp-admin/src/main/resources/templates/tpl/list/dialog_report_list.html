@@ -19,7 +19,8 @@
 
         @media screen and (min-width: 576px) {
             .card-body-scroll-panel, .table-fixed-container {
-                max-height: calc(100vh - 152px);
+                margin-bottom: 8px;
+                max-height: calc(100vh - 208px);
             }
         }
 
@@ -32,9 +33,13 @@
             display: none;
         }
 
-        table tr.active {
+        .dialog-report-list-table table tr.active {
             background: #20a8d8!important;
             color: #fff;
+        }
+
+        .dialog-report-list-table table {
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -78,7 +83,7 @@
         <div class="card" style="margin-bottom: 0;">
             <div class="card-body" style="padding-bottom: 0">
                 <div th:id="${reportDomId}">
-                    <ajax-table :grid="grid" :display-page="displayPage" class="report-list-table" row-key="id" @refresh="refresh"
+                    <ajax-table :grid="grid" :display-page="displayPage" class="dialog-report-list-table" row-key="id" @refresh="refresh"
                                 :fixed-head="true"
                                 @page-change="pageChange"
                                 @sort-column="sortColumn"
@@ -88,16 +93,18 @@
                         <table-column
                                 type="index"
                                 label="序号"
-                                width="40">
+                                width="40"
+                                category="column">
                         </table-column>
                         <table-column
                                 type="checkbox"
                                 class="text-center"
                                 label="<input type=checkbox>"
                                 align="center"
-                                width="40" th:if="${'multiple' eq params['mode']}">
+                                width="40" th:if="${'multiple' eq params['mode']}"
+                                category="column">
                         </table-column>
-                        <table-column th:each="n : ${report.reportColumnList}" th:if="${!n.hidden}" th:attr="prop=${n.name}, label=${n.label}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
+                        <table-column th:each="n : ${report.reportColumnList}" th:attr="prop=${n.name}, label=${n.label}, category=${n.hidden ? 'hidden': 'column'}, ':sortable'=${n.sortable}, ':tooltip'=${n.tooltip}, width=${n.columnWidth == null? 'auto': n. columnWidth}, align=${n.align.name().toLowerCase()}">
                         </table-column>
                     </ajax-table>
                 </div>

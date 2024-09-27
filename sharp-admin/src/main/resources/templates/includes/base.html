@@ -103,6 +103,18 @@
         }
         /*验证样式结束*/
 
+        .container-search-dialog.modal-lg {
+            max-width: 800px!important;
+        }
+
+        .container-search-dialog.modal-lg iframe {
+            height: 560px;
+        }
+
+        .container-search-dialog .modal-body {
+            padding: 0!important;
+        }
+
         @media screen and (max-width: 768px) {
             .hidden-sm {
                 display: none;
@@ -486,18 +498,27 @@
 
             $.ajaxSetup({
                 beforeSend: function (xhr) {
-                    let url = arguments[1].url.replace(/\?.*/, "")
+                    const pathname = arguments[1].url.replace(/\?.*/, "")
+                    let showLoading = true
+                    if (/\.(css|js|jpg)$/i.test(pathname)) {
+                        return false
+                    }
+
+                    if (pathname.startsWith('/code-input')) {
+                        showLoading = false
+                    }
 
                     let ignoreLoadingOverlay = ['/password/check'] // 禁止加载loading
-
                     let len = ignoreLoadingOverlay.length;
-
                     for (let i = 0; i < len; i++) {
-                        if(url === ignoreLoadingOverlay[i] || /\.(css|js|jpg)$/i.test(url)) {
-                            return false
+                        if(pathname === ignoreLoadingOverlay[i]) {
+                            showLoading = false
+                            break
                         }
                     }
-                    $.LoadingOverlay("show");
+                    if (showLoading) {
+                        $.LoadingOverlay("show");
+                    }
                 },
                 error: function (xhr, status, error) {
                     if (xhr.status === 400) {
