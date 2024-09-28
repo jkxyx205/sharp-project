@@ -2,7 +2,7 @@
 
 	function select2(parent, options) {
 		this.options = options
-		this.valueElement = parent.firstChild
+		this.valueElement = parent.firstElementChild
 		this.inputElement = this.valueElement.nextElementSibling
 		this.select2 = this.valueElement.parentNode
 		this.itemsContainer = this.select2.querySelector('.items')

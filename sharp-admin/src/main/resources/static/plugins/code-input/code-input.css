@@ -27,7 +27,8 @@
 	margin-bottom: 0
 }
 
-.code-input-table table tbody tr:hover {
+.code-input-table table tbody tr:hover,
+.code-input-table table tbody tr.active {
 	background: #20A8D8;
 	color: #fff;
 	cursor: pointer;
