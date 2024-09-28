@@ -150,10 +150,10 @@
             input: "code", // 显示的字段 description,
             // search: 'code, name', // 通过 sql 的 where 控制
             method: 'remote',
-            value: 'admin',
             // value: {
-            // 	id: "2",
-            // 	code: "0002",
+            //     id: "1",
+            //     code: "admin",
+            //     name: "管理员",
             // }
         })
 
@@ -167,12 +167,12 @@
             input: "name", // 显示的字段 name,
             // search: 'code, name', // 通过 sql 的 where 控制
             method: 'remote',
-            value: 'admin',
             reportId: "786015805669142528", // 显示 search help
-            // value: {
-            // 	id: "2",
-            // 	code: "0002",
-            // }
+            value: {
+            	id: "1",
+            	code: "admin",
+                name: "管理员",
+            }
         })
 
         document.getElementById("btn-submit4").addEventListener('click', () => {

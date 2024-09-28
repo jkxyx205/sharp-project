@@ -80,12 +80,6 @@
                 }
             })
 
-            // 初始化值
-            let hasData = this.options.value != undefined && this.options.value.length > 0
-            if (hasData) {
-                this.appendValue(this.options.value)
-            }
-
             // 固定表头
             this.$element.table({fixedHead: true})
 
@@ -158,6 +152,12 @@
             }
 
             this.options.afterCreated && this.options.afterCreated()
+
+            // 初始化值
+            let hasData = this.options.value != undefined && this.options.value.length > 0
+            if (hasData) {
+                this.appendValue(this.options.value)
+            }
         },
         getEditRow: function () {
             return this.$table.find('input[name=id][value]').parent()
@@ -181,7 +181,7 @@
         },
         getValue: function() {
             let valueList = []
-            this.$table.find('tbody tr:not(:last-child)').each((index, elem) => {
+            this.$table.find('> tbody > tr:not(:last-child)').each((index, elem) => {
                 valueList.push(this._getValue($(elem)))
             })
 
@@ -290,6 +290,12 @@
                 }
 
                 let columnConfig = _this.nameColumnConfigsMap[this.name]
+
+                if (columnConfig && columnConfig.setRowValue) {
+                    columnConfig.setRowValue(this, $tr, row, ignoreUndefined)
+                    return;
+                }
+
                 if (columnConfig && columnConfig.valueFormat) {
                     row[this.name] = columnConfig.valueFormat(row, row[this.name])
                 }
@@ -325,10 +331,17 @@
             })
         },
         _getValue: function ($tr) {
+            let _this = this
             let value = {}
             $tr.find(':input').each(function () {
                 let name = $(this).attr('name')
                 if (name) {
+                    let columnConfig = _this.nameColumnConfigsMap[name]
+                    if (columnConfig && columnConfig.getValue) {
+                        value[name] = columnConfig.getValue(this, $tr)
+                        return
+                    }
+
                     if ($(this).attr('type') === 'switch') {
                         value[name] = $(this).prop('checked')
                     } else if ($(this).attr('type') === 'checkbox') {
