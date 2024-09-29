@@ -38,6 +38,8 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
 
     private static final String PROP_KEY = "key";
 
+    private static final String PROP_REQUIRED = "required";
+
     private final CodeInputService codeInputService;
 
 
@@ -75,6 +77,7 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
         String id = attrMap.get(PROP_ID);
         boolean remote = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_REMOTE);
         boolean showReport = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_SHOW_REPORT);
+        boolean required = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_REQUIRED);
 
         Map<String, Object> dataMap;
         StringBuilder attrBuilder;
@@ -99,7 +102,7 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
         // language=HTML
         String template = "<div id=\""+id+"\">\n" +
                 "    <div class=\"code-input-container\">\n" +
-                "        <input class=\"form-control code-input\" type=\"text\" autocomplete=\"off\">\n" +
+                "        <input class=\"form-control code-input\" type=\"text\" autocomplete=\"off\""+(required ? " required" : "")+">\n" +
                 "        "+(showReport ? "<i class=\"fa fa-list\"></i>\n" : "") +
                 "    </div>\n" +
                 "    <div class=\"code-input-table\">\n" +
