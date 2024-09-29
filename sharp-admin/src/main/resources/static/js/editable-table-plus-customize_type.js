@@ -1,6 +1,59 @@
 // https://segmentfault.com/a/1190000015975240
 ;(function () {
     let customizeType = {
+        'code-input': {
+            mounted: function (columnConfig) {
+                columnConfig.setRowValue = function(input, $tr, row, ignoreUndefined) {
+                    if (row[input.name]) {
+                        // input.value = row[input.name][$(input).parents('td')[0].input]
+                        // for(let p in row[input.name]) {
+                        //     input.dataset[p] = row[input.name][p]
+                        // }
+
+                        $(input).parents('td')[0].codeInput.setValue(row[input.name])
+                    }
+                }
+
+                columnConfig.getValue = function (input, $tr) {
+                    // return input.dataset['id']
+                    return $(input).parents('td')[0].codeInput.getValue()
+                }
+            },
+            formatTr: function ($td, columnConfig, editableTable) {
+                let id = 'id-' + new Date().getTime() + '-' + $td.parent().index()
+                $td.html('<div id="' + id + '">\n' +
+                    '    <div class="code-input-container">\n' +
+                    '        <input class="form-control code-input" type="text" autocomplete="off" name="'+columnConfig.name+'">\n' +
+                    '       '+(columnConfig.reportId ? '<i class="fa fa-list"></i>' : '')+'\n' +
+                    '    </div>\n' +
+                    '    <div class="code-input-table">\n' +
+                    '        <table class="table table-responsive-sm">\n' +
+                    '            \n' +
+                    '            <tbody>\n' +
+                    '            \n' +
+                    '            </tbody>\n' +
+                    '        </table>\n' +
+                    '        <div class="code-input-table-empty">暂无数据</div>\n' +
+                    '    </div>\n' +
+                    '</div>')
+                $td[0].input = columnConfig.input || "code" // 显示的字段 code,
+                $td[0].codeInput = new CodeInput({
+                    id: id,
+                    input: "code", // 显示的字段 description,
+                    // search: 'code, name', // 通过 sql 的 where 控制
+                    method: 'remote',
+                    input: $td[0].input,
+                    remoteKey: columnConfig.remoteKey,
+                    reportId: columnConfig.reportId,
+                    // value: {
+                    //     id: "1",
+                    //     code: "admin",
+                    //     name: "管理员",
+                    // }
+                })
+
+            }
+        },
         'user': {
             formatTr: function ($td, columnConfig, editableTable) {
                 columnConfig = $.extend({}, columnConfig, {
@@ -119,6 +172,3 @@
 
     window.customizeType = customizeType
 })()
-
-
-

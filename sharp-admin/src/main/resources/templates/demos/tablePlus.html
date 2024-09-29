@@ -6,6 +6,7 @@
     <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
     <link rel="stylesheet" th:href="@{/css/edit-table.css}">
+    <link rel="stylesheet" th:href="@{/plugins/code-input/code-input.css}">
     <style>
         .report-dialog.modal-lg {
             max-width: 800px!important;
@@ -31,9 +32,6 @@
     </div>
 </th:block>
 <th:block th:replace="includes/base :: common_js(~{::script})">
-    <script src="../../../coreui/vendors/jquery/js/jquery.min.js"></script>
-    <script src="../../../coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
-
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
     <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
 
@@ -41,6 +39,7 @@
     <script src="../../../js/jquery.dialog-reportpicker.js"></script>
     <script src="../../../js/jquery.dialog-input-reportpicker.js"></script>
 
+    <script th:src="@{/plugins/code-input/code-input.min.js}"></script>
 
     <script th:src="@{/editable-table/editable-table.js}"></script>
     <script th:src="@{/js/jquery.table.js}"></script>
@@ -48,7 +47,6 @@
     <script th:src="@{/js/editable-table-plus-customize_type.js}"></script>
 
     <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
-
     <script>
         let value = [{
             id: '1',
@@ -60,6 +58,11 @@
             quantity: '99',
             deliveryDate: '2024-02-29',
             purchaseSend: '1',
+            operator: {
+                id: "1",
+                code: "admin",
+                name: "管理员",
+            },
             remark: '主要包装'
         }]
 
@@ -149,6 +152,14 @@
                     name: "purchaseSend",
                     width: 80,
                     title: "采购直发"
+                },
+                {
+                    type: "code-input",
+                    title: "操作人",
+                    name: "operator",
+                    input: "name", // 显示 code or name
+                    remoteKey: "users",
+                    reportId: "786015805669142528",
                 },
                 {
                     type: "text",
