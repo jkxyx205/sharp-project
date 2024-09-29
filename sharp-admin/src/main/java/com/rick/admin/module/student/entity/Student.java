@@ -10,7 +10,9 @@ import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
 import com.rick.db.dto.type.BaseCodeEntityWithLongId;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Embedded;
+import com.rick.db.plugin.dao.annotation.Sql;
 import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.plugin.model.IdCodeValue;
 import com.rick.fileupload.client.support.Document;
 import com.rick.meta.config.validator.DictValueCheck;
 import com.rick.meta.dict.model.DictType;
@@ -102,6 +104,18 @@ public class Student extends BaseCodeEntityWithLongId {
     @Column(comment = "简介")
     String remark;
 
+
+    // 数据库增加字段 user_id, 前端提交数据 operatorId = 1
+//    @Embedded(columnPrefix="user_")
+//    @JsonAlias("operatorId")
+//    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
+//    @Sql(value = "select id, code, name as description from sys_user where id = :id ", params="id@operator.id", nullWhenParamsIsNull="id")
+//    IdValue operator;
+
+    // 数据库增加字段 user_id user_code 前端提交数据 operator { id: "1", code: "ADMIN"}
+    @Embedded(columnPrefix="user_")
+    @Sql(value = "select id, code, name as description from sys_user where id = :id ", params="id@operator.id", nullWhenParamsIsNull="id")
+    IdCodeValue operator;
 
 //    /**
 //     * 可以前台获取 this.form.unitCode = data.unit ? data.unit.code : ''

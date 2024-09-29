@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sp="http://www.w3.org/1999/html">
 <head th:replace="includes/base :: common_header(~{},~{::link},~{::style})">
     <link rel="stylesheet" th:href="@{/css/tab-common.css}">
     <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/code-input/code-input.css}">
     <style>
 
     </style>
@@ -126,6 +127,14 @@
                         <div class="col-4"><textarea class="form-control" id="remark" name="remark" th:text="${student.remark}" required></textarea></div>
                     </div>
                     <div class="form-group row">
+                        <label class="col-1 col-form-label required" for="operatorId">操作人</label>
+                        <div class="col-4" style="position: relative;">
+                            <sp:code-input id="operatorId" key="users" hide-header remote show-report required/>
+                            <label style="position: absolute; left: 100%; top: 6px; white-space: nowrap;" id="operatorName"></label>
+                        </div>
+
+                    </div>
+                    <div class="form-group row">
                         <label class="col-1 col-form-label required" for="available">状态</label>
                         <div class="col-4">
                             <label class="switch switch-pill switch-primary">
@@ -152,6 +161,10 @@
 
     <script th:src="@{/ajaxfileupload.js}"></script>
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
+
+    <script th:src="@{/js/jquery.dialog.js}"></script>
+    <script th:src="@{/js/jquery.dialog-reportpicker.js}"></script>
+    <script th:src="@{/plugins/code-input/code-input.min.js}"></script>
     <script th:inline="javascript">
         let hasAuthority = false
         /*[# sec:authorize="${hasAuthority('student_edit') or hasAuthority('student_delete') }"]*/
@@ -207,9 +220,29 @@
                 formDOM.validElse($('[name=gender]:checked').length > 0, document.getElementById('gender')) &
                 formDOM.validElse($('#materialTypeList').multipleSelect('getSelects').length > 0, document.getElementById('materialTypeList').nextSibling) &
                 formDOM.validElse($('#category').multipleSelect('getSelects').length > 0 && $('#category').multipleSelect('getSelects')[0] != '', document.getElementById('category').nextSibling) &
-                formDOM.validElse(form_attachments_file.getAttachments().length > 0, document.getElementById('btn-file'))
+                formDOM.validElse(form_attachments_file.getAttachments().length > 0, document.getElementById('btn-file')) &
+                userRemoteDialogCodeInput.valid()
             return valid
         });
+
+        let operatorNameDOM = document.getElementById("operatorName")
+        let userRemoteDialogCodeInput = new CodeInput({
+            id: 'operatorId',
+            input: "code", // 显示的字段 name,
+            // search: 'code, name', // 通过 sql 的 where 控制
+            method: 'remote',
+            remoteKey: "users",
+            reportId: "786015805669142528", // 显示 search help
+            blur: function(value) {
+                operatorNameDOM.textContent = value.name
+            },
+            afterSetValue: function(value) {
+                console.log('afterSetValue: ', value)
+                operatorNameDOM.textContent = value.name
+            },
+            value: originalFormData.operator
+        })
+        operatorNameDOM.textContent = originalFormData.operator.description
 
         // file uploadConsumer callback
         function form_attachments_file_uploadConsumer(attachments) {
@@ -245,6 +278,9 @@
             formDOM.save(null, formData => {
                 // 添加其他的参数
 
+                // code input
+                formData.operator = userRemoteDialogCodeInput.getValue()
+                // formData.operatorId = userRemoteDialogCodeInput.getValue().id
                 // 多选
                 formData.materialTypeList = $('#materialTypeList').multipleSelect('getSelects')
                 // 文件
