@@ -11,12 +11,15 @@
 }
 
 .code-input-table {
-	position: absolute;
+	/*	position: absolute;*/
+	position: fixed;
 	z-index: 999;
 	display: none;
-	width: 100%;
-	max-height: 200px;
 	margin-top: 2px;
+	max-height: 200px;
+	/*	width: 100%;*/
+	width: max-content;
+	max-width: 200px;
 	background: #ffffff;
 	border: 1px solid #c8ced3;
 	overflow: auto;

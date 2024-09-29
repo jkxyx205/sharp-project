@@ -36,3 +36,12 @@
 .table-editor input:focus {
     background: #fcf0a8;
 }
+
+.table-editor .code-input-table table th,
+.table-editor .code-input-table table td {
+    padding: 4px;
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: none;
+    border-right: none;
+}
