@@ -57,3 +57,11 @@
 
 .code-input-table table thead.code-input-table-fixed-head {
 }
+
+.code-input-container .form-control.is-invalid {
+	border-color: #f86c6b!important;
+}
+
+.code-input-container .form-control.is-invalid:focus {
+	box-shadow: 0 0 0 0.2rem rgba(248, 108, 107, 0.25)!important;
+}
