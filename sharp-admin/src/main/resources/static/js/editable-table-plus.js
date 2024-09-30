@@ -83,10 +83,6 @@
             // 固定表头
             this.$element.table({fixedHead: true})
 
-            if (!this.options.readonly || hasData) {
-                $('.tr-empty.non-data').remove()
-            }
-
             this.readonly(this.options.readonly)
 
             // 注册事件
@@ -155,6 +151,10 @@
 
             // 初始化值
             let hasData = this.options.value != undefined && this.options.value.length > 0
+            if (!this.options.readonly || hasData) {
+                $('.tr-empty.non-data').remove()
+            }
+
             if (hasData) {
                 this.appendValue(this.options.value)
             }
@@ -163,7 +163,7 @@
             return this.$table.find('input[name=id][value]').parent()
         },
         getTrByIndex(index) {
-            return this.$table.find('tbody tr:not(:last-child):eq('+index+')')
+            return this.$table.find('> tbody > tr:not(:last-child):eq('+index+')')
         },
         getValueByIndex(index) {
             let $tr = this.getTrByIndex(index);
@@ -177,7 +177,7 @@
             return this._getValue($tr)
         },
         getAllTr: function () {
-            return this.$table.find('tbody tr:not(:last-child)')
+            return this.$table.find('> tbody > tr:not(:last-child)')
         },
         getValue: function() {
             let valueList = []
@@ -214,14 +214,14 @@
             this.options.activeIndex = index
             // highlight
             if (this.options.highlight) {
-                this.$table.find('tbody tr:nth-child('+this.options.activeIndex+')')
+                this.$table.find('> tbody > tr:nth-child('+this.options.activeIndex+')')
                     .css('border-left', '4px solid #20a8d8')
                     .siblings().css('border-left', 'none')
             }
         },
         getActiveRowValue: function () {
             if (this.options.activeIndex) {
-                let $tr =  this.$table.find('tbody tr:nth-child('+this.options.activeIndex+')')
+                let $tr =  this.$table.find('> tbody > tr:nth-child('+this.options.activeIndex+')')
                 return {
                     activeIndex: this.options.activeIndex,
                     $tr,
@@ -233,7 +233,7 @@
         },
         each: function (callback, withOutLastTr) {
             withOutLastTr = (withOutLastTr === undefined) ? true : withOutLastTr;
-            this.$table.find('tbody tr' + (withOutLastTr ? ':not(:last-child)' : '')).each((index, elem) => {
+            this.$table.find('> tbody > tr' + (withOutLastTr ? ':not(:last-child)' : '')).each((index, elem) => {
                 callback(index, this, $(elem), this._getValue($(elem)))
             })
         },
@@ -246,7 +246,7 @@
                 this.$element.find('thead th:last-child').show()
                 // readonly 由 true => false, 根据 _formatTr 重新设置 readonly 和 disabled
                 let _this = this
-                this.$table.find('tbody tr').each(function() {
+                this.$table.find('> tbody > tr').each(function() {
                     _this._consumeUnHiddenColumnConfig((childIndex, columnConfig) => {
                         let $input = $(this).find('td:nth-child('+childIndex+') :input')
 
@@ -260,23 +260,23 @@
         edit_only: function () {
             // 不能删除 和 添加行，只能编辑单元格
             this.$element.find('thead th:last-child').hide()
-            if (this.$table.find('tbody tr').length > 1) {
-                this.$table.find('tbody tr:not(:last-child) .operator, tbody tr:last-child').hide()
+            if (this.$table.find('> tbody > tr').length > 1) {
+                this.$table.find('> tbody > tr:not(:last-child) .operator, > tbody > tr:last-child').hide()
             }
         },
         getColumnConfigs: function () {
             return this.options.columnConfigs
         },
         clear: function () {
-            if (this.$table.find('tbody tr').length > 1) {
-                this.$table.find('tbody tr:not(:last-child)').remove()
+            if (this.$table.find('> tbody > tr').length > 1) {
+                this.$table.find('> tbody > tr:not(:last-child)').remove()
                 this._rebuildIndex()
             }
         },
         appendValue: function (value) {
             for (let row of value) {
                 this.$table.editableTable('addEmptyLine')
-                let $tr = this.$table.find("tbody tr:last-child").prev()
+                let $tr = this.$table.find("> tbody > tr:last-child").prev()
                 this._setRowValue($tr, row)
             }
         },
@@ -528,14 +528,14 @@
             // 设置行号
             if (this.options.showRowNumber) {
                 let editableTableIndex = 1;
-                this.$table.find('tbody tr').each(function () {
+                this.$table.find('> tbody > tr').each(function () {
                     $(this).find('td:nth-child(1)').text(editableTableIndex++).addClass('row-number')
                 })
             }
         },
         _setRequired: function () {
             // 倒数第二行 设置 required
-            let $tr = this.$table.find('tbody tr:last-child')
+            let $tr = this.$table.find('> tbody > tr:last-child')
             let $requiredTr = $tr.prev()
             if ($requiredTr.length == 0) {
                 $requiredTr = $tr
