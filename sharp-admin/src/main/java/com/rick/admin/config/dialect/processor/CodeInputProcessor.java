@@ -3,6 +3,7 @@ package com.rick.admin.config.dialect.processor;
 import com.rick.admin.common.util.ThymeleafRenderHelper;
 import com.rick.admin.module.codeinput.service.CodeInputService;
 import com.rick.common.util.HtmlTagUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
@@ -34,7 +35,9 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
 
     private static final String PROP_SHOW_REPORT = "show-report";
 
-    private static final String PROP_ID = "id";
+    private static final String PROP_CONTAINER_ID = "container-id";
+
+    private static final String PROP_NAME = "name";
 
     private static final String PROP_KEY = "key";
 
@@ -74,7 +77,8 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
     protected void doProcess(ITemplateContext iTemplateContext, IProcessableElementTag iProcessableElementTag, IElementTagStructureHandler iElementTagStructureHandler) {
         Map<String, String> attrMap = iProcessableElementTag.getAttributeMap();
         String key = attrMap.get(PROP_KEY);
-        String id = attrMap.get(PROP_ID);
+        String containerId = attrMap.get(PROP_CONTAINER_ID);
+        String inputName = attrMap.get(PROP_NAME);
         boolean remote = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_REMOTE);
         boolean showReport = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_SHOW_REPORT);
         boolean required = HtmlTagUtils.isTagPropertyTrueAndPut(attrMap, PROP_REQUIRED);
@@ -100,9 +104,9 @@ public class CodeInputProcessor extends AbstractElementTagProcessor {
         }
 
         // language=HTML
-        String template = "<div id=\""+id+"\">\n" +
+        String template = "<div id=\""+containerId+"\">\n" +
                 "    <div class=\"code-input-container\">\n" +
-                "        <input class=\"form-control code-input\" type=\"text\" autocomplete=\"off\""+(required ? " required" : "")+">\n" +
+                "        <input class=\"form-control code-input\""+(StringUtils.isNotBlank(inputName) ? " id=\"" + inputName + "\"": "")+""+(StringUtils.isNotBlank(inputName) ? " name=\"" + inputName + "\"": "")+" type=\"text\" autocomplete=\"off\""+(required ? " required" : "")+">\n" +
                 "        "+(showReport ? "<i class=\"fa fa-list\"></i>\n" : "") +
                 "    </div>\n" +
                 "    <div class=\"code-input-table\">\n" +

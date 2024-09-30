@@ -23,7 +23,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="name">姓名</label>
-                        <div class="col-4 col-form-label"><input class="form-control" type="text" id="name" name="name" required th:value="${student.name}"></div>
+                        <div class="col-4"><input class="form-control" type="text" id="name" name="name" required th:value="${student.name}"></div>
                     </div>
                     <div class="form-group row">
                         <label class="col-1 col-form-label required">gender</label>
@@ -127,9 +127,9 @@
                         <div class="col-4"><textarea class="form-control" id="remark" name="remark" th:text="${student.remark}" required></textarea></div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-1 col-form-label required" for="operatorId">操作人</label>
+                        <label class="col-1 col-form-label required" for="operatorCode">操作人</label>
                         <div class="col-4" style="position: relative;">
-                            <sp:code-input id="operatorId" key="users" hide-header remote show-report required/>
+                            <sp:code-input container-id="operator-container" name="operatorCode" key="users" hide-header remote show-report required/>
                             <label style="position: absolute; left: 100%; top: 6px; white-space: nowrap;" id="operatorName"></label>
                         </div>
 
@@ -227,8 +227,8 @@
 
         let operatorNameDOM = document.getElementById("operatorName")
         let userRemoteDialogCodeInput = new CodeInput({
-            id: 'operatorId',
-            input: "code", // 显示的字段 name,
+            id: 'operator-container',
+            input: "code", // 显示的字段 name 显示姓名,
             // search: 'code, name', // 通过 sql 的 where 控制
             method: 'remote',
             remoteKey: "users",
