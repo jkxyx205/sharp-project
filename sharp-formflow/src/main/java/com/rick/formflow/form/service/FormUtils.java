@@ -15,11 +15,11 @@ public class FormUtils {
 
     public static Map<Long, FormCache> formCacheMap = new HashMap<>();
 
-    FormCache getFormCacheById(Long id) {
+    public FormCache getFormCacheById(Long id) {
         return formCacheMap.get(id);
     }
 
-    void update(Long id, FormCache formCache) {
+    public void update(Long id, FormCache formCache) {
         formCacheMap.put(id, formCache);
     }
 
