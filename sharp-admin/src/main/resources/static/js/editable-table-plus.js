@@ -274,11 +274,15 @@
             }
         },
         appendValue: function (value) {
+            let trArr = []
             for (let row of value) {
                 this.$table.editableTable('addEmptyLine')
-                let $tr = this.$table.find("> tbody > tr:last-child").prev()
+                let $tr = this.$table.find("tbody tr:last-child").prev()
+                trArr.push($tr)
                 this._setRowValue($tr, row)
             }
+
+            return trArr
         },
         _setRowValue:function ($tr, row, ignoreUndefined) {
             ignoreUndefined = (ignoreUndefined === undefined) ? false : ignoreUndefined
