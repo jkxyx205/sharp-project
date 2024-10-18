@@ -19,4 +19,6 @@ public @interface ManyToMany {
     String referenceColumnName();
 
     String columnDefinition();
+
+    String sortColumnName() default "";
 }

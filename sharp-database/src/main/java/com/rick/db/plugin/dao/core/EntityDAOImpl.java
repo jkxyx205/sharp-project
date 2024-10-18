@@ -1265,8 +1265,9 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
             EntityDAO referenceTableDAO = EntityDAOManager.tableNameEntityDAOMap.get(referenceTable);
 
-            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value) AND is_deleted = 0",
-                    columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition
+            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value) AND is_deleted = 0%s",
+                    columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition,
+                    StringUtils.isNotBlank(manyToManyProperty.getManyToMany().sortColumnName()) ? " ORDER BY "+manyToManyProperty.getManyToMany().sortColumnName()+" ASC" : ""
             ), Params.builder(1).pv("value", columnIds).build());
 
             Collection<Long> refIds = Lists.newArrayList();
@@ -1420,9 +1421,31 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             // 更新中间表
+            ID idValue = getIdValue(t);
+
             SQLUtils.updateRefTable(referenceTable,
                     manyToManyProperty.getManyToMany().columnDefinition(), manyToManyProperty.getManyToMany().referenceColumnName(),
-                    getIdValue(t), refIdsValue);
+                    idValue, refIdsValue);
+
+            // 更新顺序
+            if (StringUtils.isNotBlank(manyToManyProperty.getManyToMany().sortColumnName()) && refIdsValue.size() > 0) {
+                // 手动拼装 SQL
+//                String updateSQL = String.format("update %s set %s = ? where %s = ? and %s = ?"
+//                        , referenceTable
+//                        , manyToManyProperty.getManyToMany().sortColumnName()
+//                        , manyToManyProperty.getManyToMany().columnDefinition()
+//                        ,manyToManyProperty.getManyToMany().referenceColumnName());
+                List<Object[]> paramsList = new ArrayList<>(refIdsValue.size());
+//
+                for (int i = 0; i < refIdsValue.size(); i++) {
+                    paramsList.add(new Object[] {i, idValue, refIdsValue.get(i)});
+                }
+//
+//                sharpService.getNamedJdbcTemplate().getJdbcTemplate().batchUpdate(updateSQL, paramsList);
+
+                SQLUtils.update(referenceTable, manyToManyProperty.getManyToMany().sortColumnName(), paramsList
+                , String.format("%s = ? and %s = ?", manyToManyProperty.getManyToMany().columnDefinition(), manyToManyProperty.getManyToMany().referenceColumnName()));
+            }
         }
     }
 
