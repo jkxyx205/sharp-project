@@ -1206,7 +1206,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 subEntityRefParentEntity(t, subTableEntityDAO.getEntityClass(), oneToManyProperty.getOneToMany().reversePropertyName(), (Collection<?>) data);
             }
 
-            // 级别联删除
+            // 级联删除
             if (CascadeSelectThreadLocalValue.getOneToManyConsumer() != null) {
                 CascadeSelectThreadLocalValue.getOneToManyConsumer().accept(oneToManyProperty, subTableEntityDAO, refIds);
             }
