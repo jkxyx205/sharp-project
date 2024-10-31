@@ -59,4 +59,29 @@ public class ExcelUtils {
         return cellStyle;
     }
 
+    public int[] getCoordinateByLocation(String location) {
+        char[] chars = location.toCharArray();
+        int x = 0;
+        int y = 0;
+        int numberIndex = 0;
+        for (int i = chars.length - 1; i >= 0; i--) {
+            char c = chars[i];
+            int number;
+            if (c >= 65 && c <= 90) {
+                number = c - 64;
+                x += number * Math.pow(26, numberIndex - i - 1);
+            } else if (c >= 97 && c <= 122) {
+                number = c - 96;
+                x += number * Math.pow(26, numberIndex - i - 1);
+            } else {
+                // 数字
+                number = c - 48;
+                y += number * Math.pow(10, chars.length - i - 1);
+                numberIndex = i;
+            }
+        }
+
+        return new int[]{x, y};
+    }
+
 }
