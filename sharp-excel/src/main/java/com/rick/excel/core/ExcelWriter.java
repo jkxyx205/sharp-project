@@ -70,6 +70,19 @@ public class ExcelWriter {
         this.activeSheet = book.getSheetAt(0);
     }
 
+    public void setActiveSheet(int index) {
+        this.activeSheet= book.getSheetAt(index);
+    }
+
+    public void cloneSheetAndActive(int sheetNum) {
+        cloneSheetAndActive(sheetNum, null);
+    }
+
+    public void cloneSheetAndActive(int sheetNum, String sheetName) {
+        this.activeSheet = book.cloneSheet(sheetNum, sheetName);
+        sheetList.add(this.activeSheet);
+    }
+
     public void createSheetAndActive(String sheetName) {
         this.activeSheet = createSheet(sheetName);
         sheetList.add(this.activeSheet);
