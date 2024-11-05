@@ -57,6 +57,12 @@ public interface FormAdvice {
     default void beforeDeleteInstance(Long instanceId) {}
 
     /**
+     * 删除实例之后
+     * @param instanceId
+     */
+    default void afterDeleteInstance(Long instanceId) {}
+
+    /**
      * 客户端实现, 执行完成后返回true，终止 form 的insertOrUpdate
      */
     default boolean insertOrUpdate(Map<String, Object> values) {return false;}

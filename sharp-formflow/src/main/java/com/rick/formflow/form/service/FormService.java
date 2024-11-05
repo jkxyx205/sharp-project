@@ -291,6 +291,7 @@ public class FormService {
         return 1;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int delete(Long formId, Long instanceId) {
         Form form =  formDAO.selectById(formId).get();
 
@@ -299,21 +300,26 @@ public class FormService {
             formAdvice.beforeDeleteInstance(instanceId);
         }
 
+        int affectRow = 0;
         if (form.getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE) {
-            return formCpnValueDAO.deleteByInstanceId(instanceId);
+            affectRow = formCpnValueDAO.deleteByInstanceId(instanceId);
         } else if (form.getStorageStrategy() == Form.StorageStrategyEnum.CREATE_TABLE) {
             if (StringUtils.isNotBlank(form.getRepositoryName())) {
                 EntityDAO entityDAO = applicationContext.getBean(form.getRepositoryName(), EntityDAO.class);
 
                 if (BaseEntityUtils.isEntityClass(entityDAO.getEntityClass())) {
-                    return entityDAO.deleteLogicallyById(instanceId);
+                    affectRow = entityDAO.deleteLogicallyById(instanceId);
+                } else {
+                    affectRow = entityDAO.deleteById(instanceId);
                 }
-
-                return entityDAO.deleteById(instanceId);
             }
         }
 
-        return 0;
+        if (formAdvice != null) {
+            formAdvice.afterDeleteInstance(instanceId);
+        }
+
+        return affectRow;
     }
 
     public FormAdvice getFormAdviceByName(String formAdviceName) {
