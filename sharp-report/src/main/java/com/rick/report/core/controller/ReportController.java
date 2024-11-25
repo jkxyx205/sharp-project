@@ -123,7 +123,7 @@ public class ReportController {
         model.addAttribute("grid", grid);
         model.addAttribute("id", id);
         model.addAttribute("params", params);
-        model.addAttribute("pageInfo", PaginationHelper.limitPages(grid.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : grid.getPageSize(), grid.getPage()));
+        model.addAttribute("pageInfo", PaginationHelper.limitPages(grid.getTotalPages(), HttpRequestDeviceUtils.isMobileDevice(request) ? 5 : 15, grid.getPage()));
         return StringUtils.defaultString(reportDTO.getReport().getTplName(), "list");
     }
 
