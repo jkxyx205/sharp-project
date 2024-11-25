@@ -56,7 +56,7 @@ public final class StringUtils {
      * @param str
      * @return
      */
-    public static final boolean isChinese(String str) {
+    public static boolean isChinese(String str) {
         String regEx = "[\\u4e00-\\u9fa5]+";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
@@ -187,5 +187,13 @@ public final class StringUtils {
         }
 
         return false;
+    }
+
+    public static String setMethodName(String propertyName) {
+       return  "set" + String.valueOf(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1);
+    }
+
+    public static String getMethodName(String propertyName) {
+        return  "get" + String.valueOf(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1);
     }
 }
