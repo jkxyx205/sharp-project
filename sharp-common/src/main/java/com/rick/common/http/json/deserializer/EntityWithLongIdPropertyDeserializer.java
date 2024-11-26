@@ -67,7 +67,7 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
     private T invokeSetIdMethod(Long id, Class<?> clazz) {
         try {
             Object o = clazz.newInstance();
-            ReflectionUtils.invokeMethod(clazz.getMethod("setId", Long.class), o, id);
+            ReflectionUtils.invokeMethod(clazz.getMethod("setId", clazz.getMethod("getId").getReturnType()), o, id);
             return (T) o;
         } catch (Exception e) {
             e.printStackTrace();
