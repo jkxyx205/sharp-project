@@ -26,6 +26,12 @@ public @interface OneToMany {
 
     boolean cascadeDelete() default true;
 
+    /**
+     * 删除是否执行逻辑删除，默认是非逻辑删除
+     * @return
+     */
+    boolean cascadeDeleteLogically() default false;
+
     String joinValue();
 
     boolean oneToOne() default false;
