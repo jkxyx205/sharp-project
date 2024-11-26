@@ -27,10 +27,10 @@ public @interface OneToMany {
     boolean cascadeDelete() default true;
 
     /**
-     * 删除是否执行逻辑删除，默认是非逻辑删除
+     * 删除是否执行逻辑删除，默认是逻辑删除
      * @return
      */
-    boolean cascadeDeleteLogically() default false;
+    boolean cascadeDeleteLogically() default true;
 
     String joinValue();
 
