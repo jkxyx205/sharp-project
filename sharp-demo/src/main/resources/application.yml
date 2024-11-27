@@ -1,5 +1,6 @@
 spring:
   profiles:
+#    active: sqlite
 #    active: postgress
     active: mysql
 

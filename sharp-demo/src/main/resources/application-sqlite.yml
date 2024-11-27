@@ -1,0 +1,45 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 50MB
+  datasource:
+    url: jdbc:sqlite:/Users/rick/sample.db
+  mail:  # SMTP 发邮件
+    host: smtp.qiye.aliyun.com
+    port: 25
+    username: xxx
+    password: xxx
+    default-encoding: UTF-8
+    imap: # IMAP 收邮件
+      host: imap.qiye.aliyun.com
+      port: 143
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+logging:
+  level:
+    com.rick.demo: DEBUG
+    com.rick.db: DEBUG
+
+sharp:
+  database:
+    type: "sqlite"
+    select-cache: false
+    init-database-meta-data: true
+    entity-base-package: com.rick.demo.module.**.entity
+
+fileupload:
+  tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
+  local: # cd /Users/rick/Space/tmp/fileupload && http-server -p 7892
+    root-path: /Users/rick/Space/tmp/fileupload
+    server-url: http://localhost:7892/ # 映射到tmp目录
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKeyId: xxx
+    accessKeySecret: xxx
+    bucketName: sharp-fileupload
+
