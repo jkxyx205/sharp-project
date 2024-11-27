@@ -29,7 +29,7 @@ public class ContactPerson {
     @Column("contact_phone")
     private String phone;
 
-    @OneToMany(subTable = "t_company_vendor", joinValue = "company_id", cascadeInsertOrUpdate = true, reversePropertyName = "companyId")
+    @OneToMany(subTable = "t_company_vendor", joinValue = "company_id", cascadeInsertOrUpdate = true, reversePropertyName = "companyId", cascadeDeleteLogically = false)
     private List<Vendor> vendorList;
 
     @ManyToOne(value = "role_id", parentTable = "t_role", cascadeInsertOrUpdate = true)
