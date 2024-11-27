@@ -6,11 +6,9 @@ import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import com.rick.db.util.OptionalUtils;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.util.Assert;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,6 +45,9 @@ public final class IdDescriptionUtils {
     }
 
     public static Optional<IdCodeValue> queryIdCodeValue(Long id, String table, String idColumnName, String codeColumnName, String descriptionColumnName) {
+        if (Objects.isNull(id)) {
+            return Optional.empty();
+        }
         return OptionalUtils.expectedAsOptional(queryIdCodeValue(Arrays.asList(id), table, idColumnName, codeColumnName, descriptionColumnName));
     }
 
@@ -60,6 +61,7 @@ public final class IdDescriptionUtils {
      * @return
      */
     public static List<IdCodeValue> queryIdCodeValue(List<Long> ids, String table, String idColumnName, String codeColumnName, String descriptionColumnName) {
+        Assert.notEmpty(ids, "ids cannot be empty");
         String sql = "SELECT "+idColumnName+" as id, "+codeColumnName+" as code, "+descriptionColumnName+" as description FROM "+table+" WHERE "+idColumnName+" IN (:ids)";
         return sharpService.query(sql, Params.builder(1).pv("ids", ids).build(), IdCodeValue.class);
     }
@@ -78,10 +80,15 @@ public final class IdDescriptionUtils {
     }
 
     public static Optional<IdValue> queryIdValue(Long id, String table, String idColumnName, String descriptionColumnName) {
+        if (Objects.isNull(id)) {
+            return Optional.empty();
+
+        }
         return OptionalUtils.expectedAsOptional(queryIdValue(Arrays.asList(id), table, idColumnName, descriptionColumnName));
     }
 
     public static List<IdValue> queryIdValue(List<Long> ids, String table, String idColumnName, String descriptionColumnName) {
+        Assert.notEmpty(ids, "ids cannot be empty");
         String sql = "SELECT "+idColumnName+" as id, "+descriptionColumnName+" as description FROM "+table+" WHERE "+idColumnName+" IN (:ids)";
         return sharpService.query(sql, Params.builder(1).pv("ids", ids).build(), IdValue.class);
     }
