@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -535,6 +535,9 @@ public final class SQLUtils {
             return EnumUtils.getCode((Enum) value);
         } else if (value.getClass() == Instant.class) {
             return Timestamp.from((Instant) value);
+        } else if (value.getClass() == LocalDateTime.class || value.getClass() == LocalDate.class || value.getClass() == OffsetTime.class
+                || value.getClass() == LocalTime.class || value.getClass() == OffsetDateTime.class) {
+            return value;
         } else if (JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(value.getClass())) {
             return JsonUtils.toJson(value);
         } else if (Collection.class.isAssignableFrom(value.getClass())) {
