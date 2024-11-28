@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
 import com.rick.common.http.web.param.ParamName;
 import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.ManyToMany;
-import com.rick.db.plugin.dao.annotation.ManyToOne;
-import com.rick.db.plugin.dao.annotation.Sql;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.plugin.dao.annotation.*;
 import com.rick.demo.module.project.domain.entity.Person;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,6 +28,10 @@ import java.util.List;
 public class Book extends BaseEntityWithLongId {
 
     private String title;
+
+    @ParamName("user_id")
+    @Transient
+    private String userId;
 
     /**
      * 书的拥有者
