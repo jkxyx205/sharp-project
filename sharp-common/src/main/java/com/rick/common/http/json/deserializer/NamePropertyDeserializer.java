@@ -91,6 +91,7 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
 
             try {
                 deserializePropertyClass = ClassUtils.getField(contentClass, deserializePropertyName).getType();
+                deserializePropertyClass = getaClass(deserializePropertyClass, contentClass);
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
@@ -116,6 +117,7 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
 
             try {
                 deserializePropertyClass = ClassUtils.getField(javaType.getRawClass(), deserializePropertyName).getType();
+                deserializePropertyClass = getaClass(deserializePropertyClass, javaType.getRawClass());
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
@@ -131,10 +133,25 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
         return (T) JsonUtils.toObject(node, this.javaType.getRawClass());
     }
 
+    private static Class getaClass(Class deserializePropertyClass, Class contentClass) {
+        if (deserializePropertyClass == Object.class) { // 无法获取范型真实的类型， 向父类查找
+            Class supperClass = contentClass.getSuperclass();
+            while (supperClass != null) {
+                Class<?>[] classGenericsTypes = ClassUtils.getClassGenericsTypes(supperClass);
+
+                if (classGenericsTypes != null && classGenericsTypes[0] != Object.class) {
+                    deserializePropertyClass = classGenericsTypes[0];
+                    break;
+                }
+            }
+        }
+        return deserializePropertyClass;
+    }
+
     private T invokeSetPropertyMethod(String propertyName, Object value, Class<?> clazz, Class<?> deserializePropertyClass) {
         try {
             Object o = clazz.newInstance();
-            ReflectionUtils.invokeMethod(clazz.getMethod("set" + String.valueOf(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1), deserializePropertyClass), o, value);
+            ReflectionUtils.invokeMethod(clazz.getMethod(com.rick.common.util.StringUtils.setMethodName(propertyName), clazz.getMethod(com.rick.common.util.StringUtils.getMethodName(propertyName)).getReturnType()), o, value);
             return (T) o;
         } catch (Exception e) {
             e.printStackTrace();
