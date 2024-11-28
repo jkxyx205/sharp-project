@@ -242,7 +242,7 @@
             },
             value: originalFormData.operator
         })
-        operatorNameDOM.textContent = originalFormData.operator.description
+        operatorNameDOM.textContent = originalFormData.operator && originalFormData.operator.description
 
         // file uploadConsumer callback
         function form_attachments_file_uploadConsumer(attachments) {

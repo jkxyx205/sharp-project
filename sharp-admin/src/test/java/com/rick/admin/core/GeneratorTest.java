@@ -29,6 +29,7 @@ public class GeneratorTest {
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
                 Params.builder()
 //                        .pv(Generator.GENERATOR_CODE, true) // 是否创建 code template；如果没有指定，则没有就创建，否则不覆盖
+                        .pv(Generator.PROJECT, "admin")
                         .pv(Generator.FORM_PAGE, "demos/student/edit-thymeleaf") // 编辑页面路径
 
                         .pv(Generator.REPORT, true) // 是否创建 report
@@ -54,6 +55,7 @@ public class GeneratorTest {
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
                 Params.builder()
                         .pv(Generator.GENERATOR_CODE, false) // 是否创建 code template
+                        .pv(Generator.PROJECT, "admin")
                         .pv(Generator.FORM_PAGE, "demos/student/edit-vue") // 编辑页面路径
 
                         .pv(Generator.REPORT, true) // 是否创建 report
@@ -79,6 +81,7 @@ public class GeneratorTest {
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
                 Params.builder()
                         .pv(Generator.GENERATOR_CODE, false) // 是否创建 code template
+                        .pv(Generator.PROJECT, "admin")
                         .pv(Generator.FORM_PAGE, "demos/student/edit-react") // 编辑页面路径
 
                         .pv(Generator.REPORT, true) // 是否创建 report
