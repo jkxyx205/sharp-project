@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Rick.Xu
@@ -26,14 +28,14 @@ public class CodeInputService {
 
     {
         // 用户信息
-        String unitSql = "select id, code, name from sys_user where code like :code OR name like :code";
+        String userSql = "select id, code, name from sys_user where code like :code OR name like :code";
         SQL_MAPPING.put("users",
                 new CodeInputService.CodeInputContext(Arrays.asList("id", "编号", "姓名"), Arrays.asList("id", "code", "name"),
-                        unitSql)
+                        userSql)
         );
         SQL_MAPPING.put("users_dialog",
                 new CodeInputService.CodeInputContext(Arrays.asList("id", "编号", "姓名"), Arrays.asList("id", "code", "name"),
-                        unitSql)
+                        userSql)
         );
     }
 
@@ -119,7 +121,8 @@ public class CodeInputService {
         public CodeInputContext(List<String> columnLabels, List<String> columnNames, String sql, String masterTableName, CodeInputService.RowAfterSearchHandler rowAfterSearchHandler, Function<String, String> sqlFunction) {
             this.columnLabels = columnLabels;
             this.columnNames = columnNames;
-            masterTableName = StringUtils.defaultString(masterTableName, StringUtils.substringBetween(sql.toUpperCase(), "FROM ", " ").trim());
+//            masterTableName = StringUtils.defaultString(masterTableName, StringUtils.substringBetween(sql.toUpperCase(), "FROM ", " ").trim());
+            masterTableName = StringUtils.defaultString(masterTableName, getTableNameBySelectSql(sql).trim());
             this.sql = sql + " AND "+masterTableName+".is_deleted = 0";
             this.rowAfterSearchHandler = rowAfterSearchHandler;
             if (sqlFunction != null) {
@@ -159,5 +162,15 @@ public class CodeInputService {
         }
 
         return columnProperties;
+    }
+
+    private String getTableNameBySelectSql(String selectSql) {
+        Pattern pattern = Pattern.compile("from\\s+([a-zA-Z][a-zA-Z0-9_]{0,63})\\s+where", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(selectSql);
+        if (matcher.find()) {
+            return matcher.group(0).split("\\s+")[1];
+        }
+
+        return null;
     }
 }
