@@ -2,6 +2,7 @@ package com.rick.admin.auth.authentication;
 
 
 import com.rick.admin.auth.common.AuthConstants;
+import com.rick.admin.auth.common.JWTUtils;
 import com.rick.admin.auth.common.UserContextHolder;
 import com.rick.admin.sys.user.entity.User;
 import com.rick.common.http.HttpServletRequestUtils;
@@ -50,6 +51,13 @@ public class AdminAuthenticationSuccessHandler implements AuthenticationSuccessH
 
         String url = "/";
         UserContextHolder.set(userDetails.getUser());
-        response.sendRedirect(url);
+
+        if (HttpServletRequestUtils.isAjaxRequest(request)) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            response.getWriter().write("{\"success\": true, \"access_token\": \""+ JWTUtils.createToken(authentication)+"\"}");
+        } else {
+            response.sendRedirect(url);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.rick.admin.auth.config;
 
 import com.rick.admin.auth.authentication.AdminExpiredSessionStrategy;
+import com.rick.admin.auth.authentication.filter.TokenAuthenticationFilter;
 import com.rick.admin.auth.validate.image.ValidateFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -75,6 +76,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
         http.addFilterBefore(validateFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new TokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override

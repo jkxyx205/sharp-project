@@ -1,6 +1,7 @@
 package com.rick.admin.auth.authentication;
 
 import com.rick.admin.auth.common.AuthConstants;
+import com.rick.common.http.HttpServletRequestUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
@@ -39,6 +40,12 @@ public class AdminAuthenticationFailureHandler implements AuthenticationFailureH
         request.getSession().setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, e);
 //        request.getRequestDispatcher("/login").forward(request, response); //ERROR c.i.ac.exception.AcExceptionHandler - org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'POST' not supported
 
-        response.sendRedirect("/login");
+        if (HttpServletRequestUtils.isAjaxRequest(request)) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            response.getWriter().write("{\"success\": false}");
+        } else {
+            response.sendRedirect("/login");
+        }
     }
 }
