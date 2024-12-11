@@ -106,7 +106,7 @@ public class EntityCodeIdFillService {
             return id;
         }
 
-        return (ID) ((EntityCodeDAO)(EntityCodeDAO)EntityDAOManager.getEntityDAO(clazz)).selectIdByCodeOrThrowException(code);
+        return (ID) ((EntityCodeDAO) EntityDAOManager.getEntityDAO(clazz)).selectIdByCodeOrThrowException(code);
     }
 
     public <T extends BaseCodeEntity> Map<String, Long> getCodeIdMap(Class<T> clazz, Collection<String> codes) {
