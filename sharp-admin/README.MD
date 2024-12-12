@@ -56,6 +56,18 @@ nohup java -Xms64m -Xmx1024m -Dspring.profiles.active=dev -jar sharp-admin-1.0-S
         }
     }
 ```
+## 自动部署
+1. 服务器项目目录下创建文件夹用于接收可执行的 jar
+```shell
+cd sharp-admin
+mkdir deploy
+```
+
+2. 修改 `clean.sh` 并拷贝到服务器项目目录下
+3. 运行 `mvn.sh` （服务器进行免密登录配置）
+
+详情可以参考：[https://xhope.top/?p=1722](https://xhope.top/?p=1722)
+
 # 如何增删改查1
 1. 创建 `实体`
 2. 创建 `DAO`
