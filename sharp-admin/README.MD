@@ -58,6 +58,13 @@ nohup java -Xms64m -Xmx1024m -Dspring.profiles.active=dev -jar sharp-admin-1.0-S
 ```
 ## 自动部署
 1. 服务器项目目录下创建文件夹用于接收可执行的 jar
+
+## 数据库自动备份
+```shell
+#00 22 * * * mysqldump -uroot -p222222 --master-data=2 --single-transaction --databases product-manager > /usr/local/projects/sharp-admin/mysqldump/backup-$(date +'\%F-\%R').sql
+
+00 22 * * * sh /usr/local/projects/sharp-admin/mysqldump.sh
+```
 ```shell
 cd sharp-admin
 mkdir deploy
