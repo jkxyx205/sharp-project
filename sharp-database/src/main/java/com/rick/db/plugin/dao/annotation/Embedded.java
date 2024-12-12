@@ -13,5 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Transient
 public @interface Embedded {
+
     String columnPrefix() default "";
+
+    String comment() default "";
 }
