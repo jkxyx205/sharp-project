@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class DictValue {
 
     /**
-     * 对应 Dict 中的字段 name，必须是 code 而非那么是因为需要通过 EntityWithCodePropertyDeserializer 注入值
+     * 对应 Dict 中的字段 name，必须是 code 而非 name 是那么是因为需要通过 EntityWithCodePropertyDeserializer 注入值
      */
     String code;
 
