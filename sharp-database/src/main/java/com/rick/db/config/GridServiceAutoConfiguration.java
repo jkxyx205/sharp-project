@@ -35,6 +35,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import javax.validation.Validator;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -83,6 +84,16 @@ public class GridServiceAutoConfiguration {
             if (sharpDatabaseProperties.isInitDatabaseMetaData()) {
                 DatabaseMetaData.initTableMapping(jdbcTemplate);
             }
+
+            try {
+                java.sql.DatabaseMetaData metaData = jdbcTemplate.getDataSource().getConnection().getMetaData();
+                sharpDatabaseProperties.setType(metaData.getDatabaseProductName());
+                sharpDatabaseProperties.setDatabaseProductVersion(metaData.getDatabaseProductVersion());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            // 加载
             return new SharpService();
         }
 
@@ -189,8 +200,8 @@ public class GridServiceAutoConfiguration {
     static class TableGeneratorConfiguration {
 
         @Bean
-        public TableGenerator initTableGenerator(JdbcTemplate jdbcTemplate) {
-            return new TableGenerator(jdbcTemplate);
+        public TableGenerator initTableGenerator(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
+            return new TableGenerator(jdbcTemplate, sharpDatabaseProperties);
         }
     }
 

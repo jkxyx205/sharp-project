@@ -17,12 +17,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class SharpDatabaseProperties {
 
-    private String type = "mysql";
+    private String type = "MySQL";
+
+    private String databaseProductVersion;
 
     private boolean selectCache = false;
 
     private boolean initDatabaseMetaData = false;
 
     private String entityBasePackage;
-
 }

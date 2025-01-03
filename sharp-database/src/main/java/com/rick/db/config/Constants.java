@@ -6,9 +6,9 @@ package com.rick.db.config;
  */
 public final class Constants {
 
-    public static final String DB_ORACLE = "oracle";
+    public static final String DB_ORACLE = "Oracle";
 
-    public static final String DB_MYSQL = "mysql";
+    public static final String DB_MYSQL = "MySQL";
 
     public static final String GROUP_DUMMY_TABLE_NAME = "temp_";
 

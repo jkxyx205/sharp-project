@@ -3,6 +3,8 @@ package com.rick.db.plugin.dao.core;
 import com.rick.common.http.convert.JsonStringToObjectConverterFactory;
 import com.rick.common.util.EnumUtils;
 import com.rick.common.util.ObjectUtils;
+import com.rick.db.config.Constants;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Id;
 import com.rick.db.plugin.dao.annotation.ManyToMany;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 public class TableGenerator {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final SharpDatabaseProperties sharpDatabaseProperties;
 
     private ThreadLocal<Set<String>> tableNameCreatedContainer = ThreadLocal.withInitial(() -> new HashSet<>());
 
@@ -167,7 +171,7 @@ public class TableGenerator {
             return "time";
         } else if (type == Map.class || type == List.class || JsonStringToObjectConverterFactory.JsonValue.class.isAssignableFrom(type)) {
 //            return "text";
-            return "json";
+            return Constants.DB_MYSQL.equals(sharpDatabaseProperties.getType()) && sharpDatabaseProperties.getDatabaseProductVersion().charAt(0) <= '5' ? "text" : "json";
         } else if (BaseEntityUtils.isEntityClass(type)) {
             return "bigint";
         } else if (ObjectUtils.mayPureObject(type)) {
