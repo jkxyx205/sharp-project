@@ -322,20 +322,37 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Transactional(rollbackFor = Exception.class)
     public int delete(Map<String, Object> params, String conditionSQL) {
         if (hasCascadeDelete) {
-            CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
-                TableMeta subTableMeta = subTableEntityDAO.getTableMeta();
-                // 删除子表
-                if (CollectionUtils.isNotEmpty(set)) {
-                    SQLUtils.delete(subTableMeta.getTableName(), oneToManyProperty.getOneToMany().joinValue(), set);
-                }
-            }, (manyToManyProperty, set) -> {
-                if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && CollectionUtils.isNotEmpty(set)) {
-                    SQLUtils.delete(manyToManyProperty.getManyToMany().thirdPartyTable(), manyToManyProperty.getManyToMany().columnDefinition(), set);
-                }
-            });
+            if (CascadeSelectThreadLocalValue.getRootEntityDAO() == null) {
+                CascadeSelectThreadLocalValue.setRootEntityDAO((EntityDAO<? extends SimpleEntity, ?>) this);
+
+                CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
+//                TableMeta subTableMeta = subTableEntityDAO.getTableMeta();
+                    // 删除子表
+                    if (CollectionUtils.isNotEmpty(set)) {
+//                    SQLUtils.delete(subTableMeta.getTableName(), oneToManyProperty.getOneToMany().joinValue(), set);
+
+                        // 级联删除
+                        List<?> subTableIds = subTableEntityDAO.selectIdsByParams(Params.builder(1).pv(oneToManyProperty.getOneToMany().joinValue(), set).build(),
+                                oneToManyProperty.getOneToMany().joinValue() + " IN (:" + oneToManyProperty.getOneToMany().joinValue() + ")");
+                        if (CollectionUtils.isNotEmpty(subTableIds)) {
+                            if (oneToManyProperty.getOneToMany().cascadeDeleteLogically()) {
+                                subTableEntityDAO.deleteLogicallyByIds(subTableIds);
+                            } else {
+                                subTableEntityDAO.deleteByIds(subTableIds);
+                            }
+                        }
+                    }
+                }, (manyToManyProperty, set) -> {
+                    if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && CollectionUtils.isNotEmpty(set)) {
+                        SQLUtils.delete(manyToManyProperty.getManyToMany().thirdPartyTable(), manyToManyProperty.getManyToMany().columnDefinition(), set);
+                    }
+                });
+            }
 
             selectByParams(params, idColumnName, conditionSQL, null, this.entityClass);
-            CascadeSelectThreadLocalValue.removeAll();
+            if (this == CascadeSelectThreadLocalValue.getRootEntityDAO()) {
+                CascadeSelectThreadLocalValue.removeAll();
+            }
         }
 
         return super.delete(params, conditionSQL);
@@ -362,27 +379,45 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     @Transactional(rollbackFor = Exception.class)
     public int deleteLogicallyByIds(Collection<?> ids) {
         if (hasCascadeDelete) {
-            CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
-                // 逻辑删除子表
-                if (CollectionUtils.isNotEmpty(set)) {
-                    subTableEntityDAO.update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, Params.builder(1).pv("refIds", set)
-                                    .pv(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, true)
-                                    .build(),
-                            oneToManyProperty.getOneToMany().joinValue() + " IN (:refIds) AND is_deleted = 0");
-                }
-            }, (manyToManyProperty, set) -> {
-                if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && set.size() > 0) {
-                    Object[] mergedParams = new Object[set.size() + 1];
-                    mergedParams[0] = 1;
-                    System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
-                    SQLUtils.update(manyToManyProperty.getManyToMany().thirdPartyTable(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME,
-                            mergedParams, manyToManyProperty.getManyToMany().columnDefinition() + " IN " + SQLUtils.formatInSQLPlaceHolder(set.size()));
-                }
-            });
+            if (CascadeSelectThreadLocalValue.getRootEntityDAO() == null) {
+                CascadeSelectThreadLocalValue.setRootEntityDAO((EntityDAO<? extends SimpleEntity, ?>) this);
+                CascadeSelectThreadLocalValue.add((oneToManyProperty, subTableEntityDAO, set) -> {
+                    // 逻辑删除子表
+                    if (CollectionUtils.isNotEmpty(set)) {
+//                    subTableEntityDAO.update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, Params.builder(1).pv("refIds", set)
+//                                    .pv(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, true)
+//                                    .build(),
+//                            oneToManyProperty.getOneToMany().joinValue() + " IN (:refIds) AND is_deleted = 0");
+
+                        // 级联删除
+                        List<?> subTableIds = subTableEntityDAO.selectIdsByParams(Params.builder(1).pv(oneToManyProperty.getOneToMany().joinValue(), set).build(),
+                                oneToManyProperty.getOneToMany().joinValue() + " IN (:" + oneToManyProperty.getOneToMany().joinValue() + ")");
+                        if (CollectionUtils.isNotEmpty(subTableIds)) {
+                            if (oneToManyProperty.getOneToMany().cascadeDeleteLogically()) {
+                                subTableEntityDAO.deleteLogicallyByIds(subTableIds);
+                            } else {
+                                subTableEntityDAO.deleteByIds(subTableIds);
+                            }
+                        }
+
+                    }
+                }, (manyToManyProperty, set) -> {
+                    if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && set.size() > 0) {
+                        Object[] mergedParams = new Object[set.size() + 1];
+                        mergedParams[0] = 1;
+                        System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
+                        SQLUtils.update(manyToManyProperty.getManyToMany().thirdPartyTable(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME,
+                                mergedParams, manyToManyProperty.getManyToMany().columnDefinition() + " IN " + SQLUtils.formatInSQLPlaceHolder(set.size()));
+                    }
+                });
+            }
+
 
             selectByParams(Params.builder(1).pv("ids", ids).build(), idColumnName, getIdColumnName() + " IN (:ids)", null, this.entityClass);
 
-            CascadeSelectThreadLocalValue.removeAll();
+            if (this == CascadeSelectThreadLocalValue.getRootEntityDAO()) {
+                CascadeSelectThreadLocalValue.removeAll();
+            }
         }
 
         return super.deleteLogicallyByIds(ids);
@@ -1150,7 +1185,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     public Map<String, String> getColumnNameToPropertyNameMap() {
         return columnNameToPropertyNameMap;
     }
-
 
     private void cascadeSelect(List<T> list) {
         if (CollectionUtils.isEmpty(list)) {

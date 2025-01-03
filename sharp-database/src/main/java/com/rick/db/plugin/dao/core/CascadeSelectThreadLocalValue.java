@@ -17,6 +17,8 @@ public class CascadeSelectThreadLocalValue {
 
     private static ThreadLocal<BiConsumer<TableMeta.ManyToManyProperty, Set<?>>> manyToManyConsumerLocal = new ThreadLocal<>();
 
+    private static ThreadLocal<EntityDAO<? extends SimpleEntity, ?>> rootEntityDAOLocal = new ThreadLocal<>();
+
     public static void add(EntityDAOImpl.TriConsumer<TableMeta.OneToManyProperty, EntityDAO<? extends SimpleEntity, ?>, Set<?>> oneToManyConsumer,
                            BiConsumer<TableMeta.ManyToManyProperty, Set<?>> manyToManyConsumer) {
         oneToManyConsumerThreadLocal.set(oneToManyConsumer);
@@ -27,6 +29,14 @@ public class CascadeSelectThreadLocalValue {
         return oneToManyConsumerThreadLocal.get();
     }
 
+    public static EntityDAO<? extends SimpleEntity, ?> getRootEntityDAO() {
+        return rootEntityDAOLocal.get();
+    }
+
+    public static void setRootEntityDAO(EntityDAO<? extends SimpleEntity, ?> rootEntityDAO) {
+        rootEntityDAOLocal.set(rootEntityDAO);
+    }
+
     public static BiConsumer<TableMeta.ManyToManyProperty, Set<?>> getManyToManyConsumer() {
         return manyToManyConsumerLocal.get();
     }
@@ -34,6 +44,7 @@ public class CascadeSelectThreadLocalValue {
     public static void removeAll() {
         oneToManyConsumerThreadLocal.remove();
         manyToManyConsumerLocal.remove();
+        rootEntityDAOLocal.remove();
     }
 
 }
