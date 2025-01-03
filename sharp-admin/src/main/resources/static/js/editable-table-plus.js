@@ -318,6 +318,8 @@
                     }
                 } else if ($(this).attr('type') === 'radio') {
                     $("input[name="+this.name+"][value=" + row[this.name.substring(0, this.name.lastIndexOf('-'))] + "]").prop('checked', true);
+                } else if ($(this).attr('type') === 'datepicker') {
+                    $(this).datepicker('setDate', row[this.name]);
                 } else {
                     $(this).val(row[this.name])
                 }
@@ -507,7 +509,7 @@
                         columnConfig.keyup && columnConfig.keyup($tr, event, $(this).val())
                     })
                 } else if(columnConfig.type === 'date') {
-                    $td.find('input').datepicker({
+                    $td.find('input').attr('type', 'datepicker').datepicker({
                         language: "zh-CN",
                         autoclose: true,
                         clearBtn: true,
