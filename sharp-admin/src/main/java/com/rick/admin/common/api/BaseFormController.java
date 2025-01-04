@@ -1,5 +1,6 @@
 package com.rick.admin.common.api;
 
+import com.rick.admin.common.exception.ResourceNotFoundException;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
@@ -70,7 +71,8 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl>
     public String gotoFormPageById(HttpServletRequest request, @PathVariable Long id, Model model) {
         Map<String, String> parameterMap = HttpServletRequestUtils.getParameterStringMap(request);
 
-        Object entity = baseService.findById(id).get();
+        Optional<E> op = baseService.findById(id);
+        Object entity = op.orElseThrow(() -> new ResourceNotFoundException());
         DictUtils.fillDictLabel(entity); // 可选操作
         model.addAttribute(entityPropertyName, entity);
 
