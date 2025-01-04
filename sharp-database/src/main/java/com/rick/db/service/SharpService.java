@@ -121,10 +121,11 @@ public class SharpService {
 
     public int update(String sql, Map<String, ?> params) {
         SqlFormatter sqlFormatter = getSQLFormatter(sql, params);
+        int affectRows = namedJdbcTemplate.update(sqlFormatter.formatSql, sqlFormatter.paramMap);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap);
+            log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", sqlFormatter.formatSql, sqlFormatter.paramMap, affectRows);
         }
-        return namedJdbcTemplate.update(sqlFormatter.formatSql, sqlFormatter.paramMap);
+        return affectRows;
     }
 
     private Optional handleResult(List<?> list) {

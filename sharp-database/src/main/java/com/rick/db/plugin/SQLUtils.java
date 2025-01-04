@@ -433,7 +433,7 @@ public final class SQLUtils {
 
             deletedCount += SQLUtils.JDBC_TEMPLATE.update(deleteSQL, mergedParams);
             if (log.isDebugEnabled()) {
-                log.debug("SQL => [{}], args:=> [{}]", deleteSQL, mergedParams);
+                log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSQL, mergedParams, deletedCount);
             }
         }
 
