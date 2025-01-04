@@ -190,7 +190,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             refPropertyValue = EnumUtils.valueOfCode(reverseField.getType(), (String) refValue);
         } else if (BaseEntityUtils.isEntityClass(reverseField.getType())) {
             refPropertyValue = BeanUtils.instantiateClass(reverseField.getType());
-            ((SimpleEntity)refPropertyValue).setId((Long) refValue);
+            ((SimpleEntity)refPropertyValue).setId(refValue);
         } else {
             refPropertyValue = refValue;
         }
@@ -399,7 +399,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                                 subTableEntityDAO.deleteByIds(subTableIds);
                             }
                         }
-
                     }
                 }, (manyToManyProperty, set) -> {
                     if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && set.size() > 0) {
@@ -411,7 +410,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     }
                 });
             }
-
 
             selectByParams(Params.builder(1).pv("ids", ids).build(), idColumnName, getIdColumnName() + " IN (:ids)", null, this.entityClass);
 
@@ -1050,37 +1048,26 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         beforeInsertOrUpdate(subTableEntityDAO, subDataList, refColumnName, refValue);
 
         if (!insert && cascadeDelete) { // 级联删除
+            Assert.notNull(refValue, "refValue cannot be null");
             if (CollectionUtils.isEmpty(subDataList)) {
                 // 删除所有
-                if (cascadeDeleteLogically) {
-                    SQLUtils.update(subTableEntityDAO.getTableName(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{true, refValue}, refColumnName + " = ?");
-                } else {
-                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refValue));
-                }
-                return new int[0];
+                List<?> subIds = subTableEntityDAO.selectIdsByParams(Params.builder(1).pv(refColumnName, refValue).build(), refColumnName + " = :" + refColumnName);
+                return deleteSubIds(cascadeDeleteLogically, subTableEntityDAO, subIds);
             }
 
             Set<ID> deletedIds = subDataList.stream().filter(d -> Objects.nonNull(getIdValue(d))).map(d -> getIdValue(d)).collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(deletedIds)) {
                 // 删除所有
-                if (cascadeDeleteLogically) {
-                    SQLUtils.update(subTableEntityDAO.getTableName(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{true, refValue}, refColumnName + " = ?");
-                } else {
-                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refValue));
-                }
+                List<?> subIds = subTableEntityDAO.selectIdsByParams(Params.builder(1).pv(refColumnName, refValue).build(), refColumnName + " = :" + refColumnName);
+                deleteSubIds(cascadeDeleteLogically, subTableEntityDAO, subIds);
             } else {
                 // 删除 除id之外的其他记录
-                if (cascadeDeleteLogically) {
-                    Object[] params = new Object[2 + deletedIds.size()];
-                    params[0] = true;
-                    params[1] = refValue;
-                    System.arraycopy(deletedIds.toArray(), 0, params, 2, deletedIds.size());
+                List<?> subIds = subTableEntityDAO.selectIdsByParams(Params.builder(2)
+                        .pv(refColumnName, refValue)
+                        .pv(subTableEntityDAO.getIdColumnName(), deletedIds)
+                        .build(), refColumnName + " = :" + refColumnName + " AND "+subTableEntityDAO.getIdColumnName()+" NOT IN (:"+subTableEntityDAO.getIdColumnName()+")");
 
-                    SQLUtils.update(subTableEntityDAO.getTableName(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, params, refColumnName + " = ? AND "+subTableEntityDAO.getIdColumnName()+" NOT IN ("+String.join(",", Collections.nCopies(deletedIds.size(), "?"))+")");
-                } else {
-                    SQLUtils.deleteNotIn(subTableEntityDAO.getTableName(), subTableEntityDAO.getIdColumnName(),
-                            deletedIds, new Object[]{refValue}, refColumnName + " = ?");
-                }
+                deleteSubIds(cascadeDeleteLogically, subTableEntityDAO, subIds);
             }
         }
 
@@ -1102,6 +1089,22 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
         } else {
             return subTableEntityDAO.insertOrUpdate(subDataList);
+        }
+
+        return new int[0];
+    }
+
+    private static int[] deleteSubIds(boolean cascadeDeleteLogically, EntityDAO subTableEntityDAO, List<?> subIds) {
+        if (CollectionUtils.isEmpty(subIds)) {
+            return new int[0];
+        }
+
+        if (cascadeDeleteLogically) {
+//                    SQLUtils.update(subTableEntityDAO.getTableName(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, new Object[]{true, refValue}, refColumnName + " = ?");
+            subTableEntityDAO.deleteLogicallyByIds(subIds);
+        } else {
+//                    SQLUtils.delete(subTableEntityDAO.getTableName(), refColumnName, Arrays.asList(refValue));
+            subTableEntityDAO.deleteByIds(subIds);
         }
 
         return new int[0];
