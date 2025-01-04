@@ -21,4 +21,6 @@ public @interface ManyToMany {
     String columnDefinition();
 
     String sortColumnName() default "";
+
+    boolean cascadeQuery() default true;
 }

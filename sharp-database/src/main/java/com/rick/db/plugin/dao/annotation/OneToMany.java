@@ -22,9 +22,11 @@ public @interface OneToMany {
      */
     String reversePropertyName() default "";
 
-    boolean cascadeInsertOrUpdate() default false;
+    boolean cascadeInsertOrUpdate() default true;
 
     boolean cascadeDelete() default true;
+
+    boolean cascadeQuery() default true;
 
     /**
      * 删除是否执行逻辑删除，默认是逻辑删除

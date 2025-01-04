@@ -24,6 +24,8 @@ public @interface ManyToOne {
 
     boolean cascadeInsertOrUpdate() default false;
 
+    boolean cascadeQuery() default true;
+
     /**
      * 只做插入操作，不做更新操作。使用场景：批次物料库存移动的时候，如果是新的批次，则添加，否则不做更新
      * @return

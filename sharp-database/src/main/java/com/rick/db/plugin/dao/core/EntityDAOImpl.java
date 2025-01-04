@@ -1229,6 +1229,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
+            if (!oneToManyProperty.getOneToMany().cascadeQuery()) {
+                continue;
+            }
+
             String storeKey = oneToManyProperty.getOneToMany().subTable() + ":" + oneToManyProperty.getOneToMany().joinValue();
             if (EntityDAOThreadLocalValue.remove(storeKey)) {
                 continue;
@@ -1274,6 +1278,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         //region ManyToOne
         for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
+            if (!manyToOneProperty.getManyToOne().cascadeQuery()) {
+                continue;
+            }
+
             String refColumnName = StringUtils.isBlank(manyToOneProperty.getManyToOne().value()) ? propertyNameToColumnNameMap.get(manyToOneProperty.getField().getName()) : manyToOneProperty.getManyToOne().value();
             String storeKey = getTableName() + ":" + refColumnName;
 
@@ -1304,6 +1312,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         //region ManyToMany
         for (TableMeta.ManyToManyProperty manyToManyProperty : tableMeta.getManyToManyAnnotationList()) {
+            if (!manyToManyProperty.getManyToMany().cascadeQuery()) {
+                continue;
+            }
+
             String referenceColumnName = manyToManyProperty.getManyToMany().referenceColumnName();
             String columnDefinition = manyToManyProperty.getManyToMany().columnDefinition();
             String storeKey1 = getTableName() + ":" + manyToManyProperty.getManyToMany().thirdPartyTable() + ":" + referenceColumnName;
