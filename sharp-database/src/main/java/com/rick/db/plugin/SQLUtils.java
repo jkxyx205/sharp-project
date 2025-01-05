@@ -273,10 +273,11 @@ public final class SQLUtils {
      */
     public static int delete(String tableName, Object[] params, String conditionSQL) {
         String deleteSql = "DELETE FROM " + tableName + " WHERE " + conditionSQL;
+        int deletedCount =  SQLUtils.JDBC_TEMPLATE.update(deleteSql, params);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}, {}]", deleteSql, params);
+            log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSql, params, deletedCount);
         }
-        return SQLUtils.JDBC_TEMPLATE.update(deleteSql, params);
+        return deletedCount;
     }
 
     /**
