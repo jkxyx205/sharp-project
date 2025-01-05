@@ -1229,7 +1229,12 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         //region OneToMany
         for (TableMeta.OneToManyProperty oneToManyProperty : tableMeta.getOneToManyAnnotationList()) {
-            if (!oneToManyProperty.getOneToMany().cascadeQuery()) {
+            // 级联删除
+            if (CascadeSelectThreadLocalValue.getOneToManyConsumer() != null) {
+                if (!oneToManyProperty.getOneToMany().cascadeDelete()) {
+                    continue;
+                }
+            } else if (!oneToManyProperty.getOneToMany().cascadeQuery()) {
                 continue;
             }
 
@@ -1247,13 +1252,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
             }
 
             Set<ID> refIds = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
-
-            // 级联删除
-            if (CascadeSelectThreadLocalValue.getOneToManyConsumer() != null) {
-                if (!oneToManyProperty.getOneToMany().cascadeDelete()) {
-                    continue;
-                }
-            }
 
             Map<ID, List<? extends SimpleEntity>> subTableData = subTableEntityDAO.groupByColumnName(oneToManyProperty.getOneToMany().joinValue(), refIds);
 
@@ -1278,7 +1276,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
         //region ManyToOne
         for (TableMeta.ManyToOneProperty manyToOneProperty : tableMeta.getManyToOneAnnotationList()) {
-            if (!manyToOneProperty.getManyToOne().cascadeQuery()) {
+            if (CascadeSelectThreadLocalValue.getManyToManyConsumer() == null && !manyToOneProperty.getManyToOne().cascadeQuery()) {
                 continue;
             }
 
