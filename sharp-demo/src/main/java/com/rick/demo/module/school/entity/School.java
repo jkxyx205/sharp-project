@@ -80,7 +80,7 @@ public class School extends BaseEntityWithLongId {
      */
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @JsonAlias("studentIds")
-    @OneToMany(subTable = "t_school_student", joinValue = "school_id")
+    @OneToMany(subTable = "t_school_student", joinValue = "school_id", cascadeInsertOrUpdate = false)
     private List<Student> studentList;
 
     /**

@@ -28,7 +28,7 @@ public class SchoolLicense extends BaseEntityWithLongId {
     @Column(comment = "备注")
     private String remark;
 
-    @OneToMany(subTable = "t_school", joinValue = "school_license_id", oneToOne = true)
+    @OneToMany(subTable = "t_school", joinValue = "school_license_id", oneToOne = true, cascadeInsertOrUpdate = false)
     private School school;
 
 }
