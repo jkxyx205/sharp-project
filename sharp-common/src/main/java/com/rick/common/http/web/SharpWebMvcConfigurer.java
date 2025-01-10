@@ -81,7 +81,7 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Bean
-    public BeanPostProcessor beanPostProcessor() {
+    public BeanPostProcessor beanPostProcessor(ParamNameProcessor paramNameProcessor) {
         return new BeanPostProcessor() {
 
             @Override
@@ -94,7 +94,7 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
                 if (bean instanceof RequestMappingHandlerAdapter) {
                     RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
                     List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>(adapter.getArgumentResolvers());
-                    argumentResolvers.add(0, paramNameProcessor());
+                    argumentResolvers.add(0, paramNameProcessor);
                     adapter.setArgumentResolvers(argumentResolvers);
                 }
                 return bean;

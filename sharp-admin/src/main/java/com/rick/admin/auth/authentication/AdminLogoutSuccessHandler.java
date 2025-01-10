@@ -1,6 +1,7 @@
 package com.rick.admin.auth.authentication;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.session.SessionInformation;
@@ -22,6 +23,7 @@ import java.util.List;
 public class AdminLogoutSuccessHandler implements LogoutSuccessHandler {
 
     @Resource
+    @Lazy
     private SessionRegistry sessionRegistry;
 
     @Override
