@@ -1,6 +1,6 @@
 package com.rick.meta.dict.entity;
 
-import com.rick.db.dto.SimpleEntity;
+import com.rick.db.dto.BaseEntity;
 import com.rick.db.plugin.dao.annotation.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "sys_dict", comment = "字典表")
-public class Dict extends SimpleEntity<Long> {
+public class Dict extends BaseEntity<Long> {
 
     String type;
 
