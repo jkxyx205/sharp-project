@@ -13,6 +13,8 @@ import com.rick.db.dto.PageModel;
 import com.rick.db.dto.QueryModel;
 import com.rick.db.plugin.GridUtils;
 import com.rick.db.service.GridService;
+import com.rick.excel.table.AbstractExportTable;
+import com.rick.excel.table.MapExcelTable;
 import com.rick.excel.table.QueryResultExportTable;
 import com.rick.excel.table.model.AlignEnum;
 import com.rick.excel.table.model.MapTableColumn;
@@ -36,6 +38,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -205,26 +208,37 @@ public class ReportService {
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
         Report report = findById(id).get();
-
-        QueryModel queryModel = QueryModel.of(HttpServletRequestUtils.getParameterMap(request));
-        PageModel pageModel = queryModel.getPageModel();
-        pageModel.setSize(-1);
-
         LocalDateTime localDateTime = LocalDateTime.now();
         String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
         String fileName = report.getName() + timestamp + EXCEL_EXTENSION;
+        Map<String, Object> requestMap = HttpServletRequestUtils.getParameterMap(request);
 
-        QueryResultExportTable exportTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
-            @Override
-            public void setRows(List<?> rows) {
-                handleReportAdvice(report, (List<Map<String, Object>>) rows);
-                toObjectArrayListAndConvert((List<Map<String, Object>>) rows, report.getReportColumnList());
-                formatValue((List<Map<String, Object>>) rows);
-                super.setRows(rows);
-            }
-        };
+        MapExcelTable excelTable;
+        if (StringUtils.isBlank(report.getQuerySql())) {
+            ReportDTO reportDTO = list(report.getId(), requestMap);
+            excelTable = new MapExcelTable(convert(report.getReportColumnList()), reportDTO.getGridMap().getRows());
+        } else {
+            QueryModel queryModel = QueryModel.of(requestMap);
+            PageModel pageModel = queryModel.getPageModel();
+            pageModel.setSize(-1);
+            excelTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
+                @Override
+                public void setRows(List<?> rows) {
+                    handleReportAdvice(report, (List<Map<String, Object>>) rows);
+                    toObjectArrayListAndConvert((List<Map<String, Object>>) rows, report.getReportColumnList());
+                    formatValue((List<Map<String, Object>>) rows);
+                    super.setRows(rows);
+                }
+            };
+        }
+        Consumer<AbstractExportTable> consumerExcelWriter = null;
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
 
-        exportTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName));
+        if (reportAdvice != null) {
+            consumerExcelWriter = reportAdvice.beforeExportAndReturnBeforeToFileConsumer(report, excelTable, requestMap);
+        }
+        excelTable.getExcelWriter().getBook().setSheetName(0, report.getName());
+        excelTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName), consumerExcelWriter);
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {

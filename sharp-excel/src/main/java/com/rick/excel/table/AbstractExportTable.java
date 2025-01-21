@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * All rights Reserved, Designed By www.xhope.top
@@ -59,8 +60,15 @@ public abstract class AbstractExportTable {
     }
 
     public void write(OutputStream os) throws IOException {
+        write(os, null);
+    }
+
+    public void write(OutputStream os, Consumer<AbstractExportTable> beforeToFileConsumer) throws IOException {
         writeColumns();
         writeRows();
+        if (Objects.nonNull(beforeToFileConsumer)) {
+            beforeToFileConsumer.accept(this);
+        }
         excelWriter.toFile(os);
     }
 
