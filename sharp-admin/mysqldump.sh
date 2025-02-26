@@ -1,23 +1,30 @@
 #!/bin/bash
+SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}); pwd)
+source $SCRIPT_DIR/config.sh
+# db info
+username="root"
+password="123456"
+database="sharp-admin"
+# backup folder
+mysqldump="mysqldump"
 
-echo "---------------------------------------------------" >> /usr/local/projects/sharp-admin/mysqldump/dbBackLog.log
-echo $(date +"%Y-%m-%d %H:%M:%S") "test Database backup start"  >> /usr/local/projects/sharp-admin/mysqldump/dbBackLog.log
+echo "---------------------------------------------------" >> $project_path/$mysqldump/dbBackLog.log
+echo $(date +"%Y-%m-%d %H:%M:%S") "Database backup start"  >> $project_path/$mysqldump/dbBackLog.log
 
-
-mysqldump -uroot -p222222 --master-data=2 --single-transaction --databases product-manager > /usr/local/projects/sharp-admin/mysqldump/backup-$(date +"%Y-%m-%d").sql
+mysqldump -u$username -p$password --master-data=2 --single-transaction --databases $database > $project_path/$mysqldump/backup-$(date +"%Y-%m-%d").sql
 
 if [ 0 -eq $? ];then
 
-    if [ -f "/usr/local/projects/sharp-admin/mysqldump/backup-$(date +"%Y-%m-%d").sql" ];then
-        echo $(date +"%Y-%m-%d %H:%M:%S") "test Database backup success!" >> /usr/local/projects/sharp-admin/mysqldump/dbBackLog.log
+    if [ -f "$project_path/$mysqldump/backup-$(date +"%Y-%m-%d").sql" ];then
+        echo $(date +"%Y-%m-%d %H:%M:%S") "Database backup success!" >> $project_path/$mysqldump/dbBackLog.log
     else
-        echo $(date +"%Y-%m-%d %H:%M:%S") "test Database backup fail!" >> /usr/local/projects/sharp-admin/mysqldump/dbBackLog.log
+        echo $(date +"%Y-%m-%d %H:%M:%S") "Database backup fail!" >> $project_path/$mysqldump/dbBackLog.log
     fi
 
 else
-    echo $(date +"%Y-%m-%d %H:%M:%S") "test Database backup error!" >> /usr/local/projects/sharp-admin/mysqldump/dbBackLog.log
+    echo $(date +"%Y-%m-%d %H:%M:%S") "Database backup error!" >> $project_path/$mysqldump/dbBackLog.log
 
 fi
 
-echo "---------------------------------------------------" >> /usr/local/projects/sharp-admin/mysqldump/dbBackLog.log
-find /usr/local/projects/sharp-admin/mysqldump/ -mtime +7 -name "backup-*.sql" -exec rm -rf {} \;
+echo "---------------------------------------------------" >> $project_path/$mysqldump/dbBackLog.log
+find $project_path/$mysqldump/ -mtime +7 -name "backup-*.sql" -exec rm -rf {} \;
