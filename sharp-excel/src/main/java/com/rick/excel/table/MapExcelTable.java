@@ -17,14 +17,8 @@ import java.util.Objects;
  */
 public class MapExcelTable extends AbstractExportTable {
 
-    private List<MapTableColumn> tableColumnList;
-
-    private int columnSize;
-
     public MapExcelTable(List<MapTableColumn> tableColumnList, List<Map<String, Object>> rows) {
         super(tableColumnList, rows);
-        columnSize = tableColumnList.size();
-        this.tableColumnList = tableColumnList;
     }
 
     @Override
@@ -34,10 +28,11 @@ public class MapExcelTable extends AbstractExportTable {
     }
 
     private Object[] toObjectArray(Map<String, Object> map) {
+        int columnSize = tableColumnList.size();
         Object[] row = new Object[columnSize];
 
         for (int i = 0; i < columnSize; i++) {
-            MapTableColumn mapTableColumn = tableColumnList.get(i);
+            MapTableColumn mapTableColumn = (MapTableColumn) tableColumnList.get(i);
             Object value = map.get(mapTableColumn.getName());
             if (Objects.isNull(mapTableColumn.getConverter())) {
                 row[i] = value;

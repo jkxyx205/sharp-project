@@ -34,9 +34,9 @@ import java.util.function.Consumer;
 @Setter
 public abstract class AbstractExportTable {
 
-    private List<? extends TableColumn> tableColumnList;
+    protected List<? extends TableColumn> tableColumnList;
 
-    private List<?> rows;
+    protected List<?> rows;
 
     protected ExcelWriter excelWriter = new ExcelWriter();
 
@@ -94,7 +94,7 @@ public abstract class AbstractExportTable {
             }
         }
 
-        ExcelRow row = new ExcelRow(1,1, labels);
+        ExcelRow row = new ExcelRow(1, 1, labels);
         row.setHeightInPoints(columnHeight);
         row.setCellStyles(cellStyles);
 
