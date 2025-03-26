@@ -439,7 +439,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         if (sharpDatabaseProperties.getType().equals(DB_MYSQL)) {
             return selectByParams(params, "1", conditionSQL, srcSQL -> srcSQL + " LIMIT 1", Long.class).size() > 0 ? true : false;
         } else {
-            return countByParams(params, conditionSQL) > 1;
+            return countByParams(params, conditionSQL) > 0;
         }
     }
 
