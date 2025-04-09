@@ -24,6 +24,7 @@ import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 /**
@@ -133,7 +134,7 @@ public class SharpService {
     }
 
     <T> List<T> toClass(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap, Class<T> clazz) {
-        if (clazz == String.class || Number.class.isAssignableFrom(clazz) || Character.class == clazz || Boolean.class == clazz || clazz.isEnum()) {
+        if (clazz == String.class || Number.class.isAssignableFrom(clazz) || Character.class == clazz || Boolean.class == clazz || clazz.isEnum() || Temporal.class.isAssignableFrom(clazz)) {
             return jdbcTemplate.queryForList(sql, paramMap, clazz);
         }
 
