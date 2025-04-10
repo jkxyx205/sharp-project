@@ -33,12 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -207,11 +209,28 @@ public class ReportService {
     }
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
-        Report report = findById(id).get();
-        LocalDateTime localDateTime = LocalDateTime.now();
-        String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
-        String fileName = report.getName() + timestamp + EXCEL_EXTENSION;
         Map<String, Object> requestMap = HttpServletRequestUtils.getParameterMap(request);
+        export(requestMap, report -> {
+            LocalDateTime localDateTime = LocalDateTime.now();
+            String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
+            String fileName = report.getName() + timestamp + EXCEL_EXTENSION;
+            try {
+                return HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }, id);
+    }
+
+    /**
+     * 根据 id 导出到 Excel 中
+     * @param requestMap
+     * @param osSupplier
+     * @param id
+     * @throws IOException
+     */
+    public void export(Map<String, Object> requestMap, Function<Report, OutputStream> osSupplier, Long id) throws IOException {
+        Report report = findById(id).get();
 
         MapExcelTable excelTable;
         if (StringUtils.isBlank(report.getQuerySql())) {
@@ -223,10 +242,10 @@ public class ReportService {
             pageModel.setSize(-1);
             excelTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
                 @Override
-                public void setRows(List<?> rows) {
-                    handleReportAdvice(report, (List<Map<String, Object>>) rows);
-                    toObjectArrayListAndConvert((List<Map<String, Object>>) rows, report.getReportColumnList());
-                    formatValue((List<Map<String, Object>>) rows);
+                public void setRows(List<Map<String, Object>> rows) {
+                    handleReportAdvice(report, rows);
+                    toObjectArrayListAndConvert(rows, report.getReportColumnList());
+                    formatValue(rows);
                     super.setRows(rows);
                 }
             };
@@ -238,7 +257,7 @@ public class ReportService {
             consumerExcelWriter = reportAdvice.beforeExportAndReturnBeforeToFileConsumer(report, excelTable, requestMap);
         }
         excelTable.getExcelWriter().getBook().setSheetName(0, report.getName());
-        excelTable.write(HttpServletResponseUtils.getOutputStreamAsAttachment(request, response, fileName), consumerExcelWriter);
+        excelTable.write(osSupplier.apply(report), consumerExcelWriter);
     }
 
     private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
