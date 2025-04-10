@@ -13,7 +13,7 @@ import java.util.List;
  * @date: 6/17/20 9:18 PM
  * @Copyright: 2020 www.yodean.com. All rights reserved.
  */
-public class GeneralExportTable extends AbstractExportTable {
+public class GeneralExportTable extends AbstractExportTable<Object[]> {
 
     public GeneralExportTable(List<TableColumn> tableColumnList, List<Object[]> rows) {
         super(tableColumnList, rows);

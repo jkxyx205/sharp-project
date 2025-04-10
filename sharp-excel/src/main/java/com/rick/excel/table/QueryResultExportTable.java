@@ -40,7 +40,7 @@ public class QueryResultExportTable extends MapExcelTable {
 
     @Override
     protected void writeRows() {
-        List<Map<String, Object>> list =  gridService.query(sql, pageModel, params).getRows();
+        List<Map<String, Object>> list = gridService.query(sql, pageModel, params).getRows();
         setRows(list);
         super.writeRows();
     }

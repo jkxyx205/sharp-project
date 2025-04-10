@@ -32,11 +32,11 @@ import java.util.function.Consumer;
  */
 @Getter
 @Setter
-public abstract class AbstractExportTable {
+public abstract class AbstractExportTable<T> {
 
     protected List<? extends TableColumn> tableColumnList;
 
-    protected List<?> rows;
+    protected List<T> rows;
 
     protected ExcelWriter excelWriter = new ExcelWriter();
 
@@ -52,7 +52,7 @@ public abstract class AbstractExportTable {
 
     protected XSSFCellStyle defaultRowStyle;
 
-    public AbstractExportTable(List<? extends TableColumn> tableColumnList, List<?> rows) {
+    public AbstractExportTable(List<? extends TableColumn> tableColumnList, List<T> rows) {
         this.tableColumnList = tableColumnList;
         this.defaultColumnStyle = createDefaultColumnStyle();
         this.defaultRowStyle = createDefaultRowStyle();
