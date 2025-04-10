@@ -109,6 +109,13 @@ public class Email {
             return this;
         }
 
+        public EmailBuilder attachments(List<Object[]> attachments) {
+            for (Object[] attachment : attachments) {
+                this.attachmentList.add(new Object[]{attachment[0], attachment[1], attachment[2]});
+            }
+            return this;
+        }
+
         public EmailBuilder embeddedImage(String fileName, byte[] byteArray, String type) {
             this.embeddedImageList.add(new Object[]{fileName, byteArray, type});
             return this;
