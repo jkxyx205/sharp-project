@@ -7,8 +7,10 @@ import com.rick.db.plugin.dao.support.ColumnAutoFill;
 import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.impl.fastdfs.FastDFSInputStreamStore;
+import com.rick.fileupload.impl.oos.MinioInputStreamStore;
 import com.rick.fileupload.impl.oos.OSSInputStreamStore;
 import com.rick.fileupload.impl.oos.property.OSSProperties;
+import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
 import org.csource.common.MyException;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +60,16 @@ public class SharpConfig {
     public InputStreamStore ossInputStreamStore(OSSProperties ossProperties) {
         OSS ossClient = new OSSClientBuilder().build(ossProperties.getEndpoint(), ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret());
         return new OSSInputStreamStore(ossClient, ossProperties);
+    }
+
+//    @Bean
+    public InputStreamStore minioInputStreamStore(OSSProperties ossProperties) {
+        MinioClient minioClient =
+                MinioClient.builder()
+                        .endpoint(ossProperties.getEndpoint())
+                        .credentials(ossProperties.getAccessKeyId(), ossProperties.getAccessKeySecret())
+                        .build();
+        return new MinioInputStreamStore(minioClient, ossProperties);
     }
 
 //    @Bean
