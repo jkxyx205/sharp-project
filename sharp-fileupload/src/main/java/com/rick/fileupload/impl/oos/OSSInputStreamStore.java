@@ -25,9 +25,10 @@ public class OSSInputStreamStore extends AbstractInputStreamStore {
     @Override
     public StoreResponse store(String groupName, String storeName, String extension, InputStream is) throws IOException {
         String path = FileUtils.fullName(storeName, extension);
+        String fullPath = getFullPath(groupName, path);
         ossClient.putObject(ossProperties.getBucketName(),
-                groupName + "/" + path, is);
-        return new StoreResponse(groupName, path, groupName + "/" + path, getURL(groupName, path));
+                fullPath, is);
+        return new StoreResponse(groupName, path, fullPath, getURL(groupName, path));
     }
 
     @Override
