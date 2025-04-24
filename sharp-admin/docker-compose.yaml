@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+#  nginx:
+#    container_name: nginx
+#    image: nginx:1.25.4
+#    restart: always
+#    ports:
+#      - "8000:80"
+  db:
+    container_name: mysql-sharp-admin
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: sharp-admin
+    volumes:
+      - /Users/rick/Space/tmp/mysql:/var/lib/mysql # 数据挂载
+      - ./init:/docker-entrypoint-initdb.d # 数据挂载目录下没有数据，那么执行 init 下的 sql
+#    ports:
+#      - "3306:3306"
+#      - "33060:33060"
+    expose: # 不会真的开放端口到宿主机或外部网络
+      - 3306
+      - 33060
+    healthcheck: # 给 db 添加健康检查，要真正做到“等数据库准备好再启动”
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sharp-admin:
+    container_name: sharp-admin
+    image: sharp-admin:2.0
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - /Users/rick/Space/tmp/admin/log:/opt/app/log
+    depends_on:
+      db:
+        condition: service_healthy

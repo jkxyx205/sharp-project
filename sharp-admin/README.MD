@@ -57,24 +57,51 @@ nohup java -Xms64m -Xmx1024m -Dspring.profiles.active=dev -jar sharp-admin-1.0-S
     }
 ```
 ## 自动部署
-1. 服务器项目目录下创建文件夹用于接收可执行的 jar
-
+0. 安装数据库
+1. 在服务器创建 `deploy` 文件夹用于上传 jar 文件
+```shell
+cd sharp-admin
+mkdir deploy
+```
+2. 修改 `config.sh` 和 `mysqldump.sh` 后，和 `deploy.sh` 一并拷贝到服务器项目目录下
+目录结构：
+```
+sharp-admin
+├── config.sh // 配置目录
+├── deploy // jar 临时存放的目录
+├── deploy.sh // 部署命令
+├── mysqldump // 备份文件
+└── mysqldump.sh // 备份脚步
+```
+3. 运行 `mvn.sh` （服务器进行免密登录配置）
 ## 数据库自动备份
+运行 `crontab -e`
 ```shell
 #00 22 * * * mysqldump -uroot -p222222 --master-data=2 --single-transaction --databases product-manager > /usr/local/projects/sharp-admin/mysqldump/backup-$(date +'\%F-\%R').sql
 
 00 22 * * * sh /usr/local/projects/sharp-admin/mysqldump.sh
 ```
-```shell
-cd sharp-admin
-mkdir deploy
-```
-
-2. 修改 `clean.sh` 并拷贝到服务器项目目录下
-3. 运行 `mvn.sh` （服务器进行免密登录配置）
-
 详情可以参考：[https://xhope.top/?p=1722](https://xhope.top/?p=1722)
-
+## Docker 部署
+1. 安装 `Docker` 环境
+2. 执行命令
+```shell
+#!/bin/bash
+mvn clean package -Dmaven.test.skip=true
+docker-compose down
+docker-compose up -d
+```
+3. 应用程序更新
+```shell
+#!/bin/bash
+docker-compose stop sharp-admin
+docker-compose rm sharp-admin -f
+mvn clean package -Dmaven.test.skip=true
+docker rmi sharp-admin:2.0
+docker build -t sharp-admin:2.0 .
+docker-compose create sharp-admin
+docker-compose start sharp-admin
+```
 # 如何增删改查1
 1. 创建 `实体`
 2. 创建 `DAO`

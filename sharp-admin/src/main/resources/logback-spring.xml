@@ -16,6 +16,9 @@
     <springProfile name="prod">
         <include resource="logback/logback-prod.xml"/>
     </springProfile>
+    <springProfile name="docker-prod">
+        <include resource="logback/logback-prod.xml"/>
+    </springProfile>
     <springProfile name="dev-prod">
         <include resource="logback/logback-dev.xml"/>
     </springProfile>
