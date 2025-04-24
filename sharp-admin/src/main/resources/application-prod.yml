@@ -16,7 +16,7 @@ spring:
 
 logging:
   file:
-    path: E:\\project\\py\\logs
+    path: /Users/rick/Space/tmp/admin/log
 
 fileupload:
   tmp: E:\\project\\py\\tmp # 下载的临时目录
