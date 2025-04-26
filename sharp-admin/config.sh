@@ -1,4 +1,4 @@
-server_ip="106.15.102.170"
+server_ip="47.97.7.98"
 dir="/usr/local/projects"
 project_name="sharp-admin"
 port="8080"
