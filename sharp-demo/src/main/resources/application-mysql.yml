@@ -63,3 +63,14 @@ fileupload:
     accessKeySecret: xxx
     bucketName: sharp-fileupload
 
+#bark:
+#  url: https://bark-worker.jkxyx205.workers.dev
+#  device-keys:
+#    - xxx
+
+bark:
+  url: https://api.day.app # 这个地址不允许批量发送消息
+  device-key: xxx
+wechat:
+  appid:  xxx
+  secret: xxx
