@@ -55,7 +55,11 @@ public class DevDBInit {
         long end = System.currentTimeMillis();
         System.out.println("processed at costs "+((end - start) / 1000)+" ms");
 
-        // mysql -uroot -p123456 sharp-admin-20241106 < /Users/rick/Space/Share/sharp-admin-20241106.sqlFile
+        // 常规恢复（有现成的数据库）
+        // mysql -uroot -p123456 sharp-admin-20241106 < /Users/rick/Space/Share/sharp-admin-20241106.sql
+
+        // 三、如果你想一条命令搞定（连建库带恢复
+        // mysql -uroot -p123456 < /Users/rick/Space/Share/sharp-admin-20241106.sql
     }
 
     private DataSource dataSource() {
