@@ -1,0 +1,14 @@
+[Unit]
+Description=Sharp Admin Deploy Service
+After=network.target mysql.service
+Requires=mysql.service
+
+[Service]
+Type=simple
+# ExecStart=/bin/bash -c 'nohup java -Xms1024m -Xmx2048m -Dspring.profiles.active=prod -jar /usr/local/projects/sharp-admin/sharp-admin-2.0-SNAPSHOT.jar --server.port=8080 &'
+ExecStart=/usr/local/projects/sharp-admin/deploy.sh
+WorkingDirectory=/usr/local/projects/sharp-admin
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
