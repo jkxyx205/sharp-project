@@ -60,7 +60,7 @@
 </div>
 <div th:replace="includes/base :: common_js(~{})">
 </div>
-<script th:inline="javascript">
+<script th:inline="javascript" th:if="${@environment.getProperty('spring.profiles.active') == 'prod'}">
     new Vue({
         el: '#form',
         data: {
@@ -68,6 +68,27 @@
             password: "",
             code: "",
             showCode: /*[[${session.showCode}]]*/
+        },
+        computed: {
+            loginDisabled: function () {
+                return !(this.username && this.password && (!this.showCode || this.showCode && this.code))
+            }
+        },
+        methods: {
+        }
+    })
+</script>
+<script th:inline="javascript" th:if="${@environment.getProperty('spring.profiles.active') != 'prod'}">
+    new Vue({
+        el: '#form',
+        data: {
+            username: "admin",
+            password: "111111",
+            code: "",
+            showCode: /*[[${session.showCode}]]*/
+        },
+        mounted: function () {
+            $('#form').submit()
         },
         computed: {
             loginDisabled: function () {
