@@ -6,8 +6,8 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-#      url: jdbc:mysql://localhost:3306/sharp-admin-20250407?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
-      url: jdbc:mysql://localhost:3306/sharp-admin?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+#      url: jdbc:mysql://127.0.0.1:3306/sharp-admin-20250407?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+      url: jdbc:mysql://127.0.0.1:3306/sharp-admin?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
       username: root
       password: jkxyx205
       initialSize: 1
@@ -26,4 +26,4 @@ fileupload:
   tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
   local: # cd /Users/rick/Space/tmp/fileupload && http-server -p 7892
     root-path: /Users/rick/Space/tmp/fileupload
-    server-url: http://localhost:7892/ # 映射到tmp目录
+    server-url: http://127.0.0.1:7892/ # 映射到tmp目录
