@@ -5,12 +5,12 @@
 FROM openjdk:8-jdk-alpine
 
 # Refer to Maven build -> finalName
-ARG JAR_FILE=target/sharp-admin-2.0-SNAPSHOT.jar
+ARG JAR_FILE=deploy/sharp-admin-2.0-SNAPSHOT.jar
 
 # cd /opt/app
 WORKDIR /opt/app
 
-# cp target/sharp-admin-2.0-SNAPSHOT.jar /opt/app/app.jar
+# cp deploy/sharp-admin-2.0-SNAPSHOT.jar /opt/app/app.jar
 COPY ${JAR_FILE} app.jar
 
 # java -jar /opt/app/app.jar

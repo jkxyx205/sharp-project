@@ -1,0 +1,5 @@
+server_ip="47.111.117.113"
+dir="/usr/local/projects"
+project_name="sharp-admin"
+port="8080"
+project_path="$dir/$project_name"

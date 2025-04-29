@@ -143,6 +143,7 @@ Temporary Items
 ### Gradle ###
 .gradle
 build/
+sharp-admin/deploy/**/*.jar
 
 # Ignore Gradle GUI config
 gradle-app.setting
