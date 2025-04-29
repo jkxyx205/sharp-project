@@ -64,3 +64,5 @@ dict:
 props:
   items: {"group_select_sql": "select 1 id, 'Rick' name, 'Man' parent_name from dual union all select 2 id, 'Tom' name, 'Man' parent_name from dual"}
 
+app:
+  version: v2025.04.29
