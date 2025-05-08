@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>alpine-js</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body>
+<h1>hello alpine</h1>
+
+<div x-data="setup">
+    <button x-text="isOpen ? 'Open' : 'Closed'" @click="isOpen = !isOpen"></button>
+
+    <form action="/" @submit.prevent="post">
+        code: <input type="text" name="code" x-model="code"><br>
+        name: <input type="text" name="name" x-model="name"><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <span>显示</span>
+    <span x-text="'计算属性：' + upperName"></span>
+    <ul>
+        <li x-text="code"></li>
+        <li x-text="name"></li>
+    </ul>
+</div>
+
+<div>
+    <button onclick="post()">Post</button>
+</div>
+
+<script th:inline="javascript">
+    function setup() {
+        // return {
+        //     code: "hello",
+        //     name: "world"
+        // }
+        return {
+            .../*[[${user}]]*/,
+            isOpen: true,
+            get upperName() {
+                return this.name.toUpperCase()
+            },
+            post() {
+                console.log(this.code, this.name);
+            }
+        };
+    }
+
+    function post() {
+        // 更新组件数据
+        const root = document.querySelector('[x-data]');
+        // Alpine v3 提供了 Alpine.$data(el) 方法，用于获取绑定在某个元素上的组件数据。
+        const data = Alpine.$data(root);
+        console.log(data.code, data.name)
+    }
+
+</script>
+</body>
+</html>

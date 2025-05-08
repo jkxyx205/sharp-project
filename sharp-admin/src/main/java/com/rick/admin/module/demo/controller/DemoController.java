@@ -5,6 +5,7 @@ import com.rick.admin.module.demo.entity.ComplexModel;
 import com.rick.admin.module.demo.model.EmbeddedValue;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
+import com.rick.admin.sys.user.entity.User;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
@@ -145,5 +146,15 @@ public class DemoController {
     @GetMapping("jq-valid")
     public String jqValid() {
         return "demos/jq-valid";
+    }
+
+    @GetMapping("alpine-js")
+    public String AlpineJs(Model model) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+        return "demos/alpine-js";
     }
 }
