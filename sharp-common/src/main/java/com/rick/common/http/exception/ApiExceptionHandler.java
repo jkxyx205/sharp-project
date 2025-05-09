@@ -149,8 +149,10 @@ public class ApiExceptionHandler {
             return ResultUtils.fail(code, message, data);
         }
 
-        request.setAttribute("javax.servlet.error.status_code", code);
-        request.getRequestDispatcher("/error").forward(request, response);
+        if (!request.getRequestURI().equals("/error")) {
+            request.setAttribute("javax.servlet.error.status_code", code);
+            request.getRequestDispatcher("/error").forward(request, response);
+        }
         return null;
     }
 
