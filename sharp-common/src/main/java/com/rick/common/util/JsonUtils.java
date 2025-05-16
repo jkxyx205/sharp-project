@@ -1,11 +1,9 @@
 package com.rick.common.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -118,6 +116,16 @@ public final class JsonUtils {
 
     public static Map<String, ?> objectToMap(Object obj) {
         return objectMapper.convertValue(obj, Map.class);
+    }
+
+    public static String beautifyJSON(String json) {
+        ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+        try {
+            Object jsonObject = objectMapper.readValue(json, Object.class);
+            return writer.writeValueAsString(jsonObject);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static JavaType getCollectionType(Class<?> collectionClass, Class<?>... elementClasses) {
