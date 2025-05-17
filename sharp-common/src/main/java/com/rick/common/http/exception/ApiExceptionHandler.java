@@ -161,7 +161,7 @@ public class ApiExceptionHandler {
                     FieldError fieldError = (FieldError) objectError;
                     Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
                     params.put("field", fieldError.getField());
-                    params.put("message", objectError.getDefaultMessage());
+                    params.put("message", fieldError.getField() + "=" +((FieldError) objectError).getRejectedValue() + "," + objectError.getDefaultMessage());
                     params.put("rejectedValue", ((FieldError) objectError).getRejectedValue());
                     return params;
                 }
@@ -172,7 +172,7 @@ public class ApiExceptionHandler {
         return constraintViolationSet.stream().map(constraintViolation -> {
             Map<String, Object> params = Maps.newHashMapWithExpectedSize(3);
             params.put("field", StringUtils.substringAfterLast("."+ constraintViolation.getPropertyPath().toString(), "."));
-            params.put("message", constraintViolation.getMessage());
+            params.put("message",  params.get("field") + "=" + constraintViolation.getInvalidValue() + "," + constraintViolation.getMessage());
             params.put("rejectedValue", constraintViolation.getInvalidValue());
             return params;
         }).collect(Collectors.toList());
