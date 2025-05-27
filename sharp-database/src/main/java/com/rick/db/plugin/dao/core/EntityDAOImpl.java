@@ -1590,8 +1590,6 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     .replace("\n", "\\n")
                     .replace("'", "''"); // SQL 转义单引号
             return "'" + str + "'";
-        } else if (value.getClass() == Date.class) {
-            return formatValue(Time2StringUtils.format((Date) value));
         } else if (value.getClass() == LocalDate.class) {
             return formatValue(Time2StringUtils.format((LocalDate) value));
         } else if (value.getClass() == LocalDateTime.class) {

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Objects;
 
@@ -41,24 +42,12 @@ public final class Time2StringUtils {
         return format(localDate, DEFAULT_DATE_FORMATTER);
     }
 
-    public static String format(LocalDate localDate, DateTimeFormatter formatter) {
-        return Objects.isNull(localDate) ? null : formatter.format(localDate);
-    }
-
     public static String format(LocalDateTime dateTime) {
         return format(dateTime, DEFAULT_TIME_FORMATTER);
     }
 
-    public static String format(LocalDateTime dateTime, DateTimeFormatter formatter) {
-        return Objects.isNull(dateTime) ? null : formatter.format(dateTime);
-    }
-
     public static String format(Instant instant) {
         return format(instant, DEFAULT_TIME_FORMATTER);
-    }
-
-    public static String format(Instant instant, DateTimeFormatter formatter) {
-        return Objects.isNull(instant) ? null : formatter.format(instant);
     }
 
     public static String format(long milliseconds) {
@@ -67,5 +56,9 @@ public final class Time2StringUtils {
 
     public static String format(long milliseconds, DateTimeFormatter formatter) {
         return format(Instant.ofEpochMilli(milliseconds), formatter);
+    }
+
+    public static String format(TemporalAccessor temporal, DateTimeFormatter formatter) {
+        return Objects.isNull(temporal) ? null : formatter.format(temporal);
     }
 }
