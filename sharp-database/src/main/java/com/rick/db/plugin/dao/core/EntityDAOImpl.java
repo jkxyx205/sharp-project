@@ -8,6 +8,7 @@ import com.rick.common.http.exception.BizException;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.EnumUtils;
 import com.rick.common.util.IdGenerator;
+import com.rick.common.util.Time2StringUtils;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.constant.SharpDbConstants;
@@ -43,6 +44,9 @@ import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -846,6 +850,15 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
     }
 
     @Override
+    public String getInsertSQL(T t) {
+        return String.format("INSERT INTO %s (%s) VALUES (%s);",
+                this.tableName,
+                this.columnNames,
+                String.join(",", Arrays.stream(instanceToParamsArray(t)).map(param -> formatValue(param)).collect(Collectors.toList()))
+        );
+    }
+
+    @Override
     public Class<T> getEntityClass() {
         return entityClass;
     }
@@ -1567,4 +1580,31 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         return (tableMeta.getFieldMap().get(name) != null && tableMeta.getFieldMap().get(name).getAnnotation(annotationClazz) != null) ||
                 (tableMeta.getColumnNameFieldMap().get(name)!= null && tableMeta.getColumnNameFieldMap().get(name).getAnnotation(annotationClazz) != null);
     }
+
+    private static String formatValue(Object value) {
+        if (value == null) {
+            return "NULL";
+        } else if (value instanceof String || value instanceof Character) {
+            String str = value.toString()
+                    .replace("\r\n", "\\n")
+                    .replace("\n", "\\n")
+                    .replace("'", "''"); // SQL 转义单引号
+            return "'" + str + "'";
+        } else if (value.getClass() == Date.class) {
+            return formatValue(Time2StringUtils.format((Date) value));
+        } else if (value.getClass() == LocalDate.class) {
+            return formatValue(Time2StringUtils.format((LocalDate) value));
+        } else if (value.getClass() == LocalDateTime.class) {
+            return formatValue(Time2StringUtils.format((LocalDateTime) value));
+        } else if (value.getClass() == Instant.class) {
+            return formatValue(Time2StringUtils.format((Instant) value));
+        } else if (Number.class.isAssignableFrom(value.getClass())){
+            return value.toString();
+        }  else if (Boolean.class == value.getClass()){
+            return Objects.equals(Boolean.TRUE, value) ? "1" : "0";
+        } else {
+            return formatValue(value.toString());
+        }
+    }
+
 }

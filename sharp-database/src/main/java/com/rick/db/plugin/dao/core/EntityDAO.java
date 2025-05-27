@@ -136,6 +136,13 @@ public interface EntityDAO<T, ID> extends CoreDAO<ID> {
 
     String getSelectConditionSQL(Map<String, ?> params);
 
+    /**
+     * 根据实体类转换成 insert 语句
+     * @param t
+     * @return
+     */
+    String getInsertSQL(T t);
+
     void selectPropertyBySql(List<T> list);
 
     Map<String, String> getPropertyNameToColumnNameMap();
