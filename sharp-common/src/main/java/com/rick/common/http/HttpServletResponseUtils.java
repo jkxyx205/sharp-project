@@ -1,7 +1,9 @@
 package com.rick.common.http;
 
 
+import com.rick.common.http.model.Result;
 import com.rick.common.util.FileUtils;
+import com.rick.common.util.JsonUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +68,14 @@ public final class HttpServletResponseUtils {
         response.setContentType(FileUtils.getContentType(formatedFileName));// 定义输出类型
         OutputStream os = response.getOutputStream(); // 取得输出流Files
         return os;
+    }
+
+    public static void writeJSON(HttpServletResponse response, String value) {
+        HttpServletResponseUtils.write(response, "application/json; charset=UTF-8", value);
+    }
+
+    public static void writeJSON(HttpServletResponse response, Result result) {
+        HttpServletResponseUtils.write(response, "application/json; charset=UTF-8", JsonUtils.toJson(result));
     }
 
     public static void write(HttpServletResponse response, String contentType, String value) {
