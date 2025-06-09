@@ -6,6 +6,7 @@ import com.rick.admin.module.demo.model.EmbeddedValue;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
 import com.rick.admin.sys.user.entity.User;
+import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
@@ -17,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.PermitAll;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -156,5 +158,60 @@ public class DemoController {
 
         model.addAttribute("user", user);
         return "demos/alpine-js";
+    }
+
+
+    @GetMapping("htmx")
+    public String htmx(Model model) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+        return "demos/htmx/layout";
+    }
+
+    @GetMapping("htmx/index")
+    public String htmxIndex(Model model, HttpServletRequest request) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+
+        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index :: content" : "demos/htmx/index";
+    }
+
+    @GetMapping("htmx/about")
+    public String htmxAbout(Model model, HttpServletRequest request) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+
+        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/about :: content" : "demos/htmx/about";
+    }
+
+    @GetMapping("htmx/index/tab-a")
+    public String htmxIndexTabA(Model model, HttpServletRequest request) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+        model.addAttribute("tab", "tab-a");
+        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index-tab-a :: content-tab" : "demos/htmx/index-tab-a";
+    }
+
+    @GetMapping("htmx/index/tab-b")
+    public String htmxIndexTabB(Model model, HttpServletRequest request) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+        model.addAttribute("tab", "tab-b");
+        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index-tab-b :: content-tab" : "demos/htmx/index-tab-b";
     }
 }

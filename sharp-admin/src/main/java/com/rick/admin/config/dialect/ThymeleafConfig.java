@@ -14,6 +14,7 @@ import com.rick.admin.module.codeinput.service.CodeInputService;
 import com.rick.db.service.SharpService;
 import com.rick.formflow.form.service.FormService;
 import com.rick.meta.dict.service.DictService;
+import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
@@ -55,7 +56,14 @@ public class ThymeleafConfig {
         // 自定义解析
         StandardDialect standardDialect = CollectionUtils.findValueOfType(templateEngine.getDialects(), StandardDialect.class);
         standardDialect.setJavaScriptSerializer(new JacksonStandardJavaScriptSerializer());
+
+        templateEngine.addDialect(new LayoutDialect());
         return templateEngine;
+    }
+
+    @Bean
+    public LayoutDialect layoutDialect() {
+        return new LayoutDialect();
     }
 
     private static final class JacksonStandardJavaScriptSerializer implements IStandardJavaScriptSerializer {

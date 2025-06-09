@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{demos/htmx/layout.html}">
+<div layout:fragment="content" th:fragment="content">
+    <style>
+        li.active {
+            background-color: red;
+        }
+
+        li a {
+            display: block;
+        }
+    </style>
+
+    <h1>Index</h1>
+
+    <div th:attr="x-data='{ active: \'' + ${tab} + '\' }'">
+        <ul >
+            <li th:class="${tab == 'tab-a' ? 'active0' : ''}" :class="{active: active === 'tab-a'}" @click="active = 'tab-a'"><a hx-get="/demos/htmx/index/tab-a" hx-target="#html-tab" hx-push-url="true">TabA</a></li>
+            <li th:class="${tab == 'tab-b' ? 'active0' : ''}" :class="'tab-b' === active ? 'active' : ''" @click="active = 'tab-b'"><a hx-get="/demos/htmx/index/tab-b" hx-target="#html-tab" hx-push-url="true">TabB</a></li>
+        </ul>
+    <div>
+    <hr>
+
+    <div id="html-tab" layout:fragment="content-tab">
+        <span>Welcome</span>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
+</div>
+</html>

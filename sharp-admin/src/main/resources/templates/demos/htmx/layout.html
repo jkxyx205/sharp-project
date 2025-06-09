@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Layout</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+      .layout {
+        display: flex;
+        flex-direction: column;
+          height: 100vh;
+      }
+
+      .title {
+        height: 50px;
+          line-height: 50px;
+        background-color: #0c0e10;
+        color: #FFFFFF;
+      }
+
+      .bottom {
+        display: flex;
+          flex: 1;
+      }
+
+      .side-left {
+        width: 200px;
+          background-color: #af4040;
+      }
+
+      .side-right {
+          flex: 1;
+          background-color: #0b4d75;
+      }
+
+    </style>
+</head>
+<body>
+<div class="layout">
+  <div class="title" th:text="${user.name}"></div>
+  <div class="bottom">
+    <div class="side-left">
+      <ul>
+        <li><a hx-get="/demos/htmx/index" hx-target="#html" hx-push-url="true">Index</a></li>
+        <li><a hx-get="/demos/htmx/about" hx-target="#html" hx-push-url="true">About</a></li>
+      </ul>
+    </div>
+    <div class="side-right" id="html" layout:fragment="content">
+      <span>Welcome</span>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/htmx/2.0.4/htmx.min.js"></script>
+<script>
+    htmx.on("htmx:configRequest", function(evt) {
+        evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
+    });
+</script>
+</body>
+</html>
