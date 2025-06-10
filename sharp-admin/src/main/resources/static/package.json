@@ -1,0 +1,11 @@
+{
+  "name": "settings",
+  "scripts": {
+    "sass": "sass --watch scss:css --style=compressed --no-source-map",
+    "rollup": "rollup -c rollup.config.mjs --watch"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.42.0"
+  }
+}
