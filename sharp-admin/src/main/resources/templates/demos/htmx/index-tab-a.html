@@ -4,5 +4,26 @@
       layout:decorate="~{demos/htmx/index.html}">
 <div layout:fragment="content-tab" th:fragment="content-tab">
     <h1>Index Tab A</h1>
+
+    <div>
+        <button id="getRequest">GET Request</button>
+
+        <div id="response" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
+            <h3>Response:</h3>
+            <pre id="responseData" style="overflow: auto;"></pre>
+        </div>
+    </div>
+    <script>
+        document.getElementById('getRequest').addEventListener('click', function() {
+            axios.get('https://jsonplaceholder.typicode.com/posts/1')
+                .then(function(response) {
+                    document.getElementById('responseData').textContent = JSON.stringify(response.data, null, 2);
+                })
+                .catch(function(error) {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('responseData').textContent = 'Error fetching data';
+                });
+        });
+    </script>
 </div>
 </html>
