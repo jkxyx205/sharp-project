@@ -598,6 +598,11 @@
             location.href = location.pathname + _newUrl(url)
         }
 
+        /**
+         * @param url 根据当前的查询合并 url 得到新的查询
+         * @returns {string|string|string}
+         * @private
+         */
         function _newUrl(url) {
             if (typeof url === 'object') {
                 url = $.param(url)
@@ -621,7 +626,8 @@
         }
 
         /**
-         * 获取url参数对象
+         * 获取url参数对象，同 url2Object
+         * 参考库实现 https://github.com/ljharb/qs
          * @returns {*}
          */
         function getUrlObject() {
@@ -656,6 +662,12 @@
             }
         }
 
+        /**
+         * 同 getUrlObject
+         * 参考库实现 https://github.com/ljharb/qs
+         * @param search
+         * @returns {{}} "a=b&a=c" =>{a: "c"}
+         */
         function url2Object(search) {
             var urlObj = {}
 

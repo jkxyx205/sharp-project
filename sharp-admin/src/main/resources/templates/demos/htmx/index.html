@@ -20,12 +20,11 @@
             <li th:class="${tab == 'tab-a' ? 'active0' : ''}" :class="{active: active === 'tab-a'}" @click="active = 'tab-a'"><a hx-get="/demos/htmx/index/tab-a" hx-target="#html-tab" hx-push-url="true">TabA</a></li>
             <li th:class="${tab == 'tab-b' ? 'active0' : ''}" :class="'tab-b' === active ? 'active' : ''" @click="active = 'tab-b'"><a hx-get="/demos/htmx/index/tab-b" hx-target="#html-tab" hx-push-url="true">TabB</a></li>
         </ul>
-    <div>
+    </div>
     <hr>
 
     <div id="html-tab" layout:fragment="content-tab">
         <span>Welcome</span>
     </div>
-    <script src="https://cdn.bootcdn.net/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 </div>
 </html>
