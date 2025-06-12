@@ -54,6 +54,11 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
             request.setAttribute("device", device);
         }
 
+        // 标签模式
+        if (request.getSession().getAttribute("multiTab") == null || request.getParameter("multiTab") != null) {
+            request.getSession().setAttribute("multiTab", ObjectUtils.defaultIfNull(request.getParameter("multiTab"), true));
+        }
+
         writeAccessInfo(request, username, name);
 
         String servletPath = request.getServletPath();

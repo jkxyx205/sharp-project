@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
-    <title>Layout</title>
+    <title>Sharp Admin</title>
     <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
     <style>
         html, body {
@@ -90,31 +90,38 @@
       <span class="visible-md" style="margin-right: 4px;" sec:authentication="name"></span>
       <span class="visible-md" th:text="${user.name}"></span>
       <span class="ml-2" th:text="${T(com.rick.admin.common.AppConfigHolder).version}"></span>
+      <a style="margin-left: 16px; color: #fff;" th:href="|javascript:location.href=mergeUrlQueryObject('multiTab=${!session.multiTab}')|">layout模式</a>
   </div>
   <div class="bottom">
     <div class="side-left">
       <ul>
-        <li><a id="index" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)">Index这里是首页哈哈哈Index这里是首页哈哈哈</a></li>
-        <li><a id="about" hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)">About</a></li>
+        <li><a id="index" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">Index</a></li>
+        <li><a id="about" hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >About</a></li>
       </ul>
     </div>
-    <div class="side-right">
-        <div id="tab" x-data="setup" x-init="init">
-            <ul>
-                <template x-for="tab in tabs">
-                    <li><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
-                </template>
-            </ul>
-            <div style="clear: left;"></div>
-        </div>
-        <div id="html">
-            <div th:if="${#request.servletPath.indexOf('/demos/htmx/index') > -1 }" id="index-tab-container" target-id="index-tab" layout:fragment="content"></div>
-            <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-a'}" id="index-container" layout:fragment="content"></div>-->
-            <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-b'}" id="index-container" layout:fragment="content"></div>-->
-            <div th:if="${#request.servletPath == '/demos/htmx/about'}" id="about-tab-container" target-id="about-tab" layout:fragment="content"></div>
-<!--            <div th:if="${#request.servletPath == '/demos/htmx/detail/SO11231232323'}" id="so-detail-container" target-id="so-detail-tab" layout:fragment="content"></div>-->
-        </div>
-    </div>
+
+      <div class="side-right">
+          <div id="tab" x-data="setup" x-init="init" th:if="${session.multiTab}">
+              <ul>
+                  <template x-for="tab in tabs">
+                      <li><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
+                  </template>
+              </ul>
+              <div style="clear: left;"></div>
+          </div>
+          <div id="html">
+              <div layout:fragment="content" th:if="${!session.multiTab}"></div>
+
+              <!-- 服务端渲染，如何服务端没有渲染，js 会再次请求后端，demos/htmx/index/tab-a 会定位到第三层路由 -->
+              <th:block th:if="${session.multiTab}">
+              <div th:if="${#request.servletPath.indexOf('/demos/htmx/index') > -1 }" id="index-tab-container" target-id="index-tab"><div layout:fragment="content"></div></div>
+              <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-a'}" id="index-container"><div layout:fragment="content"></div></div>-->
+              <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
+              <div th:if="${#request.servletPath == '/demos/htmx/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
+              </th:block>
+
+          </div>
+      </div>
   </div>
 </div>
 <script src="https://cdn.bootcdn.net/ajax/libs/htmx/2.0.4/htmx.min.js"></script>
@@ -178,6 +185,81 @@
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Re-select your 'a' elements here
+        const linkNodes = document.querySelectorAll('a'); // Selects all <a> tags
+
+        if (linkNodes.length > 0) {
+            console.log("Link nodes re-selected:", linkNodes);
+            // Now you can safely use linkNodes, e.g., iterate over them
+            linkNodes.forEach(link => {
+                // Add event listeners, modify attributes, etc.
+                // console.log(link.href);
+            });
+        } else {
+            console.log("No <a> elements found on the page.");
+        }
+    });
+
+    const linkNodes = document.querySelectorAll(".side-left li a")
+    const links = []
+    for (let linkNode of linkNodes) {
+        links.push({
+            id: linkNode.id,
+            path: linkNode.getAttribute("hx-get"),
+            name: linkNode.innerText,
+        });
+
+        linkNode.addEventListener('click',
+            function (event) {
+                if (typeof addHtmxTab !== 'undefined') {
+                    addHtmxTab(event.target)
+                } else {
+                    event.target.preventRequest = location.pathname.indexOf(event.target.getAttribute("hx-get")) > -1 ? true : false
+                }
+            })
+    }
+
+    function beforeRequest(event) {
+        if (event.target.preventRequest) {
+            event.preventDefault()
+        }
+    }
+
+    function openLink(...args) {
+        if (args.length === 1) {
+            const param = args[0];
+            if (typeof addHtmxTab !== 'undefined') {
+                // elem
+                addHtmxTab(param);
+            } else {
+                // path: /demos/html/index
+                fetchTargetContainer(param, "html")
+            }
+        } else if (args.length === 3) {
+            const [id, path, name] = args; // Destructure the arguments
+            if (typeof addTab !== 'undefined') {
+                addTab(id, path, name);
+            } else {
+                fetchTargetContainer(path, "html")
+            }
+        } else {
+            console.warn("openLink called with an unsupported number of arguments.");
+        }
+    }
+
+    function fetchTargetContainer(path, containerId) {
+        axios.get(path)
+            .then(function(response) {
+                document.getElementById(containerId).innerHTML = response.data
+                history.pushState(null, '', path)
+            })
+            .catch(function(error) {
+                console.error('Error fetching data:', error);
+                document.getElementById(containerId).innerHTML = "Error fetching data"
+            });
+    }
 </script>
 <!--url 工具函数-->
 <script>
@@ -237,29 +319,14 @@
     }
 </script>
 <!-- 多标签-->
-<script>
+<script th:if="${session.multiTab}">
     const tabElem = document.getElementById("tab")
     const htmlElem = document.getElementById("html")
-    const linkNodes = document.querySelectorAll(".side-left li a")
-    const links = []
     const TAB_ITEMS_KEY = 'tabs'
     let activeId;
     let data
-    for (let linkNode of linkNodes) {
-        links.push({
-            id: linkNode.id,
-            path: linkNode.getAttribute("hx-get"),
-            name: linkNode.innerText,
-        });
 
-        linkNode.addEventListener('click',
-            function (event) {
-                addHtmxTab(event.target)
-            })
-    }
-
-    //  TODO
-    // 合并非菜单的
+    // 合并非菜单的 tab
     // links.push({
     //     id: "SO11231232323",
     //     path: "/demos/htmx/detail/SO11231232323",
@@ -308,7 +375,7 @@
                     elem && elem.setAttribute('hx-target', '#' + containerId)
                 });
 
-                // 如何没有加载(非 服务渲染)，运行 click()，重新请求
+                // 如何没有加载(非 服务渲染)，运行 click()，重新请求，如何有三层路由，比如 htmx/index/tab-a htmx/index/tab-b，需要进行服务器渲染
                 let container = document.querySelector("[target-id="+link.id+"-tab]")
                 if (!container.children.length)
                     setTimeout(() => document.getElementById(link.id + "-tab").click(), 200)
@@ -326,10 +393,11 @@
         let tab = data.tabs.find(tab => tab.id === tabId)
         if (tab) {
             let container = document.querySelector("[target-id="+tab.id+"]")
-            if (container.children.length)
-                elem.preventRequest = true
-            activeTab(tabId);
-            return
+            if (container.children.length) {
+                elem.preventRequest = true;
+                activeTab(tabId);
+                return
+            }
         }
 
         _addTab(tabId, elem.getAttribute("hx-get"), elem.innerText, containerId => elem.setAttribute('hx-target', '#' + containerId));
@@ -337,16 +405,7 @@
 
     function addTab(id, path, name) {
         _addTab(id, path, name, containerId => {
-            axios.get(path)
-                .then(function(response) {
-                    document.getElementById(containerId).innerHTML = response.data
-                })
-                .catch(function(error) {
-                    console.error('Error fetching data:', error);
-                    document.getElementById(containerId).innerHTML = "Error fetching data"
-                });
-
-            document.getElementById(containerId).innerHTML = "Hello World"
+            fetchTargetContainer(path, containerId)
         })
     }
 
@@ -428,12 +487,6 @@
             } else {
                 containerElem.style.display = 'none';
             }
-        }
-    }
-
-    function beforeRequest(event) {
-        if (event.target.preventRequest) {
-            event.preventDefault()
         }
     }
 
