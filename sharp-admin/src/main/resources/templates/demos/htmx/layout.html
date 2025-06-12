@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Sharp Admin</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
     <style>
         html, body {
@@ -15,6 +16,11 @@
         display: flex;
         flex-direction: column;
           height: 100vh;
+      }
+
+      #html {
+         position: relative;
+         flex: 1;
       }
 
       .title {
@@ -35,7 +41,9 @@
       }
 
       .side-right {
+          display: flex;
           flex: 1;
+          flex-direction: column;
           background-color: #0b4d75;
           overflow: hidden;
       }
@@ -80,6 +88,18 @@
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
+    }
+
+    .drawer-dialog {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 0;
+        right: 0;
+        top: 0;
+        background: red;
+        transition: width .2s ease;
     }
     </style>
 </head>
@@ -129,9 +149,12 @@
 <!-- Include Axios from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
 <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+
+<script th:src="@{/coreui/vendors/bootstrap/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.dialog.js}"></script>
 <script>
     htmx.on("htmx:configRequest", function(evt) {
         evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -249,16 +272,45 @@
         }
     }
 
-    function fetchTargetContainer(path, containerId) {
-        axios.get(path)
+    function openDrawerDialog(url, dialogId, pushUrl = true) {
+        fetchTargetContainer(url, $("#"+dialogId+" .drawer-content")[0], pushUrl);
+        document.getElementById(dialogId).style.width = "600px";
+    }
+
+    /**
+     * @param obj id or elem
+     * @param url
+     */
+    function closeDrawerDialog(param, url) {
+        if (typeof param === "string") {
+            document.getElementById(param).style.width = "0px";
+        } else {
+            param.parentNode.parentNode.style.width = "0"
+        }
+        url && history.pushState(null, '', url)
+    }
+
+    function fetchTargetContainer(url, containerId, pushUrl = true) {
+        let elem;
+        if (isDOMElement(containerId)) {
+            elem = containerId
+        } else {
+            elem = document.getElementById(containerId)
+        }
+
+        axios.get(url)
             .then(function(response) {
-                document.getElementById(containerId).innerHTML = response.data
-                history.pushState(null, '', path)
+                elem.innerHTML = response.data
+                pushUrl && history.pushState(null, '', url)
             })
             .catch(function(error) {
                 console.error('Error fetching data:', error);
-                document.getElementById(containerId).innerHTML = "Error fetching data"
+                elem.innerHTML = "Error fetching data"
             });
+    }
+
+    function isDOMElement(obj) {
+        return typeof obj === 'object' && obj !== null && obj instanceof Element;
     }
 </script>
 <!--url 工具函数-->

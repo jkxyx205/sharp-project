@@ -16,5 +16,48 @@
 
     <hr>
     <button onclick="openLink('SO11231232323', '/demos/htmx/detail/SO11231232323?a=1', 'addTab')">addTab</button>
+
+    <button onclick="addDialog1()">addDialog1(全局)</button>
+    <button onclick="addDialog2()">addDialog2(全局)</button>
+    <button onclick="openDrawerDialog('/demos/htmx/detail/SO11231232323', 'about-dialog', false)">抽屉（多标签下独立）</button>
+
+    <div class="drawer-dialog" id="about-dialog">
+        <div style="height: 50px; padding-right: 24px; background: #0c0e10; text-align: right;">
+            <a style="line-height: 50px;" href="javascript:;" onclick="$(this).parents('.drawer-dialog').css('width', 0)";>X</a>
+        </div>
+        <div style="flex: 1; overflow: hidden;" class="drawer-content"></div>
+    </div>
+
+    <script>
+        // console.log($) // $ is not defined
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log($)
+            // do some use jQuery
+        });
+
+        function addDialog1() {
+            $.dialog({
+                content: '<h1 style="color: red;">hello world</h1>'
+            })
+        }
+
+        function addDialog2() {
+            $.dialog({
+                url: "/demos/htmx/detail/SO11231232323",
+                class: 'container-search-btn modal-lg',
+                ok: {
+                    label: '确定',
+                    success: function (dialog) {
+                        console.log('success')
+                        dialog.$modal.modal('hide')
+                    }
+                },
+                hidden: function () {
+                    console.log('hidden')
+                }
+            })
+        }
+
+    </script>
 </th:block>
 </html>

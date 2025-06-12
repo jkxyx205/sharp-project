@@ -13,8 +13,22 @@
         }
     </style>
 
-    <h1>Index</h1>
+    <div class="drawer-dialog" id="index-dialog">
+        <div style="height: 50px; padding-right: 24px; background: #0c0e10; text-align: right;">
+            <a style="line-height: 50px;" href="javascript:;" onclick="$(this).parents('.drawer-dialog').css('width', 0)";>X</a>
+        </div>
+        <div style="flex: 1; overflow: hidden;" class="drawer-content">
 
+        </div>
+        <div style="height: 50px">
+            <button onclick="closeDrawerDialog('index-dialog')">Close</button>
+            <button onclick="closeDrawerDialog(this)">Close</button>
+        </div>
+    </div>
+
+    <h1>Index</h1>
+    <button onclick="openDrawerDialog('/demos/htmx/detail/SO1123123232300', 'index-dialog', false)">抽屉</button>
+    <hr>
     <div th:attr="x-data='{ active: \'' + ${tab} + '\' }'">
         <ul >
             <li th:class="${tab == 'tab-a' ? 'active0' : ''}" :class="{active: active === 'tab-a'}" @click="active = 'tab-a'"><a hx-get="/demos/htmx/index/tab-a" hx-target="#html-tab" hx-push-url="true">TabA</a></li>
