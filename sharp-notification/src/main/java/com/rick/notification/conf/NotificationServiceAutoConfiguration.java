@@ -2,6 +2,7 @@ package com.rick.notification.conf;
 
 import com.rick.notification.bark.DeviceKey;
 import com.rick.notification.bark.PushNotificationService;
+import com.rick.notification.fcm.MessagingSendService;
 import com.rick.notification.wechat.TemplateMessageSender;
 import com.rick.notification.wechat.TokenService;
 import com.rick.notification.wechat.WechatKey;
@@ -36,6 +37,11 @@ public class NotificationServiceAutoConfiguration {
         @Bean
         public TemplateMessageSender templateMessageSender(WechatKey wechatKey) {
             return new TemplateMessageSender(new TokenService(wechatKey));
+        }
+
+        @Bean
+        public MessagingSendService messagingSendService() {
+            return new MessagingSendService();
         }
     }
 }
