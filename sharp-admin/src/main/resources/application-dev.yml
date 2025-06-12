@@ -15,6 +15,10 @@ spring:
       maxActive: 10
       maxWait: 60000
 
+bark:
+  url: https://api.day.app # 这个地址不允许批量发送消息
+  device-key: hAHsAa323XArLtQs6VdfaV
+
 logging:
   level:
     com.rick.admin: DEBUG

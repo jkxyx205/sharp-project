@@ -107,6 +107,11 @@
             <version>${sharp.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.rick.notification</groupId>
+            <artifactId>sharp-notification</artifactId>
+            <version>${sharp.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.rick</groupId>
             <artifactId>sharp-generator</artifactId>
             <version>${sharp.version}</version>
