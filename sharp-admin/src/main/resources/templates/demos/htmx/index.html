@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{demos/htmx/layout.html}">
-<div layout:fragment="content" th:fragment="content">
+<th:block layout:fragment="content" th:fragment="content">
     <style>
         li.active {
             background-color: red;
@@ -23,8 +23,8 @@
     </div>
     <hr>
 
-    <div id="html-tab" layout:fragment="content-tab">
-        <span>Welcome</span>
+    <div id="html-tab">
+        <div layout:fragment="content-tab"></div>
     </div>
-</div>
+</th:block>
 </html>

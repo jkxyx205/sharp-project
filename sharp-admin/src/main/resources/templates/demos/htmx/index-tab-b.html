@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{demos/htmx/index.html}">
-<div layout:fragment="content-tab" th:fragment="content-tab">
+<th:block layout:fragment="content-tab" th:fragment="content-tab">
     <link rel="stylesheet" th:href="@{/css/tab-b.css}">
     <h1>Index Tab B</h1>
 
@@ -10,8 +10,8 @@
         <h1 id="h1">add two numbers below: </h1>
         <input type="text" id="a"> + <input type="text" id="b"> = <span id="result"></span>
         <br>
-        <button id="btn">result</button>
+        <button style="margin-top: 8px;" id="btn">result</button>
     </div>
     <script th:src="@{/js/dist/tab-b.js}"></script>
-</div>
+</th:block>
 </html>
