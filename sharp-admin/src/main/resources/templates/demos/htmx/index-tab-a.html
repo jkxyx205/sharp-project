@@ -7,21 +7,64 @@
 
     <div>
         <button id="getRequest">GET Request</button>
-
         <div id="response" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
             <h3>Response:</h3>
             <pre id="responseData" style="overflow: auto;"></pre>
         </div>
     </div>
+
+    <div style="margin-top: 16px;">
+        <button id="getRequest2">GET Exception Request（code = 422）</button>
+    </div>
+
+    <div style="margin-top: 16px;">
+        <button id="getRequest3">GET Exception Request（code = 200）</button>
+    </div>
+
+    <div style="margin-top: 16px;">
+        <button id="getRequest4">GET Exception Request（code = 500）</button>
+    </div>
+
     <script>
         document.getElementById('getRequest').addEventListener('click', function() {
             axios.get('https://jsonplaceholder.typicode.com/posts/1')
                 .then(function(response) {
                     document.getElementById('responseData').textContent = JSON.stringify(response.data, null, 2);
+                    toastr.success("数据加载完成")
                 })
                 .catch(function(error) {
                     console.error('Error fetching data:', error);
                     document.getElementById('responseData').textContent = 'Error fetching data';
+                });
+        });
+
+        document.getElementById('getRequest2').addEventListener('click', function() {
+            axios.get('/demos/htmx/exception')
+                .then(function(response) {
+
+                })
+                .catch(function(error) {
+
+                });
+        });
+
+        document.getElementById('getRequest3').addEventListener('click', function() {
+            axios.get('/demos/htmx/exception2')
+                .then(function(response) {
+
+                })
+                .catch(function(error) {
+
+                });
+        });
+
+        document.getElementById('getRequest4').addEventListener('click', function() {
+            axios.get('/demos/htmx/exception3')
+                .then(function(response) {
+
+                })
+                .catch(function(error) {
+
                 });
         });
     </script>

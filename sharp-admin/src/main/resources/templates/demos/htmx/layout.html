@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Layout</title>
+    <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
     <style>
         html, body {
             margin: 0;
@@ -39,20 +40,80 @@
           overflow: hidden;
       }
 
+     /*tab style*/
+
+    #tab {
+        background-color: #e3e3c7;
+        height: 40px;
+        line-height: 40px;
+        overflow: hidden;
+    }
+
+    #tab ul {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+
+    #tab ul li {
+        position: relative;
+        float: left;
+        height: 100%;
+        padding: 0 24px 0 16px;
+        margin-right: 16px;
+        list-style: none;
+        }
+
+        #tab li a {
+            display: inline-block;
+            max-width: 100px;
+
+            word-break: keep-all;
+            overflow: hidden;
+        }
+    #tab li.active {
+        background-color: yellow;
+    }
+    .tab-remove-icon {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
     </style>
 </head>
 <body>
 <div class="layout">
-  <div class="title" th:text="${user.name}"></div>
+  <div class="title">
+      <div style="display: inline-block; height: 30px; width: 30px; border-radius: 50%; background: #20a8d8; text-align: center; line-height: 30px; color: #fff; font-size: 12px;" th:text="${session.user.imgName}"></div>
+      <span class="visible-md" style="margin-right: 4px;" sec:authentication="name"></span>
+      <span class="visible-md" th:text="${user.name}"></span>
+      <span class="ml-2" th:text="${T(com.rick.admin.common.AppConfigHolder).version}"></span>
+  </div>
   <div class="bottom">
     <div class="side-left">
       <ul>
-        <li><a hx-get="/demos/htmx/index" hx-target="#html" hx-push-url="true">Index</a></li>
-        <li><a hx-get="/demos/htmx/about" hx-target="#html" hx-push-url="true">About</a></li>
+        <li><a id="index" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)">Index这里是首页哈哈哈Index这里是首页哈哈哈</a></li>
+        <li><a id="about" hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)">About</a></li>
       </ul>
     </div>
-    <div class="side-right" id="html" layout:fragment="content">
-      <span>Welcome</span>
+    <div class="side-right">
+        <div id="tab" x-data="setup" x-init="init">
+            <ul>
+                <template x-for="tab in tabs">
+                    <li><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
+                </template>
+            </ul>
+            <div style="clear: left;"></div>
+        </div>
+        <div id="html">
+            <div th:if="${#request.servletPath.indexOf('/demos/htmx/index') > -1 }" id="index-tab-container" target-id="index-tab" layout:fragment="content"></div>
+            <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-a'}" id="index-container" layout:fragment="content"></div>-->
+            <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-b'}" id="index-container" layout:fragment="content"></div>-->
+            <div th:if="${#request.servletPath == '/demos/htmx/about'}" id="about-tab-container" target-id="about-tab" layout:fragment="content"></div>
+<!--            <div th:if="${#request.servletPath == '/demos/htmx/detail/SO11231232323'}" id="so-detail-container" target-id="so-detail-tab" layout:fragment="content"></div>-->
+        </div>
     </div>
   </div>
 </div>
@@ -60,6 +121,10 @@
 <script src="https://cdn.bootcdn.net/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
 <!-- Include Axios from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script th:src="@{/plugins/loadingoverlay.min.js}"></script>
+<script th:src="@{/plugins/toastr/toastr.min.js}"></script>
 <script>
     htmx.on("htmx:configRequest", function(evt) {
         evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -69,6 +134,7 @@
     axios.interceptors.request.use(function (config) {
         // Do something before request is sent
         console.log('before request....');
+        $.LoadingOverlay("show");
         config.headers['Custom-Header'] = 'CustomValue'; // Example of adding a custom header
         return config;
     }, function (error) {
@@ -81,13 +147,306 @@
         // Any status code that lie within the range of 2xx cause this function to trigger
         // Do something with response data
         console.log('after response....', response);
+        $.LoadingOverlay("hide");
+        if (response.data && response.data.success === false) {
+            toastr.error(response.data.message);
+        }
         return response;
     }, function (error) {
         // Any status codes that falls outside the range of 2xx cause this function to trigger
         // Do something with response error
         console.log('after response....');
+        $.LoadingOverlay("hide");
+        toastr.error(error.response.data ? error.response.data.message : error.message);
         return Promise.reject(error);
     });
+
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+</script>
+<!--url 工具函数-->
+<script>
+    /**
+     * 合并查询参数，并查询
+     * @param queryString
+     */
+    function search(queryString) {
+        $.LoadingOverlay("show");
+        location.href = location.pathname + mergeUrlQueryObject(queryString)
+    }
+    /**
+     * 合并查询参数
+     * @param queryString
+     * @returns {string}
+     */
+    function mergeUrlQueryObject(queryString) {
+        if (typeof queryString === 'object') {
+            queryString = $.param(queryString)
+        }
+        let mergedQueryString = {}
+        $.extend(mergedQueryString, getCurrentUrlQueryObject(), getUrlQueryObject(queryString));
+        return "?" + $.param(mergedQueryString);
+    }
+
+    /**
+     * 获取当前浏览器的查询参数
+     * @returns {{}|any}
+     */
+    function getCurrentUrlQueryObject() {
+        let search = location.search.substring(1);
+
+        if (!search) {
+            return {}
+        }
+        return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) })
+    }
+
+    /**
+     * 将查询参数传成对象
+     * @param queryString
+     * @returns {{}}
+     */
+    function getUrlQueryObject(queryString) {
+        let queryObject = {}
+
+        if (!queryString)
+            return queryObject
+
+        let params = queryString.split('&');
+        params.forEach(function(item) {
+            let data = item.split('=')
+            if (data.length === 2)
+                queryObject[data[0]] = decodeURIComponent(data[1].replace(/[+]/g, ' '))
+        })
+        return queryObject
+    }
+</script>
+<!-- 多标签-->
+<script>
+    const tabElem = document.getElementById("tab")
+    const htmlElem = document.getElementById("html")
+    const linkNodes = document.querySelectorAll(".side-left li a")
+    const links = []
+    const TAB_ITEMS_KEY = 'tabs'
+    let activeId;
+    let data
+    for (let linkNode of linkNodes) {
+        links.push({
+            id: linkNode.id,
+            path: linkNode.getAttribute("hx-get"),
+            name: linkNode.innerText,
+        });
+
+        linkNode.addEventListener('click',
+            function (event) {
+                addHtmxTab(event.target)
+            })
+    }
+
+    //  TODO
+    // 合并非菜单的
+    // links.push({
+    //     id: "SO11231232323",
+    //     path: "/demos/htmx/detail/SO11231232323",
+    //     name: "SO11231232323",
+    // });
+
+    // 当前访问 url 加入到 links
+    const id = location.pathname.split('/').pop().split('?')[0];
+    links.push({
+        id: id,
+        path: location.pathname,
+        name: id
+    });
+
+    function setup() {
+        return {
+            tabs: [
+                // {
+                //     id:"about",
+                //     path: "/2332/2",
+                //     name: "world"
+                // }
+            ]
+        }
+    }
+
+    function init() {
+        data = Alpine.$data(tabElem);
+        let hashpath = location.pathname + location.search
+        for (let link of links) {
+            if (hashpath.indexOf(link.path) > -1) {
+                let tabs = sessionStorage.getItem(TAB_ITEMS_KEY)
+                if (tabs) {
+                    tabs = JSON.parse(tabs)
+                    for (let tab of tabs) {
+                        if (tab.id !== link.id)
+                            _addTab(tab.id, tab.path, tab.name, containerId => {
+                                let elem = Array.from(linkNodes).find(node => node.id + "-tab" === tab.id)
+                                elem && elem.setAttribute('hx-target', '#' + containerId)
+                            });
+                    }
+                }
+
+                _addTab(link.id + "-tab", hashpath, link.name, containerId => {
+                    let elem = Array.from(linkNodes).find(node => node.id === link.id)
+                    elem && elem.setAttribute('hx-target', '#' + containerId)
+                });
+
+                // 如何没有加载(非 服务渲染)，运行 click()，重新请求
+                let container = document.querySelector("[target-id="+link.id+"-tab]")
+                if (!container.children.length)
+                    setTimeout(() => document.getElementById(link.id + "-tab").click(), 200)
+                return
+            }
+        }
+    }
+
+    document.addEventListener('alpine:initialized', function () {
+    });
+
+    function addHtmxTab(elem) {
+        let tabId = elem.id + "-tab"
+        elem.preventRequest = false
+        let tab = data.tabs.find(tab => tab.id === tabId)
+        if (tab) {
+            let container = document.querySelector("[target-id="+tab.id+"]")
+            if (container.children.length)
+                elem.preventRequest = true
+            activeTab(tabId);
+            return
+        }
+
+        _addTab(tabId, elem.getAttribute("hx-get"), elem.innerText, containerId => elem.setAttribute('hx-target', '#' + containerId));
+    }
+
+    function addTab(id, path, name) {
+        _addTab(id, path, name, containerId => {
+            axios.get(path)
+                .then(function(response) {
+                    document.getElementById(containerId).innerHTML = response.data
+                })
+                .catch(function(error) {
+                    console.error('Error fetching data:', error);
+                    document.getElementById(containerId).innerHTML = "Error fetching data"
+                });
+
+            document.getElementById(containerId).innerHTML = "Hello World"
+        })
+    }
+
+    function _addTab(id, path, name, callback) {
+        let containerId = id + "-container"
+
+        !document.getElementById(containerId) && htmlElem.append(createHtmlDiv(id, containerId))
+
+        callback && callback(containerId)
+
+        !data.tabs.find(tab => tab.id === id) && data.tabs.push({
+            id: id,
+            path: path,
+            name: name,
+            showCurrentTab(event) {
+                event.preventDefault()
+
+                event.target.preventRequest = false
+                let container = document.querySelector("[target-id="+id+"]")
+                if (container.children.length)
+                    event.target.preventRequest = true
+
+                activeTab(id)
+            },
+            remove() {
+                removeTab(id)
+            }
+        })
+
+        activeTab(id, path);
+
+        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(data.tabs));
+    }
+
+
+    function removeTab(id) {
+        if (data.tabs.length === 1) {
+            alert("至少保留一个标签")
+            return
+        }
+        let activeNextId
+
+        for (let index in data.tabs) {
+            if (data.tabs[index].id == id) {
+                if (index < data.tabs.length - 1) {
+                    activeNextId = data.tabs[Number.parseInt(index) + 1].id
+                }
+                break
+            }
+            activeNextId = data.tabs[index].id
+        }
+
+        data.tabs = data.tabs.filter(tab => tab.id !== id)
+        document.querySelector("[target-id="+id+"]").remove()
+        if (activeNextId)
+            activeTab(activeNextId);
+
+        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(data.tabs));
+    }
+
+    function activeTab(id, path) {
+        activeId = id
+        history.pushState(null, '', path ? path : data.tabs.find(tab => tab.id === id).path)
+
+        data.$nextTick(() => {
+            let tabNodes = document.querySelectorAll("#tab a")
+            for (let linkNode of tabNodes) {
+                if (linkNode.id === id) {
+                    linkNode.parentNode.classList.add("active")
+                } else {
+                    linkNode.parentNode.classList.remove("active")
+                }
+            }
+        });
+
+        for (let containerElem of htmlElem.children) {
+            if (containerElem.getAttribute("target-id") === id) {
+                containerElem.style.display = 'block';
+            } else {
+                containerElem.style.display = 'none';
+            }
+        }
+    }
+
+    function beforeRequest(event) {
+        if (event.target.preventRequest) {
+            event.preventDefault()
+        }
+    }
+
+    function createHtmlDiv(targetId, id) {
+        const newDiv = document.createElement('div');
+        newDiv.id = id;
+        newDiv.setAttribute("target-id", targetId)
+        return newDiv;
+    }
+</script>
+<!-- 分页工具 -->
+<script>
+
 </script>
 </body>
 </html>

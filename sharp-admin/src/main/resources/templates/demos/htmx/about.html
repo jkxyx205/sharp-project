@@ -4,5 +4,16 @@
       layout:decorate="~{demos/htmx/layout.html}">
 <div layout:fragment="content" th:fragment="content">
     <h1>About</h1>
+
+    <!-- 约定：用 SO11231232323 作为参数 -->
+    <a style="text-decoration: underline;" id="SO11231232323" hx-get="/demos/htmx/detail/SO11231232323" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)"
+    onclick="addHtmxTab(this)">SO11231232323-push-url
+    </a>
+    <br>
+    <a style="text-decoration: underline;" id="SO11231232324" hx-get="/demos/htmx/detail/SO11231232323" hx-push-url="false" hx-on:htmx:before-request="beforeRequest(event)"
+       onclick="addHtmxTab(this)">SO11231232324-not-push-url
+    </a>
+    <hr>
+    <button onclick="addTab('SO11231232323', '/demos/htmx/detail/SO11231232323', 'addTab')">addTab</button>
 </div>
 </html>

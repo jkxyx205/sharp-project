@@ -7,6 +7,7 @@ import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
 import com.rick.admin.sys.user.entity.User;
 import com.rick.common.http.HttpServletRequestUtils;
+import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.db.plugin.dao.core.EntityDAO;
@@ -168,7 +169,7 @@ public class DemoController {
         user.setName("Rick.Xu");
 
         model.addAttribute("user", user);
-        return "demos/htmx/layout";
+        return "redirect:/demos/htmx/index";
     }
 
     @GetMapping("htmx/index")
@@ -214,4 +215,37 @@ public class DemoController {
         model.addAttribute("tab", "tab-b");
         return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index-tab-b :: content-tab" : "demos/htmx/index-tab-b";
     }
+
+    @GetMapping("htmx/detail/{code}")
+    public String detail(Model model, HttpServletRequest request, @PathVariable String code) {
+        model.addAttribute("code", code);
+
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/detail :: content" : "demos/htmx/detail";
+    }
+
+    @GetMapping("htmx/exception")
+    @ResponseBody
+    public void exception() {
+        throw new BizException("业务异常");
+    }
+
+    @GetMapping("htmx/exception2")
+    @ResponseBody
+    public Result exception2() {
+        return ResultUtils.fail("手机号不能为空");
+    }
+
+    @GetMapping("htmx/exception3")
+    @ResponseBody
+    public Result exception3() {
+        int a = 500 / 0;
+        return ResultUtils.success();
+    }
+
+
 }
