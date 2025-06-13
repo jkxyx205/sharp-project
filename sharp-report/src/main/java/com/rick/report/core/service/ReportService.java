@@ -231,28 +231,40 @@ public class ReportService {
      */
     public void export(Map<String, Object> requestMap, Function<Report, OutputStream> osSupplier, Long id) throws IOException {
         Report report = findById(id).get();
-
-        MapExcelTable excelTable;
+        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
+        MapExcelTable excelTable = null;
         if (StringUtils.isBlank(report.getQuerySql())) {
             ReportDTO reportDTO = list(report.getId(), requestMap);
-            excelTable = new MapExcelTable(convert(report.getReportColumnList()), reportDTO.getGridMap().getRows());
+
+            if (reportAdvice != null) {
+                excelTable = reportAdvice.getMapExcelTable(report, null, null, reportDTO.getGridMap().getRows());
+            }
+
+            if (excelTable == null)
+                excelTable = new MapExcelTable(convert(report.getReportColumnList()), reportDTO.getGridMap().getRows());
+
         } else {
             QueryModel queryModel = QueryModel.of(requestMap);
             PageModel pageModel = queryModel.getPageModel();
             pageModel.setSize(-1);
-            excelTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
-                @Override
-                public void setRows(List<Map<String, Object>> rows) {
-                    handleReportAdvice(report, rows);
-                    toObjectArrayListAndConvert(rows, report.getReportColumnList());
-                    formatValue(rows);
-                    super.setRows(rows);
-                }
-            };
+
+            if (reportAdvice != null) {
+                excelTable = reportAdvice.getMapExcelTable(report,  queryModel.getParams(), pageModel, null);
+            }
+
+            if (excelTable == null) {
+                excelTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
+                    @Override
+                    public void setRows(List<Map<String, Object>> rows) {
+                        handleReportAdvice(report, rows);
+                        toObjectArrayListAndConvert(rows, report.getReportColumnList());
+                        formatValue(rows);
+                        super.setRows(rows);
+                    }
+                };
+            }
         }
         Consumer<AbstractExportTable> consumerExcelWriter = null;
-        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
-
         if (reportAdvice != null) {
             consumerExcelWriter = reportAdvice.beforeExportAndReturnBeforeToFileConsumer(report, excelTable, requestMap);
         }

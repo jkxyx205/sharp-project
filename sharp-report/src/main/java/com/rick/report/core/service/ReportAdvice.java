@@ -1,6 +1,7 @@
 package com.rick.report.core.service;
 
 import com.rick.db.dto.Grid;
+import com.rick.db.dto.PageModel;
 import com.rick.excel.table.AbstractExportTable;
 import com.rick.excel.table.MapExcelTable;
 import com.rick.report.core.entity.Report;
@@ -38,4 +39,14 @@ public interface ReportAdvice {
      * @return excel 写入列和数据后执行，比如对 excel 做样式处理，或插入其他数据， 如果 excel 不需要特殊处理，返回 null
      */
     default Consumer<AbstractExportTable> beforeExportAndReturnBeforeToFileConsumer(Report report, MapExcelTable excelTable, Map<String, Object> requestMap) {return null;}
+
+    /**
+     *
+     * @param report
+     * @param params
+     * @param pageModel
+     * @param rows  fetchDataWithoutSql，提供 list 数据
+     * @return
+     */
+    default MapExcelTable getMapExcelTable(Report report, Map<String, ?> params, PageModel pageModel, List<Map<String, Object>> rows) {return null;}
 }
