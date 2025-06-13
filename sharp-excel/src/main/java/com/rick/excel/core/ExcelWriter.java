@@ -1,5 +1,6 @@
 package com.rick.excel.core;
 
+import com.rick.common.util.Time2StringUtils;
 import com.rick.excel.core.model.ExcelCell;
 import com.rick.excel.core.model.ExcelColumn;
 import com.rick.excel.core.model.ExcelRow;
@@ -320,13 +321,19 @@ public class ExcelWriter {
 
         if (object instanceof Boolean) {
             cell.setCellValue((Boolean) object);
-        } else if (object instanceof java.util.Date) {
+        } else if (Date.class.isAssignableFrom(object.getClass())) {
+            cell.setCellValue(Time2StringUtils.format((java.sql.Date) object));
+        } else if (object.getClass() == LocalDate.class) {
+            cell.setCellValue(Time2StringUtils.format((LocalDate) object));
+        } else if (object.getClass() == LocalDateTime.class) {
+            cell.setCellValue(Time2StringUtils.format((LocalDateTime) object));
+        }/*else if (object instanceof java.util.Date) { // 显示数字，表示 是一个 Excel 格式的序列号日期，可读性差
             cell.setCellValue((java.util.Date) object);
         } else if (object instanceof LocalDateTime) {
             cell.setCellValue((LocalDateTime) object);
         } else if (object instanceof LocalDate) {
             cell.setCellValue((LocalDate)object);
-        } else if (object instanceof Calendar) {
+        } */else if (object instanceof Calendar) {
             cell.setCellValue((Calendar)object);
         } else if (object instanceof Number) {
             cell.setCellValue(Double.valueOf(String.valueOf(object)));

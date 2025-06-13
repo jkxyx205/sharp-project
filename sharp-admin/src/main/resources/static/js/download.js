@@ -9,7 +9,8 @@ function download(path, completedCallback, failCallback) {
             const fr = new FileReader();
             fr.readAsText(this.response)
             fr.onload = function (e) {
-                const message = JSON.parse(e.target.result).message
+                let response = JSON.parse(e.target.result)
+                const message = response.message ? response.message : response.error
                 failCallback ? failCallback(message) : alert(message)
             }
         } else {
