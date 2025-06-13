@@ -31,4 +31,8 @@ public class TableColumn {
         this.columnWidth = columnWidth;
     }
 
+    public TableColumn setAlign(AlignEnum align) {
+        this.align = align;
+        return this;
+    }
 }

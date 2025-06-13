@@ -41,4 +41,9 @@ public class MapTableColumn extends TableColumn {
         this.name = name;
         this.converter = converter;
     }
+
+    public MapTableColumn setAlign(AlignEnum align) {
+        super.setAlign(align);
+        return this;
+    }
 }

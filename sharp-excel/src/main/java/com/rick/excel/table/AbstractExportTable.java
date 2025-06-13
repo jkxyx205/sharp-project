@@ -87,11 +87,11 @@ public abstract class AbstractExportTable<T> {
             excelWriter.getActiveSheet().setColumnWidth(i, tableColumn.getColumnWidth());
 
             // cell style
+            XSSFCellStyle defaultRowStyle = createDefaultColumnStyle();
             if (tableColumn.getAlign() != null) {
-                XSSFCellStyle defaultRowStyle = createDefaultColumnStyle();
                 defaultRowStyle.setAlignment((HorizontalAlignment.valueOf(tableColumn.getAlign().name())));
-                cellStyles[i] = defaultRowStyle;
             }
+            cellStyles[i] = defaultRowStyle;
         }
 
         ExcelRow row = new ExcelRow(1, 1, labels);
