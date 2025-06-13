@@ -391,6 +391,15 @@ public final class SQLUtils {
         return "(" + String.join(",", Collections.nCopies(paramSize, "?")) + ")";
     }
 
+    public static String extractWhereCondition(String sql) {
+        sql = sql.toLowerCase(); // 为了简化匹配
+        int whereIndex = sql.indexOf("where");
+        if (whereIndex != -1) {
+            return sql.substring(whereIndex + 5).trim();
+        }
+        return "";
+    }
+
     private static int deleteData(String tableName, String deleteColumn, String sqlPatch, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
         Assert.notEmpty(deleteValues, "deleteValues cannot be null");
         int size = deleteValues.size();
