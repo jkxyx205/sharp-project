@@ -172,6 +172,18 @@ public class DemoController {
         return "redirect:/demos/htmx/index";
     }
 
+
+    @GetMapping("htmx/demo")
+    public String htmxDemo(Model model, HttpServletRequest request) {
+        User user = new User();
+        user.setCode("0000001");
+        user.setName("Rick.Xu");
+
+        model.addAttribute("user", user);
+        return page(request, "demos/htmx/demo");
+     }
+
+
     @GetMapping("htmx/index")
     public String htmxIndex(Model model, HttpServletRequest request) {
         User user = new User();
@@ -180,7 +192,7 @@ public class DemoController {
 
         model.addAttribute("user", user);
 
-        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index :: content" : "demos/htmx/index";
+        return page(request, "demos/htmx/index");
     }
 
     @GetMapping("htmx/about")
@@ -191,7 +203,7 @@ public class DemoController {
 
         model.addAttribute("user", user);
 
-        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/about :: content" : "demos/htmx/about";
+        return page(request, "demos/htmx/about");
     }
 
     @GetMapping("htmx/index/tab-a")
@@ -202,7 +214,8 @@ public class DemoController {
 
         model.addAttribute("user", user);
         model.addAttribute("tab", "tab-a");
-        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index-tab-a :: content-tab" : "demos/htmx/index-tab-a";
+        // 一级路由用 fragment=content 二级路由用 content-content，三级路由用 content-content-content，以此类推
+        return page(request, "demos/htmx/index-tab-a", "content-content");
     }
 
     @GetMapping("htmx/index/tab-b")
@@ -213,7 +226,7 @@ public class DemoController {
 
         model.addAttribute("user", user);
         model.addAttribute("tab", "tab-b");
-        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/index-tab-b :: content-tab" : "demos/htmx/index-tab-b";
+        return page(request, "demos/htmx/index-tab-b", "content-content");
     }
 
     @GetMapping("htmx/detail/{code}")
@@ -225,7 +238,7 @@ public class DemoController {
         user.setName("Rick.Xu");
 
         model.addAttribute("user", user);
-        return HttpServletRequestUtils.isAjaxRequest(request) ? "demos/htmx/detail :: content" : "demos/htmx/detail";
+        return page(request, "demos/htmx/detail");
     }
 
     @GetMapping("htmx/exception")
@@ -247,5 +260,12 @@ public class DemoController {
         return ResultUtils.success();
     }
 
+    private String page(HttpServletRequest request, String page) {
+        return page(request, page, "content");
+    }
+
+    private String page(HttpServletRequest request, String page, String fragment) {
+        return HttpServletRequestUtils.isAjaxRequest(request) ? page +" :: "+fragment+"" : page;
+    }
 
 }
