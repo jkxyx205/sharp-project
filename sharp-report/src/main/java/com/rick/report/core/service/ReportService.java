@@ -7,7 +7,6 @@ import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.JsonUtils;
-import com.rick.common.util.Time2StringUtils;
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
 import com.rick.db.dto.QueryModel;
@@ -35,7 +34,6 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -258,7 +256,7 @@ public class ReportService {
                     public void setRows(List<Map<String, Object>> rows) {
                         handleReportAdvice(report, rows);
                         toObjectArrayListAndConvert(rows, report.getReportColumnList());
-                        formatValue(rows);
+//                        formatValue(rows);
                         super.setRows(rows);
                     }
                 };
@@ -357,24 +355,24 @@ public class ReportService {
         }
     }
 
-    private void formatValue(List<Map<String, Object>> rows) {
-        for (Map<String, Object> row : rows) {
-            Set<Map.Entry<String, Object>> kvs = row.entrySet();
-            for (Map.Entry<String, Object> kv : kvs) {
-                if (kv.getValue() == null) {
-                    continue;
-                }
-
-                if (Date.class.isAssignableFrom(kv.getValue().getClass())) {
-                    row.put(kv.getKey(), Time2StringUtils.format((java.sql.Date) kv.getValue()));
-                }
-                if (kv.getValue().getClass() == LocalDate.class) {
-                    row.put(kv.getKey(), Time2StringUtils.format((LocalDate) kv.getValue()));
-                } else if (kv.getValue().getClass() == LocalDateTime.class) {
-                    row.put(kv.getKey(), Time2StringUtils.format((LocalDateTime) kv.getValue()));
-                }
-            }
-        }
-    }
+//    private void formatValue(List<Map<String, Object>> rows) {
+//        for (Map<String, Object> row : rows) {
+//            Set<Map.Entry<String, Object>> kvs = row.entrySet();
+//            for (Map.Entry<String, Object> kv : kvs) {
+//                if (kv.getValue() == null) {
+//                    continue;
+//                }
+//
+//                if (Date.class.isAssignableFrom(kv.getValue().getClass())) {
+//                    row.put(kv.getKey(), Time2StringUtils.format((java.sql.Date) kv.getValue()));
+//                }
+//                if (kv.getValue().getClass() == LocalDate.class) {
+//                    row.put(kv.getKey(), Time2StringUtils.format((LocalDate) kv.getValue()));
+//                } else if (kv.getValue().getClass() == LocalDateTime.class) {
+//                    row.put(kv.getKey(), Time2StringUtils.format((LocalDateTime) kv.getValue()));
+//                }
+//            }
+//        }
+//    }
 
 }
