@@ -28,7 +28,7 @@ public final class StringUtils {
      * @param name
      * @return
      */
-    public static final String generateImgName(String name) {
+    public static String generateImgName(String name) {
         int nameLen = name.length();
 
         String nameWritten;

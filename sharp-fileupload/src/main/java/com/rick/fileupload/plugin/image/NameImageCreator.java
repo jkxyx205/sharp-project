@@ -34,22 +34,8 @@ public class NameImageCreator {
             throws IOException {
         int width = 100;
         int height = 100;
-        int nameLen = name.length();
-        String nameWritten;
-        //如果用户输入的姓名少于等于2个字符，不用截取
-        if (nameLen <= 2) {
-            nameWritten = name;
-        } else {
-            //如果用户输入的姓名大于等于3个字符，截取后面一位  可根据需求改长度
-            String first = name.substring(0, 1);
-            if (isChinese(first)) {
-                //截取倒数两位汉字
-                nameWritten = name.substring(nameLen - 2);
-            } else {
-                //截取前面的两个英文字母
-                nameWritten = name.substring(0, 2).toUpperCase();
-            }
-        }
+
+        String nameWritten = com.rick.common.util.StringUtils.generateImgName(name);
 
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
