@@ -117,6 +117,7 @@
       <ul>
         <li><a id="index" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">Index</a></li>
         <li><a id="about" hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >About</a></li>
+        <li><a id="dict" hx-get="/reports/695316160014499840" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理</a></li>
       </ul>
     </div>
 
@@ -169,6 +170,8 @@
         return config;
     }, function (error) {
         // Do something with request error
+        console.log(error)
+        toastr.error(error.message);
         return Promise.reject(error);
     });
 
@@ -187,7 +190,7 @@
         // Do something with response error
         console.log('after response....');
         $.LoadingOverlay("hide");
-        toastr.error(error.response.data ? error.response.data.message : error.message);
+        toastr.error(error.response?.data ? error.response.data.message : error.message);
         return Promise.reject(error);
     });
 
