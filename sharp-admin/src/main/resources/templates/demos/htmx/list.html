@@ -71,7 +71,7 @@
                                     <td th:attr="x-text=${'m.index'}"></td>
                                     <td class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}" style="width: 40px"><input type="checkbox" x-model="m.select" @change="select(m.select)" :data-id="m.id"/></td>
                                     <td th:each="n : ${report.reportColumnList}" th:class="${'text-' + n.align.name().toLowerCase()}" th:if="${!n.hidden}">
-                                        <a href="javascript:;" th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index == 1}"></a>
+                                        <a href="javascript:;" @click="edit(m.id)" th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index == 1}"></a>
                                         <span th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index > 1}"></span>
                                     </td>
                                     <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
@@ -84,16 +84,17 @@
                                     <input type="hidden" th:each="n : ${report.reportColumnList}" th:if="${n.hidden}" th:name="${n.name}" th:attr="x-model=${'m.' + n.name}"/>
                                 </tr>
                             </template>
-                            <tr th:if="${summary ne null}">
+                            <template x-if="isSummary && grid.records">
+                            <tr>
                                 <td style="font-weight: bold;">合计</td>
-                                <td th:if="${'multiple' eq params['mode']}"></td>
-                                <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}" th:attr="x-text='summaryData[\'' + ${n.name} + '\']'"
-                                ></td>
+                                <td class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}"></td>
+                                <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}" th:attr="x-text='summaryData[\'' + ${n.name} + '\']'"></td>
                                 <td sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete')}"></td>
                             </tr>
+                            </template>
                             <template x-if="grid.records < 1">
                                 <tr class="tr-empty non-data">
-                                    <td th:colspan="${report.visibleColumnSize + 2 + ('multiple' eq params['mode'] ? 1 : 0)}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
+                                    <td th:colspan="${report.visibleColumnSize + 2 + ((report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true) ? 1 : 0)}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
                                 </tr>
                             </template>
                             </tbody>
@@ -178,7 +179,7 @@
 
         window['setup' + /*[[${report.id}]]*/] = function () {
             let reportColumnList = /*[[${report.reportColumnList}]]*/
-            let summary = /*[[${report.summaryColumnNames != null}]]*/
+            let isSummary = /*[[${report.summaryColumnNames != null}]]*/
             let summaryData = /*[[${report.summaryColumnNames != null ? summary : {}}]]*/
             let grid = /*[[${grid}]]*/
 
@@ -199,6 +200,7 @@
                 sidx: '',
                 sord: '',
                 isSelectAll: false,
+                isSummary,
                 summaryData,
                 get pageRange() {
                     let leftOffset = parseInt((this.displayPage - 1) / 2);
@@ -288,7 +290,7 @@
 
                             this.isSelectAll = false
                             this.grid = grid
-                            if (summary)
+                            if (this.isSummary)
                                 this.summaryData = response.data.data.summaryData
 
                             this.$elem.find(".goto").val(this.grid.page)

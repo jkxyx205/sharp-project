@@ -71,7 +71,19 @@ public class ReportController {
 
     @GetMapping("{id}/json")
     @ResponseBody
-    public Result<Grid<Map<String, Object>>> value(@PathVariable  Long id, HttpServletRequest request) {
+    public Result<Grid<Map<String, Object>>> value(@PathVariable Long id, HttpServletRequest request) {
+        ReportDTO reportDTO = getReportDTO(id, request);
+        return ResultUtils.success(reportDTO.getGridMap());
+    }
+
+    @GetMapping("{id}/json/summary")
+    @ResponseBody
+    public Result valueAndSummary(@PathVariable Long id, HttpServletRequest request) {
+        ReportDTO reportDTO = getReportDTO(id, request);
+        return ResultUtils.success(Params.builder(2).pv("grid", reportDTO.getGridMap()).pv("summaryData", reportDTO.getSummaryMap()).build());
+    }
+
+    private ReportDTO getReportDTO(Long id, HttpServletRequest request) {
         ReportDTO reportDTO = reportService.list(id, HttpServletRequestUtils.getParameterMap(request));
         for (Map<String, Object> row : reportDTO.getGridMap().getRows()) {
             for (Map.Entry<String, Object> entry : row.entrySet()) {
@@ -81,8 +93,7 @@ public class ReportController {
                 }
             }
         }
-
-        return ResultUtils.success(reportDTO.getGridMap());
+        return reportDTO;
     }
 
     @GetMapping("{id}/json/count")
@@ -117,6 +128,7 @@ public class ReportController {
             }
             model.addAttribute("summaryIndex", summaryIndexList);
         } else {
+            model.addAttribute("summary", Collections.EMPTY_MAP);
             model.addAttribute("summaryIndex", Collections.emptyList());
         }
 
