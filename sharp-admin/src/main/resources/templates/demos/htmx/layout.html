@@ -108,7 +108,7 @@
   <div class="title">
       <div style="display: inline-block; height: 30px; width: 30px; border-radius: 50%; background: #20a8d8; text-align: center; line-height: 30px; color: #fff; font-size: 12px;" th:text="${session.user.imgName}"></div>
       <span class="visible-md" style="margin-right: 4px;" sec:authentication="name"></span>
-      <span class="visible-md" th:text="${user.name}"></span>
+      <span class="visible-md" th:if="${user != null}" th:text="${user.name}"></span>
       <span class="ml-2" th:text="${T(com.rick.admin.common.AppConfigHolder).version}"></span>
       <a style="margin-left: 16px; color: #fff;" th:href="|javascript:location.href=mergeUrlQueryObject('multiTab=${!session.multiTab}')|">layout模式</a>
   </div>
@@ -118,7 +118,8 @@
         <li><a id="index" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">Index</a></li>
         <li><a id="about" hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >About</a></li>
         <li><a id="demo" hx-get="/demos/htmx/demo" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >Demo</a></li>
-        <li><a id="dict" hx-get="/reports/695316160014499840" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理</a></li>
+        <li><a id="dict" hx-get="/reports/htmx/964844123011960832" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理</a></li>
+<!--        <li><a id="dict-type" hx-get="/reports/htmx/964844123011960832?type=UNIT" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理UNIT</a></li>-->
       </ul>
     </div>
 
@@ -126,7 +127,7 @@
           <div id="tab" x-data="setup" x-init="init" th:if="${session.multiTab}">
               <ul>
                   <template x-for="tab in tabs">
-                      <li><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
+                      <li :class="{active: tab.active}"><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
                   </template>
               </ul>
               <div style="clear: left;"></div>
@@ -140,27 +141,41 @@
               <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-a'}" id="index-container"><div layout:fragment="content"></div></div>-->
               <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
               <div th:if="${#request.servletPath == '/demos/htmx/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
+
+              <div th:if="${#request.servletPath == '/reports/htmx/964844123011960832'}" id="dict-tab-container" target-id="dict-tab"><div layout:fragment="content"></div></div>
+<!--              <div th:if="${#request.servletPath == '/reports/htmx/964844123011960832?type=UNIT'}" id="dict-type-tab-container" target-id="dict-type-tab"><div layout:fragment="content"></div></div>-->
               </th:block>
 
           </div>
       </div>
   </div>
 </div>
-<script src="https://cdn.bootcdn.net/ajax/libs/htmx/2.0.4/htmx.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/alpinejs/3.14.9/cdn.min.js" defer></script>
-<!-- Include Axios from CDN -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.4/htmx.min.js" integrity="sha512-2kIcAizYXhIn8TzUvqzEDZNuDZ+aW7yE/+f1HJHXFjQcGNfv1kqzJSTBRBSlOgp6B/KZsz1K0a3ZTqP9dnxioQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<!-- Include Axios from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.9.0/axios.min.js" integrity="sha512-FPlUpimug7gt7Hn7swE8N2pHw/+oQMq/+R/hH/2hZ43VOQ+Kjh25rQzuLyPz7aUWKlRpI7wXbY6+U3oFPGjPOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
 <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
 <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
 
 <script th:src="@{/coreui/vendors/bootstrap/js/bootstrap.min.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/jquery.formautofill.min.js}"></script>
+<!--<script type="text/javascript" th:src="@{/js/jquery.pageTable.js}"></script>-->
+
 <script th:src="@{/js/jquery.dialog.js}"></script>
+<script th:src="@{/js/download.js}"></script>
+
 <script>
     htmx.on("htmx:configRequest", function(evt) {
         evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
     });
+
+    document.addEventListener('htmx:responseError', evt => toastr.error(evt.detail.xhr.responseText))
 
     // Add a request interceptor
     axios.interceptors.request.use(function (config) {
@@ -191,7 +206,7 @@
         // Do something with response error
         console.log('after response....');
         $.LoadingOverlay("hide");
-        toastr.error(error.response?.data ? error.response.data.message : error.message);
+        toastr.error(error.response?.data ? (error.response.data.message ? error.response.data.message : error.response.data.error) : error.message);
         return Promise.reject(error);
     });
 
@@ -229,12 +244,33 @@
         }
     });
 
+    function getPathname(url) {
+        const indexOfQuestionMark = url.indexOf('?');
+
+        if (indexOfQuestionMark !== -1) { // 确保找到了问号
+            return url.substring(0, indexOfQuestionMark)
+        }
+
+        return url;
+    }
+
+    function getSearchString(url) {
+        const indexOfQuestionMark = url.indexOf('?');
+
+        let queryString = '';
+        if (indexOfQuestionMark !== -1) { // 确保找到了问号
+            queryString = url.substring(indexOfQuestionMark);
+        }
+
+        return queryString
+    }
+
     const linkNodes = document.querySelectorAll(".side-left li a")
     const links = []
     for (let linkNode of linkNodes) {
         links.push({
             id: linkNode.id,
-            path: linkNode.getAttribute("hx-get"),
+            path: getPathname(linkNode.getAttribute("hx-get")),
             name: linkNode.innerText,
         });
 
@@ -380,7 +416,7 @@
     const htmlElem = document.getElementById("html")
     const TAB_ITEMS_KEY = 'tabs'
     let activeId;
-    let data
+    let tabElemData
 
     // 合并非菜单的 tab
     // links.push({
@@ -389,13 +425,15 @@
     //     name: "SO11231232323",
     // });
 
-    // 当前访问 url 加入到 links
-    const id = location.pathname.split('/').pop().split('?')[0];
-    links.push({
-        id: id,
-        path: location.pathname,
-        name: id
-    });
+    // 当前访问 url 加入到 links(得到的 id 可能是数字，会出现异常，纯数字不能作为属性值)
+    if (!links.map(link => link.path).find(path => getPathname(path) === location.pathname)) {
+        const id = location.pathname.split('/').pop().split('?')[0];
+        links.push({
+            id: id,
+            path: location.pathname + location.search,
+            name: id
+        });
+    }
 
     function setup() {
         return {
@@ -410,7 +448,7 @@
     }
 
     function init() {
-        data = Alpine.$data(tabElem);
+        tabElemData = Alpine.$data(tabElem);
         let hashpath = location.pathname + location.search
         for (let link of links) {
             if (hashpath.indexOf(link.path) > -1) {
@@ -431,10 +469,15 @@
                     elem && elem.setAttribute('hx-target', '#' + containerId)
                 });
 
-                // 如何没有加载(非 服务渲染)，运行 click()，重新请求，如何有三层路由，比如 htmx/index/tab-a htmx/index/tab-b，需要进行服务器渲染
+                // 如果没有加载(非 服务渲染)，运行 click()，重新请求，如果有三层路由，比如 htmx/index/tab-a htmx/index/tab-b，需要进行服务器渲染
                 let container = document.querySelector("[target-id="+link.id+"-tab]")
-                if (!container.children.length)
-                    setTimeout(() => document.getElementById(link.id + "-tab").click(), 200)
+                if (!container.children.length) {
+                    tabElemData.$nextTick(() => {
+                        // document.getElementById(link.id + "-tab").click()
+                        htmx.trigger("#" + link.id + "-tab", 'click')
+                    });
+                }
+
                 return
             }
         }
@@ -446,7 +489,7 @@
     function addHtmxTab(elem) {
         let tabId = elem.id + "-tab"
         elem.preventRequest = false
-        let tab = data.tabs.find(tab => tab.id === tabId)
+        let tab = tabElemData.tabs.find(tab => tab.id === tabId)
         if (tab) {
             let container = document.querySelector("[target-id="+tab.id+"]")
             if (container.children.length) {
@@ -472,7 +515,7 @@
 
         callback && callback(containerId)
 
-        !data.tabs.find(tab => tab.id === id) && data.tabs.push({
+        !tabElemData.tabs.find(tab => tab.id === id) && tabElemData.tabs.push({
             id: id,
             path: path,
             name: name,
@@ -484,7 +527,7 @@
                 if (container.children.length)
                     event.target.preventRequest = true
 
-                activeTab(id)
+                activeTab(id, path)
             },
             remove() {
                 removeTab(id)
@@ -493,49 +536,63 @@
 
         activeTab(id, path);
 
-        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(data.tabs));
+        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(tabElemData.tabs));
     }
 
 
     function removeTab(id) {
-        if (data.tabs.length === 1) {
+        if (tabElemData.tabs.length === 1) {
             alert("至少保留一个标签")
             return
         }
+
+        tabElemData.tabs = tabElemData.tabs.filter(tab => tab.id !== id)
+        document.querySelector("[target-id="+id+"]").remove()
+        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(tabElemData.tabs));
+
+        if (activeId !== id) {
+            return;
+        }
+
         let activeNextId
 
-        for (let index in data.tabs) {
-            if (data.tabs[index].id == id) {
-                if (index < data.tabs.length - 1) {
-                    activeNextId = data.tabs[Number.parseInt(index) + 1].id
+        for (let index in tabElemData.tabs) {
+            if (tabElemData.tabs[index].id == id) {
+                if (index < tabElemData.tabs.length - 1) {
+                    activeNextId = tabElemData.tabs[Number.parseInt(index) + 1].id
                 }
                 break
             }
-            activeNextId = data.tabs[index].id
+            activeNextId = tabElemData.tabs[index].id
         }
 
-        data.tabs = data.tabs.filter(tab => tab.id !== id)
-        document.querySelector("[target-id="+id+"]").remove()
-        if (activeNextId)
-            activeTab(activeNextId);
-
-        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(data.tabs));
+        if (activeNextId) {
+            let container = document.querySelector("[target-id="+activeNextId+"]")
+            if (!container.children.length) {
+                htmx.trigger("#" + activeNextId, 'click')
+            } else {
+                activeTab(activeNextId);
+            }
+        }
     }
 
     function activeTab(id, path) {
-        activeId = id
-        history.pushState(null, '', path ? path : data.tabs.find(tab => tab.id === id).path)
+        // let container = document.querySelector("[target-id="+id)
+        // if (!container.children.length) {
+        //     setTimeout(() => document.getElementById(id).click(), 200)
+        //     return
+        // }
 
-        data.$nextTick(() => {
-            let tabNodes = document.querySelectorAll("#tab a")
-            for (let linkNode of tabNodes) {
-                if (linkNode.id === id) {
-                    linkNode.parentNode.classList.add("active")
-                } else {
-                    linkNode.parentNode.classList.remove("active")
-                }
+        activeId = id
+
+        for (let tab of tabElemData.tabs) {
+            if (tab.id === id) {
+                tab.active = true
+            } else {
+                tab.active = false
             }
-        });
+        }
+        history.pushState(null, '', path ? path : tabElemData.tabs.find(tab => tab.id === id).path)
 
         for (let containerElem of htmlElem.children) {
             if (containerElem.getAttribute("target-id") === id) {
@@ -557,5 +614,6 @@
 <script>
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" integrity="sha512-KSdieUYxSxr/laB3Bh5TP8GAng49b2qRfdcnFvh8OuPpPgksA189OQ9v1A3gIz5P9s3A4aXMe5uiHLMfla60Uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>

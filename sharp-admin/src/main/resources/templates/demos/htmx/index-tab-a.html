@@ -14,6 +14,9 @@
     </div>
 
     <div style="margin-top: 16px;">
+        <button id="getRequest22">GET Exception Request（code = 404）</button>
+    </div>
+    <div style="margin-top: 16px;">
         <button id="getRequest2">GET Exception Request（code = 422）</button>
     </div>
 
@@ -35,6 +38,16 @@
                 .catch(function(error) {
                     console.error('Error fetching data:', error);
                     document.getElementById('responseData').textContent = 'Error fetching data';
+                });
+        });
+
+        document.getElementById('getRequest22').addEventListener('click', function() {
+            axios.get('/demos/htmx/notfound')
+                .then(function(response) {
+
+                })
+                .catch(function(error) {
+
                 });
         });
 
