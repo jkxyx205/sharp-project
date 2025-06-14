@@ -6,6 +6,8 @@
     <title>Sharp Admin</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
     <style>
         html, body {
             margin: 0;
@@ -74,7 +76,7 @@
 
         #tab li a {
             display: inline-block;
-            max-width: 100px;
+            max-width: 150px;
 
             word-break: keep-all;
             overflow: hidden;
@@ -165,10 +167,14 @@
 <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
 <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
 <script type="text/javascript" th:src="@{/plugins/jquery.formautofill.min.js}"></script>
+<script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+<script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+<script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
 <!--<script type="text/javascript" th:src="@{/js/jquery.pageTable.js}"></script>-->
 
 <script th:src="@{/js/jquery.dialog.js}"></script>
 <script th:src="@{/js/download.js}"></script>
+<script type="text/javascript" th:src="@{/js/form-support.js}"></script>
 
 <script>
     htmx.on("htmx:configRequest", function(evt) {
@@ -349,6 +355,10 @@
             });
     }
 
+    function reloadTab(id) {
+        console.log('reloadTab = ', id)
+    }
+
     function isDOMElement(obj) {
         return typeof obj === 'object' && obj !== null && obj instanceof Element;
     }
@@ -429,7 +439,7 @@
     if (!links.map(link => link.path).find(path => getPathname(path) === location.pathname)) {
         const id = location.pathname.split('/').pop().split('?')[0];
         links.push({
-            id: id,
+            id: (!isNaN(id) && id.trim() !== '') ? "tab-" + id : id,
             path: location.pathname + location.search,
             name: id
         });
@@ -538,7 +548,6 @@
 
         sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(tabElemData.tabs));
     }
-
 
     function removeTab(id) {
         if (tabElemData.tabs.length === 1) {
