@@ -346,7 +346,7 @@
 
         axios.get(url)
             .then(function(response) {
-                elem.innerHTML = response.data
+                $(elem).html(response.data)
                 pushUrl && history.pushState(null, '', url)
             })
             .catch(function(error) {
