@@ -21,7 +21,7 @@
                                 <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
                                     <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
                                     <input class="form-control" th:id="${f.name}" type="checkbox" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'CHECKBOX'}" th:value="1" th:placeholder="${f.placeholder}">
-                                    <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'DATE'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                    <input class="form-control" th:id=selectAll"${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'DATE'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
                                     <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT' or f.type.name() == 'SEARCH_SELECT'}"/>
                                     <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
                                     <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText/>
@@ -38,7 +38,7 @@
                                 </th:block>
                             </div>
                         </th:block>
-                        <div class="form-group">
+                        <div class="form-group operator-group">
                             <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}" @click="search({page: 1})">
                                 <i class="fa fa-search"></i> 查询</button>
                             <button class="btn btn-secondary mr-2" type="button" name="reset" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}" @click="reset">
@@ -59,7 +59,7 @@
                             <thead>
                             <tr>
                                 <th style="width: 40px">序号</th>
-<!--                                <th class="text-center" th:if="${'multiple' eq params['mode']}" style="width: 40px"><input id="table-select-all-checkbox" type="checkbox"/></th>-->
+                                <th class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}" style="width: 40px"><input type="checkbox" x-model="isSelectAll" @change="selectAll"/></th>
                                 <th th:each="n : ${report.reportColumnList}" th:text="${n.label}" th:data-name="${n.name}"
                                     th:style="${n.columnWidth == null ? '': 'width: ' + n.columnWidth + 'px'}" th:if="${!n.hidden}" th:attr="'@click'=${n.sortable ? 'search({sidx:&#34;'+n.name+'&#34;,page: 1})' : null},':class'=${(n.sortable ? '&#34;sortable&#34;' : '&#34;&#34;') + '+ &#34; text-&#34;+&#34' + n.align.name().toLowerCase()+'&#34' + (' + (&#34;' + n.name + '&#34; === sidx ? &#34; active&#34;:&#34;&#34;)')+ (' + (&#34asc&#34 === sord ? &#34; asc&#34;:&#34; desc&#34;)')}"></th>
                                 <th class="text-center" style="width: 100px" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">操作</th>
@@ -69,6 +69,7 @@
                             <template x-for="m in grid.rows" :key="m.id">
                                 <tr :data-id="m.id">
                                     <td th:attr="x-text=${'m.index'}"></td>
+                                    <td class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}" style="width: 40px"><input type="checkbox" x-model="m.select" @change="select(m.select)" :data-id="m.id"/></td>
                                     <td th:each="n : ${report.reportColumnList}" th:class="${'text-' + n.align.name().toLowerCase()}" th:if="${!n.hidden}">
                                         <a href="javascript:;" th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index == 1}"></a>
                                         <span th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index > 1}"></span>
@@ -86,7 +87,8 @@
                             <tr th:if="${summary ne null}">
                                 <td style="font-weight: bold;">合计</td>
                                 <td th:if="${'multiple' eq params['mode']}"></td>
-                                <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}"></td>
+                                <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}" th:attr="x-text='summaryData[\'' + ${n.name} + '\']'"
+                                ></td>
                                 <td sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete')}"></td>
                             </tr>
                             <template x-if="grid.records < 1">
@@ -144,20 +146,22 @@
     </div>
 
     <script th:inline="javascript">
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     load()
-        // });
-        //
-        // typeof $ !== 'undefined' && $(function () {
-        //     load()
-        // })
-        //
-        // function load() {
-        //     $('.query-form').autofill(getCurrentUrlQueryObject())
-        // }
+        document.addEventListener("DOMContentLoaded", function () {
+            load()
+        });
+
+        typeof $ !== 'undefined' && $(function () {
+            load()
+        })
+
+        function load() {
+            // $('.query-form').autofill(getCurrentUrlQueryObject())
+            /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
+        }
 
         window['init' + /*[[${report.id}]]*/] = function () {
             this.$elem = $(('#id' + /*[[${report.id}]]*/))
+            this.$elem[0].alpineData = this
             this.$elemForm = $(('#id' + /*[[${report.id}]]*/) + ' .query-form')
 
             let searchObject = getCurrentUrlQueryObject();
@@ -174,13 +178,15 @@
 
         window['setup' + /*[[${report.id}]]*/] = function () {
             let reportColumnList = /*[[${report.reportColumnList}]]*/
+            let summary = /*[[${report.summaryColumnNames != null}]]*/
+            let summaryData = /*[[${report.summaryColumnNames != null ? summary : {}}]]*/
             let grid = /*[[${grid}]]*/
 
             grid.rows = grid.rows.map((row, index) => {
                 let data = {}
 
                 data['index'] = (grid.page - 1) * grid.pageSize  + 1 + index
-
+                data.select = false
                 for (let i = 0; i < reportColumnList.length; i++) {
                     data[reportColumnList[i].name] = row[i]
                 }
@@ -192,6 +198,8 @@
                 displayPage: 10,
                 sidx: '',
                 sord: '',
+                isSelectAll: false,
+                summaryData,
                 get pageRange() {
                     let leftOffset = parseInt((this.displayPage - 1) / 2);
                     let leftPage = this.grid.page - 1;
@@ -265,25 +273,27 @@
 
                     // history
                     history.pushState(null, '', location.pathname + "?" + $.param(params))
-
-
                     console.log(params, "...")
 
-                    axios.get(('/reports/' + /*[[${report.id}]]*/ )+'/json', {
+                    axios.get(('/reports/' + /*[[${report.id}]]*/ )+'/json/summary', {
                         params
                     })
                         .then((response) => {
-                            let grid = response.data.data
+                            let grid = response.data.data.grid
 
                             for (let i = 0; i < grid.rows.length; i++) {
                                 grid.rows[i]['index'] = (grid.page - 1) * grid.pageSize  + 1 + i
+                                grid.rows[i]['select'] = false
                             }
 
+                            this.isSelectAll = false
                             this.grid = grid
+                            if (summary)
+                                this.summaryData = response.data.data.summaryData
+
                             this.$elem.find(".goto").val(this.grid.page)
                         })
                         .catch(function (error) {
-
                         });
 
                 },
@@ -352,11 +362,24 @@
                                 this.search();
                             })
                     }
+                },
+                selectAll() {
+                    for (let row of this.grid.rows) {
+                        row.select = this.isSelectAll
+                    }
+                },
+                select(select) {
+                    if (!select)
+                        this.isSelectAll = false
+                    else if (!this.grid.rows.find(row => !row.select)) {
+                        this.isSelectAll = true
+                    }
+                },
+                getSelectedData() {
+                    return this.grid.rows.filter(row => row.select).map(row => row.id);
                 }
             }
         }
-
-        /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
     </script>
     [(${report.additionalInfo['script'] != null ? report.additionalInfo['script'] : ''})]
 </th:block>
