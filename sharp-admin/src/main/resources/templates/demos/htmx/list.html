@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{demos/htmx/layout.html}"
+      xmlns:sp="">
+<th:block layout:fragment="content" th:fragment="content">
+    [(${report.additionalInfo['link'] != null ? report.additionalInfo['link'] : ''})]
+    <style th:inline="css">
+        /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
+    </style>
+
+    <div class="report-container" th:attr="id=${'id' + report.id}, x-data=${'setup' + report.id}, x-init=${'init' + report.id}">
+        <div class="container-fluid">
+            <!-- 查询条件 -->
+            <div class="card">
+                <div class="card-body">
+                    <form class="form-fluid query-form">
+                        <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
+                            <div class="form-group">
+                                <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
+                                <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
+                                    <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                    <input class="form-control" th:id="${f.name}" type="checkbox" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'CHECKBOX'}" th:value="1" th:placeholder="${f.placeholder}">
+                                    <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'DATE'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                    <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT' or f.type.name() == 'SEARCH_SELECT'}"/>
+                                    <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
+                                    <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText/>
+                                </th:block>
+
+                                <th:block style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                                    <div class="input-group input-daterange" th:classappend="${f.name}">
+                                        <input class="form-control" th:id="${f.name + '0'}" th:name="${f.name + '0'}" type="text" placeholder="开始时间"
+                                               autocomplete="off"><label
+                                            class="col-form-label" style="padding-left: 0;">～</label>
+                                        <input class="form-control" th:id="${f.name + '1'}" th:name="${f.name + '1'}" type="text" placeholder="结束时间"
+                                               autocomplete="off">
+                                    </div>
+                                </th:block>
+                            </div>
+                        </th:block>
+                        <div class="form-group">
+                            <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}" @click="search({page: 1})">
+                                <i class="fa fa-search"></i> 查询</button>
+                            <button class="btn btn-secondary mr-2" type="button" name="reset" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}" @click="reset">
+                                <i class="fa fa-remove"></i> 重置</button>
+                            <a class="btn btn-secondary mr-2" href="javascript:;" @click="download" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                                <i class="fa fa-upload"></i> 导出</a>
+                            <button class="btn btn-primary" type="button" onclick="gotoDetail('新增')" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                                <i class="fa fa-plus"></i> 新增</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body" id="report-list" style="padding-bottom: 0">
+                    <div class="card-body-scroll-panel">
+                        <table class="table table-responsive-sm table-bordered table-striped table-sm">
+                            <thead>
+                            <tr>
+                                <th style="width: 40px">序号</th>
+<!--                                <th class="text-center" th:if="${'multiple' eq params['mode']}" style="width: 40px"><input id="table-select-all-checkbox" type="checkbox"/></th>-->
+                                <th th:each="n : ${report.reportColumnList}" th:text="${n.label}" th:data-name="${n.name}"
+                                    th:style="${n.columnWidth == null ? '': 'width: ' + n.columnWidth + 'px'}" th:if="${!n.hidden}" th:attr="'@click'=${n.sortable ? 'search({sidx:&#34;'+n.name+'&#34;,page: 1})' : null},':class'=${(n.sortable ? '&#34;sortable&#34;' : '&#34;&#34;') + '+ &#34; text-&#34;+&#34' + n.align.name().toLowerCase()+'&#34' + (' + (&#34;' + n.name + '&#34; === sidx ? &#34; active&#34;:&#34;&#34;)')+ (' + (&#34asc&#34 === sord ? &#34; asc&#34;:&#34; desc&#34;)')}"></th>
+                                <th class="text-center" style="width: 100px" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <template x-for="m in grid.rows" :key="m.id">
+                                <tr :data-id="m.id">
+                                    <td th:attr="x-text=${'m.index'}"></td>
+                                    <td th:each="n : ${report.reportColumnList}" th:class="${'text-' + n.align.name().toLowerCase()}" th:if="${!n.hidden}">
+                                        <a href="javascript:;" th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index == 1}"></a>
+                                        <span th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index > 1}"></span>
+                                    </td>
+                                    <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                                        <!-- <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', 'xx')" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
+                                        <a class="dialogBtn mr-2" href="javascript:;" th:onclick="" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
+                                        <a href="javascript:;" th:onclick="" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
+                                        <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
+                                    </td>
+
+                                    <input type="hidden" th:each="n : ${report.reportColumnList}" th:if="${n.hidden}" th:name="${n.name}" th:attr="x-model=${'m.' + n.name}"/>
+                                </tr>
+                            </template>
+                            <tr th:if="${summary ne null}">
+                                <td style="font-weight: bold;">合计</td>
+                                <td th:if="${'multiple' eq params['mode']}"></td>
+                                <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}"></td>
+                                <td sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete')}"></td>
+                            </tr>
+                            <template x-if="grid.records < 1">
+                                <tr class="tr-empty non-data">
+                                    <td th:colspan="${report.visibleColumnSize + 2 + ('multiple' eq params['mode'] ? 1 : 0)}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
+                                </tr>
+                            </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer-bar">
+                        <div style="margin-bottom: 8px; float: left;">
+                            <span class="breadcrumb-item active" x-text="'共' + grid.records + '条，'+grid.totalPages+'页'"></span>
+                            <select @input="search({page:1, size: $event.target.value})" th:if="${report.pageable}">
+                                <option value="15" th:selected="${grid.pageSize == 15}">15条</option>
+                                <option value="50" th:selected="${grid.pageSize == 50}">50条</option>
+                                <option value="100" th:selected="${grid.pageSize == 100}">100条</option>
+                                <option value="200" th:selected="${grid.pageSize == 200}">200条</option>
+                            </select>
+                            <span th:if="${grid.totalPages > 1}">，前往<input class="goto" style="width: 68px;" @keyup="gotoPage($event.target, $event)" maxlength="6">页</span>
+                        </div>
+                        <div id="batch-cpn-bar" style="margin-left: 16px; float: left; margin-bottom: 8px;" th:if="${'multiple' eq params['mode']}">
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-light" style="padding: .075rem .45rem" type="button" onclick="batchDelete()" disabled><i class="fa fa-trash-o fa-lg"></i></button>
+                                    <!--                                <button class="btn btn-light" style="padding: .075rem .45rem" type="button"><i class="fa fa-trash-o fa-lg"></i></button>-->
+                                </div>
+                            </div>
+                        </div>
+                        <template x-if="grid.totalPages > 1">
+                        <nav style="float: right">
+                            <ul class="pagination pagination-sm">
+                                <template x-if="grid.page > 1">
+                                    <li class="page-item">
+                                        <a class="page-link" href="javascript:;" @click="search({page: grid.page - 1})">上一页</a>
+                                    </li>
+                                </template>
+                                <template x-for="pageNumber in pageRange" :key="pageNumber">
+                                    <li :class="'page-item ' + (pageNumber == grid.page ? 'active': '')">
+                                        <a class="page-link" href="javascript:;" @click="pageNumber != grid.page && search({page: pageNumber})" x-text="pageNumber"></a>
+                                    </li>
+                                </template>
+                                <template x-if="grid.page < grid.totalPages">
+                                    <li class="page-item">
+                                        <a class="page-link" href="javascript:;" @click="search({page: grid.page + 1})">下一页</a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </nav>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     load()
+        // });
+        //
+        // typeof $ !== 'undefined' && $(function () {
+        //     load()
+        // })
+        //
+        // function load() {
+        //     $('.query-form').autofill(getCurrentUrlQueryObject())
+        // }
+
+        window['init' + /*[[${report.id}]]*/] = function () {
+            this.$elem = $(('#id' + /*[[${report.id}]]*/))
+            this.$elemForm = $(('#id' + /*[[${report.id}]]*/) + ' .query-form')
+
+            let searchObject = getCurrentUrlQueryObject();
+            this.$elemForm.autofill(searchObject)
+            this.sidx = searchObject.sidx
+            this.sord = searchObject.sord
+        }
+
+        window['setup' + /*[[${report.id}]]*/] = function () {
+            let reportColumnList = /*[[${report.reportColumnList}]]*/
+            let grid = /*[[${grid}]]*/
+
+            grid.rows = grid.rows.map((row, index) => {
+                let data = {}
+
+                data['index'] = (grid.page - 1) * grid.pageSize  + 1 + index
+
+                for (let i = 0; i < reportColumnList.length; i++) {
+                    data[reportColumnList[i].name] = row[i]
+                }
+                return data
+            })
+
+            return {
+                grid,
+                displayPage: 10,
+                sidx: '',
+                sord: '',
+                get pageRange() {
+                    let leftOffset = parseInt((this.displayPage - 1) / 2);
+                    let leftPage = this.grid.page - 1;
+                    let rightOffset = this.displayPage - leftOffset - 1;
+                    let rightPage = this.grid.totalPages - this.grid.page;
+                    let startPage = 1;
+                    if (rightPage < rightOffset) {
+                        leftOffset = leftOffset + rightOffset - rightPage;
+                    }
+
+                    if (leftPage > leftOffset) {
+                        startPage = this.grid.page - leftOffset;
+                    }
+
+                    let endPage = startPage + this.displayPage - 1;
+                    if (endPage > this.grid.totalPages) {
+                        endPage = this.grid.totalPages;
+                    }
+
+                    const length = endPage - startPage + 1;
+                    return Array.from({ length }, (_, i) => i + startPage);
+                },
+                gotoPage(o, event) {
+                    if (o.value == this.grid.page) {
+                        return
+                    }
+                    // 兼容FF和IE和Opera
+                    let theEvent = event || window.event;
+                    let code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+                    if (code == 13) {
+                        if (o.value && o.value.trim()) {
+                            let page = o.value.trim()
+
+                            if (/^[0-9]*[1-9][0-9]*$/.test(page)) {
+                                this.search({page: o.value})
+                            } else {
+                                toastr.error('页码只能是正整数!');
+                            }
+                            return
+                        }
+                        toastr.error('页码不能为空!');
+                    }
+                },
+                search(query) {
+                    let params = {}
+
+                    let formParams = this.$elemForm.form2json({allowEmptyMultiVal:true})
+
+                    $.extend(params, getCurrentUrlQueryObject(), formParams, query)
+                    if (query['sidx']) {
+                        // sord
+                        params['sord'] = this.sord === 'desc' ? 'asc' : 'desc'
+                        this.sord = params['sord']
+                        this.sidx = query['sidx']
+                    }
+
+                    // $multipleSelect.each(function () {
+                    //     var values = $(this).multipleSelect('getSelects')
+                    //     if (values.length > 0) {
+                    //         param[this.name] = $(this).multipleSelect('getSelects').join(",")
+                    //     } else {
+                    //         param[this.name] = undefined
+                    //     }
+                    // })
+
+                    // checkbox 不打勾表示不做筛选条件
+                    // $checkbox.each(function () {
+                    //     param[this.name] = $(this).prop('checked') & 1
+                    // })
+
+                    // history
+                    history.pushState(null, '', location.pathname + "?" + $.param(params))
+
+
+                    console.log(params, "...")
+
+                    axios.get(('/reports/' + /*[[${report.id}]]*/ )+'/json', {
+                        params
+                    })
+                        .then((response) => {
+                            let grid = response.data.data
+
+                            for (let i = 0; i < grid.rows.length; i++) {
+                                grid.rows[i]['index'] = (grid.page - 1) * grid.pageSize  + 1 + i
+                            }
+
+                            this.grid = grid
+                            this.$elem.find(".goto").val(this.grid.page)
+                        })
+                        .catch(function (error) {
+
+                        });
+
+                },
+                download() {
+                    $.LoadingOverlay("show")
+                    download("/reports/" + (/*[[${report.id}]]*/) + "/export", function () {
+                        $.LoadingOverlay("hide")
+                    }, function (message) {
+                        toastr.error(message)
+                    })
+                },
+                reset() {
+                    this.$elemForm.resetForm()
+                    this.$elemForm.clearForm(true)
+                    //reset multi select
+                    // $multipleSelect.each(function() {
+                    //     $(this).find("option").each(function() {
+                    //         $(this).prop('selected', false);
+                    //     });
+                    //
+                    //     $(this).multipleSelect('uncheckAll')
+                    // });
+                    this.search({page: 1})
+                }
+            }
+        }
+
+        /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
+    </script>
+    [(${report.additionalInfo['script'] != null ? report.additionalInfo['script'] : ''})]
+</th:block>
+</html>
