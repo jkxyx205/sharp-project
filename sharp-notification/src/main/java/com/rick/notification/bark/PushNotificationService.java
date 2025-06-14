@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit;
  * @author Rick.Xu
  * @date 2025/4/27 15:05
  */
-@Service
 @FieldDefaults(makeFinal=true, level= AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @Slf4j

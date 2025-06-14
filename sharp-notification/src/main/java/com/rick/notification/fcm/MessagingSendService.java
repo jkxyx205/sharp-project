@@ -4,7 +4,6 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
@@ -12,7 +11,6 @@ import java.io.IOException;
  * @author Rick.Xu
  * @date 2025/5/8 11:01
  */
-@Service
 public class MessagingSendService {
 
     public static final String URL = "https://us-central1-fir-cloudmessaging-4e2cd.cloudfunctions.net/send";

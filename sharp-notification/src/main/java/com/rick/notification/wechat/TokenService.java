@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -18,7 +17,6 @@ import java.util.Map;
  * @date 2024/3/6 09:21
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public final class TokenService {
 
