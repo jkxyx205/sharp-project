@@ -45,7 +45,7 @@
                                 <i class="fa fa-remove"></i> 重置</button>
                             <a class="btn btn-secondary mr-2" href="javascript:;" @click="download" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                                 <i class="fa fa-upload"></i> 导出</a>
-                            <button class="btn btn-primary" type="button" onclick="gotoDetail('新增')" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                            <button class="btn btn-primary" type="button" @click="edit()" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                                 <i class="fa fa-plus"></i> 新增</button>
                         </div>
                     </form>
@@ -75,8 +75,8 @@
                                     </td>
                                     <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
                                         <!-- <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', 'xx')" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
-                                        <a class="dialogBtn mr-2" href="javascript:;" th:onclick="" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
-                                        <a href="javascript:;" th:onclick="" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
+                                        <a class="dialogBtn mr-2" href="javascript:;" @click="edit(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
+                                        <a href="javascript:;" @click="deleteRow(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
                                         <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
                                     </td>
 
@@ -164,6 +164,12 @@
             this.$elemForm.autofill(searchObject)
             this.sidx = searchObject.sidx
             this.sord = searchObject.sord
+
+            let hasAuthority = false
+            /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+            hasAuthority = true
+            /*[/]*/
+            this.readonly = !hasAuthority || [[${readonly}]]
         }
 
         window['setup' + /*[[${report.id}]]*/] = function () {
@@ -230,10 +236,10 @@
                     }
                 },
                 search(query) {
+                    query = query ? query : {}
+
                     let params = {}
-
                     let formParams = this.$elemForm.form2json({allowEmptyMultiVal:true})
-
                     $.extend(params, getCurrentUrlQueryObject(), formParams, query)
                     if (query['sidx']) {
                         // sord
@@ -242,14 +248,15 @@
                         this.sidx = query['sidx']
                     }
 
-                    // $multipleSelect.each(function () {
-                    //     var values = $(this).multipleSelect('getSelects')
-                    //     if (values.length > 0) {
-                    //         param[this.name] = $(this).multipleSelect('getSelects').join(",")
-                    //     } else {
-                    //         param[this.name] = undefined
-                    //     }
-                    // })
+                    let $multipleSelect = this.$elemForm.find("select[multiple]")
+                    $multipleSelect.each(function () {
+                        let values = $(this).multipleSelect('getSelects')
+                        if (values.length > 0) {
+                            params[this.name] = $(this).multipleSelect('getSelects').join(",")
+                        } else {
+                            params[this.name] = undefined
+                        }
+                    })
 
                     // checkbox 不打勾表示不做筛选条件
                     // $checkbox.each(function () {
@@ -291,15 +298,60 @@
                 reset() {
                     this.$elemForm.resetForm()
                     this.$elemForm.clearForm(true)
-                    //reset multi select
-                    // $multipleSelect.each(function() {
-                    //     $(this).find("option").each(function() {
-                    //         $(this).prop('selected', false);
-                    //     });
-                    //
-                    //     $(this).multipleSelect('uncheckAll')
-                    // });
+
+                    let $multipleSelect = this.$elemForm.find("select[multiple]")
+                    $multipleSelect.each(function() {
+                        $(this).find("option").each(function() {
+                            $(this).prop('selected', false);
+                        });
+
+                        $(this).multipleSelect('uncheckAll')
+                    });
                     this.search({page: 1})
+                },
+                edit(id, search) {
+                    let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+                    if (form_id) {
+                        let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
+                        if (formAction === 'link') {
+                            openLink((!id ? "edit" + new Date().getTime() : id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : "")), "编辑-" + (/*[[${report.name}]]*/));
+                        } else {
+                            $.dialog({
+                                title: /*[[${report.name}]]*/,
+                                url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + this.readonly,
+                                ok: {
+                                    label: '保存',
+                                    success: value => {
+                                        window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
+                                            value.$modal.modal('hide')
+                                            toastr.success("保存成功")
+                                            this.search()
+                                        })
+                                    }
+                                }
+                            })
+                        }
+                    } else { // 自定义 endpoint 跳转页面详情
+                        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
+                        openLink((!id ? "edit" + new Date().getTime() : id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
+                    }
+                },
+                deleteRow(id) {
+                    if (confirm('确定要删除该条记录吗？')) {
+                        let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+                        let url;
+                        if (form_id) {
+                            url = '/forms/ajax/' + form_id + '/' + id
+                        } else {
+                            url = '/'+ endpoint +  '/' + id
+                        }
+
+                        axios.delete(url)
+                            .then(() => {
+                                toastr.success("删除成功");
+                                this.search();
+                            })
+                    }
                 }
             }
         }
