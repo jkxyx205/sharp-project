@@ -61,7 +61,13 @@ public class UserTest {
                         .pv("label-col", 1)
                         .build()) // 跳转新的页面编辑，适合字段多的页面
 
-                // 4. link + tab
+                // 4. drawer
+//                .tplName("demos/htmx/form") // drawer使用form， report 设置参数 .pv("formAction", "drawer")
+//                .additionalInfo(Params.builder(1)
+//                        .pv("label-col", 1)
+//                        .build()) // 跳转新的页面编辑，适合字段多的页面
+
+                // 5. link + tab
 //                .tplName("tpl/form/form-tab") // report 设置参数 .pv("formAction", "link")；弹出框显示需要使用 tpl/form-tab
 //                 .additionalInfo(Params.builder(1)
 //                        .pv("label-col", 2)

@@ -4,6 +4,7 @@ import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.formflow.form.controller.instance.PageInstanceController;
 import com.rick.formflow.form.service.FormAdvice;
 import com.rick.formflow.form.service.FormService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +29,12 @@ public class PageInstanceHtmxController extends PageInstanceController {
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
     public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model, HttpServletRequest request) {
         String page = super.gotoFormPage(formId, instanceId, model, request);
-        // 需要使用 htmx 中的模版
-//        page = "demos/htmx/form";
+        // 默认需要使用 htmx 中的模版 demos/htmx/form
+        String reqFormPage = request.getParameter("formPage");
+        if (StringUtils.isNotBlank(reqFormPage)) {
+            page = reqFormPage;
+        }
+
         String fragment = "content";
         return HttpServletRequestUtils.isAjaxRequest(request) ? page +" :: "+fragment+"" : page;
     }

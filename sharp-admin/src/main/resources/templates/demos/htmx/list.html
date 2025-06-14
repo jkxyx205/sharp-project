@@ -145,7 +145,20 @@
             </div>
         </div>
     </div>
+    <div class="drawer-dialog" th:attr="id=${'id' + report.id + 'drawer-dialog'}">
+        <div style="height: 50px; padding-right: 24px; background: #0c0e10; text-align: right;">
+            <a style="line-height: 50px;" href="javascript:;" onclick="$(this).parents('.drawer-dialog').css('width', 0)";>X</a>
+        </div>
+        <div style="flex: 1; overflow: hidden;" class="drawer-content">
 
+        </div>
+        <div style="height: 50px">
+            <button th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${report.id}').alpineData.search();})|">
+                Save
+            </button>
+            <button onclick="closeDrawerDialog(this)">Close</button>
+        </div>
+    </div>
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
             load()
@@ -325,12 +338,16 @@
                     let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
                     if (form_id) {
                         let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
+                        let formPage = /*[[${report.additionalInfo != null && report.additionalInfo['formPage'] != null ? report.additionalInfo['formPage'] : '' } + '']]*/
+                        let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : ""))
                         if (formAction === 'link') {
-                            openLink((!id ? "edit" + new Date().getTime() : id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : "")), "编辑-" + (/*[[${report.name}]]*/));
+                            openLink((!id ? "edit" + new Date().getTime() : id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
+                        } if (formAction === 'drawer') {
+                            openDrawerDialog('/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString, 'id' + (/*[[${report.id}]]*/) + 'drawer-dialog', false)
                         } else {
                             $.dialog({
                                 title: /*[[${report.name}]]*/,
-                                url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + this.readonly,
+                                url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString,
                                 ok: {
                                     label: '保存',
                                     success: value => {
