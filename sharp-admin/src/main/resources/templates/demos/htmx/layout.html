@@ -548,8 +548,10 @@
             showCurrentTab(event) {
                 event.target.preventRequest = false
                 let container = document.querySelector("[target-id="+id+"]")
-                if (container.children.length)
+                if (container.children.length) {
                     event.target.preventRequest = true
+                    event.preventDefault()
+                }
 
                 activeTab(id, path)
             },
