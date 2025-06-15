@@ -209,10 +209,15 @@ public class FormService {
         FormBO form = getFormBOById(formId);
 
         values.put("formId", formId);
-        values.put("id", instanceId);
 
-        Long innerTableId = instanceId == null ? IdGenerator.getSequenceId() : instanceId;
-        values.put("instanceId", innerTableId);
+        if (StringUtils.isNotBlank((CharSequence) values.get("id"))) {
+            instanceId = Long.parseLong((String) values.get("id"));
+        } else {
+            if (form.getForm().getStorageStrategy() == Form.StorageStrategyEnum.INNER_TABLE && instanceId == null) {
+                instanceId = IdGenerator.getSequenceId();
+            }
+            values.put("id", instanceId);
+        }
 
         List<FormCpnValue> formCpnValueList = Lists.newArrayListWithExpectedSize(form.getPropertyList().size());
 
@@ -232,7 +237,7 @@ public class FormService {
             formCpnValueList.add(FormCpnValue.builder()
                     .value(value)
                     .formCpnId(property.getId())
-                    .instanceId(innerTableId)
+                    .instanceId(instanceId)
                     .formId(formId)
                     .configId(property.getConfigurer().getId())
                     .build());
@@ -279,8 +284,6 @@ public class FormService {
         if (formAdvice != null) {
             formAdvice.afterInstanceHandle(form, instanceId, values);
         }
-
-        values.put("id", innerTableId);
     }
 
     public int delete(Long formId, Long[] instanceIds) {

@@ -362,6 +362,10 @@
     function isDOMElement(obj) {
         return typeof obj === 'object' && obj !== null && obj instanceof Element;
     }
+
+    function isNumber(value) {
+        return (!isNaN(value) && value.trim() !== '')
+    }
 </script>
 <!--url 工具函数-->
 <script>
@@ -439,7 +443,7 @@
     if (!links.map(link => link.path).find(path => getPathname(path) === location.pathname)) {
         const id = location.pathname.split('/').pop().split('?')[0];
         links.push({
-            id: (!isNaN(id) && id.trim() !== '') ? "tab-" + id : id,
+            id: isNumber(id) ? "tab-" + id : id,
             path: location.pathname + location.search,
             name: id
         });
@@ -519,6 +523,10 @@
     }
 
     function _addTab(id, path, name, callback) {
+        if (isNumber(id)) {
+            alert('id是数字不合规范')
+            return
+        }
         let containerId = id + "-container"
 
         !document.getElementById(containerId) && htmlElem.append(createHtmlDiv(id, containerId))

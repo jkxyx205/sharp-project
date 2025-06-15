@@ -62,7 +62,7 @@ public class UserTest {
                         .build()) // 跳转新的页面编辑，适合字段多的页面
 
                 // 4. drawer
-//                .tplName("demos/htmx/form") // drawer使用form， report 设置参数 .pv("formAction", "drawer")
+//                .tplName("tpl/form/form") // drawer使用form， report 设置参数 .pv("formAction", "drawer")
 //                .additionalInfo(Params.builder(1)
 //                        .pv("label-col", 1)
 //                        .build()) // 跳转新的页面编辑，适合字段多的页面

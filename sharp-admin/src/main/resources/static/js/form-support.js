@@ -130,6 +130,7 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
                         idDOM.value = options.originalFormData.id = res.data
 
                         // setTimeout(() => {
+                        // 刷新页面继续添加
                         //     window.location.reload()
                         // }, 1000)
                     }

@@ -34,16 +34,16 @@ public class AjaxInstanceController {
     }
 
     @PostMapping("{formId}")
-    public Result<Long> save(@RequestBody Map<String, Object> values, @PathVariable Long formId) throws BindException {
+    public Result<String> save(@RequestBody Map<String, Object> values, @PathVariable Long formId) throws BindException {
         formService.post(formId, values);
-        return ResultUtils.success((Long) values.get(SharpDbConstants.ID_COLUMN_NAME));
+        return ResultUtils.success(String.valueOf(values.get(SharpDbConstants.ID_COLUMN_NAME)));
     }
 
     @PutMapping("{formId}/{instanceId}")
     @PostMapping("{formId}/{instanceId}")
-    public Result<Long> update(@RequestBody Map<String, Object> values, @PathVariable Long formId, @PathVariable Long instanceId) throws BindException {
+    public Result<String> update(@RequestBody Map<String, Object> values, @PathVariable Long formId, @PathVariable Long instanceId) throws BindException {
         formService.post(formId, instanceId, values);
-        return ResultUtils.success(instanceId);
+        return ResultUtils.success(String.valueOf(instanceId));
     }
 
     @DeleteMapping("{formId}")

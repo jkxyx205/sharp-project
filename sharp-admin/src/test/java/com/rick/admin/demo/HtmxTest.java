@@ -33,8 +33,13 @@ public class HtmxTest {
                 .reportAdviceName("dictHtmxReportAdvice")
                 .summaryColumnNames("sort")
                 .additionalInfo(Params.builder(2).pv("formId", "695312747063197696")
+                        // 1. link
+//                        .pv("formAction", "link")
+//                        .pv("formPage", "demos/htmx/form")
+//                        .pv("showSaveFormBtn", true)
+                        // 2. drawer
                         .pv("formAction", "drawer")
-//                        .pv("formPage", "tpl/form/form-full")
+                        // .pv("formPage", "tpl/form/form-full") // drawer 默认使用 tpl/form/form-full，从 form tplName 继承
                         .pv("select", true).build())
                 .querySql("select id, type, name, label, sort from sys_dict where type = :type and is_deleted = 0 order by type, sort asc")
                 .queryFieldList(Arrays.asList(

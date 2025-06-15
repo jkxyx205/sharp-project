@@ -341,8 +341,8 @@
                         let formPage = /*[[${report.additionalInfo != null && report.additionalInfo['formPage'] != null ? report.additionalInfo['formPage'] : '' } + '']]*/
                         let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : ""))
                         if (formAction === 'link') {
-                            openLink((!id ? "edit" + new Date().getTime() : id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
-                        } if (formAction === 'drawer') {
+                            openLink((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
+                        } else if (formAction === 'drawer') {
                             openDrawerDialog('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString, 'id' + (/*[[${report.id}]]*/) + 'drawer-dialog', false)
                         } else {
                             $.dialog({
@@ -362,7 +362,7 @@
                         }
                     } else { // 自定义 endpoint 跳转页面详情
                         let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
-                        openLink((!id ? "edit" + new Date().getTime() : id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
+                        openLink((!id ? "edit" + new Date().getTime() : "edit" + id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
                     }
                 },
                 deleteRow(id) {
