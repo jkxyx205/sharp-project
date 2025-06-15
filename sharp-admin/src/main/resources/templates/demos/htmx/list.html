@@ -343,7 +343,7 @@
                         if (formAction === 'link') {
                             openLink((!id ? "edit" + new Date().getTime() : id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
                         } if (formAction === 'drawer') {
-                            openDrawerDialog('/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString, 'id' + (/*[[${report.id}]]*/) + 'drawer-dialog', false)
+                            openDrawerDialog('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString, 'id' + (/*[[${report.id}]]*/) + 'drawer-dialog', false)
                         } else {
                             $.dialog({
                                 title: /*[[${report.name}]]*/,
