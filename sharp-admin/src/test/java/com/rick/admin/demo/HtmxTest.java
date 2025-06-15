@@ -36,7 +36,6 @@ public class HtmxTest {
                         // 1. link
 //                        .pv("formAction", "link")
 //                        .pv("formPage", "demos/htmx/form")
-//                        .pv("showSaveFormBtn", true)
                         // 2. drawer
                         .pv("formAction", "drawer")
                         // .pv("formPage", "tpl/form/form-full") // drawer 默认使用 tpl/form/form-full，从 form tplName 继承

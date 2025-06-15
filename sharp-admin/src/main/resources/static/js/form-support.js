@@ -153,10 +153,10 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
 
             if (Array.isArray(reloadTabIds)) {
                 for(let reloadTabId of reloadTabIds) {
-                    reloadTab(reloadTabId)
+                    typeof reloadTab !== "undefined" && reloadTab(reloadTabId)
                 }
             } else {
-                reloadTab(reloadTabIds)
+                typeof reloadTab !== "undefined" && reloadTab(reloadTabIds)
             }
         }
     }

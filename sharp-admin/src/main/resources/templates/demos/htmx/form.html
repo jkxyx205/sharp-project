@@ -2,30 +2,36 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{demos/htmx/layout.html}">
-<th:block layout:fragment="content" th:fragment="content">
+<th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
     <style>
         /*[(${formBO.form.getAdditionalInfo['css'] == null ? '' : formBO.form.getAdditionalInfo['css']})]*/
     </style>
-    <div class="container">
+    <div class="container" th:id="${'container' + s}">
         <th:block th:replace="tpl/includes/horizotal-form"></th:block>
     </div>
-    <script th:inline="javascript">
-        var formBO = /*[[${ formBO }]]*/
-        var originalFormData = /*[[${ formBO.data }]]*/
-        var formCode = /*[[${formBO.form.code}]]*/
-        var p = [[${formBO.propertyList}]]
 
-        var hasAuthority = false
+    <script th:inline="javascript">
+        window.s = 'load' + new Date().getTime();
+        window[s] = function () {
+        let formBO = /*[[${ formBO }]]*/
+        let originalFormData = /*[[${ formBO.data }]]*/
+        let formCode = /*[[${formBO.form.code}]]*/
+        let p = [[${formBO.propertyList}]]
+
+        let hasAuthority = false
         /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') }"]*/
         hasAuthority = true
         /*[/]*/
-        var readonly = !hasAuthority || JSON.parse([[${query.readonly}]])
+        let readonly = !hasAuthority || JSON.parse([[${query.readonly}]])
 
-        var formDOM = window[formCode + 'FormDOM'] = document.getElementsByClassName("sharp-form")[0]
-        var idDOM = $(formDOM).find("#id")[0]
+        let formDOM = window[formCode + 'FormDOM' + /*[[${ s }]]*/] = document.querySelector('#container' + (/*[[${ s }]]*/) + ' .sharp-form')
+        let idDOM = $(formDOM).find("#id")[0]
 
         sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
         /*[(${formBO.form.getAdditionalInfo['js'] == null ? '' : formBO.form.getAdditionalInfo['js']})]*/
+        }
+        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
+        delete window.s
     </script>
 </th:block>
 </html>

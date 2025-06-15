@@ -119,7 +119,7 @@
     <div class="form-group row" th:if="${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('showSaveFormBtn') == null || formBO.form.getAdditionalInfo().get('showSaveFormBtn') == true)}">
         <label th:class="${'col-form-label col-sm-' + col}"></label>
         <div th:class="${'col-sm-' + (12 - col)}">
-            <button type="button" class="btn btn-primary btn-save" th:onclick="[(${formBO.form.code})]FormDOM.save()">保存</button>
+            <button type="button" class="btn btn-primary btn-save" th:onclick="[(${formBO.form.code})]FormDOM[(${s})].save()">保存</button>
         </div>
     </div>
 </form>

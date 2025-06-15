@@ -153,26 +153,20 @@
 
         </div>
         <div style="height: 50px">
-            <button th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${report.id}').alpineData.search();})|">
+            <button class="btn btn-primary btn-save" th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${report.id}').alpineData.search();})|">
                 Save
             </button>
-            <button onclick="closeDrawerDialog(this)">Close</button>
+            <button class="btn btn-secondary" onclick="closeDrawerDialog(this)">Close</button>
         </div>
     </div>
     <script th:inline="javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            load()
-        });
-
-        typeof $ !== 'undefined' && $(function () {
-            load()
-        })
-
-        function load() {
+        window.s = 'load' + new Date().getTime();
+        window[s] = function () {
             // $('.query-form').autofill(getCurrentUrlQueryObject())
             /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
         }
-
+        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
+        delete window.s
         window['init' + /*[[${report.id}]]*/] = function () {
             this.$elem = $(('#id' + /*[[${report.id}]]*/))
             this.$elem[0].alpineData = this
