@@ -3,13 +3,13 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{demos/htmx/layout.html}"
       xmlns:sp="">
-<th:block layout:fragment="content" th:fragment="content">
+<th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
     [(${report.additionalInfo['link'] != null ? report.additionalInfo['link'] : ''})]
     <style th:inline="css">
         /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
     </style>
 
-    <div class="report-container" th:attr="id=${'id' + report.id}, x-data=${'setup' + report.id}, x-init=${'init' + report.id}">
+    <div class="report-container" th:attr="id=${'id' + s}, x-data=${'setup' + s}, x-init=${'init' + s}, data-id=${report.id}">
         <div class="container-fluid">
             <!-- 查询条件 -->
             <div class="card">
@@ -145,7 +145,7 @@
             </div>
         </div>
     </div>
-    <div class="drawer-dialog" th:attr="id=${'id' + report.id + 'drawer-dialog'}">
+    <div class="drawer-dialog" th:attr="id=${'id' + s + 'drawer-dialog'}">
         <div style="height: 50px; padding-right: 24px; background: #0c0e10; text-align: right;">
             <a style="line-height: 50px;" href="javascript:;" onclick="$(this).parents('.drawer-dialog').css('width', 0)";>X</a>
         </div>
@@ -153,7 +153,7 @@
 
         </div>
         <div style="height: 50px">
-            <button class="btn btn-primary btn-save" th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${report.id}').alpineData.search();})|">
+            <button class="btn btn-primary btn-save" th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${s}').alpineData.search();})|">
                 Save
             </button>
             <button class="btn btn-secondary" onclick="closeDrawerDialog(this)">Close</button>
@@ -162,15 +162,14 @@
     <script th:inline="javascript">
         window.s = 'load' + new Date().getTime();
         window[s] = function () {
-            // $('.query-form').autofill(getCurrentUrlQueryObject())
             /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
         }
         typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
         delete window.s
-        window['init' + /*[[${report.id}]]*/] = function () {
-            this.$elem = $(('#id' + /*[[${report.id}]]*/))
+        window['init' + /*[[${s}]]*/] = function () {
+            this.$elem = $(('#id' + /*[[${s}]]*/))
             this.$elem[0].alpineData = this
-            this.$elemForm = $(('#id' + /*[[${report.id}]]*/) + ' .query-form')
+            this.$elemForm = $(('#id' + /*[[${s}]]*/) + ' .query-form')
 
             let searchObject = getCurrentUrlQueryObject();
             this.$elemForm.autofill(searchObject)
@@ -184,7 +183,7 @@
             this.readonly = !hasAuthority || [[${readonly}]]
         }
 
-        window['setup' + /*[[${report.id}]]*/] = function () {
+        window['setup' + /*[[${s}]]*/] = function () {
             let reportColumnList = /*[[${report.reportColumnList}]]*/
             let isSummary = /*[[${report.summaryColumnNames != null}]]*/
             let summaryData = /*[[${report.summaryColumnNames != null ? summary : {}}]]*/
@@ -335,7 +334,7 @@
                         let formPage = /*[[${report.additionalInfo != null && report.additionalInfo['formPage'] != null ? report.additionalInfo['formPage'] : '' } + '']]*/
                         let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : ""))
                         if (formAction === 'link') {
-                            openLink((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
+                            addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
                         } else if (formAction === 'drawer') {
                             openDrawerDialog('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString, 'id' + (/*[[${report.id}]]*/) + 'drawer-dialog', false)
                         } else {
@@ -356,7 +355,7 @@
                         }
                     } else { // 自定义 endpoint 跳转页面详情
                         let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
-                        openLink((!id ? "edit" + new Date().getTime() : "edit" + id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
+                        addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
                     }
                 },
                 deleteRow(id) {

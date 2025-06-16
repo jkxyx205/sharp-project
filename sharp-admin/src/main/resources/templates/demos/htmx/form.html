@@ -27,7 +27,7 @@
         let formDOM = window[formCode + 'FormDOM' + /*[[${ s }]]*/] = document.querySelector('#container' + (/*[[${ s }]]*/) + ' .sharp-form')
         let idDOM = $(formDOM).find("#id")[0]
 
-        sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, null, null);
+        sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, formCode + '-tab' , null);
         /*[(${formBO.form.getAdditionalInfo['js'] == null ? '' : formBO.form.getAdditionalInfo['js']})]*/
         }
         typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])

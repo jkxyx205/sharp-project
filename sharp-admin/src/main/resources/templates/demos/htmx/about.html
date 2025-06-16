@@ -7,15 +7,15 @@
 
     <!-- 约定：用 SO11231232323 作为参数 -->
     <a style="text-decoration: underline;" id="SO11231232323" hx-get="/demos/htmx/detail/SO11231232323" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html"
-    onclick="openLink(this)">SO11231232323-push-url
+    onclick="addHtmxTab(this)">SO11231232323-push-url
     </a>
     <br>
     <a style="text-decoration: underline;" id="SO11231232324" hx-get="/demos/htmx/detail/SO11231232323" hx-push-url="false" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html"
-       onclick="openLink(this)">SO11231232324-not-push-url
+       onclick="addHtmxTab(this)">SO11231232324-not-push-url
     </a>
 
     <hr>
-    <button onclick="openLink('SO11231232323', '/demos/htmx/detail/SO11231232323?a=1', 'addTab')">addTab</button>
+    <button onclick="addTab('SO11231232323', '/demos/htmx/detail/SO11231232323?a=1', 'addTab')">addTab</button>
 
     <button onclick="addDialog1()">addDialog1(全局)</button>
     <button onclick="addDialog2()">addDialog2(全局)</button>
