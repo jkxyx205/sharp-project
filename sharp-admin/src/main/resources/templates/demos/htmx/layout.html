@@ -454,10 +454,15 @@
             _addTab(tab.id, tab.path, tab.name, containerId => {
                 let linkElem = document.getElementById(removeTabSuffix(tab.id))
                 linkElem && linkElem.setAttribute('hx-target', '#' + containerId)
-            }, () => {
+
                 if (activeId === tab.id) {
                     // 如果没有加载(非服务端渲染，通过 activeTab() 判断服务渲染了数据)，则运行 click()，重新请求，如果有三层路由，比如 htmx/index/tab-a htmx/index/tab-b，需要进行服务器渲染
-                    !activeTab(activeId) && htmx.trigger("#" + activeId, 'click')
+
+                    // !activeTab(activeId) && htmx.trigger("#" + activeId, 'click')
+
+                    tabElemData.$nextTick(() => {
+                        htmx.trigger("#" + activeId, 'click')
+                    });
                 }
             })
         }
@@ -473,7 +478,8 @@
         } else {
             _addTab(tabId, elem.getAttribute("hx-get"), elem.innerText, containerId => {
                 elem.setAttribute('hx-target', '#' + containerId)
-            }, () => activeTab(tabId));
+                activeTab(tabId)
+            });
         }
 
         return false
@@ -486,7 +492,8 @@
         } else {
             _addTab(id, path, name, containerId => {
                 fetchTargetContainer(path, containerId)
-            }, () =>  activeTab(id))
+                activeTab(id)
+            })
         }
     }
 
@@ -550,10 +557,13 @@
             preventRequest = false
         }
 
-        document.getElementById(id).preventRequest = preventRequest
+        let tabElem = document.getElementById(id)
+        if (tabElem) {
+            tabElem.preventRequest = preventRequest
+        }
+
         let linkElem = document.getElementById(removeTabSuffix(id))
         linkElem && (linkElem.preventRequest = preventRequest)
-
         return preventRequest
     }
 
@@ -585,7 +595,7 @@
      * @param callback
      * @private
      */
-    function _addTab(id, path, name, callback, callback2) {
+    function _addTab(id, path, name, callback) {
         if (isNumber(id)) {
             alert('id是数字不合规范')
             return
@@ -594,9 +604,6 @@
         let containerId = id + "-container"
 
         !document.getElementById(containerId) && htmlElem.append(createHtmlDiv(id, containerId))
-
-        callback && callback(containerId)
-
         !tabElemData.tabs.find(tab => tab.id === id) && tabElemData.tabs.push({
             id: id,
             path: path,
@@ -609,10 +616,7 @@
             }
         })
 
-        tabElemData.$nextTick(() => {
-            callback2 && callback2()
-        });
-
+        callback && callback(containerId)
         sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(tabElemData.tabs));
     }
 
