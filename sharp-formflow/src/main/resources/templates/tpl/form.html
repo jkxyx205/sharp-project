@@ -55,7 +55,7 @@
                             <ul class="list-group list-group-flush">
                                 <th:block th:if="${p.value ne null}">
                                 <li class="list-group-item" th:each="f : ${p.value}">
-                                    <a th:text="${f.full_name}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link" th:onclick="deleteAttachment([[${p.name}]], [[${f.id}]], this)">删除</button>
+                                    <a th:text="${f.fullName}" th:href="${f.url}" target="_blank"></a><button type="button" class="btn btn-link" th:onclick="deleteAttachment([[${p.name}]], [[${f.id}]], this)">删除</button>
                                 </li>
                                 </th:block>
                             </ul>
@@ -118,15 +118,15 @@
 <!--                        <div class="invalid-feedback" th:if="${errors eq null ? false : (#maps.containsKey(errors, p.name) ? true : false)}" th:text="${errors.get(p.name).defaultMessage}"></div>-->
                     </th:block>
                 </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-sm-2"></label>
-                    <div class="col-sm-10">
-                        <button type="button" class="btn btn-primary" onclick="save()">保存</button>
-                    </div>
-                </div>
+<!--                <div class="form-group row">-->
+<!--                    <label class="col-form-label col-sm-2"></label>-->
+<!--                    <div class="col-sm-10">-->
+<!--                        <button type="button" class="btn btn-primary" onclick="save()">保存</button>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
-            <!--            <button type="button" class="btn btn-primary" onclick="save()">ajax保存</button>-->
-<!--            <button type="submit" class="btn btn-primary">form保存</button>-->
+                        <button type="button" class="btn btn-primary" onclick="save()">ajax保存</button>
+            <button type="submit" class="btn btn-primary">form保存</button>
         </form>
     </div>
 </body>
@@ -205,7 +205,7 @@
                     })
                     alert(errorList.join(""))
                 } else {
-                    idDOM.value = data
+                    idDOM.value = data.responseJSON.data
                     alert('保存成功')
                 }
             }
@@ -240,7 +240,7 @@
 
                     data.data.forEach(function (attachment) {
                         $('#' + fileElementId).siblings('ul').append("<li class=\"list-group-item\">\n" +
-                            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.full_name+"</a><button type=\"button\" class=\"btn btn-link\" onclick=\"deleteAttachment('"+fileElementId+"', "+attachment.id+", this)\">删除</button>\n" +
+                            "<a href=\""+attachment.url+"\" target=\"_blank\">"+attachment.fullName+"</a><button type=\"button\" class=\"btn btn-link\" onclick=\"deleteAttachment('"+fileElementId+"', "+attachment.id+", this)\">删除</button>\n" +
                         "</li>")
                     })
 

@@ -86,8 +86,6 @@ public class CheckBox extends AbstractCpn<List<String>> {
             } else {
                 return Arrays.asList(Boolean.FALSE.toString(), "0");
             }
-        } else if (value instanceof CharSequence) {
-            return Arrays.asList(value.toString());
         } else if (value.getClass().isEnum()) {
             return Arrays.asList(((Enum)value).name());
         } else if (value.getClass() == DictValue.class) {
