@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="en">
+  <!--begin::Head-->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>AdminLTE 4</title>
+    <!--begin::Primary Meta Tags-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="title" content="AdminLTE 4" />
+    <meta name="author" content="ColorlibHQ" />
+    <meta
+      name="description"
+      content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS."
+    />
+    <meta
+      name="keywords"
+      content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard"
+    />
+    <!--end::Primary Meta Tags-->
+    <!--begin::Fonts-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
+      crossorigin="anonymous"
+    />
+    <!--end::Fonts-->
+    <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css"
+      integrity="sha256-tZHrRjVqNSRyWg2wbppGnT833E/Ys0DHWGwT04GiqQg="
+      crossorigin="anonymous"
+    />
+    <!--end::Third Party Plugin(OverlayScrollbars)-->
+    <!--begin::Third Party Plugin(Bootstrap Icons)-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      integrity="sha256-9kPW/n5nn53j4WMRYAxe9c1rCY96Oogo/MKSVdKzPmI="
+      crossorigin="anonymous"
+    />
+    <!--end::Third Party Plugin(Bootstrap Icons)-->
+    <!--begin::Required Plugin(AdminLTE)-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link th:href="@{/adminlte/css/adminlte.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/multiple-select/multiple-select.min.css}">
+    <link th:href="@{/plugins/toastr/toastr.min.css}" rel="stylesheet">
+    <link th:href="@{/adminlte/plugins/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <!--end::Required Plugin(AdminLTE)-->
+    <style>
+      [data-astro-image] {
+        width: 100%;
+        height: auto;
+        object-fit: var(--fit);
+        object-position: var(--pos);
+        aspect-ratio: var(--w) / var(--h);
+      }
+      [data-astro-image='responsive'] {
+        max-width: calc(var(--w) * 1px);
+        max-height: calc(var(--h) * 1px);
+      }
+      [data-astro-image='fixed'] {
+        width: calc(var(--w) * 1px);
+        height: calc(var(--h) * 1px);
+      }
+
+      table {
+        word-break: keep-all;
+      }
+
+      .card-body {
+        overflow: auto;
+      }
+
+      .drawer-dialog {
+        position: absolute;
+        z-index: 9;
+        display: flex;
+        flex-direction: column;
+        right: 0;
+        top: 0;
+        height: 100%;
+        max-width: 100%;
+        width: 0;
+        background-color: #ffffff;
+        overflow: hidden;
+        word-break: keep-all;
+        transition: width .3s ease;
+      }
+
+      @media (min-width: 576px) {
+        .form-fluid {
+          display: flex;
+        }
+      }
+
+      @media screen and (max-width: 576px) {
+        .form-fluid .form-group {
+          display: flex;
+        }
+
+        .form-control {
+          flex: 1;
+        }
+      }
+
+      .form-fluid .form-group {
+        margin: 0 .5rem .5rem 0
+      }
+
+      .form-fluid .form-control {
+        display: inline-block;
+        width: auto;
+      }
+
+      .mr-2 {
+        margin-right: .5rem;
+      }
+
+      html, body, .app-wrapper, .app-content {
+        height: 100%;
+      }
+
+      .app-content {
+        overflow: auto;
+      }
+
+      .tab-remove-icon {
+        position: absolute;
+        right: 2px;
+        /*top: 50%;*/
+        /*transform: translateY(-50%);*/
+        top: 0;
+        display: none;
+        cursor: pointer;
+      }
+
+      #tab .nav-item .nav-link {
+        /*color: var(--bs-nav-link-color);*/
+        color: rgba(var(--bs-emphasis-color-rgb), 0.65);
+      }
+      #tab .nav-item:hover .tab-remove-icon {
+        display: block;
+      }
+
+    </style>
+  </head>
+  <!--end::Head-->
+  <!--begin::Body-->
+  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <!--begin::App Wrapper-->
+    <div class="app-wrapper">
+      <!--begin::Header-->
+      <nav class="app-header navbar navbar-expand bg-body">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Start Navbar Links-->
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                <i class="bi bi-list"></i>
+              </a>
+            </li>
+            <li class="nav-item d-none d-md-block"><a href="#" class="nav-link">Home</a></li>
+            <li class="nav-item d-none d-md-block"><a href="#" class="nav-link">Contact</a></li>
+            <li class="nav-item d-none d-md-block"><a class="nav-link" th:href="|javascript:location.href=mergeUrlQueryObject('multiTab=${!session.multiTab}')|">View 模式</a></li>
+          </ul>
+          <!--end::Start Navbar Links-->
+          <!--begin::End Navbar Links-->
+          <ul class="navbar-nav ms-auto">
+            <!--begin::Navbar Search-->
+            <li class="nav-item">
+              <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+                <i class="bi bi-search"></i>
+              </a>
+            </li>
+            <!--end::Navbar Search-->
+            <!--begin::Messages Dropdown Menu-->
+            <li class="nav-item dropdown">
+              <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                <i class="bi bi-chat-text"></i>
+                <span class="navbar-badge badge text-bg-danger">3</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <a href="#" class="dropdown-item">
+                  <!--begin::Message-->
+                  <div class="d-flex">
+                    <div class="flex-shrink-0">
+                      <img
+                        th:src="@{/adminlte/assets/img/user1-128x128.jpg}"
+                        alt="User Avatar"
+                        class="img-size-50 rounded-circle me-3"
+                      />
+                    </div>
+                    <div class="flex-grow-1">
+                      <h3 class="dropdown-item-title">
+                        Brad Diesel
+                        <span class="float-end fs-7 text-danger"
+                          ><i class="bi bi-star-fill"></i
+                        ></span>
+                      </h3>
+                      <p class="fs-7">Call me whenever you can...</p>
+                      <p class="fs-7 text-secondary">
+                        <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
+                      </p>
+                    </div>
+                  </div>
+                  <!--end::Message-->
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                  <!--begin::Message-->
+                  <div class="d-flex">
+                    <div class="flex-shrink-0">
+                      <img
+                        th:src="@{/adminlte/assets/img/user8-128x128.jpg}"
+                        alt="User Avatar"
+                        class="img-size-50 rounded-circle me-3"
+                      />
+                    </div>
+                    <div class="flex-grow-1">
+                      <h3 class="dropdown-item-title">
+                        John Pierce
+                        <span class="float-end fs-7 text-secondary">
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                      </h3>
+                      <p class="fs-7">I got your message bro</p>
+                      <p class="fs-7 text-secondary">
+                        <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
+                      </p>
+                    </div>
+                  </div>
+                  <!--end::Message-->
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                  <!--begin::Message-->
+                  <div class="d-flex">
+                    <div class="flex-shrink-0">
+                      <img
+                        th:src="@{/adminlte/assets/img/user3-128x128.jpg}"
+                        alt="User Avatar"
+                        class="img-size-50 rounded-circle me-3"
+                      />
+                    </div>
+                    <div class="flex-grow-1">
+                      <h3 class="dropdown-item-title">
+                        Nora Silvester
+                        <span class="float-end fs-7 text-warning">
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                      </h3>
+                      <p class="fs-7">The subject goes here</p>
+                      <p class="fs-7 text-secondary">
+                        <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
+                      </p>
+                    </div>
+                  </div>
+                  <!--end::Message-->
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
+              </div>
+            </li>
+            <!--end::Messages Dropdown Menu-->
+            <!--begin::Notifications Dropdown Menu-->
+            <li class="nav-item dropdown">
+              <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                <i class="bi bi-bell-fill"></i>
+                <span class="navbar-badge badge text-bg-warning">15</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <span class="dropdown-item dropdown-header">15 Notifications</span>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                  <i class="bi bi-envelope me-2"></i> 4 new messages
+                  <span class="float-end text-secondary fs-7">3 mins</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                  <i class="bi bi-people-fill me-2"></i> 8 friend requests
+                  <span class="float-end text-secondary fs-7">12 hours</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                  <i class="bi bi-file-earmark-fill me-2"></i> 3 new reports
+                  <span class="float-end text-secondary fs-7">2 days</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item dropdown-footer"> See All Notifications </a>
+              </div>
+            </li>
+            <!--end::Notifications Dropdown Menu-->
+            <!--begin::Fullscreen Toggle-->
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+                <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+              </a>
+            </li>
+            <!--end::Fullscreen Toggle-->
+            <!--begin::User Menu Dropdown-->
+            <li class="nav-item dropdown user-menu">
+              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                <img
+                  th:src="@{/adminlte/assets/img/user2-160x160.jpg}"
+                  class="user-image rounded-circle shadow"
+                  alt="User Image"
+                />
+                <span class="d-none d-md-inline" sec:authentication="name"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <!--begin::User Image-->
+                <li class="user-header text-bg-primary">
+                  <img
+                    th:src="@{/adminlte/assets/img/user2-160x160.jpg}"
+                    class="rounded-circle shadow"
+                    alt="User Image"
+                  />
+                  <p>
+                    Alexander Pierce - Web Developer
+                    <small>Member since Nov. 2023</small>
+                  </p>
+                </li>
+                <!--end::User Image-->
+                <!--begin::Menu Body-->
+                <li class="user-body">
+                  <!--begin::Row-->
+                  <div class="row">
+                    <div class="col-4 text-center"><a href="#">Followers</a></div>
+                    <div class="col-4 text-center"><a href="#">Sales</a></div>
+                    <div class="col-4 text-center"><a href="#">Friends</a></div>
+                  </div>
+                  <!--end::Row-->
+                </li>
+                <!--end::Menu Body-->
+                <!--begin::Menu Footer-->
+                <li class="user-footer">
+                  <a href="#" class="btn btn-default btn-flat">Profile</a>
+                  <a th:href="@{/logout}"class="btn btn-default btn-flat float-end">[[#{logout.label}]]</a>
+                </li>
+                <!--end::Menu Footer-->
+              </ul>
+            </li>
+            <!--end::User Menu Dropdown-->
+          </ul>
+          <!--end::End Navbar Links-->
+        </div>
+        <!--end::Container-->
+      </nav>
+      <!--end::Header-->
+      <!--begin::Sidebar-->
+      <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+        <!--begin::Sidebar Brand-->
+        <div class="sidebar-brand">
+          <!--begin::Brand Link-->
+          <a href="/pages/blank.html" class="brand-link">
+            <!--begin::Brand Image-->
+            <img
+              th:src="@{/adminlte/assets/img/AdminLTELogo.png}"
+              alt="AdminLTE Logo"
+              class="brand-image opacity-75 shadow"
+            />
+            <!--end::Brand Image-->
+            <!--begin::Brand Text-->
+            <span class="brand-text fw-light">AdminLTE 4</span>
+            <!--end::Brand Text-->
+          </a>
+          <!--end::Brand Link-->
+        </div>
+        <!--end::Sidebar Brand-->
+        <!--begin::Sidebar Wrapper-->
+        <div class="sidebar-wrapper">
+          <nav class="mt-2">
+            <!--begin::Sidebar Menu-->
+            <ul
+              class="nav sidebar-menu flex-column"
+              data-lte-toggle="treeview"
+              role="menu"
+              data-accordion="false"
+            >
+
+
+
+
+              <li class="nav-header">测试</li>
+              <li class="nav-item">
+                <a class="nav-link" id="index" href="javascript:;" hx-get="/adminlte/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>Index</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="about" href="javascript:;" hx-get="/adminlte/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>About</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="demo" href="javascript:;" hx-get="/adminlte/demo" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>Demo</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="sys_dict" href="javascript:;" hx-get="/reports/htmx/966383991991062528" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>字典管理</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="sys_dict2" href="javascript:;" hx-get="/reports/htmx/966383991991062528?type=MATERIAL" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>字典管理2</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-speedometer"></i>
+                  <p>
+                    Dashboard
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="../index.html" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Dashboard v1</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="../index2.html" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Dashboard v2</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="../index3.html" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Dashboard v3</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              
+              <li class="nav-header">MULTI LEVEL EXAMPLE</li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>Level 1</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>
+                    Level 1
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Level 2</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>
+                        Level 2
+                        <i class="nav-arrow bi bi-chevron-right"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle-fill"></i>
+                          <p>Level 3</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle-fill"></i>
+                          <p>Level 3</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle-fill"></i>
+                          <p>Level 3</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Level 2</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>Level 1</p>
+                </a>
+              </li>
+              <li class="nav-header">LABELS</li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle text-danger"></i>
+                  <p class="text">Important</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle text-warning"></i>
+                  <p>Warning</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle text-info"></i>
+                  <p>Informational</p>
+                </a>
+              </li>
+            </ul>
+            <!--end::Sidebar Menu-->
+          </nav>
+        </div>
+        <!--end::Sidebar Wrapper-->
+      </aside>
+      <!--end::Sidebar-->
+      <!--begin::App Main-->
+      <main class="app-main">
+        <!--begin::App Content Header-->
+        <div class="app-content-header">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row" id="tab" x-data="setup" x-init="init" th:if="${session.multiTab}">
+<!--              <div class="col-sm-6"><h3 class="mb-0">Page</h3></div>-->
+<!--              <div class="col-sm-6">-->
+<!--                <ol class="breadcrumb float-sm-end">-->
+<!--                  <li class="breadcrumb-item"><a href="#">adminlte</a></li>-->
+<!--                  <li class="breadcrumb-item active" aria-current="page">Page</li>-->
+<!--                </ol>-->
+<!--              </div>-->
+
+              <ul class="nav nav-tabs">
+                <template x-for="tab in tabs" :key="tab.id">
+                <li class="nav-item" :class="{active: tab.active}" style="position: relative;">
+                  <a :class="{active: tab.active}" class="nav-link" :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)"><i class="bi bi-x"></i></span>
+                </li>
+                </template>
+              </ul>
+            </div>
+            <!--end::Row-->
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content Header-->
+        <!--begin::App Content-->
+        <div class="app-content">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <div id="html">
+              <div layout:fragment="content" th:if="${!session.multiTab}"></div>
+
+              <!-- 服务端渲染，如何服务端没有渲染，js 会再次请求后端，demos/htmx/index/tab-a 会定位到第三层路由 -->
+              <th:block th:if="${session.multiTab}">
+                <div th:if="${#request.servletPath.indexOf('/adminlte/index') > -1 }" id="index-tab-container" target-id="index-tab"><div layout:fragment="content"></div></div>
+                <!--          <div th:if="${#request.servletPath == '/adminlte/index/tab-a'}" id="index-container"><div layout:fragment="content"></div></div>-->
+                <!--          <div th:if="${#request.servletPath == '/adminlte/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
+                <div th:if="${#request.servletPath == '/adminlte/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/adminlte/demo'}" id="demo-container" target-id="demo-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/reports/htmx/964844123011960832'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/reports/htmx/964844123011960832?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
+              </th:block>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content-->
+      </main>
+      <!--end::App Main-->
+      <!--begin::Footer-->
+      <footer class="app-footer">
+        <!--begin::To the end-->
+        <div class="float-end d-none d-sm-inline" th:text="${T(com.rick.admin.common.AppConfigHolder).version}"></div>
+        <!--end::To the end-->
+        <!--begin::Copyright-->
+        <strong>
+          Copyright &copy; 2014-[[${#dates.format(new java.util.Date().getTime(), 'yyyy')}]]&nbsp;
+          <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.
+        </strong>
+        All rights reserved.
+        <!--end::Copyright-->
+      </footer>
+      <!--end::Footer-->
+    </div>
+    <!--end::App Wrapper-->
+    <!--begin::Script-->
+    <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <div style="position: fixed; bottom: 14px; right: 0;"><a href="javascript:refreshView()" title="刷新当前页面"><i class="bi bi-arrow-clockwise"></i></a></div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"
+      integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ="
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
+    <script th:src="@{/adminlte/js/adminlte.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.4/htmx.min.js" integrity="sha512-2kIcAizYXhIn8TzUvqzEDZNuDZ+aW7yE/+f1HJHXFjQcGNfv1kqzJSTBRBSlOgp6B/KZsz1K0a3ZTqP9dnxioQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Include Axios from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.9.0/axios.min.js" integrity="sha512-FPlUpimug7gt7Hn7swE8N2pHw/+oQMq/+R/hH/2hZ43VOQ+Kjh25rQzuLyPz7aUWKlRpI7wXbY6+U3oFPGjPOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
+    <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/jquery.formautofill.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+    <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+    <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
+
+    <script th:src="@{/adminlte/plugins/jquery.dialog.js}"></script>
+    <script th:src="@{/js/download.js}"></script>
+    <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
+    <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
+    <script>
+      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+      const Default = {
+        scrollbarTheme: 'os-theme-light',
+        scrollbarAutoHide: 'leave',
+        scrollbarClickScroll: true,
+      };
+      document.addEventListener('DOMContentLoaded', function () {
+        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+        if (sidebarWrapper && typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== 'undefined') {
+          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+              theme: Default.scrollbarTheme,
+              autoHide: Default.scrollbarAutoHide,
+              clickScroll: Default.scrollbarClickScroll,
+            },
+          });
+        }
+      });
+    </script>
+    <!--end::OverlayScrollbars Configure-->
+    <!--end::Script-->
+    <script>
+      htmx.on("htmx:configRequest", function(evt) {
+        evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
+      });
+
+      htmx.on("htmx:afterRequest", function(evt) {
+        $.LoadingOverlay("hide");
+      });
+
+      document.addEventListener('htmx:responseError', evt => toastr.error(evt.detail.xhr.responseText))
+
+      // Add a request interceptor
+      axios.interceptors.request.use(function (config) {
+        // Do something before request is sent
+        console.log('before request....');
+        $.LoadingOverlay("show");
+        config.headers['Custom-Header'] = 'CustomValue'; // Example of adding a custom header
+        return config;
+      }, function (error) {
+        // Do something with request error
+        console.log(error)
+        toastr.error(error.message);
+        return Promise.reject(error);
+      });
+
+      // Add a response interceptor
+      axios.interceptors.response.use(function (response) {
+        // Any status code that lie within the range of 2xx cause this function to trigger
+        // Do something with response data
+        console.log('after response....', response);
+        $.LoadingOverlay("hide");
+        if (response.data && response.data.success === false) {
+          toastr.error(response.data.message);
+        }
+        return response;
+      }, function (error) {
+        // Any status codes that falls outside the range of 2xx cause this function to trigger
+        // Do something with response error
+        console.log('after response....');
+        $.LoadingOverlay("hide");
+        toastr.error(error.response?.data ? (error.response.data.message ? error.response.data.message : error.response.data.error) : error.message);
+        return Promise.reject(error);
+      });
+
+      toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+      }
+
+      function getPathname(url) {
+        const indexOfQuestionMark = url.indexOf('?');
+
+        if (indexOfQuestionMark !== -1) { // 确保找到了问号
+          return url.substring(0, indexOfQuestionMark)
+        }
+
+        return url;
+      }
+
+      function getSearchString(url) {
+        const indexOfQuestionMark = url.indexOf('?');
+
+        let queryString = '';
+        if (indexOfQuestionMark !== -1) { // 确保找到了问号
+          queryString = url.substring(indexOfQuestionMark);
+        }
+
+        return queryString
+      }
+
+      function beforeRequest(event) {
+        if (event.target.preventRequest) {
+          event.preventDefault()
+        } else {
+          $.LoadingOverlay("show");
+        }
+      }
+
+      function openDrawerDialog(url, dialogId, pushUrl = true) {
+        fetchTargetContainer(url, $("#"+dialogId+" .drawer-content")[0], pushUrl);
+        document.getElementById(dialogId).style.width = "600px";
+      }
+
+      /**
+       * @param obj id or elem
+       * @param url
+       */
+      function closeDrawerDialog(param, url) {
+        if (typeof param === "string") {
+          document.getElementById(param).style.width = "0px";
+        } else {
+          param.parentNode.parentNode.parentNode.parentNode.style.width = "0"
+        }
+        url && history.pushState(null, '', url)
+      }
+
+      function fetchTargetContainer(url, containerId, pushUrl = true) {
+        let elem;
+        if (isDOMElement(containerId)) {
+          elem = containerId
+        } else {
+          elem = document.getElementById(containerId)
+        }
+
+        axios.get(url)
+                .then(function(response) {
+                  $(elem).html(response.data)
+                  pushUrl && history.pushState(null, '', url)
+                })
+                .catch(function(error) {
+                  console.error('Error fetching data:', error);
+                  elem.innerHTML = "Error fetching data"
+                });
+      }
+
+      function refreshView() {
+        location.reload()
+      }
+
+      function isDOMElement(obj) {
+        return typeof obj === 'object' && obj !== null && obj instanceof Element;
+      }
+
+      function isNumber(value) {
+        return (!isNaN(value) && value.trim() !== '')
+      }
+    </script>
+    <!--url 工具函数-->
+    <script>
+      /**
+       * 合并查询参数，并查询
+       * @param queryString
+       */
+      function search(queryString) {
+        $.LoadingOverlay("show");
+        location.href = location.pathname + mergeUrlQueryObject(queryString)
+      }
+      /**
+       * 合并查询参数
+       * @param queryString
+       * @returns {string}
+       */
+      function mergeUrlQueryObject(queryString) {
+        if (typeof queryString === 'object') {
+          queryString = $.param(queryString)
+        }
+        let mergedQueryString = {}
+        $.extend(mergedQueryString, getCurrentUrlQueryObject(), getUrlQueryObject(queryString));
+        return "?" + $.param(mergedQueryString);
+      }
+
+      /**
+       * 获取当前浏览器的查询参数
+       * @returns {{}|any}
+       */
+      function getCurrentUrlQueryObject() {
+        let search = location.search.substring(1);
+
+        if (!search) {
+          return {}
+        }
+        return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) })
+      }
+
+      /**
+       * 将查询参数传成对象
+       * @param queryString
+       * @returns {{}}
+       */
+      function getUrlQueryObject(queryString) {
+        let queryObject = {}
+
+        if (!queryString)
+          return queryObject
+
+        let params = queryString.split('&');
+        params.forEach(function(item) {
+          let data = item.split('=')
+          if (data.length === 2)
+            queryObject[data[0]] = decodeURIComponent(data[1].replace(/[+]/g, ' '))
+        })
+        return queryObject
+      }
+    </script>
+    <script>
+      let url = location.pathname + location.search
+      const linkNodes = document.querySelectorAll(".sidebar-menu .nav-link")
+
+      for (let linkNode of linkNodes) {
+        linkNode.addEventListener('click', function () {
+          let preventRequest;
+          if (this.active) {
+            preventRequest = true
+          } else {
+            preventRequest = false
+            activeLink(this)
+          }
+
+          this.preventRequest = preventRequest
+
+          typeof addHtmxTab !== 'undefined' && addHtmxTab(this, this.id + '-tab')
+        })
+
+        if (url.indexOf(linkNode.getAttribute("hx-get")) > -1) {
+          linkNode.preventRequest = true
+          activeLink(linkNode)
+        }
+      }
+
+      function activeLink(activeNode) {
+        activeNode.active = true
+
+        // activeNode.classList.add('active')
+        // adminlte 已经实现 active
+        if (!(event && event.currentTarget === activeNode)) {
+          activeNode.parentNode.classList.add('menu-open')
+        }
+
+        for (let linkNode of linkNodes) {
+          if (linkNode !== activeNode) {
+            linkNode.active = false
+
+            // linkNode.classList.remove('active')
+            if (!(event && event.currentTarget === activeNode)) {
+              linkNode.parentNode.classList.remove('menu-open')
+            }
+          }
+        }
+      }
+    </script>
+    <!-- 多标签-->
+    <script th:if="${session.multiTab}">
+      const tabElem = document.getElementById("tab")
+      const htmlElem = document.getElementById("html")
+      const TAB_ITEMS_KEY = 'tabs'
+      let activeId;
+      let tabElemData
+
+      function setup() {
+        return {
+          tabs: [
+            // {
+            //     id:"about",
+            //     path: "/2332/2",
+            //     name: "world"
+            // }
+          ]
+        }
+      }
+
+      function init() {
+        tabElemData = Alpine.$data(tabElem);
+        let currentTab;
+
+        currentTab = findTab(url, Array.from(linkNodes).map(linkNode =>  {
+          return {
+            id: linkNode.id + "-tab",
+            path: linkNode.getAttribute("hx-get"),
+            name: linkNode.innerText,
+            active: true
+          }
+        }));
+
+        let tabs = sessionStorage.getItem(TAB_ITEMS_KEY)
+        if (!tabs || !tabs.length) {
+          tabs = []
+        } else {
+          tabs = JSON.parse(tabs)
+        }
+
+        if (!currentTab) {
+          let currentTab = findTab(url, tabs)
+          if (!currentTab) {
+            const id = location.pathname.split('/').pop().split('?')[0];
+            // 当前访问 url 加入到 links(得到的 id 可能是数字，会出现异常，纯数字不能作为属性值)
+            activeId = isNumber(id) ? "tab-" + id : id
+            currentTab = {
+              id: activeId,
+              path: url,
+              name: id,
+              active: true
+            }
+          }
+        }
+
+        if (!tabs.find(tab => tab.id === currentTab.id)) {
+          tabs.push(currentTab)
+        }
+
+        activeId = currentTab.id
+
+        for (let tab of tabs) {
+          _addTab(tab.id, tab.path, tab.name, containerId => {
+            let linkElem = document.getElementById(removeTabSuffix(tab.id))
+            linkElem && linkElem.setAttribute('hx-target', '#' + containerId)
+
+            if (activeId === tab.id) {
+              // 如果没有加载(非服务端渲染，通过 activeTab() 判断服务渲染了数据)，则运行 click()，重新请求，如果有三层路由，比如 htmx/index/tab-a htmx/index/tab-b，需要进行服务器渲染
+
+              tabElemData.$nextTick(() => {
+                !activeTab(activeId, url) && setTimeout(() => htmx.trigger("#" + activeId, 'click'), 200)
+              });
+            }
+          })
+        }
+      }
+
+      document.addEventListener('alpine:initialized', function () {});
+
+      function addHtmxTab(elem, tabId) {
+        !tabId && (tabId = elem.id)
+        let tab = tabElemData.tabs.find(tab => tab.id === tabId)
+        if (tab) {
+          return activeTab(tabId)
+        } else {
+          _addTab(tabId, elem.getAttribute("hx-get"), elem.innerText, containerId => {
+            elem.setAttribute('hx-target', '#' + containerId)
+            activeTab(tabId)
+          });
+        }
+
+        return false
+      }
+
+      function addTab(id, path, name) {
+        let tab = tabElemData.tabs.find(tab => tab.id === id)
+        if (tab) {
+          document.getElementById(id).click()
+        } else {
+          _addTab(id, path, name, containerId => {
+            fetchTargetContainer(path, containerId)
+            activeTab(id)
+          })
+        }
+      }
+
+      function removeTab(id) {
+        if (tabElemData.tabs.length === 1) {
+          alert("至少保留一个标签")
+          return
+        }
+
+        let activeNextId
+        if (activeId === id) {
+          for (let index in tabElemData.tabs) {
+            if (tabElemData.tabs[index].id == id) {
+              if (index < tabElemData.tabs.length - 1) {
+                activeNextId = tabElemData.tabs[Number.parseInt(index) + 1].id
+              }
+              break
+            }
+            activeNextId = tabElemData.tabs[index].id
+          }
+        }
+
+        tabElemData.tabs = tabElemData.tabs.filter(tab => tab.id !== id)
+        document.querySelector("[target-id=" + id + "]").remove()
+        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(tabElemData.tabs));
+
+        if (activeNextId) {
+          document.getElementById(activeNextId).click()
+        }
+      }
+
+      /**
+       *
+       * @param id
+       * @returns {boolean} preventRequest
+       */
+      function activeTab(id, path) {
+        activeId = id
+        for (let tab of tabElemData.tabs) {
+          if (tab.id === id) {
+            tab.active = true
+            !path && (path = tab.path)
+          } else {
+            tab.active = false
+          }
+        }
+
+        history.pushState(null, '', path)
+
+        for (let containerElem of htmlElem.children) {
+          if (containerElem.getAttribute("target-id") === id) {
+            containerElem.style.display = 'block';
+          } else {
+            containerElem.style.display = 'none';
+          }
+        }
+        let preventRequest = true
+
+        let container = document.querySelector("[target-id="+id+"]")
+        if (!container.children.length) {
+          preventRequest = false
+        }
+
+        let tabElem = document.getElementById(id)
+        if (tabElem) {
+          tabElem.preventRequest = preventRequest
+        }
+
+        let linkElem = document.getElementById(removeTabSuffix(id))
+        if (linkElem) {
+          linkElem.preventRequest = preventRequest
+          activeLink(linkElem)
+        }
+        return preventRequest
+      }
+
+      function reloadTab(id) {
+        if (id) {
+          if (activeId === id) {
+            refreshView(id)
+            return
+          }
+
+          // 清空其他 tab 内容，等待点击重新获取数据
+          if (document.getElementById(id)) {
+            document.getElementById(id + '-container').innerHTML = ''
+          }
+        }
+      }
+
+      function refreshView(id) {
+        id = id || activeId
+        document.getElementById(id + '-container').innerHTML = ''
+        document.getElementById(id).click()
+      }
+
+      /**
+       * 新增 tab
+       * @param id
+       * @param path
+       * @param name
+       * @param callback
+       * @private
+       */
+      function _addTab(id, path, name, callback) {
+        if (isNumber(id)) {
+          alert('id是数字不合规范')
+          return
+        }
+
+        let containerId = id + "-container"
+
+        !document.getElementById(containerId) && htmlElem.append(createHtmlDiv(id, containerId))
+        !tabElemData.tabs.find(tab => tab.id === id) && tabElemData.tabs.push({
+          id: id,
+          path: path,
+          name: name,
+          showCurrentTab(event) {
+            addHtmxTab(event.target) && event.preventDefault()
+          },
+          remove() {
+            removeTab(id)
+          }
+        })
+
+        callback && callback(containerId)
+        sessionStorage.setItem(TAB_ITEMS_KEY, JSON.stringify(tabElemData.tabs));
+      }
+
+      function createHtmlDiv(targetId, id) {
+        const newDiv = document.createElement('div');
+        newDiv.id = id;
+        newDiv.setAttribute("target-id", targetId)
+        return newDiv;
+      }
+
+      function removeTabSuffix(str) {
+        const suffix = '-tab';
+        if (str.endsWith(suffix)) {
+          return str.slice(0, str.length - suffix.length);
+        }
+        return str;
+      }
+
+      function findTab(url, tabs) {
+        // 1. 完全匹配
+        for (const tab of tabs) {
+          if (tab.url === url) {
+            return tab;
+          }
+        }
+        // 2. 找最长的前缀匹配
+        let bestMatch = null;
+        let maxLength = -1;
+
+        for (const tab of tabs) {
+          if (url.startsWith(tab.path) && tab.path.length > maxLength) {
+            bestMatch = tab;
+            maxLength = tab.path.length;
+          }
+        }
+
+        return bestMatch;
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" integrity="sha512-KSdieUYxSxr/laB3Bh5TP8GAng49b2qRfdcnFvh8OuPpPgksA189OQ9v1A3gIz5P9s3A4aXMe5uiHLMfla60Uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </body>
+  <!--end::Body-->
+</html>

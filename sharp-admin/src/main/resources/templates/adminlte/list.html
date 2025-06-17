@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{adminlte/layout.html}">
+      xmlns:sp="">
+<th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
+    [(${report.additionalInfo['link'] != null ? report.additionalInfo['link'] : ''})]
+    <style th:inline="css">
+        /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
+    </style>
+
+    <div class="report-container" th:attr="id=${'id' + s}, x-data=${'setup' + s}, x-init=${'init' + s}, data-id=${report.id}">
+        <div>
+            <!-- 查询条件 -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form class="form-fluid query-form">
+                        <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
+                            <div class="form-group">
+                                <label class="col-form-label mr-2" th:for="${f.name}" th:text="${f.label}"></label>
+                                <th:block th:if="${f.type.name() ne 'DATE_RANGE'}">
+                                    <input class="form-control" th:id="${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'TEXT'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                    <input class="form-control" th:id="${f.name}" type="checkbox" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'CHECKBOX'}" th:value="1" th:placeholder="${f.placeholder}">
+                                    <input class="form-control" th:id=selectAll"${f.name}" type="text" th:name="${f.name}" autocomplete th:if="${f.type.name() == 'DATE'}" th:value="${f.value}" th:placeholder="${f.placeholder}">
+                                    <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'SELECT' or f.type.name() == 'SEARCH_SELECT'}"/>
+                                    <sp:select  th:id="${f.name}" th:name="${f.name}" th:attr="key=${f.extraData}" class="form-control" group th:if="${f.type.name() == 'GROUP_SELECT'}"/>
+                                    <sp:select  th:id="${f.name}" th:name="${f.name}" multiple th:attr="key=${f.extraData}" class="form-control" th:if="${f.type.name() == 'MULTIPLE_SELECT'}" hideDummyItemText/>
+                                </th:block>
+
+                                <th:block style="margin-bottom: 10px;" th:if="${f.type.name() == 'DATE_RANGE'}">
+                                    <div class="input-group input-daterange" th:classappend="${f.name}">
+                                        <input class="form-control" th:id="${f.name + '0'}" th:name="${f.name + '0'}" type="text" placeholder="开始时间"
+                                               autocomplete="off"><label
+                                            class="col-form-label" style="padding-left: 0;">～</label>
+                                        <input class="form-control" th:id="${f.name + '1'}" th:name="${f.name + '1'}" type="text" placeholder="结束时间"
+                                               autocomplete="off">
+                                    </div>
+                                </th:block>
+                            </div>
+                        </th:block>
+                        <div class="form-group operator-group">
+                            <button class="btn btn-primary mr-2" type="button" name="search" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}" @click="search({page: 1})">
+                                <i class="fa fa-search"></i> 查询</button>
+                            <button class="btn btn-secondary mr-2" type="button" name="reset" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}" @click="reset">
+                                <i class="fa fa-remove"></i> 重置</button>
+                            <a class="btn btn-secondary mr-2" href="javascript:;" @click="download" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                                <i class="fa fa-upload"></i> 导出</a>
+                            <button class="btn btn-primary" type="button" @click="edit()" sec:authorize="${hasAuthority(#vars.report.code + '_add') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                                <i class="fa fa-plus"></i> 新增</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body" id="report-list" style="padding-bottom: 0">
+                    <div class="card-body-scroll-panel">
+                        <table class="table table-responsive-sm table-bordered table-striped table-sm">
+                            <thead>
+                            <tr>
+                                <th style="width: 40px">序号</th>
+                                <th class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}" style="width: 40px"><input type="checkbox" x-model="isSelectAll" @change="selectAll"/></th>
+                                <th th:each="n : ${report.reportColumnList}" th:text="${n.label}" th:data-name="${n.name}"
+                                    th:style="${n.columnWidth == null ? '': 'width: ' + n.columnWidth + 'px'}" th:if="${!n.hidden}" th:attr="'@click'=${n.sortable ? 'search({sidx:&#34;'+n.name+'&#34;,page: 1})' : null},':class'=${(n.sortable ? '&#34;sortable&#34;' : '&#34;&#34;') + '+ &#34; text-&#34;+&#34' + n.align.name().toLowerCase()+'&#34' + (' + (&#34;' + n.name + '&#34; === sidx ? &#34; active&#34;:&#34;&#34;)')+ (' + (&#34asc&#34 === sord ? &#34; asc&#34;:&#34; desc&#34;)')}"></th>
+                                <th class="text-center" style="width: 100px" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <template x-for="m in grid.rows" :key="m.id">
+                                <tr :data-id="m.id">
+                                    <td th:attr="x-text=${'m.index'}"></td>
+                                    <td class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}" style="width: 40px"><input type="checkbox" x-model="m.select" @change="select(m.select)" :data-id="m.id"/></td>
+                                    <td th:each="n : ${report.reportColumnList}" th:class="${'text-' + n.align.name().toLowerCase()}" th:if="${!n.hidden}">
+                                        <a href="javascript:;" @click="edit(m.id)" th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index == 1}"></a>
+                                        <span th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index > 1}"></span>
+                                    </td>
+                                    <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
+                                        <!-- <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', 'xx')" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
+                                        <a class="dialogBtn mr-2" href="javascript:;" @click="edit(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
+                                        <a href="javascript:;" @click="deleteRow(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
+                                        <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
+                                    </td>
+
+                                    <input type="hidden" th:each="n : ${report.reportColumnList}" th:if="${n.hidden}" th:name="${n.name}" th:attr="x-model=${'m.' + n.name}"/>
+                                </tr>
+                            </template>
+                            <template x-if="isSummary && grid.records">
+                            <tr>
+                                <td style="font-weight: bold;">合计</td>
+                                <td class="text-center" th:if="${report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true}"></td>
+                                <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}" th:attr="x-text='summaryData[\'' + ${n.name} + '\']'"></td>
+                                <td sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete')}"></td>
+                            </tr>
+                            </template>
+                            <template x-if="grid.records < 1">
+                                <tr class="tr-empty non-data">
+                                    <td th:colspan="${report.visibleColumnSize + 2 + ((report.additionalInfo['select'] != null && report.additionalInfo['select'] eq true) ? 1 : 0)}" style="text-align: center;"><span class="empty-text">暂无数据</span></td>
+                                </tr>
+                            </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer-bar">
+                        <div style="margin-bottom: 8px; float: left;">
+                            <span class="breadcrumb-item active" x-text="'共' + grid.records + '条，'+grid.totalPages+'页'"></span>
+                            <select @input="search({page:1, size: $event.target.value})" th:if="${report.pageable}">
+                                <option value="15" th:selected="${grid.pageSize == 15}">15条</option>
+                                <option value="50" th:selected="${grid.pageSize == 50}">50条</option>
+                                <option value="100" th:selected="${grid.pageSize == 100}">100条</option>
+                                <option value="200" th:selected="${grid.pageSize == 200}">200条</option>
+                            </select>
+                            <span th:if="${grid.totalPages > 1}">，前往<input class="goto" style="width: 68px;" @keyup="gotoPage($event.target, $event)" maxlength="6">页</span>
+                        </div>
+                        <div id="batch-cpn-bar" style="margin-left: 16px; float: left; margin-bottom: 8px;" th:if="${'multiple' eq params['mode']}">
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-light" style="padding: .075rem .45rem" type="button" onclick="batchDelete()" disabled><i class="fa fa-trash-o fa-lg"></i></button>
+                                    <!--                                <button class="btn btn-light" style="padding: .075rem .45rem" type="button"><i class="fa fa-trash-o fa-lg"></i></button>-->
+                                </div>
+                            </div>
+                        </div>
+                        <template x-if="grid.totalPages > 1">
+                        <nav style="float: right">
+                            <ul class="pagination pagination-sm">
+                                <template x-if="grid.page > 1">
+                                    <li class="page-item">
+                                        <a class="page-link" href="javascript:;" @click="search({page: grid.page - 1})">上一页</a>
+                                    </li>
+                                </template>
+                                <template x-for="pageNumber in pageRange" :key="pageNumber">
+                                    <li :class="'page-item ' + (pageNumber == grid.page ? 'active': '')">
+                                        <a class="page-link" href="javascript:;" @click="pageNumber != grid.page && search({page: pageNumber})" x-text="pageNumber"></a>
+                                    </li>
+                                </template>
+                                <template x-if="grid.page < grid.totalPages">
+                                    <li class="page-item">
+                                        <a class="page-link" href="javascript:;" @click="search({page: grid.page + 1})">下一页</a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </nav>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:attr="id=${'id' + s + 'drawer-dialog'}" class="modal show drawer-dialog" style="display: block; left: auto; ">
+        <div class="modal-dialog modal-primary dialog" style="width: 100%; max-width: 100%; height: 100%; margin-top: 0;" role="document">
+            <div class="modal-content" style="height: 100%; border-radius: 0; border-top-width: 0; border-right-width: 0; border-bottom-width: 0;">
+                <!--                <div class="modal-header">-->
+                <!--                    <h1 class="modal-title fs-5">提示信息</h1>-->
+                <!--                    <button class="btn-close" type="button" aria-label="Close" onclick="closeDrawerDialog(this)">-->
+                <!--                    </button>-->
+                <!--                </div>-->
+                <div class="modal-body drawer-content" style="flex: 1; overflow: auto;"></div>
+                <div class="modal-footer" style="justify-content: flex-start;">
+                    <button class="btn btn-primary" onclick="closeDrawerDialog('index-dialog')"th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${s}').alpineData.search();})|"><i class="fa fa-save"></i> 确定</button>
+                    <button class="btn btn-secondary" type="button" onclick="closeDrawerDialog(this)"> 关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script th:inline="javascript">
+        window.s = 'load' + new Date().getTime();
+        window[s] = function () {
+            /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
+        }
+        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
+        delete window.s
+        window['init' + /*[[${s}]]*/] = function () {
+            this.$elem = $(('#id' + /*[[${s}]]*/))
+            this.$elem[0].alpineData = this
+            this.$elemForm = $(('#id' + /*[[${s}]]*/) + ' .query-form')
+
+            let searchObject = getCurrentUrlQueryObject();
+            this.$elemForm.autofill(searchObject)
+            this.sidx = searchObject.sidx
+            this.sord = searchObject.sord
+
+            let hasAuthority = false
+            /*[# sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true) }"]*/
+            hasAuthority = true
+            /*[/]*/
+            this.readonly = !hasAuthority || [[${readonly}]]
+        }
+
+        window['setup' + /*[[${s}]]*/] = function () {
+            let reportColumnList = /*[[${report.reportColumnList}]]*/
+            let isSummary = /*[[${report.summaryColumnNames != null}]]*/
+            let summaryData = /*[[${report.summaryColumnNames != null ? summary : {}}]]*/
+            let grid = /*[[${grid}]]*/
+
+            grid.rows = grid.rows.map((row, index) => {
+                let data = {}
+
+                data['index'] = (grid.page - 1) * grid.pageSize  + 1 + index
+                data.select = false
+                for (let i = 0; i < reportColumnList.length; i++) {
+                    data[reportColumnList[i].name] = row[i]
+                }
+                return data
+            })
+
+            return {
+                grid,
+                displayPage: 10,
+                sidx: '',
+                sord: '',
+                isSelectAll: false,
+                isSummary,
+                summaryData,
+                get pageRange() {
+                    let leftOffset = parseInt((this.displayPage - 1) / 2);
+                    let leftPage = this.grid.page - 1;
+                    let rightOffset = this.displayPage - leftOffset - 1;
+                    let rightPage = this.grid.totalPages - this.grid.page;
+                    let startPage = 1;
+                    if (rightPage < rightOffset) {
+                        leftOffset = leftOffset + rightOffset - rightPage;
+                    }
+
+                    if (leftPage > leftOffset) {
+                        startPage = this.grid.page - leftOffset;
+                    }
+
+                    let endPage = startPage + this.displayPage - 1;
+                    if (endPage > this.grid.totalPages) {
+                        endPage = this.grid.totalPages;
+                    }
+
+                    const length = endPage - startPage + 1;
+                    return Array.from({ length }, (_, i) => i + startPage);
+                },
+                gotoPage(o, event) {
+                    if (o.value == this.grid.page) {
+                        return
+                    }
+                    // 兼容FF和IE和Opera
+                    let theEvent = event || window.event;
+                    let code = theEvent.keyCode || theEvent.which || theEvent.charCode;
+                    if (code == 13) {
+                        if (o.value && o.value.trim()) {
+                            let page = o.value.trim()
+
+                            if (/^[0-9]*[1-9][0-9]*$/.test(page)) {
+                                this.search({page: o.value})
+                            } else {
+                                toastr.error('页码只能是正整数!');
+                            }
+                            return
+                        }
+                        toastr.error('页码不能为空!');
+                    }
+                },
+                search(query) {
+                    query = query ? query : {}
+
+                    let params = {}
+                    let formParams = this.$elemForm.form2json({allowEmptyMultiVal:true})
+                    $.extend(params, getCurrentUrlQueryObject(), formParams, query)
+                    if (query['sidx']) {
+                        // sord
+                        params['sord'] = this.sord === 'desc' ? 'asc' : 'desc'
+                        this.sord = params['sord']
+                        this.sidx = query['sidx']
+                    }
+
+                    let $multipleSelect = this.$elemForm.find("select[multiple]")
+                    $multipleSelect.each(function () {
+                        let values = $(this).multipleSelect('getSelects')
+                        if (values.length > 0) {
+                            params[this.name] = $(this).multipleSelect('getSelects').join(",")
+                        } else {
+                            params[this.name] = undefined
+                        }
+                    })
+
+                    // checkbox 不打勾表示不做筛选条件
+                    // $checkbox.each(function () {
+                    //     param[this.name] = $(this).prop('checked') & 1
+                    // })
+
+                    // history
+                    history.pushState(null, '', location.pathname + "?" + $.param(params))
+                    console.log(params, "...")
+
+                    axios.get(('/reports/' + /*[[${report.id}]]*/ )+'/json/summary', {
+                        params
+                    })
+                        .then((response) => {
+                            let grid = response.data.data.grid
+
+                            for (let i = 0; i < grid.rows.length; i++) {
+                                grid.rows[i]['index'] = (grid.page - 1) * grid.pageSize  + 1 + i
+                                grid.rows[i]['select'] = false
+                            }
+
+                            this.isSelectAll = false
+                            this.grid = grid
+                            if (this.isSummary)
+                                this.summaryData = response.data.data.summaryData
+
+                            this.$elem.find(".goto").val(this.grid.page)
+                        })
+                        .catch(function (error) {
+                        });
+
+                },
+                download() {
+                    $.LoadingOverlay("show")
+                    download("/reports/" + (/*[[${report.id}]]*/) + "/export" + location.search, function () {
+                        $.LoadingOverlay("hide")
+                    }, function (message) {
+                        toastr.error(message)
+                    })
+                },
+                reset() {
+                    this.$elemForm.resetForm()
+                    this.$elemForm.clearForm(true)
+
+                    let $multipleSelect = this.$elemForm.find("select[multiple]")
+                    $multipleSelect.each(function() {
+                        $(this).find("option").each(function() {
+                            $(this).prop('selected', false);
+                        });
+
+                        $(this).multipleSelect('uncheckAll')
+                    });
+                    this.search({page: 1})
+                },
+                edit(id, search) {
+                    let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+                    if (form_id) {
+                        let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
+                        let formPage = /*[[${report.additionalInfo != null && report.additionalInfo['formPage'] != null ? report.additionalInfo['formPage'] : '' } + '']]*/
+                        let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : ""))
+                        if (formAction === 'link') {
+                            addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/htmx/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
+                        } else if (formAction === 'drawer') {
+                            openDrawerDialog('/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString, 'id' + (/*[[${s}]]*/) + 'drawer-dialog', false)
+                        } else {
+                            $.dialog({
+                                title: /*[[${report.name}]]*/,
+                                url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + queryString,
+                                ok: {
+                                    label: '保存',
+                                    success: value => {
+                                        window[value.$OkBtn.parents('.modal-content').find('form').attr("name") + 'FormDOM'].save(() => {
+                                            value.$modal.modal('hide')
+                                            toastr.success("保存成功")
+                                            this.search()
+                                        })
+                                    }
+                                }
+                            })
+                        }
+                    } else { // 自定义 endpoint 跳转页面详情
+                        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
+                        addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
+                    }
+                },
+                deleteRow(id) {
+                    if (confirm('确定要删除该条记录吗？')) {
+                        let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+                        let url;
+                        if (form_id) {
+                            url = '/forms/ajax/' + form_id + '/' + id
+                        } else {
+                            url = '/'+ endpoint +  '/' + id
+                        }
+
+                        axios.delete(url)
+                            .then(() => {
+                                toastr.success("删除成功");
+                                this.search();
+                            })
+                    }
+                },
+                selectAll() {
+                    for (let row of this.grid.rows) {
+                        row.select = this.isSelectAll
+                    }
+                },
+                select(select) {
+                    if (!select)
+                        this.isSelectAll = false
+                    else if (!this.grid.rows.find(row => !row.select)) {
+                        this.isSelectAll = true
+                    }
+                },
+                getSelectedData() {
+                    return this.grid.rows.filter(row => row.select).map(row => row.id);
+                }
+            }
+        }
+    </script>
+    [(${report.additionalInfo['script'] != null ? report.additionalInfo['script'] : ''})]
+</th:block>
+</html>

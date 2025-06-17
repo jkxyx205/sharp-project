@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{adminlte/index.html}">
+<th:block layout:fragment="content-content" th:fragment="content-content">
+    <link rel="stylesheet" th:href="@{/css/tab-b.css}">
+    <h1>Index Tab B</h1>
+
+    <div class="tab-b">
+        <h1 id="h1">add two numbers below: </h1>
+        <input type="text" id="a"> + <input type="text" id="b"> = <span id="result"></span>
+        <br>
+        <button style="margin-top: 8px;" id="btn">result</button>
+    </div>
+    <script th:src="@{/js/dist/tab-b.js}"></script>
+</th:block>
+</html>

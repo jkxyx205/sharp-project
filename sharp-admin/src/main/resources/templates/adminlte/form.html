@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{adminlte/layout.html}">
+<th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
+    <style>
+        /*[(${formBO.form.getAdditionalInfo['css'] == null ? '' : formBO.form.getAdditionalInfo['css']})]*/
+    </style>
+    <div class="container" th:id="${'container' + s}">
+        <th:block th:replace="tpl/includes/horizotal-form"></th:block>
+    </div>
+
+    <script th:inline="javascript">
+        window.s = 'load' + new Date().getTime();
+        window[s] = function () {
+        let formBO = /*[[${ formBO }]]*/
+        let originalFormData = /*[[${ formBO.data }]]*/
+        let formCode = /*[[${formBO.form.code}]]*/
+        let p = [[${formBO.propertyList}]]
+
+        let hasAuthority = false
+        /*[# sec:authorize="${hasAuthority(#vars.formBO.form.code + '_edit') or hasAuthority(#vars.formBO.form.code + '_delete') }"]*/
+        hasAuthority = true
+        /*[/]*/
+        let readonly = !hasAuthority || JSON.parse([[${query.readonly}]])
+
+        let formDOM = window[formCode + 'FormDOM' + /*[[${ s }]]*/] = document.querySelector('#container' + (/*[[${ s }]]*/) + ' .sharp-form')
+        let idDOM = $(formDOM).find("#id")[0]
+
+        sharpFormInit(formDOM, idDOM, {originalFormData, formCode, p, readonly: [[${query.readonly}]], actionUrl: formBO.actionUrl, method: formBO.method}, formCode + '-tab' , null);
+        /*[(${formBO.form.getAdditionalInfo['js'] == null ? '' : formBO.form.getAdditionalInfo['js']})]*/
+        }
+        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
+        delete window.s
+    </script>
+</th:block>
+</html>
