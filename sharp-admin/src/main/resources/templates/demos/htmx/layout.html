@@ -527,7 +527,7 @@
 
     function removeTab(id) {
         if (tabElemData.tabs.length === 1) {
-            alert("至少保留一个标签")
+            toastr.warning("至少保留一个页签");
             return
         }
 

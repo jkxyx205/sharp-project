@@ -140,9 +140,15 @@
       #tab .nav-item .nav-link {
         /*color: var(--bs-nav-link-color);*/
         color: rgba(var(--bs-emphasis-color-rgb), 0.65);
+        background: none;
       }
+
       #tab .nav-item:hover .tab-remove-icon {
         display: block;
+      }
+
+      #tab .nav-tabs .nav-link.active, #tab .nav-tabs .nav-item.show .nav-link {
+        border-bottom-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
       }
 
     </style>
@@ -1022,7 +1028,7 @@
 
       function removeTab(id) {
         if (tabElemData.tabs.length === 1) {
-          alert("至少保留一个标签")
+          toastr.warning("至少保留一个页签");
           return
         }
 
