@@ -1,6 +1,6 @@
 <form class="form-horizontal sharp-form" th:classappend="${query.readonly == 'true' ? 'readonly' : ''}" th:id="${formBO.form.id}" th:name="${formBO.form.code}" th:with="required = ${new com.rick.formflow.form.valid.Required(true)}, col = ${(formBO.form.getAdditionalInfo() == null || formBO.form.getAdditionalInfo().get('label-col') == null) ? 2 : formBO.form.getAdditionalInfo().get('label-col')}">
     <input type="hidden" name="id" id="id" th:value="${formBO.instanceId}">
-    <div class="form-group row" th:classappend="${p.name}" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.configurer.validatorProperties.get('Required.required') eq null ? false : p.configurer.validatorProperties.get('Required.required')}">
+    <div class="form-group row mb-4" th:classappend="${p.name}" th:each="p : ${formBO.propertyList}" th:with="isRequired = ${p.configurer.validatorProperties.get('Required.required') eq null ? false : p.configurer.validatorProperties.get('Required.required')}">
         <label th:for="${p.name}" th:class="${'col-form-label col-sm-' + col}" th:classappend="${isRequired ? 'required' : ''}" th:text="${p.configurer.label}"></label>
         <div th:class="${'col-sm-' + (12 - col)}">
             <label class="col-form-label"  th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).LABEL}" th:id="${p.name}" th:name="${p.name}" th:text="${( p.configurer.options.size() eq 0 || p.value == null) ? p.value : p.configurer.optionMap[p.value]}"></label>

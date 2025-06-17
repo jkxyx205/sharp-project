@@ -10,9 +10,9 @@
     </style>
 
     <div class="report-container" th:attr="id=${'id' + s}, x-data=${'setup' + s}, x-init=${'init' + s}, data-id=${report.id}">
-        <div class="container-fluid">
+        <div>
             <!-- 查询条件 -->
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <form class="form-fluid query-form">
                         <th:block th:each="f : ${report.queryFieldList}" th:if="${report.queryFieldList != null && report.queryFieldList.size() > 0}">
