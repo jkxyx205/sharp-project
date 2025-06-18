@@ -1,4 +1,4 @@
-package com.rick.admin.module.demo.controller;
+package com.rick.admin.common.layout;
 
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.formflow.form.controller.instance.PageInstanceController;
@@ -19,17 +19,17 @@ import java.util.Map;
  * @date 2025/6/14 08:57
  */
 @Controller
-@RequestMapping("forms/page/htmx")
-public class PageInstanceHtmxController extends PageInstanceController {
+@RequestMapping("forms/page/layout")
+public class PageInstanceLayoutController extends PageInstanceController {
 
-    public PageInstanceHtmxController(FormService formService, Map<String, FormAdvice> formAdviceMap) {
+    public PageInstanceLayoutController(FormService formService, Map<String, FormAdvice> formAdviceMap) {
         super(formService, formAdviceMap);
     }
 
     @GetMapping({"{formId}", "{formId}/{instanceId}"})
     public String gotoFormPage(@PathVariable Long formId, @PathVariable(required = false) Long instanceId, Model model, HttpServletRequest request) {
         String page = super.gotoFormPage(formId, instanceId, model, request);
-        // 默认需要使用 htmx 中的模版 demos/htmx/form
+        // page 必须使用 layout
         String reqFormPage = request.getParameter("formPage");
         if (StringUtils.isNotBlank(reqFormPage)) {
             page = reqFormPage;

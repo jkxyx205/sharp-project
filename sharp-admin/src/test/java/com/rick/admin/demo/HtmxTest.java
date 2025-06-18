@@ -28,7 +28,7 @@ public class HtmxTest {
         reportService.saveOrUpdate(Report.builder()
                 .id(964844123011960832L)
                 .code("sys_dict-htmx")
-                .tplName("demos/htmx/list")
+                .tplName("demos/htmx/list") // 渲染模版需要使用 demos/htmx/layout.html
                 .name("字典管理-htmx")
                 .reportAdviceName("dictHtmxReportAdvice")
                 .summaryColumnNames("sort")
@@ -62,7 +62,7 @@ public class HtmxTest {
         reportService.saveOrUpdate(Report.builder()
                 .id(966383991991062528L)
                 .code("sys_dict-adminlte")
-                .tplName("adminlte/list")
+                .tplName("adminlte/list") // 渲染模版需要使用 adminlte/layout.html
                 .name("字典管理-adminlte")
                 .reportAdviceName("dictHtmxReportAdvice")
                 .summaryColumnNames("sort")

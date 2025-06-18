@@ -1,12 +1,12 @@
 package com.rick.admin.module.demo.controller;
 
 import com.google.common.collect.Sets;
+import com.rick.admin.common.layout.LayoutUtils;
 import com.rick.admin.module.demo.entity.ComplexModel;
 import com.rick.admin.module.demo.model.EmbeddedValue;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
 import com.rick.admin.sys.user.entity.User;
-import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
@@ -180,7 +180,7 @@ public class DemoController {
         user.setName("Rick.Xu");
 
         model.addAttribute("user", user);
-        return page(request, "demos/htmx/demo");
+        return LayoutUtils.page(request, "demos/htmx/demo");
      }
 
 
@@ -192,7 +192,7 @@ public class DemoController {
 
         model.addAttribute("user", user);
 
-        return page(request, "demos/htmx/index");
+        return LayoutUtils.page(request, "demos/htmx/index");
     }
 
     @GetMapping("htmx/about")
@@ -203,7 +203,7 @@ public class DemoController {
 
         model.addAttribute("user", user);
 
-        return page(request, "demos/htmx/about");
+        return LayoutUtils.page(request, "demos/htmx/about");
     }
 
     @GetMapping("htmx/index/tab-a")
@@ -215,7 +215,7 @@ public class DemoController {
         model.addAttribute("user", user);
         model.addAttribute("tab", "tab-a");
         // 一级路由用 fragment=content 二级路由用 content-content，三级路由用 content-content-content，以此类推
-        return page(request, "demos/htmx/index-tab-a", "content-content");
+        return LayoutUtils.page(request, "demos/htmx/index-tab-a", "content-content");
     }
 
     @GetMapping("htmx/index/tab-b")
@@ -226,7 +226,7 @@ public class DemoController {
 
         model.addAttribute("user", user);
         model.addAttribute("tab", "tab-b");
-        return page(request, "demos/htmx/index-tab-b", "content-content");
+        return LayoutUtils.page(request, "demos/htmx/index-tab-b", "content-content");
     }
 
     @GetMapping("htmx/detail/{code}")
@@ -238,7 +238,7 @@ public class DemoController {
         user.setName("Rick.Xu");
 
         model.addAttribute("user", user);
-        return page(request, "demos/htmx/detail");
+        return LayoutUtils.page(request, "demos/htmx/detail");
     }
 
     @GetMapping("htmx/exception")
@@ -258,14 +258,6 @@ public class DemoController {
     public Result exception3() {
         int a = 500 / 0;
         return ResultUtils.success();
-    }
-
-    private String page(HttpServletRequest request, String page) {
-        return page(request, page, "content");
-    }
-
-    private String page(HttpServletRequest request, String page, String fragment) {
-        return HttpServletRequestUtils.isAjaxRequest(request) ? page +" :: "+fragment+"" : page;
     }
 
 }

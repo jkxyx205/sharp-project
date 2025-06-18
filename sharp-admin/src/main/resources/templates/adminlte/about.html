@@ -19,6 +19,7 @@
 
     <button onclick="addDialog1()">addDialog1(全局)</button>
     <button onclick="addDialog2()">addDialog2(全局)</button>
+    <button onclick="addDialog3()">confirm(全局)</button>
 
     <br>
     <button onclick="openDrawerDialog('/adminlte/detail/SO11231232323A', 'about-dialog', false)">抽屉（多标签下独立,同标签下共享）</button><br>
@@ -59,6 +60,19 @@
                 hidden: function () {
                     console.log('hidden')
                 }
+            })
+        }
+
+        function addDialog3() {
+            $.dialog({
+                content: '<h1 style="color: red;">确定要删除吗？</h1>',
+                ok: {
+                    label: '确定',
+                    success: function (dialog) {
+                        console.log('success')
+                        dialog.$modal.modal('hide')
+                    }
+                },
             })
         }
 

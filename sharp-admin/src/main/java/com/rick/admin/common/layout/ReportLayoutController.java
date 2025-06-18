@@ -1,4 +1,4 @@
-package com.rick.admin.module.demo.controller;
+package com.rick.admin.common.layout;
 
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.report.core.controller.ReportController;
@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServletRequest;
  * @author Rick.Xu
  * @date 2025/6/13 09:36
  */
-@RequestMapping("reports/htmx")
+@RequestMapping("reports/layout")
 @Controller
-public class ReportHtmxController extends ReportController {
+public class ReportLayoutController extends ReportController {
 
-    public ReportHtmxController(ReportService reportService) {
+    public ReportLayoutController(ReportService reportService) {
         super(reportService);
     }
 
