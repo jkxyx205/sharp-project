@@ -87,7 +87,7 @@
                         <td th:text="${mStat.index + 1 + (grid.page - 1) * grid.pageSize}"></td>
                         <td th:each="v : ${grid.rows[mStat.index]}" th:text="${v}" th:class="${'text-' + report.reportColumnList.get(vStat.index).align.name().toLowerCase()}"></td>
                     </tr>
-                    <tr th:if="${summary ne null}">
+                    <tr th:if="${!#maps.isEmpty(summary)}">
                         <td style="font-weight: bold;">合计</td>
                         <td th:each="n : ${report.reportColumnList}" th:text="${summary.get(n.name)}"></td>
                     </tr>

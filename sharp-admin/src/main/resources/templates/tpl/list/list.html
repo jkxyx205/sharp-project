@@ -100,7 +100,7 @@
                             </td>
                             <input type="hidden" th:each="v : ${grid.rows[mStat.index]}" th:if="${report.reportColumnList.get(vStat.index).hidden}" th:name="${report.reportColumnList.get(vStat.index).name}" th:value="${v}" />
                         </tr>
-                        <tr th:if="${summary ne null}">
+                        <tr th:if="${!#maps.isEmpty(summary)}">
                             <td style="font-weight: bold;">合计</td>
                             <td th:if="${'multiple' eq params['mode']}"></td>
                             <td class="text-right bold" th:each="n : ${report.reportColumnList}" th:text="${#numbers.formatDecimal(summary.get(n.name),1,'COMMA',2,'POINT')}" th:if="${!n.hidden}"></td>
