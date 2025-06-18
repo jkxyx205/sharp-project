@@ -1123,7 +1123,9 @@
 
           // 清空其他 tab 内容，等待点击重新获取数据
           if (document.getElementById(id)) {
-            document.getElementById(id + '-container').innerHTML = ''
+            let containerElem = document.getElementById(id + '-container')
+            if (containerElem)
+              containerElem.innerHTML = ''
           }
         }
       }
