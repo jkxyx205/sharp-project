@@ -90,6 +90,10 @@
         transition: width .3s ease;
       }
 
+      .drawer-dialog.open {
+        width: 600px;
+      }
+
       @media (min-width: 576px) {
         .form-fluid {
           display: flex;
@@ -412,13 +416,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="sys_dict" href="javascript:;" hx-get="/reports/htmx/966383991991062528" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                <a class="nav-link" id="sys_dict" href="javascript:;" hx-get="/reports/layout/966383991991062528" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
                   <i class="nav-icon bi bi-circle-fill"></i>
                   <p>字典管理</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="sys_dict2" href="javascript:;" hx-get="/reports/htmx/966383991991062528?type=MATERIAL" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                <a class="nav-link" id="sys_dict2" href="javascript:;" hx-get="/reports/layout/966383991991062528?type=MATERIAL" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
                   <i class="nav-icon bi bi-circle-fill"></i>
                   <p>字典管理2</p>
                 </a>
@@ -588,8 +592,8 @@
                 <!--          <div th:if="${#request.servletPath == '/adminlte/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
                 <div th:if="${#request.servletPath == '/adminlte/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
                 <div th:if="${#request.servletPath == '/adminlte/demo'}" id="demo-container" target-id="demo-tab"><div layout:fragment="content"></div></div>
-                <div th:if="${#request.servletPath == '/reports/htmx/964844123011960832'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
-                <div th:if="${#request.servletPath == '/reports/htmx/964844123011960832?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/reports/layout/964844123011960832'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/reports/layout/964844123011960832?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
               </th:block>
             </div>
           </div>
@@ -770,19 +774,20 @@
 
       function openDrawerDialog(url, dialogId, pushUrl = true) {
         fetchTargetContainer(url, $("#"+dialogId+" .drawer-content")[0], pushUrl);
-        document.getElementById(dialogId).style.width = "600px";
+        document.getElementById(dialogId).classList.add("open")
       }
 
       /**
        * @param obj id or elem
        * @param url
        */
-      function closeDrawerDialog(param, url) {
-        if (typeof param === "string") {
-          document.getElementById(param).style.width = "0px";
-        } else {
-          param.parentNode.parentNode.parentNode.parentNode.style.width = "0"
+      function closeDrawerDialog(dialogElem, url) {
+        if (typeof dialogElem === "string") {
+          dialogElem = document.getElementById(dialogElem)
+        } else if (dialogElem.tagName === 'BUTTON') {
+          dialogElem = dialogElem.parentNode.parentNode.parentNode.parentNode
         }
+        dialogElem && dialogElem.classList.remove('open')
         url && history.pushState(null, '', url)
       }
 
@@ -804,6 +809,16 @@
                   elem.innerHTML = "Error fetching data"
                 });
       }
+
+      document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") {
+          let drawer = document.querySelector(".drawer-dialog.open")
+          if (drawer) {
+            closeDrawerDialog(drawer);
+            event.preventDefault();
+          }
+        }
+      });
 
       function refreshView() {
         location.reload()
