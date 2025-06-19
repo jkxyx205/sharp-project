@@ -48,6 +48,10 @@ sharp:
   database: # 多个包扫描用 , 隔开
     entity-base-package: com.rick.admin.module.**.entity
 
+bark:
+  url:  ${BARK.URL} # 这个地址不允许批量发送消息
+  device-key: ${BARK.KEY}
+
 dict:
   items:
     - type: bol

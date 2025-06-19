@@ -143,7 +143,7 @@ Temporary Items
 ### Gradle ###
 .gradle
 build/
-sharp-admin/deploy/**/*.jar
+deploy/**/*.jar
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -167,6 +167,10 @@ gradle-app.setting
 .classpath
 .idea
 target
+deploy/**/*.jar
+ehcache
+rebel.xml
+application-prod.yml
 control-*.html
 node_modules
 .env*
