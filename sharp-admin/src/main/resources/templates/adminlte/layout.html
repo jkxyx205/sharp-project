@@ -67,6 +67,7 @@
       }
 
       table {
+        white-space: nowrap;
         word-break: keep-all;
       }
 
@@ -97,26 +98,44 @@
       @media (min-width: 576px) {
         .form-fluid {
           display: flex;
+          flex-wrap: wrap;
         }
+
+        .form-fluid .form-control, .form-fluid .input-group {
+          flex: 1;
+        }
+
       }
 
       @media screen and (max-width: 576px) {
-        .form-fluid .form-group {
-          display: flex;
+        .col-form-label {
+          flex: 1;
         }
 
-        .form-control {
-          flex: 1;
+        .form-fluid .form-control, .form-fluid .input-group {
+          width: 250px;
         }
       }
 
       .form-fluid .form-group {
+        display: flex;
         margin: 0 .5rem .5rem 0
       }
 
-      .form-fluid .form-control {
-        display: inline-block;
-        width: auto;
+      .form-fluid .form-group .col-form-label {
+        white-space: nowrap;
+        word-break: keep-all;
+      }
+
+      label.required {
+        position: relative;
+      }
+
+      .required label:before, label.required:before {
+        content: '*';
+        position: absolute;
+        left: 6px;
+        color: #f86c6b;
       }
 
       .mr-2 {
@@ -142,8 +161,6 @@
       }
 
       #tab .nav-item .nav-link {
-        /*color: var(--bs-nav-link-color);*/
-        color: rgba(var(--bs-emphasis-color-rgb), 0.65);
         background: none;
       }
 
@@ -154,8 +171,8 @@
       #tab .nav-tabs .nav-link.active, #tab .nav-tabs .nav-item.show .nav-link {
         border-bottom-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
       }
-
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
   <!--end::Head-->
   <!--begin::Body-->
@@ -427,7 +444,12 @@
                   <p>字典管理2</p>
                 </a>
               </li>
-
+              <li class="nav-item">
+                <a class="nav-link" id="roles" href="javascript:;" hx-get="/roles" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                  <i class="nav-icon bi bi-circle"></i>
+                  <p>权限管理</p>
+                </a>
+              </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon bi bi-speedometer"></i>
@@ -590,10 +612,11 @@
                 <div th:if="${#request.servletPath.indexOf('/adminlte/index') > -1 }" id="index-tab-container" target-id="index-tab"><div layout:fragment="content"></div></div>
                 <!--          <div th:if="${#request.servletPath == '/adminlte/index/tab-a'}" id="index-container"><div layout:fragment="content"></div></div>-->
                 <!--          <div th:if="${#request.servletPath == '/adminlte/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
+                <div th:if="${#request.servletPath == '/roles'}" id="roles-tab-container" target-id="roles-tab"><div layout:fragment="content"></div></div>
                 <div th:if="${#request.servletPath == '/adminlte/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
                 <div th:if="${#request.servletPath == '/adminlte/demo'}" id="demo-container" target-id="demo-tab"><div layout:fragment="content"></div></div>
-                <div th:if="${#request.servletPath == '/reports/layout/964844123011960832'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
-                <div th:if="${#request.servletPath == '/reports/layout/964844123011960832?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/reports/layout/966383991991062528'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
+                <div th:if="${#request.servletPath == '/reports/layout/966383991991062528?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
               </th:block>
             </div>
           </div>
@@ -644,8 +667,7 @@
 
     <!-- Include Axios from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.9.0/axios.min.js" integrity="sha512-FPlUpimug7gt7Hn7swE8N2pHw/+oQMq/+R/hH/2hZ43VOQ+Kjh25rQzuLyPz7aUWKlRpI7wXbY6+U3oFPGjPOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script th:src="@{/plugins/lodash.min.js}"></script>
     <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
     <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
@@ -656,8 +678,12 @@
     <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
 
     <script th:src="@{/adminlte/plugins/jquery.dialog.js}"></script>
-    <script th:src="@{/js/download.js}"></script>
+
+    <script th:src="@{/ajaxfileupload.js}"></script>
+    <script type="text/javascript" th:src="@{/js/upload.js}"></script>
+
     <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
+    <script th:src="@{/js/download.js}"></script>
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
     <script>
       const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
@@ -666,22 +692,12 @@
         scrollbarAutoHide: 'leave',
         scrollbarClickScroll: true,
       };
-      document.addEventListener('DOMContentLoaded', function () {
-        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-        if (sidebarWrapper && typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== 'undefined') {
-          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-            scrollbars: {
-              theme: Default.scrollbarTheme,
-              autoHide: Default.scrollbarAutoHide,
-              clickScroll: Default.scrollbarClickScroll,
-            },
-          });
-        }
-      });
     </script>
     <!--end::OverlayScrollbars Configure-->
     <!--end::Script-->
     <script>
+      typeof s !== 'undefined' && document.addEventListener('DOMContentLoaded', window[s] && window[s]);
+
       htmx.on("htmx:configRequest", function(evt) {
         evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
       });
@@ -689,6 +705,46 @@
       htmx.on("htmx:afterRequest", function(evt) {
         $.LoadingOverlay("hide");
       });
+
+      (function () {
+        const loadedScripts = new Set();
+
+        document.body.addEventListener('htmx:afterSwap', function (evt) {
+          const fragment = evt.detail.target;
+
+          // 找出所有外部 <script src="..."> 标签
+          const scripts = fragment.querySelectorAll("script[src]");
+
+          const loadScriptsSequentially = async () => {
+            for (const oldScript of scripts) {
+              const src = oldScript.src;
+
+              // 避免重复加载
+              if (loadedScripts.has(src)) continue;
+
+              await new Promise((resolve, reject) => {
+                const newScript = document.createElement("script");
+                newScript.src = src;
+                newScript.async = false; // 保持顺序
+                newScript.onload = () => {
+                  loadedScripts.add(src);
+                  resolve();
+                };
+                newScript.onerror = () => {
+                  console.error("Failed to load script:", src);
+                  reject();
+                };
+                document.head.appendChild(newScript);
+              });
+            }
+          };
+
+          loadScriptsSequentially().then(() => {
+            console.log("All external scripts loaded.");
+            window.s && window[s]();
+          });
+        });
+      })();
 
       document.addEventListener('htmx:responseError', evt => toastr.error(evt.detail.xhr.responseText))
 

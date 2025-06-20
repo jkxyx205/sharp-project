@@ -14,38 +14,38 @@
             padding: 0;
         }
 
-      .layout {
-        display: flex;
-        flex-direction: column;
-          height: 100vh;
-      }
+        .layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
-      .title {
-        height: 50px;
-          line-height: 50px;
-        background-color: #0c0e10;
-        color: #FFFFFF;
-      }
+        .title {
+            height: 50px;
+            line-height: 50px;
+            background-color: #0c0e10;
+            color: #FFFFFF;
+        }
 
-      .bottom {
-        display: flex;
-          flex: 1;
-          overflow: auto;
-      }
+        .bottom {
+            display: flex;
+            flex: 1;
+            overflow: auto;
+        }
 
-      .side-left {
-        width: 200px;
-          background-color: #af4040;
-      }
+        .side-left {
+            width: 200px;
+            background-color: #af4040;
+        }
 
-      .side-right {
-          display: flex;
-          flex: 1;
-          flex-direction: column;
-          background-color: #0b4d75;
-          /*height: 100%;*/
-          overflow: hidden;
-      }
+        .side-right {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            background-color: #0b4d75;
+            /*height: 100%;*/
+            overflow: hidden;
+        }
 
         #html {
             position: relative;
@@ -54,143 +54,163 @@
             overflow: auto;
         }
 
-     /*tab style*/
+        /*tab style*/
 
-    #tab {
-        background-color: #e3e3c7;
-        height: 40px;
-        line-height: 40px;
-        overflow: hidden;
-    }
-
-    #tab ul {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-    }
-
-    #tab ul li {
-        position: relative;
-        float: left;
-        height: 100%;
-        padding: 0 24px 0 16px;
-        margin-right: 16px;
-        list-style: none;
+        #tab {
+            background-color: #e3e3c7;
+            height: 40px;
+            line-height: 40px;
+            overflow: hidden;
         }
 
-    #tab li a {
-        display: inline-block;
-        max-width: 150px;
+        #tab ul {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
 
-        word-break: keep-all;
-        overflow: hidden;
-    }
-    #tab li.active, .side-left li a.active {
-        background-color: yellow;
-    }
-    .tab-remove-icon {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-    }
+        #tab ul li {
+            position: relative;
+            float: left;
+            height: 100%;
+            padding: 0 24px 0 16px;
+            margin-right: 16px;
+            list-style: none;
+        }
 
-    table {
-        word-break: keep-all;
-    }
+        #tab li a {
+            display: inline-block;
+            max-width: 150px;
 
-    .drawer-dialog {
-        position: absolute;
-        z-index: 9;
-        display: flex;
-        flex-direction: column;
-        right: 0;
-        top: 0;
-        height: 100%;
-        width: 0;
-        overflow: hidden;
-        background: red;
-        transition: width .2s ease;
-    }
+            word-break: keep-all;
+            overflow: hidden;
+        }
+        #tab li.active, .side-left li a.active {
+            background-color: yellow;
+        }
+        .tab-remove-icon {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        table {
+            word-break: keep-all;
+        }
+
+        .drawer-dialog {
+            position: absolute;
+            z-index: 9;
+            display: flex;
+            flex-direction: column;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            overflow: hidden;
+            background: red;
+            transition: width .2s ease;
+        }
 
         .drawer-dialog.open {
             width: 600px;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <div class="layout">
-  <div class="title">
-      <div style="display: inline-block; height: 30px; width: 30px; border-radius: 50%; background: #20a8d8; text-align: center; line-height: 30px; color: #fff; font-size: 12px;" th:text="${session.user.imgName}"></div>
-      <span class="visible-md" style="margin-right: 4px;" sec:authentication="name"></span>
-      <span class="visible-md" th:if="${user != null}" th:text="${user.name}"></span>
-      <span class="ml-2" th:text="${T(com.rick.admin.common.AppConfigHolder).version}"></span>
-      <a style="margin-left: 16px; color: #fff;" th:href="|javascript:location.href=mergeUrlQueryObject('multiTab=${!session.multiTab}')|">layout模式</a>
-  </div>
-  <div class="bottom">
-    <div class="side-left">
-      <ul>
-        <li><a id="index" href="javascript:;" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">Index</a></li>
-        <li><a id="about" href="javascript:;"  hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >About</a></li>
-        <li><a id="demo" href="javascript:;"  hx-get="/demos/htmx/demo" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >Demo</a></li>
-          <!--sys_dict 最佳实践是 form code，这个多 tab 模式下，更新后，列表会自动刷新  -->
-        <li><a id="sys_dict" href="javascript:;"  hx-get="/reports/layout/964844123011960832" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理</a></li>
-        <li><a id="sys_dict2" href="javascript:;"  hx-get="/reports/layout/964844123011960832?type=MATERIAL" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理type=MATERIAL</a></li>
-
-      </ul>
+    <div class="title">
+        <div style="display: inline-block; height: 30px; width: 30px; border-radius: 50%; background: #20a8d8; text-align: center; line-height: 30px; color: #fff; font-size: 12px;" th:text="${session.user.imgName}"></div>
+        <span class="visible-md" style="margin-right: 4px;" sec:authentication="name"></span>
+        <span class="visible-md" th:if="${user != null}" th:text="${user.name}"></span>
+        <span class="ml-2" th:text="${T(com.rick.admin.common.AppConfigHolder).version}"></span>
+        <a style="margin-left: 16px; color: #fff;" th:href="|javascript:location.href=mergeUrlQueryObject('multiTab=${!session.multiTab}')|">layout模式</a>
     </div>
-    <div class="side-right">
-      <div id="tab" x-data="setup" x-init="init" th:if="${session.multiTab}">
-          <ul>
-              <template x-for="tab in tabs" :key="tab.id">
-                  <li :class="{active: tab.active}"><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
-              </template>
-          </ul>
-          <div style="clear: left;"></div>
-      </div>
-      <div id="html">
-          <div layout:fragment="content" th:if="${!session.multiTab}"></div>
+    <div class="bottom">
+        <div class="side-left">
+            <ul>
+                <li><a id="index" href="javascript:;" hx-get="/demos/htmx/index" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">Index</a></li>
+                <li><a id="about" href="javascript:;"  hx-get="/demos/htmx/about" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >About</a></li>
+                <li><a id="demo" href="javascript:;"  hx-get="/demos/htmx/demo" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >Demo</a></li>
+                <!--sys_dict 最佳实践是 form code，这个多 tab 模式下，更新后，列表会自动刷新  -->
+                <li><a id="sys_dict" href="javascript:;"  hx-get="/reports/layout/964844123011960832" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理</a></li>
+                <li><a id="sys_dict2" href="javascript:;"  hx-get="/reports/layout/964844123011960832?type=MATERIAL" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html" >字典管理type=MATERIAL</a></li>
 
-          <!-- 服务端渲染，如何服务端没有渲染，js 会再次请求后端，demos/htmx/index/tab-a 会定位到第三层路由 -->
-          <th:block th:if="${session.multiTab}">
-          <div th:if="${#request.servletPath.indexOf('/demos/htmx/index') > -1 }" id="index-tab-container" target-id="index-tab"><div layout:fragment="content"></div></div>
-          <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-a'}" id="index-container"><div layout:fragment="content"></div></div>-->
-          <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
-          <div th:if="${#request.servletPath == '/demos/htmx/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
-              <div th:if="${#request.servletPath == '/demos/htmlx/demo'}" id="demo-container" target-id="demo-tab"><div layout:fragment="content"></div></div>
-          <div th:if="${#request.servletPath == '/reports/layout/964844123011960832'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
-          <div th:if="${#request.servletPath == '/reports/layout/964844123011960832?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
-          </th:block>
-      </div>
+            </ul>
+        </div>
+        <div class="side-right">
+            <div id="tab" x-data="setup" x-init="init" th:if="${session.multiTab}">
+                <ul>
+                    <template x-for="tab in tabs" :key="tab.id">
+                        <li :class="{active: tab.active}"><a :id="tab.id" :href="tab.path" :title="tab.name" :hx-target="'#' + tab.id + '-container'" :hx-get="tab.path" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" x-text="tab.name" @click="tab.showCurrentTab.bind(tab)"></a><span class="tab-remove-icon" href="javascript:;" @click="tab.remove.bind(tab)">x</span></li>
+                    </template>
+                </ul>
+                <div style="clear: left;"></div>
+            </div>
+            <div id="html">
+                <div layout:fragment="content" th:if="${!session.multiTab}"></div>
+
+                <!-- 服务端渲染，如何服务端没有渲染，js 会再次请求后端，demos/htmx/index/tab-a 会定位到第三层路由 -->
+                <th:block th:if="${session.multiTab}">
+                    <div th:if="${#request.servletPath.indexOf('/demos/htmx/index') > -1 }" id="index-tab-container" target-id="index-tab"><div layout:fragment="content"></div></div>
+                    <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-a'}" id="index-container"><div layout:fragment="content"></div></div>-->
+                    <!--          <div th:if="${#request.servletPath == '/demos/htmx/index/tab-b'}" id="index-container"><div layout:fragment="content"></div></div>-->
+                    <div th:if="${#request.servletPath == '/demos/htmx/about'}" id="about-tab-container" target-id="about-tab"><div layout:fragment="content"></div></div>
+                    <div th:if="${#request.servletPath == '/demos/htmlx/demo'}" id="demo-container" target-id="demo-tab"><div layout:fragment="content"></div></div>
+                    <div th:if="${#request.servletPath == '/reports/layout/964844123011960832'}" id="sys_dict-tab-container" target-id="sys_dict-tab"><div layout:fragment="content"></div></div>
+                    <div th:if="${#request.servletPath == '/reports/layout/964844123011960832?type=MATERIAL'}" id="sys_dict2-tab-container" target-id="sys_dict2-tab"><div layout:fragment="content"></div></div>
+                </th:block>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 <div style="position: fixed; bottom: 10px; right: 10px;"><a href="javascript:refreshView()">刷新</a></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script
+        src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"
+        integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ="
+        crossorigin="anonymous"
+></script>
+<!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+<script
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"
+></script>
+<!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+        crossorigin="anonymous"
+></script>
+<!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
+<script th:src="@{/adminlte/js/adminlte.js}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.4/htmx.min.js" integrity="sha512-2kIcAizYXhIn8TzUvqzEDZNuDZ+aW7yE/+f1HJHXFjQcGNfv1kqzJSTBRBSlOgp6B/KZsz1K0a3ZTqP9dnxioQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- Include Axios from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.9.0/axios.min.js" integrity="sha512-FPlUpimug7gt7Hn7swE8N2pHw/+oQMq/+R/hH/2hZ43VOQ+Kjh25rQzuLyPz7aUWKlRpI7wXbY6+U3oFPGjPOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+<script th:src="@{/plugins/lodash.min.js}"></script>
 <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
 <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
-
-<script th:src="@{/coreui/vendors/bootstrap/js/bootstrap.min.js}"></script>
-
 <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
 <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
 <script type="text/javascript" th:src="@{/plugins/jquery.formautofill.min.js}"></script>
 <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
 <script th:src="@{/plugins/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js}"></script>
 <script th:src="@{/plugins/multiple-select/multiple-select.min.js}"></script>
-<!--<script type="text/javascript" th:src="@{/js/jquery.pageTable.js}"></script>-->
 
-<script th:src="@{/js/jquery.dialog.js}"></script>
-<script th:src="@{/js/download.js}"></script>
+<script th:src="@{/adminlte/plugins/jquery.dialog.js}"></script>
+
+<script th:src="@{/ajaxfileupload.js}"></script>
+<script type="text/javascript" th:src="@{/js/upload.js}"></script>
+
 <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
-
+<script th:src="@{/js/download.js}"></script>
 <script>
+    typeof s !== 'undefined' && document.addEventListener('DOMContentLoaded', window[s] && window[s]);
+
     htmx.on("htmx:configRequest", function(evt) {
         evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
     });
@@ -198,6 +218,46 @@
     htmx.on("htmx:afterRequest", function(evt) {
         $.LoadingOverlay("hide");
     });
+
+    (function () {
+        const loadedScripts = new Set();
+
+        document.body.addEventListener('htmx:afterSwap', function (evt) {
+            const fragment = evt.detail.target;
+
+            // 找出所有外部 <script src="..."> 标签
+            const scripts = fragment.querySelectorAll("script[src]");
+
+            const loadScriptsSequentially = async () => {
+                for (const oldScript of scripts) {
+                    const src = oldScript.src;
+
+                    // 避免重复加载
+                    if (loadedScripts.has(src)) continue;
+
+                    await new Promise((resolve, reject) => {
+                        const newScript = document.createElement("script");
+                        newScript.src = src;
+                        newScript.async = false; // 保持顺序
+                        newScript.onload = () => {
+                            loadedScripts.add(src);
+                            resolve();
+                        };
+                        newScript.onerror = () => {
+                            console.error("Failed to load script:", src);
+                            reject();
+                        };
+                        document.head.appendChild(newScript);
+                    });
+                }
+            };
+
+            loadScriptsSequentially().then(() => {
+                console.log("All external scripts loaded.");
+                window.s && window[s]();
+            });
+        });
+    })();
 
     document.addEventListener('htmx:responseError', evt => toastr.error(evt.detail.xhr.responseText))
 

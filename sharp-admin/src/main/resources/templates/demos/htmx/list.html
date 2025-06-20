@@ -160,12 +160,12 @@
         </div>
     </div>
     <script th:inline="javascript">
-        window.s = 'load' + new Date().getTime();
+        window.s = 'load' + /*[(${s})]*/;
         window[s] = function () {
             /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
+            delete window.s
         }
-        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
-        delete window.s
+
         window['init' + /*[[${s}]]*/] = function () {
             this.$elem = $(('#id' + /*[[${s}]]*/))
             this.$elem[0].alpineData = this

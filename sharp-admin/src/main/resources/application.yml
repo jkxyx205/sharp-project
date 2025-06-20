@@ -3,6 +3,8 @@ server:
     session:
       timeout: 120m
 spring:
+  application:
+    name: sharp-admin
   profiles:
     active: dev
 

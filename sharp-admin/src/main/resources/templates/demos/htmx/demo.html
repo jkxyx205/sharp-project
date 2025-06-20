@@ -3,19 +3,19 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{demos/htmx/layout.html}">
 <th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
-    <div class="container" th:id="${'container' + s}">
+    <div class="container-fluid" th:id="${'container' + s}">
         <!-- HTML write below-->
         <h1>DEMO page</h1>
     </div>
 
     <script th:inline="javascript">
-        window.s = 'load' + new Date().getTime();
+        window.s = 'load' + /*[(${s})]*/;
         window[s] = function () {
             // js write below
-            console.log('loading')
+            console.log('loading...')
+
+            delete window.s
         }
-        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
-        delete window.s
     </script>
 </th:block>
 </html>

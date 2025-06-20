@@ -75,7 +75,7 @@
                                         <span th:attr="x-text=${'m.' + n.name}" th:name="${n.name}" th:if="${nStat.index > 1}"></span>
                                     </td>
                                     <td class="text-center" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">
-                                        <!-- <a class="dialogBtn mr-2" href="javascript:;" th:onclick="gotoDetail('查看', 'xx')" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>-->
+                                        <a class="dialogBtn mr-2" href="javascript:;" @click="edit(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_read') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">查看</a>
                                         <a class="dialogBtn mr-2" href="javascript:;" @click="edit(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_edit') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">编辑</a>
                                         <a href="javascript:;" @click="deleteRow(m.id)" sec:authorize="${hasAuthority(#vars.report.code + '_delete') or (#vars.report.additionalInfo != null && #vars.report.additionalInfo['operator-bar'] == true)}">删除</a>
                                         <th:block th:if="${report.additionalInfo != null && report.additionalInfo['js-operator-column'] != null}" th:utext="${report.additionalInfo['js-operator-column']}"></th:block>
@@ -164,12 +164,12 @@
 
 
     <script th:inline="javascript">
-        window.s = 'load' + new Date().getTime();
+        window.s = 'load' + /*[(${s})]*/;
         window[s] = function () {
             /*[(${report.additionalInfo['js'] != null ? report.additionalInfo['js'] : ''})]*/
+            delete window.s
         }
-        typeof $ !== 'undefined' ? window[s]() : document.addEventListener("DOMContentLoaded", window[s])
-        delete window.s
+
         window['init' + /*[[${s}]]*/] = function () {
             this.$elem = $(('#id' + /*[[${s}]]*/))
             this.$elem[0].alpineData = this
@@ -185,6 +185,70 @@
             hasAuthority = true
             /*[/]*/
             this.readonly = !hasAuthority || [[${readonly}]]
+
+            // 初始化控件
+            $.fn.multipleSelect.locales['zh-CN'] = {
+                formatSelectAll: function () {
+                    return '[全选]'
+                },
+                formatAllSelected: function () {
+                    return '已选择所有记录'
+                },
+                formatCountSelected: function(count, total) {
+                    return '已从' + total + '条记录中选择' + count + '条'
+                },
+                formatNoMatchesFound: function () {
+                    return '没有找到记录'
+                }
+            }
+
+            /*<![CDATA[*/
+            var fz = [[${report.queryFieldList}]] || []
+
+            var searchSelect = fz.filter(f => f.type == 'SEARCH_SELECT')
+            searchSelect.forEach(f => {
+                let value = urlObject[f.name]
+                $('#' + f.name).multipleSelect({
+                    filter: true,
+                    single: true,
+                    placeholder: '请输入' + f.label
+                }).multipleSelect('setSelects', !value ? '' : [value])
+            })
+
+            var multipleSelect = fz.filter(f => f.type == 'MULTIPLE_SELECT')
+            multipleSelect.forEach(f => {
+                let value = urlObject[f.name]
+                $('#' + f.name).multipleSelect({
+                    selectAll: true,
+                    single: false,
+                    placeholder: '请输入' + f.label
+                }).multipleSelect('setSelects', !value ? '' : value.split(','))
+            })
+
+            var dateRange = fz.filter(f => f.type == 'DATE_RANGE')
+            dateRange.forEach(f => {
+                $('.'+f.name+'.input-daterange').datepicker({
+                    language: "zh-CN",
+                    autoclose: true,
+                    clearBtn: true,
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd'
+                })
+            })
+
+            var date = fz.filter(f => f.type == 'DATE')
+            date.forEach(f => {
+                $('#'+f.name+'').datepicker({
+                    language: "zh-CN",
+                    autoclose: true,
+                    clearBtn: true,
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd'
+                })
+            })
+            /*]]>*/
         }
 
         window['setup' + /*[[${s}]]*/] = function () {

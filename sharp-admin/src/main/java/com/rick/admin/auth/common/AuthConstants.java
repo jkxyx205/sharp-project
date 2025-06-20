@@ -21,4 +21,7 @@ public class AuthConstants {
     public static final String IMAGE_CODE_SESSION_KEY = "showCode";
 
     public static final String DEFAULT_PASSWORD = "111111";
+
+    public static final Long SYSTEM_USERID = 1L;
+
 }
