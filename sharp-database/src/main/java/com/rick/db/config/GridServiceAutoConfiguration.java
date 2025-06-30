@@ -5,6 +5,7 @@ import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.formatter.AbstractSqlFormatter;
 import com.rick.db.formatter.MysqlSqlFormatter;
 import com.rick.db.formatter.OracleSqlFormatter;
+import com.rick.db.formatter.PostgresSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
 import com.rick.db.plugin.*;
 import com.rick.db.plugin.dao.core.EntityDAO;
@@ -74,6 +75,8 @@ public class GridServiceAutoConfiguration {
         public AbstractSqlFormatter sqlFormatter(SharpDatabaseProperties sharpDatabaseProperties) {
             if (Constants.DB_ORACLE.equals(sharpDatabaseProperties.getType())) {
                 return new OracleSqlFormatter();
+            } else if (Constants.DB_POSTGRESQL.equals(sharpDatabaseProperties.getType())) {
+                return new PostgresSqlFormatter();
             }
 
             return new MysqlSqlFormatter();

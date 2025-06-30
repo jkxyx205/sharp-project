@@ -10,6 +10,8 @@ public final class Constants {
 
     public static final String DB_MYSQL = "MySQL";
 
+    public static final String DB_POSTGRESQL = "PostgreSQL";
+
     public static final String GROUP_DUMMY_TABLE_NAME = "temp_";
 
     public static final String PARAM_IN_SEPARATOR = ",";

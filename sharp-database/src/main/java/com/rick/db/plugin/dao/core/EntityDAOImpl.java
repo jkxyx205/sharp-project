@@ -1346,7 +1346,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
 
             EntityDAO referenceTableDAO = EntityDAOManager.tableNameEntityDAOMap.get(referenceTable);
 
-            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value) AND is_deleted = 0%s",
+            List<Map<String, Object>> refMapData = sharpService.query(String.format("SELECT %s, %s FROM %s WHERE %s IN (:value) AND is_deleted = FALSE%s",
                     columnDefinition, referenceColumnName, thirdPartyTable, columnDefinition,
                     StringUtils.isNotBlank(manyToManyProperty.getManyToMany().sortColumnName()) ? " ORDER BY "+manyToManyProperty.getManyToMany().sortColumnName()+" ASC" : ""
             ), Params.builder(1).pv("value", columnIds).build());
