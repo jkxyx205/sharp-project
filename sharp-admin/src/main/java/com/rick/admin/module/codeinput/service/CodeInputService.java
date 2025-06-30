@@ -123,7 +123,7 @@ public class CodeInputService {
             this.columnNames = columnNames;
 //            masterTableName = StringUtils.defaultString(masterTableName, StringUtils.substringBetween(sql.toUpperCase(), "FROM ", " ").trim());
             masterTableName = StringUtils.defaultString(masterTableName, getTableNameBySelectSql(sql).trim());
-            this.sql = sql + " AND "+masterTableName+".is_deleted = 0";
+            this.sql = sql + " AND "+masterTableName+".is_deleted = FALSE";
             this.rowAfterSearchHandler = rowAfterSearchHandler;
             if (sqlFunction != null) {
                 this.sql = sqlFunction.apply(this.sql);

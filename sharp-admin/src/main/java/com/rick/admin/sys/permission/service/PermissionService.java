@@ -37,7 +37,7 @@ public class PermissionService {
 
         return treeNodeService.getCollapseSubNode("SELECT p.id as \"id\", p.name as \"name\", pid as \"pId\", 1 as open\n" +
                 "   FROM sys_permission p\n" +
-                "   WHERE EXISTS(select 1 from sys_role_permission rp, sys_role r WHERE r.id = rp.role_id AND p.id = rp.permission_id AND r.id IN (:roleIds)) and p.is_deleted = 0 order by p.permission_order asc" +
+                "   WHERE EXISTS(select 1 from sys_role_permission rp, sys_role r WHERE r.id = rp.role_id AND p.id = rp.permission_id AND r.id IN (:roleIds)) and p.is_deleted = FALSE order by p.permission_order asc" +
                 "   ", params);
     }
 

@@ -121,7 +121,7 @@ public class AuthController {
 
         // language=SQL
         model.addAttribute("permissionFullList", treeNodeService.getTreeNode("SELECT p.id as \"id\", p.name as \"name\", pid as \"pId\", 1 as open\n" +
-                "   FROM sys_permission p where is_deleted = 0 \n" +
+                "   FROM sys_permission p where is_deleted = FALSE \n" +
                 "  order by p.permission_order asc", null));
 
         return "sys/auth";
@@ -158,7 +158,7 @@ public class AuthController {
     @PostMapping("/auth/assign/role/{roleId}/user")
     @ResponseBody
     @PreAuthorize("hasAuthority('role_management')")
-    public Result<?> assignAuthUser(@PathVariable Long roleId, @RequestParam(value = "userIds[]", required = false) Set<String> userIds) {
+    public Result<?> assignAuthUser(@PathVariable Long roleId, @RequestParam(value = "userIds[]", required = false) Set<Long> userIds) {
         roleService.addUser(roleId, userIds);
         return ResultUtils.success();
     }
@@ -197,7 +197,7 @@ public class AuthController {
     @PostMapping("/auth/assign/role/{roleId}/{userId}")
     @ResponseBody
     @PreAuthorize("hasAuthority('role_management')")
-    public Result<?> removeUserRoleAuth(@PathVariable Long roleId, @PathVariable String userId) {
+    public Result<?> removeUserRoleAuth(@PathVariable Long roleId, @PathVariable Long userId) {
         roleService.removeRoleByUserId(roleId, userId);
         return ResultUtils.success();
     }

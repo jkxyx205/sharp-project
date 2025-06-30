@@ -56,7 +56,7 @@ public class DemoController {
     @ResponseBody
     public List<TreeNode> ztreeUrl() {
         return treeNodeService.getTreeNode("SELECT p.id as \"id\", p.name as \"name\", pid as \"pId\", 1 as open\n" +
-                "   FROM sys_permission p where is_deleted = 0 \n" +
+                "   FROM sys_permission p where is_deleted = FALSE \n" +
                 "  order by p.permission_order asc", null);
     }
 

@@ -35,7 +35,7 @@ public class RoleService {
 
     PermissionService permissionService;
 
-    public void removeRoleByUserId(Long roleId, String userId) {
+    public void removeRoleByUserId(Long roleId, Long userId) {
         SQLUtils.delete("SYS_USER_ROLE", new Object[] {roleId, userId}, "ROLE_ID = ? and USER_ID = ?");
     }
 
@@ -76,7 +76,7 @@ public class RoleService {
     }
 
     public void addPermission(Long roleId, Set<Long> permissionIds) {
-        SQLUtils.delete("sys_role_permission", new Object[]{1}, "is_deleted = ?");
+        SQLUtils.delete("sys_role_permission", new Object[]{true}, "is_deleted = ?");
         SQLUtils.updateRefTable("sys_role_permission", "role_id", "permission_id", roleId, permissionIds);
     }
 
@@ -85,8 +85,8 @@ public class RoleService {
      * @param roleId 角色id
      * @param userIds 用户id
      */
-    public void addUser(long roleId, Set<String> userIds) {
-        SQLUtils.delete("sys_user_role", new Object[]{1}, "is_deleted = ?");
+    public void addUser(long roleId, Set<Long> userIds) {
+        SQLUtils.delete("sys_user_role", new Object[]{true}, "is_deleted = ?");
         SQLUtils.updateRefTable("sys_user_role", "role_id", "user_id", roleId, userIds);
     }
 }
