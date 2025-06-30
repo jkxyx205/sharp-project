@@ -14,5 +14,5 @@ scp $current_dir/target/$project_name-2.0-SNAPSHOT.jar root@$server_ip:$dir/$pro
 
 # 服务器免密登录 ssh node
 # 执行服务器 deploy.sh
-#ssh node "cd $dir/$project_name && bash -s < $dir/$project_name/deploy.sh"
-ssh node "cd $dir/$project_name && bash -s < $dir/$project_name/deploy-docker.sh"
+ssh node "cd $dir/$project_name && bash -s < $dir/$project_name/deploy.sh"
+#ssh node "cd $dir/$project_name && bash -s < $dir/$project_name/deploy-docker.sh"
