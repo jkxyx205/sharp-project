@@ -82,7 +82,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         //解决静态资源被拦截的问题
-        web.ignoring().antMatchers("/coreui/**", "/css/**", "/js/**", "/img/**", "/plugins/**", "/favicon.ico");
+        web.ignoring().antMatchers("/coreui/**", "/css/**", "/js/**", "/img/**", "/plugins/**", "/favicon.ico", "/adminlte/**");
     }
 
     @Bean
