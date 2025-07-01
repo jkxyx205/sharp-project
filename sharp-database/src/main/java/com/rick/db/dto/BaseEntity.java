@@ -28,7 +28,7 @@ public class BaseEntity<ID> extends SimpleEntity<ID> {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long createBy;
 
-    @Column(updatable = false, comment = "创建时间")
+    @Column(updatable = false, nullable = false, comment = "创建时间")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createTime;
 
@@ -37,12 +37,12 @@ public class BaseEntity<ID> extends SimpleEntity<ID> {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long updateBy;
 
-    @Column(comment = "更新时间")
+    @Column(nullable = false, comment = "更新时间")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime updateTime;
 
     @JsonIgnore
-    @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")
+    @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, nullable = false, comment = "是否逻辑删除")
     private Boolean deleted;
 
 }
