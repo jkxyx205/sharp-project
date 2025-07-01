@@ -36,6 +36,6 @@ public class PostgresSqlFormatter extends AbstractSqlFormatter {
 
     @Override
     public String escapeString() {
-        return "escape '\\\\'";
+        return "escape '\\'";
     }
 }

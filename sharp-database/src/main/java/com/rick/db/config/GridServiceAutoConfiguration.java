@@ -8,10 +8,7 @@ import com.rick.db.formatter.OracleSqlFormatter;
 import com.rick.db.formatter.PostgresSqlFormatter;
 import com.rick.db.middleware.mybatis.MappedSharpService;
 import com.rick.db.plugin.*;
-import com.rick.db.plugin.dao.core.EntityDAO;
-import com.rick.db.plugin.dao.core.EntityDAOManager;
-import com.rick.db.plugin.dao.core.EntityDAOSupport;
-import com.rick.db.plugin.dao.core.TableGenerator;
+import com.rick.db.plugin.dao.core.*;
 import com.rick.db.plugin.dao.support.*;
 import com.rick.db.service.GridService;
 import com.rick.db.service.SharpService;
@@ -204,7 +201,14 @@ public class GridServiceAutoConfiguration {
 
         @Bean
         public TableGenerator initTableGenerator(JdbcTemplate jdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
-            return new TableGenerator(jdbcTemplate, sharpDatabaseProperties);
+            if (Constants.DB_ORACLE.equals(sharpDatabaseProperties.getType())) {
+                // TODO
+                //return new OracleSqlFormatter();
+            } else if (Constants.DB_POSTGRESQL.equals(sharpDatabaseProperties.getType())) {
+                return new PostgresSQLTableGenerator(jdbcTemplate, sharpDatabaseProperties);
+            }
+
+            return new MySQLTableGenerator(jdbcTemplate, sharpDatabaseProperties);
         }
     }
 
