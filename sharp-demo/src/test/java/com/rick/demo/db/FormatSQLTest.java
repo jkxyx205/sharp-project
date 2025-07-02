@@ -31,6 +31,7 @@ public class FormatSQLTest {
         String s12 = "select NOW() from a where a = :a";
         String s13 = "select NOW() from a where (b = :b)";
         String s14 = "select NOW() from a where ((b = :b)) and name = :name";
+        String s15 = "select NOW() from a where (name is NULL or name = :name1)";
 
         OracleSqlFormatter oracleSqlFormatter = new OracleSqlFormatter();
 
@@ -56,6 +57,7 @@ public class FormatSQLTest {
 //        System.out.println(oracleSqlFormatter.formatSql(s12, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s13, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s14, params, returnMap));
+          System.out.println(oracleSqlFormatter.formatSql(s15, params, returnMap));
 
     }
 }
