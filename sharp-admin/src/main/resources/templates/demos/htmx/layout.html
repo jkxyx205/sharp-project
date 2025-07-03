@@ -493,6 +493,28 @@
             }
         }
     }
+
+    function htmxLink(aElems) {
+        aElems.forEach(function(el) {
+            el.addEventListener('click', event =>  {
+                let currentElem = event.target;
+                if (currentElem.parentElement.classList.contains('active')) {
+                    currentElem.preventRequest = true
+                }
+
+                currentElem.parentElement.classList.add('active');
+                currentElem.classList.add('active');
+                aElems.forEach(function(elem) {
+                    if (currentElem != elem) {
+                        elem.parentElement.classList.remove('active');
+                        elem.classList.remove('active');
+                        elem.preventRequest = false
+                    }
+                });
+
+            })
+        });
+    }
 </script>
 <!-- 多标签-->
 <script th:if="${session.multiTab}">
