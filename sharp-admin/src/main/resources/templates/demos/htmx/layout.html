@@ -342,7 +342,9 @@
     }
 
     function openDrawerDialog(url, dialogId, pushUrl = true) {
-        fetchTargetContainer(url, $("#"+dialogId+" .drawer-content")[0], pushUrl);
+        let contentDOM = $("#"+dialogId+" .drawer-content")[0]
+        contentDOM.textContent = ''
+        fetchTargetContainer(url, contentDOM, pushUrl);
         document.getElementById(dialogId).classList.add("open")
     }
 
