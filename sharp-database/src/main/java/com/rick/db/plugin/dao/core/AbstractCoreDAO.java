@@ -259,7 +259,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
         Assert.notEmpty(ids, "id不能为空");
 
         Object[] mergedParams = new Object[ids.size() + 1];
-        mergedParams[0] = 1;
+        mergedParams[0] = true;
         System.arraycopy(ids.toArray(), 0, mergedParams, 1, ids.size());
         return update(SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, mergedParams, this.idColumnName + " IN " + SQLUtils.formatInSQLPlaceHolder(ids.size()));
     }

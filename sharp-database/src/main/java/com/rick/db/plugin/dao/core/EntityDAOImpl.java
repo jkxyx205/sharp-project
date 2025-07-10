@@ -407,7 +407,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 }, (manyToManyProperty, set) -> {
                     if (tableMeta.getFieldMap().values().contains(manyToManyProperty.getField()) && set.size() > 0) {
                         Object[] mergedParams = new Object[set.size() + 1];
-                        mergedParams[0] = 1;
+                        mergedParams[0] = true;
                         System.arraycopy(set.toArray(), 0, mergedParams, 1, set.size());
                         SQLUtils.update(manyToManyProperty.getManyToMany().thirdPartyTable(), SharpDbConstants.LOGIC_DELETE_COLUMN_NAME,
                                 mergedParams, manyToManyProperty.getManyToMany().columnDefinition() + " IN " + SQLUtils.formatInSQLPlaceHolder(set.size()));

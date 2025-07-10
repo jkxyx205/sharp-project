@@ -583,7 +583,7 @@
 <!--              <div class="col-sm-6">-->
 <!--                <ol class="breadcrumb float-sm-end">-->
 <!--                  <li class="breadcrumb-item"><a href="#">adminlte</a></li>-->
-<!--                  <li class="breadcrumb-item active" aria-current="page">Page</li>-->
+<!--                  <li class="breadcrumb-item active" aria-current="page" id="currentMenuText">Page</li>-->
 <!--                </ol>-->
 <!--              </div>-->
 
@@ -969,6 +969,7 @@
         if (url.indexOf(linkNode.getAttribute("hx-get")) > -1) {
           linkNode.preventRequest = true
           activeLink(linkNode)
+          // document.getElementById("currentMenuText").textContent = linkNode.textContent.trim()
         }
       }
 
