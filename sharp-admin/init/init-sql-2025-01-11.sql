@@ -181,7 +181,7 @@ CREATE TABLE `sys_form_configurer` (
   `data_source` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `default_value` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `placeholder` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `is_disabled` bit(1) DEFAULT NULL,
+  `is_disabled` bit(1) DEFAULT FALSE,
   `cpn_value_converter_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `additional_info` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `create_by` bigint NOT NULL,

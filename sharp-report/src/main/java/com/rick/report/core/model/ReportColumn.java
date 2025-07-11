@@ -47,6 +47,14 @@ public class ReportColumn implements Serializable, JsonStringToObjectConverterFa
         this(name, label, false);
     }
 
+    public ReportColumn(String name, String label, List<String> valueConverterNameList) {
+        this(name, label, false, null, valueConverterNameList);
+    }
+
+    public ReportColumn(String name, String label, String context, List<String> valueConverterNameList) {
+        this(name, label, false, context, valueConverterNameList);
+    }
+
     public ReportColumn(String name, String label, Boolean sortable) {
         this(name, label, sortable, null, null);
     }

@@ -283,11 +283,11 @@
                     history.pushState(null, '', location.pathname + "?" + $.param(params))
                     console.log(params, "...")
 
-                    axios.get(('/reports/' + /*[[${report.id}]]*/ )+'/json/summary', {
+                    axios.get(('/reports/' + /*[[${report.id}]]*/ )+'/json' + (this.isSummary ? '/summary' : ''), {
                         params
                     })
                         .then((response) => {
-                            let grid = response.data.data.grid
+                            let grid = this.isSummary ? response.data.data.grid : response.data.data
 
                             for (let i = 0; i < grid.rows.length; i++) {
                                 grid.rows[i]['index'] = (grid.page - 1) * grid.pageSize  + 1 + i

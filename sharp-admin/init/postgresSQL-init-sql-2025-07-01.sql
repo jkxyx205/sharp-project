@@ -678,7 +678,7 @@ CREATE TABLE "public"."sys_form_configurer" (
   "data_source" varchar(32) COLLATE "pg_catalog"."default" DEFAULT NULL::character varying,
   "default_value" varchar(64) COLLATE "pg_catalog"."default" DEFAULT NULL::character varying,
   "placeholder" varchar(32) COLLATE "pg_catalog"."default" DEFAULT NULL::character varying,
-  "is_disabled" bool,
+  "is_disabled" bool DEFAULT FALSE,
   "cpn_value_converter_name" varchar(32) COLLATE "pg_catalog"."default" DEFAULT NULL::character varying,
   "additional_info" varchar(1024) COLLATE "pg_catalog"."default" DEFAULT NULL::character varying,
   "create_by" int8 NOT NULL,
