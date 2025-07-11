@@ -126,7 +126,9 @@ public class PostgresSQLTableGenerator extends TableGenerator {
             return "BIGINT";
         } else if (type == Integer.class) {
             return "INTEGER";
-        } else if (CharSequence.class.isAssignableFrom(type)) {
+        } else if (type == Short.class) {
+            return "SMALLINT";
+        }  else if (CharSequence.class.isAssignableFrom(type)) {
             return "VARCHAR(32)";
         } else if (type == Character.class) {
             return "CHAR(1)";

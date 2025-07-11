@@ -80,6 +80,8 @@ public class MySQLTableGenerator extends TableGenerator {
             return "BIGINT";
         } else if (type == Integer.class) {
             return "INT";
+        } else if (type == Short.class) {
+            return "SMALLINT";
         } else if (CharSequence.class.isAssignableFrom(type)) {
             return "VARCHAR(32)";
         } else if (type == Character.class) {
