@@ -66,6 +66,11 @@ public class MetaServiceAutoConfiguration {
         }
 
         @Bean
+        public SqlTimestampConverter sqlTimestampConverter() {
+            return new SqlTimestampConverter();
+        }
+
+        @Bean
         public LocalDateTimeConverter localDateTimeConverter() {
             return new LocalDateTimeConverter();
         }
