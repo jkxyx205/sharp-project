@@ -53,7 +53,7 @@
             </div>
 
             <div class="card">
-                <div class="card-body" id="report-list" style="padding-bottom: 0">
+                <div class="card-body" style="padding-bottom: 0">
                     <div class="card-body-scroll-panel">
                         <table class="table table-responsive-sm table-bordered table-striped table-sm">
                             <thead>
@@ -111,7 +111,7 @@
                             </select>
                             <span th:if="${grid.totalPages > 1}">，前往<input class="goto" style="width: 68px;" @keyup="gotoPage($event.target, $event)" maxlength="6">页</span>
                         </div>
-                        <div id="batch-cpn-bar" style="margin-left: 16px; float: left; margin-bottom: 8px;" th:if="${'multiple' eq params['mode']}">
+                        <div style="margin-left: 16px; float: left; margin-bottom: 8px;" th:if="${'multiple' eq params['mode']}">
                             <div class="btn-toolbar" role="toolbar">
                                 <div class="btn-group" role="group">
                                     <button class="btn btn-light" style="padding: .075rem .45rem" type="button" onclick="batchDelete()" disabled><i class="fa fa-trash-o fa-lg"></i></button>

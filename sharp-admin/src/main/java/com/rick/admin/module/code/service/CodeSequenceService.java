@@ -1,9 +1,7 @@
 package com.rick.admin.module.code.service;
 
-import com.rick.admin.module.code.entity.CodeSequence;
 import com.rick.common.util.Time2StringUtils;
-import com.rick.db.plugin.dao.core.EntityDAO;
-import com.rick.db.util.OptionalUtils;
+import com.rick.db.plugin.SQLUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,16 +9,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.Instant;
-import java.util.Optional;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @Validated
 public class CodeSequenceService {
-
-    EntityDAO<CodeSequence, Long> codeSequenceDAO;
 
     /**
      * 默认
@@ -74,29 +71,36 @@ public class CodeSequenceService {
      * @return
      */
     public int[] getNextSequences(String category, String prefix, String name, int size) {
-        Optional<CodeSequence> codeSequenceOptional = OptionalUtils.expectedAsOptional(codeSequenceDAO.selectByParams(CodeSequence.builder()
-                .category(category)
-                .prefix(prefix)
-                .name(name)
-                .build()));
-
-        int sequence;
-        if (codeSequenceOptional.isPresent()) {
-            CodeSequence codeSequence = codeSequenceOptional.get();
-            sequence = codeSequence.getSequence();
-        } else {
-            sequence = 0;
-        }
-
-        codeSequenceDAO.update("sequence, name", new Object[]{ sequence + size, name, category, prefix }, "category = ? AND prefix = ?");
-
         int[] sequences = new int[size];
 
-        for (int i = 1; i <= size; i++) {
-            sequences[i - 1] = sequence + i;
+        synchronized (category) {
+            int seq = SQLUtils.execute(con -> {
+                con.setAutoCommit(false);
+                int sequence = 0;
+                PreparedStatement queryPreparedStatement = con.prepareStatement("SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ?");
+                queryPreparedStatement.setString(1, category);
+                queryPreparedStatement.setString(2, prefix);
+                queryPreparedStatement.setString(3, name);
+                ResultSet resultSet = queryPreparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    sequence = resultSet.getInt(1);
+                }
+
+                PreparedStatement preparedStatement = con.prepareStatement("UPDATE core_code_sequence SET sequence = ?, name = ?, category = ? WHERE prefix = ?");
+                preparedStatement.setInt(1, sequence + size);
+                preparedStatement.setString(2, name);
+                preparedStatement.setString(3, category);
+                preparedStatement.setString(4, prefix);
+                preparedStatement.executeUpdate();
+                con.commit();
+                return sequence;
+            });
+
+            for (int i = 1; i <= size; i++) {
+                sequences[i - 1] = seq + i;
+            }
         }
 
         return sequences;
     }
-
 }
