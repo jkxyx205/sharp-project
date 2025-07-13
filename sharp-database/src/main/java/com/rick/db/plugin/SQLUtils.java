@@ -13,15 +13,20 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.Assert;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
 import java.util.*;
@@ -342,6 +347,30 @@ public final class SQLUtils {
         }
 
         SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
+    }
+
+    public static <T> T execute(ConnectionCallback<T> action) {
+        DataSource dataSource = SQLUtils.JDBC_TEMPLATE.getDataSource();
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            return action.doInConnection(con);
+        } catch (SQLException e) {
+            e.getStackTrace();
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.getStackTrace();
+            }
+        } finally {
+            if (con != null) {
+                DataSourceUtils.releaseConnection(con, dataSource);
+            }
+        }
+
+        return null;
     }
 
     /**
