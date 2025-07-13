@@ -356,14 +356,7 @@ public final class SQLUtils {
             con = dataSource.getConnection();
             return action.doInConnection(con);
         } catch (SQLException e) {
-            e.getStackTrace();
-            try {
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (SQLException ex) {
-                ex.getStackTrace();
-            }
+            e.printStackTrace();
         } finally {
             if (con != null) {
                 DataSourceUtils.releaseConnection(con, dataSource);

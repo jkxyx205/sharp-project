@@ -75,24 +75,27 @@ public class CodeSequenceService {
 
         synchronized (category) {
             int seq = SQLUtils.execute(con -> {
-                con.setAutoCommit(false);
                 int sequence = 0;
-                PreparedStatement queryPreparedStatement = con.prepareStatement("SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ?");
-                queryPreparedStatement.setString(1, category);
-                queryPreparedStatement.setString(2, prefix);
-                queryPreparedStatement.setString(3, name);
-                ResultSet resultSet = queryPreparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    sequence = resultSet.getInt(1);
+                try (PreparedStatement queryPreparedStatement = con.prepareStatement("SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ?")){
+                    queryPreparedStatement.setString(1, category);
+                    queryPreparedStatement.setString(2, prefix);
+                    queryPreparedStatement.setString(3, name);
+
+                    try (ResultSet resultSet = queryPreparedStatement.executeQuery()){
+                        if (resultSet.next()) {
+                            sequence = resultSet.getInt(1);
+                        }
+                    }
                 }
 
-                PreparedStatement preparedStatement = con.prepareStatement("UPDATE core_code_sequence SET sequence = ?, name = ?, category = ? WHERE prefix = ?");
-                preparedStatement.setInt(1, sequence + size);
-                preparedStatement.setString(2, name);
-                preparedStatement.setString(3, category);
-                preparedStatement.setString(4, prefix);
-                preparedStatement.executeUpdate();
-                con.commit();
+                try (PreparedStatement preparedStatement = con.prepareStatement("UPDATE core_code_sequence SET sequence = ?, name = ?, category = ? WHERE prefix = ?")){
+                    preparedStatement.setInt(1, sequence + size);
+                    preparedStatement.setString(2, name);
+                    preparedStatement.setString(3, category);
+                    preparedStatement.setString(4, prefix);
+                    preparedStatement.executeUpdate();
+                }
+
                 return sequence;
             });
 
