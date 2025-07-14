@@ -1,5 +1,6 @@
 package com.rick.db.plugin;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +13,20 @@ import java.util.function.Function;
  */
 public final class DbUtils {
 
-    private final String url;
-    private final String username;
-    private final String password;
+    private String url;
+    private String username;
+    private String password;
+
+    private DataSource dataSource;
 
     public DbUtils(String url, String username, String password) {
         this.url = url;
         this.username = username;
         this.password = password;
+    }
+
+    public DbUtils(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public int executeUpdate(String sql) {
@@ -61,20 +68,22 @@ public final class DbUtils {
                         preparedStatement.setObject(i + 1, params[i]);
                     }
                 }
-                ResultSet resultSet = preparedStatement.executeQuery();
-                ResultSetMetaData rsmd = resultSet.getMetaData();
-                int columnCount = rsmd.getColumnCount();
+                try (ResultSet resultSet = preparedStatement.executeQuery();){
+                    ResultSetMetaData rsmd = resultSet.getMetaData();
+                    int columnCount = rsmd.getColumnCount();
 
-                List<Object[]> list = new ArrayList<>();
-                while (resultSet.next()) {
-                    Object[] row = new Object[columnCount];
-                    for (int i = 0; i < columnCount; i++) {
-                        row[i] = resultSet.getObject(i + 1);
+                    List<Object[]> list = new ArrayList<>();
+                    while (resultSet.next()) {
+                        Object[] row = new Object[columnCount];
+                        for (int i = 0; i < columnCount; i++) {
+                            row[i] = resultSet.getObject(i + 1);
+                        }
+                        list.add(row);
                     }
-                    list.add(row);
+
+                    return list;
                 }
 
-                return list;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -82,7 +91,7 @@ public final class DbUtils {
     }
 
     public <T> T execute(Function<Connection, T> consumer) {
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+        try (Connection connection = dataSource == null ? DriverManager.getConnection(url, username, password) : dataSource.getConnection()) {
             return consumer.apply(connection);
         } catch (SQLException e) {
             e.printStackTrace();

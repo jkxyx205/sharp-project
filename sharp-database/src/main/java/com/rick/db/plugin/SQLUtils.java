@@ -349,10 +349,17 @@ public final class SQLUtils {
         SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
     }
 
+    /**
+     * 获取新的 connection 连接
+     * @param action
+     * @return
+     * @param <T>
+     */
     public static <T> T execute(ConnectionCallback<T> action) {
         DataSource dataSource = SQLUtils.JDBC_TEMPLATE.getDataSource();
         Connection con = null;
         try {
+//            con = DataSourceUtils.getConnection(dataSource); // 从 spring 上下文中获取连接
             con = dataSource.getConnection();
             return action.doInConnection(con);
         } catch (SQLException e) {
