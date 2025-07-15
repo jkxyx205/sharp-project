@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Rick
@@ -26,6 +27,10 @@ public class CpnConfigurerService {
     public int[] saveOrUpdate(List<CpnConfigurer> configurers) {
         for (CpnConfigurer configurer : configurers) {
             CpnManager.getCpnByType(configurer.getCpnType()).check(configurer);
+
+            if (Objects.isNull(configurer.getDisabled())) {
+                configurer.setDisabled(false);
+            }
         }
 
         return cpnConfigurerDAO.insertOrUpdate(configurers);
