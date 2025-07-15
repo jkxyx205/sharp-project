@@ -9,7 +9,7 @@
         /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
     </style>
 
-    <div class="report-container" th:attr="id=${'id' + s}, x-data=${'setup' + s}, x-init=${'init' + s}, data-id=${report.id}">
+    <div class="report-container" th:attr="id=${'id' + s}, x-data=${'setup' + s}, x-init=${'init' + s}, data-id=${report.id}" x-effect="refresh(grid)">
         <div>
             <!-- 查询条件 -->
             <div class="card mb-4">
@@ -457,6 +457,11 @@
                 },
                 getSelectedData() {
                     return this.grid.rows.filter(row => row.select).map(row => row.id);
+                },
+                refresh(grid) {
+                    this.$nextTick(() => {
+                        /*[(${report.additionalInfo['refresh'] != null ? report.additionalInfo['refresh'] : ''})]*/
+                    })
                 }
             }
         }
