@@ -40,7 +40,7 @@ public class MySQLTableGenerator extends TableGenerator {
 
     @Override
     protected void idColumnHandler(StringBuilder createTableSql, Field field, String columnName, Id.GenerationType strategy, Class idClass) {
-        createTableSql.append(""+(strategy == Id.GenerationType.ASSIGN ? ""+columnName+" VARCHAR(32)" : ""+columnName+" " + determineSqlType(idClass))+" NOT NULL"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" COMMENT '主键' PRIMARY KEY,");
+        createTableSql.append(""+(strategy == Id.GenerationType.ASSIGN ? ""+columnName+" VARCHAR(32)," : ""+columnName+" " + determineSqlType(idClass))+" NOT NULL"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" COMMENT '主键' PRIMARY KEY,");
     }
 
     @Override
