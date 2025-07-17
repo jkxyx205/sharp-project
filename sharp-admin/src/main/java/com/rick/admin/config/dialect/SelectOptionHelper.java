@@ -43,6 +43,10 @@ public class SelectOptionHelper {
             model.add(modelFactory.createOpenElementTag("option value=\"\""));
             model.add(modelFactory.createText(dummyItemText));
             model.add(modelFactory.createCloseElementTag("option"));
+        } else {
+            model.add(modelFactory.createOpenElementTag("option value=\"\" selected disabled hidden"));
+            model.add(modelFactory.createText(dummyItemText));
+            model.add(modelFactory.createCloseElementTag("option"));
         }
 
         if (iProcessableElementTag.hasAttribute("group")) {
