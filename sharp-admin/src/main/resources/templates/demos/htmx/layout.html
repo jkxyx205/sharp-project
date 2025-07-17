@@ -259,7 +259,12 @@
         });
     })();
 
-    document.addEventListener('htmx:responseError', evt => toastr.error(evt.detail.xhr.responseText))
+    document.addEventListener('htmx:responseError', evt => {
+        let data = JSON.parse(evt.detail.xhr.responseText);
+        if (data.success === false) {
+            toastr.error(data.message);
+        }
+    })
 
     // Add a request interceptor
     axios.interceptors.request.use(function (config) {

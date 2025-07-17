@@ -53,7 +53,10 @@ public class DictDOSupplierImpl implements DictDOSupplier {
                 for (Enum value : clazz.getEnumConstants()) {
                     Method getLabelMethod = clazz.getMethod("getLabel");
                     String label = (String) getLabelMethod.invoke(value);
-                    dictList.add(new Dict(clazz.getSimpleName(), value.name(), label, value.ordinal()));
+
+                    Method getCodeMethod = clazz.getMethod("getCode");
+                    Object code = getCodeMethod.invoke(value);
+                    dictList.add(new Dict(clazz.getSimpleName(), String.valueOf(code), label, value.ordinal()));
                 }
             }
         }
