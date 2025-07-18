@@ -17,12 +17,11 @@ import java.awt.*;
 @UtilityClass
 public class ExcelCellStyleHelper {
 
-
     public XSSFCellStyle createRowMergeCellStyle(XSSFWorkbook book) {
         XSSFCellStyle cellStyle = book.createCellStyle();
 
         // 垂直居中
-        cellStyle.setVerticalAlignment(VerticalAlignment.TOP);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
         // 文字
         XSSFFont font = book.createFont();
@@ -104,6 +103,20 @@ public class ExcelCellStyleHelper {
         // 垂直居中
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
+        return cellStyle;
+    }
+
+    public static XSSFCellStyle setAllBorder(XSSFCellStyle cellStyle) {
+        XSSFColor black = new XSSFColor(Color.BLACK, new DefaultIndexedColorMap());
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+
+        cellStyle.setBorderColor(XSSFCellBorder.BorderSide.BOTTOM, black);
+        cellStyle.setBorderColor(XSSFCellBorder.BorderSide.RIGHT, black);
+        cellStyle.setBorderColor(XSSFCellBorder.BorderSide.LEFT, black);
+        cellStyle.setBorderColor(XSSFCellBorder.BorderSide.TOP, black);
         return cellStyle;
     }
 }
