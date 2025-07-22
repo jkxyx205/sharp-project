@@ -1,5 +1,6 @@
 package com.rick.formflow.form.service.bo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.Form;
 import com.rick.formflow.form.service.FormAdvice;
@@ -29,6 +30,7 @@ public class FormBO {
 
     private Map<String, Object> data;
 
+    @JsonIgnore
     private FormAdvice formAdvice;
 
     @AllArgsConstructor

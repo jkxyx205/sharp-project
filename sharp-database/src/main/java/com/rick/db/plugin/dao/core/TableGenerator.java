@@ -83,11 +83,12 @@ public abstract class TableGenerator {
                         createTableSql.append(" NULL");
                     }
 
-                    columnHandler(createTableSql, field, columnName, column);
                 }
             } else {
                 createTableSql.append(determineSqlType(field.getType())).append(" NULL");
             }
+
+            columnHandler(createTableSql, field, columnName, column);
 
             createTableSql.append(",");
         }
