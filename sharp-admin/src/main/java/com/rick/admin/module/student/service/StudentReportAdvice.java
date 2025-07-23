@@ -25,8 +25,8 @@ public class StudentReportAdvice extends OperatorReportAdvice {
     }
 
     @Override
-    public void beforeSetRow(Report report, List<Map<String, Object>> rows) {
-        super.beforeSetRow(report, rows);
+    public void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {
+        super.beforeSetRow(report, rows, requestMap);
 
         // 文件解析
         for (Map<String, Object> row : rows) {

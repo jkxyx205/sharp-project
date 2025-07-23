@@ -16,8 +16,8 @@ import java.util.Map;
 public class LinkReportAdvice implements ReportAdvice {
 
     @Override
-    public void beforeSetRow(Report report, List<Map<String, Object>> rows) {
-        ReportAdvice.super.beforeSetRow(report, rows);
+    public void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {
+        ReportAdvice.super.beforeSetRow(report, rows, requestMap);
 
         // 判断是否是图片
         for (Map<String, Object> row : rows) {

@@ -11,10 +11,8 @@ import com.rick.db.dto.Grid;
 import com.rick.db.dto.PageModel;
 import com.rick.db.dto.QueryModel;
 import com.rick.db.plugin.GridUtils;
-import com.rick.db.service.GridService;
 import com.rick.excel.table.AbstractExportTable;
 import com.rick.excel.table.MapExcelTable;
-import com.rick.excel.table.QueryResultExportTable;
 import com.rick.excel.table.model.AlignEnum;
 import com.rick.excel.table.model.MapTableColumn;
 import com.rick.meta.dict.convert.ValueConverter;
@@ -53,8 +51,6 @@ public class ReportService {
     private static final String EXCEL_EXTENSION = ".xlsx";
 
     private final ReportDAO reportDAO;
-
-    private final GridService gridService;
 
     private final Map<String, ValueConverter> valueConverterMap;
 
@@ -143,7 +139,9 @@ public class ReportService {
         }
 
         Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
-        handleReportAdvice(report, grid.getRows());
+        if (reportAdvice != null && CollectionUtils.isNotEmpty(grid.getRows())) {
+            reportAdvice.beforeSetRow(report, grid.getRows(), requestMap);
+        }
 
         Map<String, BigDecimal> summaryMap = null;
         if (StringUtils.isNotEmpty(report.getSummaryColumnNames())) {
@@ -208,6 +206,7 @@ public class ReportService {
 
     public void export(HttpServletRequest request, HttpServletResponse response, long id) throws IOException {
         Map<String, Object> requestMap = HttpServletRequestUtils.getParameterMap(request);
+        requestMap.put("export", true);
         export(requestMap, report -> {
             LocalDateTime localDateTime = LocalDateTime.now();
             String timestamp = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSSS"));
@@ -231,37 +230,21 @@ public class ReportService {
         Report report = findById(id).get();
         ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
         MapExcelTable excelTable = null;
-        if (StringUtils.isBlank(report.getQuerySql())) {
-            ReportDTO reportDTO = list(report.getId(), requestMap);
 
-            if (reportAdvice != null) {
-                excelTable = reportAdvice.getMapExcelTable(report, null, null, reportDTO.getGridMap().getRows());
-            }
-
-            if (excelTable == null)
-                excelTable = new MapExcelTable(convert(report.getReportColumnList()), reportDTO.getGridMap().getRows());
-
-        } else {
+        if (reportAdvice != null) {
             QueryModel queryModel = QueryModel.of(requestMap);
             PageModel pageModel = queryModel.getPageModel();
             pageModel.setSize(-1);
-
-            if (reportAdvice != null) {
-                excelTable = reportAdvice.getMapExcelTable(report,  queryModel.getParams(), pageModel, null);
-            }
-
-            if (excelTable == null) {
-                excelTable = new QueryResultExportTable(gridService, report.getQuerySql(), pageModel, queryModel.getParams(), convert(report.getReportColumnList())) {
-                    @Override
-                    public void setRows(List<Map<String, Object>> rows) {
-                        handleReportAdvice(report, rows);
-                        toObjectArrayListAndConvert(rows, report.getReportColumnList());
-//                        formatValue(rows);
-                        super.setRows(rows);
-                    }
-                };
-            }
+            // 自己手动调用 QueryResultExportTable 查询获取结果
+            excelTable = reportAdvice.getMapExcelTable(report, queryModel.getParams(), pageModel, null);
         }
+
+        if (excelTable == null) {
+            requestMap.put(PageModel.PARAM_SIZE, "-1");
+            ReportDTO reportDTO = list(report.getId(), requestMap);
+            excelTable = new MapExcelTable(convert(report.getReportColumnList()), reportDTO.getGridMap().getRows());
+        }
+
         Consumer<AbstractExportTable> consumerExcelWriter = null;
         if (reportAdvice != null) {
             consumerExcelWriter = reportAdvice.beforeExportAndReturnBeforeToFileConsumer(report, excelTable, requestMap);
@@ -270,15 +253,15 @@ public class ReportService {
         excelTable.write(osSupplier.apply(report), consumerExcelWriter);
     }
 
-    private Grid<Object[]> convert(Grid<Map<String, Object>> paramGrid, Report report) {
+    private Grid<Object[]> convert(Grid<Map<String, Object>> grid, Report report) {
         List<ReportColumn> reportColumnList = report.getReportColumnList();
 
         return Grid.<Object[]>builder()
-                .rows(toObjectArrayListAndConvert(paramGrid.getRows(), reportColumnList))
-                .pageSize(paramGrid.getPageSize())
-                .page(paramGrid.getPage())
-                .totalPages(paramGrid.getTotalPages())
-                .records(paramGrid.getRecords())
+                .rows(toObjectArrayListAndConvert(grid.getRows(), reportColumnList))
+                .pageSize(grid.getPageSize())
+                .page(grid.getPage())
+                .totalPages(grid.getTotalPages())
+                .records(grid.getRecords())
                 .build();
     }
 
@@ -345,13 +328,6 @@ public class ReportService {
     private void validateNonDeleteSql(String sql) {
         if (StringUtils.isNotBlank(sql) && sql.matches("(?i).*delete\\s+from*.")) {
             throw new BizException(ResultUtils.fail("Report sql error!"));
-        }
-    }
-
-    private void handleReportAdvice(Report report, List<Map<String, Object>> rows) {
-        ReportAdvice reportAdvice = reportAdviceMap.get(report.getReportAdviceName());
-        if (reportAdvice != null && CollectionUtils.isNotEmpty(rows)) {
-            reportAdvice.beforeSetRow(report, rows);
         }
     }
 
