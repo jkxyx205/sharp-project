@@ -181,11 +181,11 @@ public class MailHandlerImpl implements MailHandler {
             }
 
             for (Object[] cc : email.getCcList()) {
-                message.addRecipient(Message.RecipientType.TO,new InternetAddress((String) cc[0], (String) cc[1]));
+                message.addRecipient(Message.RecipientType.CC,new InternetAddress((String) cc[0], (String) cc[1]));
             }
 
             for (Object[] bcc : email.getBccList()) {
-                message.addRecipient(Message.RecipientType.TO,new InternetAddress((String) bcc[0], (String) bcc[1]));
+                message.addRecipient(Message.RecipientType.BCC,new InternetAddress((String) bcc[0], (String) bcc[1]));
             }
 
             message.setSubject(email.getSubject());

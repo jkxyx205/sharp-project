@@ -153,7 +153,7 @@
 
         </div>
         <div style="height: 50px">
-            <button class="btn btn-primary btn-save" th:attr="onclick=|window[$(this).parent().prev().find('form').attr('name') + 'FormDOM'].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${s}').alpineData.search();})|">
+            <button class="btn btn-primary btn-save" th:attr="onclick=|$(this).parent().prev().find('form')[0].save(() => {closeDrawerDialog(this);toastr.success('保存成功');document.getElementById('id' + '${s}').alpineData.search();})|">
                 Save
             </button>
             <button class="btn btn-secondary" onclick="closeDrawerDialog(this)">Close</button>
@@ -188,6 +188,8 @@
             let isSummary = /*[[${report.summaryColumnNames != null}]]*/
             let summaryData = /*[[${report.summaryColumnNames != null ? summary : {}}]]*/
             let grid = /*[[${grid}]]*/
+            let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
+            let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
 
             grid.rows = grid.rows.map((row, index) => {
                 let data = {}
@@ -328,11 +330,10 @@
                     this.search({page: 1})
                 },
                 edit(id, search) {
-                    let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
                     if (form_id) {
                         let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
                         let formPage = /*[[${report.additionalInfo != null && report.additionalInfo['formPage'] != null ? report.additionalInfo['formPage'] : '' } + '']]*/
-                        let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : ""))
+                        let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : "")) + "&" + location.search.substring(1)
                         if (formAction === 'link') {
                             addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/layout/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
                         } else if (formAction === 'drawer') {
@@ -354,13 +355,12 @@
                             })
                         }
                     } else { // 自定义 endpoint 跳转页面详情
-                        let endpoint = /*[[${report.additionalInfo != null && report.additionalInfo['endpoint'] != null ? report.additionalInfo['endpoint'] : '' } + '']]*/
-                        addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + '?readonly=' + readonly, "编辑-" + (/*[[${report.name}]]*/));
+                        let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : "")) + "&" + location.search.substring(1)
+                        openDrawerDialog('/' + endpoint  + (!id ? '/new' : '/' + id + '/page') + queryString, 'id' + (/*[[${s}]]*/) + 'drawer-dialog', false)
                     }
                 },
                 deleteRow(id) {
                     if (confirm('确定要删除该条记录吗？')) {
-                        let form_id= /*[[${report.additionalInfo != null && report.additionalInfo['formId'] != null ? report.additionalInfo['formId'] : '' } + '']]*/
                         let url;
                         if (form_id) {
                             url = '/forms/ajax/' + form_id + '/' + id
