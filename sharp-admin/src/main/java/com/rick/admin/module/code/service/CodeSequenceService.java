@@ -88,7 +88,7 @@ public class CodeSequenceService {
                     }
                 }
 
-                try (PreparedStatement preparedStatement = con.prepareStatement("UPDATE core_code_sequence SET sequence = ?, name = ?, category = ? WHERE prefix = ?")){
+                try (PreparedStatement preparedStatement = con.prepareStatement("UPDATE core_code_sequence SET sequence = ?, name = ?  WHERE category = ? AND prefix = ? ")){
                     preparedStatement.setInt(1, sequence + size);
                     preparedStatement.setString(2, name);
                     preparedStatement.setString(3, category);
