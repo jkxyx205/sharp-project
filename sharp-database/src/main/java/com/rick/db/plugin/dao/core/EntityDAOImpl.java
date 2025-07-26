@@ -1463,7 +1463,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
 
         // ManyToMany 更新中间表
-        updateManyToManyReferenceTable(t);
+        updateManyToManyReferenceTable(t, insert);
     }
 
     private void subEntityRefParentEntity(T t, Class subEntityClass, String reversePropertyName, Collection<?> data) {
@@ -1486,7 +1486,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         }
     }
 
-    private void updateManyToManyReferenceTable(T t) {
+    private void updateManyToManyReferenceTable(T t, boolean insert) {
         // ManyToMany
         for (TableMeta.ManyToManyProperty manyToManyProperty : tableMeta.getManyToManyAnnotationList()) {
             String referenceTable = manyToManyProperty.getManyToMany().thirdPartyTable();
@@ -1499,6 +1499,10 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 for (Object o : refDataList) {
                     refIdsValue.add(getIdValue(o));
                 }
+            }
+
+            if (insert && CollectionUtils.isEmpty(refIdsValue)) {
+                continue;
             }
 
             // 更新中间表
