@@ -27,3 +27,6 @@ fileupload:
   local: # cd /Users/rick/Space/tmp/fileupload && http-server -p 7892
     root-path: /Users/rick/Space/tmp/fileupload
     server-url: http://127.0.0.1:7892/ # 映射到tmp目录
+
+app:
+  domain: http://127.0.0.1:8080

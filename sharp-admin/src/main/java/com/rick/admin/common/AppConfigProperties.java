@@ -12,5 +12,8 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app")
 @Data
 public class AppConfigProperties {
+
     private String version;
+
+    private String domain;
 }
