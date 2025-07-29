@@ -50,6 +50,7 @@ public class CustomizeProcessorDialectDialect extends AbstractProcessorDialect {
         processors.add(new SelectOptionProcessor(DIALECT_PREFIX, dictService, sharpService));
         processors.add(new SharpFormProcessor(DIALECT_PREFIX, formService));
         processors.add(new FileUploadProcessor(DIALECT_PREFIX));
+        processors.add(new ImageUploadProcessor(DIALECT_PREFIX));
         processors.add(new DataAttributeTagProcessor(DIALECT_PREFIX));
         processors.add(new CodeInputProcessor(DIALECT_PREFIX, codeInputService));
         processors.add(new SpanProcessor(DIALECT_PREFIX, dictService));
