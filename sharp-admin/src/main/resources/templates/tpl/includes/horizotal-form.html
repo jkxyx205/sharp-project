@@ -51,6 +51,9 @@
                 <div class="invalid-feedback" th:each="v : ${p.configurer.validatorList}"
                      th:text="${v.message}"></div>
             </div>
+            <div th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).SINGLE_IMAGE}">
+                <sp:image th:attr="form-name=${formBO.form.code}" th:name="${p.name}" sp:value="${p.value}"></sp:image>
+            </div>
 
             <input th:if="${p.configurer.cpnType == T(com.rick.formflow.form.cpn.core.CpnTypeEnum).EMAIL}" type="email" class="form-control" th:id="${p.name}" th:name="${p.name}" th:maxlength="${p.configurer.validatorProperties.get('Length.max')}"
                    th:placeholder="${p.configurer.placeholder}" th:value="${p.value}" th:required="${isRequired}" th:classappend="${errors eq null ? '' : (#maps.containsKey(errors, p.name) ? 'is-invalid' : 'is-valid')}" th:disabled="${p.configurer.disabled}">

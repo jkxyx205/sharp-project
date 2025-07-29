@@ -88,6 +88,30 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
                 window[formDOM.getAttribute("name") + '_' + c.name + '_file_itemSupplier']
             )
         })
+
+        let images = p.filter(c => c.configurer.cpnType == 'SINGLE_IMAGE')
+        images.forEach(c => {
+            window[formDOM.getAttribute("name") + '_' + c.name + '_file'] = new FileUpload(c.name + '_file',
+                false,
+                function uploadImage(attachments) {
+                    // 上传照片
+                    document.getElementById("avatar").src = attachments[0].url
+                    document.getElementById("avatar").setAttribute("value", attachments[0].id)
+                    document.getElementById(c.name).value = JSON.stringify(attachments[0])
+                    return false
+                }, function deleteImage(attachmentId, deleteBtn) {
+                    document.getElementById("avatar").src = '/img/default_avatar.png'
+                    document.getElementById("avatar").removeAttribute("value")
+                    $('.avatar-container .item .delete-btn').hide()
+                    document.getElementById(c.name).value = '[]'
+                });
+
+            $('.avatar-container .item').hover(function () {
+                document.getElementById("avatar").getAttribute("value") && $(this).find('.delete-btn').show()
+            }, function () {
+                $(this).find('.delete-btn').hide()
+            })
+        })
     }
 
     formDOM.save = function (successCallback, beforeSave) {

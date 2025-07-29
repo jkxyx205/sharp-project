@@ -27,6 +27,7 @@ public enum CpnTypeEnum {
     CHECKBOX("多选"),
     SINGLE_CHECKBOX("单选"),
     MOBILE("手机号"),
+    SINGLE_IMAGE("单图片"),
     FILE("文件"),
     EMAIL("邮箱"),
     DATE("日期"),
