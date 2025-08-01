@@ -48,8 +48,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.headers().disable()
                 .authorizeRequests()
                 .antMatchers("/forbidden", "/kaptcha", "/login", "/demos/**").permitAll()
-                .and()
-                .authorizeRequests()
                 // 第三方jar中的配置接口权限， 否则通过注解配置
                 .antMatchers("/reports/695981455636959232", "/reports/695981455636959232/export", "/forms/page/695978675677433856/**").hasAnyAuthority("mm_material_read")
                 .antMatchers(HttpMethod.POST,"/forms/ajax/695978675677433856").hasAnyAuthority("mm_material_add")
@@ -68,8 +66,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .csrf().disable()// csrf会拦截POST请求 https://www.jianshu.com/p/2c275c75c77a
-                .sessionManagement().
-                invalidSessionUrl("/login")
+                .sessionManagement()
+                .invalidSessionUrl("/login")
                 .maximumSessions(1)
                 .expiredSessionStrategy(new AdminExpiredSessionStrategy())
                 .sessionRegistry(sessionRegistry());
