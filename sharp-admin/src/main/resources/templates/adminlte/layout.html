@@ -762,6 +762,7 @@
         return config;
       }, function (error) {
         // Do something with request error
+        $.LoadingOverlay("hide");
         console.log(error)
         toastr.error(error.message);
         return Promise.reject(error);
