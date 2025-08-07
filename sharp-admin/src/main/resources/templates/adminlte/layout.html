@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
   <!--begin::Head-->
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -18,17 +18,17 @@
     />
     <!--end::Primary Meta Tags-->
     <!--begin::Fonts-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
-      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
-      crossorigin="anonymous"
-    />
+<!--    <link-->
+<!--      rel="stylesheet"-->
+<!--      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"-->
+<!--      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="-->
+<!--      crossorigin="anonymous"-->
+<!--    />-->
     <!--end::Fonts-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css"
+      href="https://cdn.bootcdn.net/ajax/libs/overlayscrollbars/2.10.1/styles/overlayscrollbars.min.css"
       integrity="sha256-tZHrRjVqNSRyWg2wbppGnT833E/Ys0DHWGwT04GiqQg="
       crossorigin="anonymous"
     />
@@ -36,7 +36,7 @@
     <!--begin::Third Party Plugin(Bootstrap Icons)-->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
       integrity="sha256-9kPW/n5nn53j4WMRYAxe9c1rCY96Oogo/MKSVdKzPmI="
       crossorigin="anonymous"
     />
@@ -172,7 +172,7 @@
         border-bottom-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
       }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
   <!--end::Head-->
   <!--begin::Body-->
@@ -445,7 +445,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="roles" href="javascript:;" hx-get="/roles" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
+                <a class="nav-link" id="roles" href="javascript:;" hx-get="/roles/adminlte" hx-push-url="true" hx-on:htmx:before-request="beforeRequest(event)" hx-target="#html">
                   <i class="nav-icon bi bi-circle"></i>
                   <p>权限管理</p>
                 </a>
@@ -644,31 +644,32 @@
     <!--begin::Script-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
     <div style="position: fixed; bottom: 14px; right: 0;"><a href="javascript:refreshView()" title="刷新当前页面"><i class="bi bi-arrow-clockwise"></i></a></div>
+    <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
+    <script>$.LoadingOverlay("show")</script>
     <script
-      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"
-      integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ="
-      crossorigin="anonymous"
+            src="https://cdn.bootcdn.net/ajax/libs/overlayscrollbars/2.10.1/browser/overlayscrollbars.browser.es6.min.js"
+            integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ="
+            crossorigin="anonymous"
     ></script>
     <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-      crossorigin="anonymous"
+            src="https://cdn.bootcdn.net/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
     ></script>
     <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
     <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-      crossorigin="anonymous"
+            src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.min.js"
+            integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+            crossorigin="anonymous"
     ></script>
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     <script th:src="@{/adminlte/js/adminlte.js}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.4/htmx.min.js" integrity="sha512-2kIcAizYXhIn8TzUvqzEDZNuDZ+aW7yE/+f1HJHXFjQcGNfv1kqzJSTBRBSlOgp6B/KZsz1K0a3ZTqP9dnxioQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/htmx/2.0.4/htmx.min.js" integrity="sha512-2kIcAizYXhIn8TzUvqzEDZNuDZ+aW7yE/+f1HJHXFjQcGNfv1kqzJSTBRBSlOgp6B/KZsz1K0a3ZTqP9dnxioQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- Include Axios from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.9.0/axios.min.js" integrity="sha512-FPlUpimug7gt7Hn7swE8N2pHw/+oQMq/+R/hH/2hZ43VOQ+Kjh25rQzuLyPz7aUWKlRpI7wXbY6+U3oFPGjPOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.9.0/axios.min.js" integrity="sha512-FPlUpimug7gt7Hn7swE8N2pHw/+oQMq/+R/hH/2hZ43VOQ+Kjh25rQzuLyPz7aUWKlRpI7wXbY6+U3oFPGjPOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script th:src="@{/plugins/lodash.min.js}"></script>
-    <script th:src="@{/plugins/loadingoverlay.min.js}"></script>
     <script th:src="@{/plugins/toastr/toastr.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/table/jquery.form.js}"></script>
     <script type="text/javascript" th:src="@{/plugins/jquery.form2json.js}"></script>
@@ -679,14 +680,18 @@
 
     <script th:src="@{/adminlte/plugins/jquery.dialog.js}"></script>
 
-    <script th:src="@{/ajaxfileupload.js}"></script>
+    <script th:src="@{/plugins/ajaxfileupload.js}"></script>
     <script type="text/javascript" th:src="@{/js/upload.js}"></script>
 
     <script type="text/javascript" th:src="@{/js/form-support.js}"></script>
     <script th:src="@{/js/download.js}"></script>
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
     <script>
-      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+      document.addEventListener('DOMContentLoaded', () => {
+        typeof s !== 'undefined' && window[s] && window[s]()
+        $.LoadingOverlay("hide")
+      });
+
       const Default = {
         scrollbarTheme: 'os-theme-light',
         scrollbarAutoHide: 'leave',
@@ -696,8 +701,6 @@
     <!--end::OverlayScrollbars Configure-->
     <!--end::Script-->
     <script>
-      typeof s !== 'undefined' && document.addEventListener('DOMContentLoaded', window[s] && window[s]);
-
       htmx.on("htmx:configRequest", function(evt) {
         evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
       });
@@ -1292,7 +1295,7 @@
         return bestMatch;
       }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.9/cdn.min.js" integrity="sha512-KSdieUYxSxr/laB3Bh5TP8GAng49b2qRfdcnFvh8OuPpPgksA189OQ9v1A3gIz5P9s3A4aXMe5uiHLMfla60Uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/alpinejs/3.14.9/cdn.min.js" integrity="sha512-KSdieUYxSxr/laB3Bh5TP8GAng49b2qRfdcnFvh8OuPpPgksA189OQ9v1A3gIz5P9s3A4aXMe5uiHLMfla60Uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </body>
   <!--end::Body-->
 </html>
