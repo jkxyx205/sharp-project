@@ -3,6 +3,7 @@ package com.rick.admin.auth.controller;
 import com.rick.admin.auth.authentication.AdminUserDetails;
 import com.rick.admin.auth.common.AuthConstants;
 import com.rick.admin.common.exception.ExceptionCodeEnum;
+import com.rick.admin.common.layout.LayoutUtils;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.plugin.ztree.model.TreeNodeService;
 import com.rick.admin.sys.permission.model.UserPermissionVO;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
@@ -125,6 +127,13 @@ public class AuthController {
                 "  order by p.permission_order asc", null));
 
         return "sys/auth";
+    }
+
+    @GetMapping("/roles/adminlte")
+    @PreAuthorize("hasAuthority('role_management')")
+    public String gotoAuthPage(Model model, HttpServletRequest request) {
+        gotoAuthPage(model);
+        return LayoutUtils.page(request, "adminlte/auth");
     }
 
     @GetMapping("/auth/{roleId}/info")

@@ -134,7 +134,7 @@
                                         <ul class="clearfix">
                                             <template x-for="user in userSelectedList">
                                             <li @click="removeUser(user.id)">
-                                                <span x-text="user.name + '('+ user.code + ')'"></span>
+                                                <span x-text="user.name + '('+ user.email + ')'"></span>
                                             </li>
                                             </template>
                                         </ul>
@@ -350,17 +350,27 @@
 
                 var permissionList = []
 
-                $.post("/auth/assign/role/" + authElemData.form.roleId + "/permission", {"permissionIds": permissionIds}, function () {
-                    nodes.forEach(function (node) {
-                        permissionList.push(permissionFullListMap[node.id])
-                    })
-                    $.fn.zTree.init($("#permissionList"), setting, permissionList)
+                const params = new URLSearchParams();
+                permissionIds.forEach(id => {
+                    params.append("permissionIds[]", id);
+                });
 
-                    authElemData.datasource.roleInfo.permissionList = permissionList
+                axios.post(`/auth/assign/role/${authElemData.form.roleId}/permission`, params).then(function () {
+                    nodes.forEach(function (node) {
+                        permissionList.push(permissionFullListMap[node.id]);
+                    });
+
+                    $.fn.zTree.init($("#permissionList"), setting, permissionList);
+
+                    authElemData.datasource.roleInfo.permissionList = permissionList;
 
                     $('#permissionModal').modal('hide');
-                    toastr.success('权限编辑成功')
-                })
+                    toastr.success('权限编辑成功');
+                }).catch(function (error) {
+                    console.error('权限编辑失败:', error);
+                    toastr.error('权限编辑失败');
+                });
+
             })
 
             delete window.s
@@ -371,15 +381,15 @@
                 userId: undefined,
                 roles: [],
                 removeRole: function (roleId) {
-                    var _this = this
-
-                    confirm('确定删除用户的角色吗？') && $.post("auth/assign/role/"+roleId+"/"+this.userId+"", function (res) {
-                        toastr.success('用户角色删除成功');
-                        _this.roles = _.filter(_this.roles, function (r) {
-                            return r.id !== roleId
+                    confirm('确定删除用户的角色吗？') && axios.post(`/auth/assign/role/${roleId}/${this.userId}`)
+                        .then(res => {
+                            toastr.success('用户角色删除成功');
+                            this.roles = _.filter(this.roles, r => r.id !== roleId);
                         })
-                    })
-
+                        .catch(error => {
+                            console.error('用户角色删除失败:', error);
+                            toastr.error('用户角色删除失败，请稍后重试');
+                        });
                 }
             }
         }
@@ -446,14 +456,19 @@
                     this.form.roleId = id;
                     const _this = this;
 
-                    $.get("/auth/" + id + "/info", function (res) {
-                        _this.datasource.roleInfo = res.data;
-                        _this.datasource.userSelectedList = res.data.userList;
-                        _this.form.userIds = _.map(res.data.userList, "id");
+                    axios.get("/auth/" + id + "/info")
+                        .then(function (res) {
+                            _this.datasource.roleInfo = res.data.data;
+                            _this.datasource.userSelectedList = res.data.data.userList;
+                            _this.form.userIds = _.map(res.data.data.userList, "id");
 
-                        $.fn.zTree.init($("#permissionList"), setting, res.data.permissionList);
-                        setChecked(res.data.permissionList);
-                    });
+                            $.fn.zTree.init($("#permissionList"), setting, res.data.data.permissionList);
+                            setChecked(res.data.data.permissionList);
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+
                 },
 
                 checkBoxUser(userId) {
@@ -471,10 +486,14 @@
                 },
 
                 resetPassword(user) {
-                    if (confirm('确定重置用户「' + user.code + ' ' + user.name + '」的密码为「111111」吗？')) {
-                        $.post("password/" + user.id + "/reset", function (res) {
-                            layer.alert('密码重置成功！新的密码是' + res.data + '<br>请通知用户及时修改密码！');
-                        });
+                    if (confirm('确定重置用户「' + user.email + ' ' + user.name + '」的密码为「111111」吗？')) {
+                        axios.post(`password/${user.id}/reset`)
+                            .then(function (res) {
+                                toastr.success('密码重置成功！新的密码是 ' + res.data.data + '<br>请通知用户及时修改密码！');
+                            })
+                            .catch(function (error) {
+                                console.error('密码重置失败:', error);
+                            });
                     }
                 },
 
@@ -484,13 +503,21 @@
                         return;
                     }
 
-                    const _this = this;
-                    $.post("/auth/assign/role/" + this.form.roleId + "/user",
-                        {"userIds": this.form.userIds},
-                        function () {
-                            _this.datasource.userSelectedList = _.cloneDeep(_this.userSelectedList);
+                    const params = new URLSearchParams();
+                    this.form.userIds.forEach(id => {
+                        params.append("userIds[]", id);
+                    });
+
+                    axios.post(`/auth/assign/role/${this.form.roleId}/user`, params)
+                        .then(() => {
+                            this.datasource.userSelectedList = _.cloneDeep(this.userSelectedList);
                             toastr.success('保存成功');
+                        })
+                        .catch(error => {
+                            console.error('保存失败:', error);
+                            toastr.error('保存失败，请稍后重试');
                         });
+
                 },
 
                 roleUp(index) {
@@ -516,30 +543,34 @@
                         return;
                     }
 
-                    const _this = this;
-                    $.ajax({
-                        method: 'POST',
-                        url: '/auth/add/roles',
-                        dataType: 'json',
-                        contentType: 'application/json',
-                        data: JSON.stringify(this.form2.roleList),
-                        success: function (res) {
-                            if (res.success) {
-                                _this.datasource.roleList = res.data;
-                                _this._normalizeRoleFormData();
+                    axios.post('/auth/add/roles', this.form2.roleList, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(res => {
+                            if (res.data.success) {
+                                this.datasource.roleList = res.data.data;
+                                this._normalizeRoleFormData();
                                 $('#roleModal').modal('hide');
                                 toastr.success('角色编辑成功');
                             } else {
-                                toastr.error(res.msg);
+                                toastr.error(res.data.msg);
                             }
-                        }
-                    });
+                        })
+                        .catch(error => {
+                            console.error('角色编辑失败:', error);
+                            toastr.error('角色编辑失败，请稍后重试');
+                        });
+
                 },
 
                 viewUserPermission(userId) {
-                    $.get('/auth/permission', {"userId": userId}, function (res) {
-                        const permissionAllList = res.data.permissionList;
-                        const roleAllList = res.data.roleList;
+                    axios.get('/auth/permission', {
+                        params: { userId: userId }
+                    }).then(res => {
+                        const permissionAllList = res.data.data.permissionList;
+                        const roleAllList = res.data.data.roleList;
 
                         // 处理权限
                         if (permissionAllList.length < 1) {
@@ -553,7 +584,10 @@
 
                         roleListAllContainerElemData.roles = roleAllList;
                         roleListAllContainerElemData.userId = userId;
+                    }).catch(err => {
+                        console.error('请求权限失败', err);
                     });
+
                 },
 
                 filterUser(user) {
