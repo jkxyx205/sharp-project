@@ -5,10 +5,12 @@
 <th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
     <link rel="stylesheet" th:href="@{/plugins/zTree_v3/css/zTreeStyle/zTreeStyle.css}" type="text/css">
     <style>
-        #auth ul {
+        #auth ul.role-list-container,
+        #auth ul.clearfix {
             padding: 0;
             margin: 0;
         }
+
         #auth li {
             list-style: none;
             cursor: pointer;
@@ -20,7 +22,7 @@
         }
 
         #auth  li.active {
-            background: var(--wp--preset--color--primary);
+            background: var(--bs-primary);
             color: #fff;
         }
 
@@ -134,7 +136,7 @@
                                         <ul class="clearfix">
                                             <template x-for="user in userSelectedList">
                                             <li @click="removeUser(user.id)">
-                                                <span x-text="user.name + '('+ user.email + ')'"></span>
+                                                <span x-text="user.name + '('+ user.code + ')'"></span>
                                             </li>
                                             </template>
                                         </ul>
@@ -486,7 +488,7 @@
                 },
 
                 resetPassword(user) {
-                    if (confirm('确定重置用户「' + user.email + ' ' + user.name + '」的密码为「111111」吗？')) {
+                    if (confirm('确定重置用户「' + user.code + ' ' + user.name + '」的密码为「111111」吗？')) {
                         axios.post(`password/${user.id}/reset`)
                             .then(function (res) {
                                 toastr.success('密码重置成功！新的密码是 ' + res.data.data + '<br>请通知用户及时修改密码！');
