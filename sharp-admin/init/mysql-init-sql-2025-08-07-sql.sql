@@ -493,8 +493,8 @@ LOCK TABLES `sys_user` WRITE;
 
 INSERT INTO `sys_user` (`id`, `code`, `name`, `password`, `birthday`, `is_available`, `attachment`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-    (1,'admin','管理员','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS','2024-11-28',b'1','[]',1,'2023-05-29 14:55:03',1,'2024-12-10 19:37:01',b'0'),
-    (786079661661646848,'test','测试','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS',NULL,b'1','[]',1,'2023-05-29 14:55:03',1,'2025-06-16 17:42:04',b'0');
+    (1,'ADMIN','管理员','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS','2024-11-28',b'1','[]',1,'2023-05-29 14:55:03',1,'2024-12-10 19:37:01',b'0'),
+    (786079661661646848,'TEST','测试','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS',NULL,b'1','[]',1,'2023-05-29 14:55:03',1,'2025-06-16 17:42:04',b'0');
 
 /*!40000 ALTER TABLE `sys_user` ENABLE KEYS */;
 UNLOCK TABLES;
