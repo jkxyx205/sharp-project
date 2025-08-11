@@ -1,0 +1,36 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    name: druidDataSource
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:sqlite:/Users/rick/Space/Workspace/sharp-project/sharp-admin/init/sharp-admin.db
+    druid:
+      driver-class-name: org.sqlite.JDBC
+#      url: jdbc:mysql://127.0.0.1:3306/sharp-admin-20250407?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+      url: jdbc:sqlite:/Users/rick/Space/Workspace/sharp-project/sharp-admin/init/sharp-admin.db
+      initialSize: 1
+      minIdle: 5
+      maxActive: 10
+      maxWait: 60000
+
+logging:
+  level:
+    com.rick.admin: DEBUG
+    com.rick.db: DEBUG
+  file:
+    path: /Users/rick/Space/tmp/admin/log
+
+sharp:
+  database:
+    type: "sqlite"
+#    entity-base-package: com.rick.admin.module.**.entity
+
+fileupload:
+  tmp: /Users/rick/Space/tmp/fastdfs/tmp # 下载的临时目录
+  local: # cd /Users/rick/Space/tmp/fileupload && http-server -p 7892
+    root-path: /Users/rick/Space/tmp/fileupload
+    server-url: http://127.0.0.1:7892/ # 映射到tmp目录
+
+app:
+  domain: http://127.0.0.1:8080
