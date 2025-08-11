@@ -12,7 +12,6 @@ import com.rick.common.util.Time2StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -132,8 +131,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             authorityList.addAll(allPermissionList);
 
             user.setAuthorityList(authorityList);
-
-            List<GrantedAuthority> grantedAuthorities = AuthorityUtils.createAuthorityList(user.getAuthorityList().toArray(new String[]{}));
 
             return new AdminUserDetails(user, AuthorityUtils.createAuthorityList(user.getAuthorityList().toArray(new String[]{})));
         }

@@ -1,13 +1,14 @@
 package com.rick.admin.sys.role.service;
 
-import com.rick.admin.common.exception.ExceptionCodeEnum;
 import com.rick.admin.plugin.ztree.model.TreeNode;
 import com.rick.admin.sys.permission.service.PermissionService;
 import com.rick.admin.sys.role.dao.RoleDAO;
 import com.rick.admin.sys.role.entity.Role;
 import com.rick.admin.sys.role.model.RoleInfoDTO;
-import com.rick.common.http.exception.BizException;
+import com.rick.admin.sys.user.dao.UserDAO;
+import com.rick.admin.sys.user.entity.User;
 import com.rick.db.plugin.SQLUtils;
+import com.rick.db.service.SharpService;
 import com.rick.db.service.support.Params;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,12 @@ import lombok.experimental.FieldDefaults;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +36,11 @@ public class RoleService {
 
     RoleDAO roleDAO;
 
+    UserDAO userDAO;
+
     PermissionService permissionService;
+
+    SharpService sharpService;
 
     public void removeRoleByUserId(Long roleId, Long userId) {
         SQLUtils.delete("SYS_USER_ROLE", new Object[] {roleId, userId}, "ROLE_ID = ? and USER_ID = ?");
@@ -64,15 +71,15 @@ public class RoleService {
     }
 
     public RoleInfoDTO getSettingsInfoByRoleId(Long roleId) {
-        Assert.notNull(roleId, "roleId cannot be null");
-        Optional<Role> optional = roleDAO.selectById(roleId);
-        if (!optional.isPresent()) {
-            throw new BizException(ExceptionCodeEnum.ROLE_NULL_ERROR);
-        }
-        Role role = optional.get();
         List<TreeNode> treeNodeList = permissionService.findTreeNodeByRoleIds(Collections.singletonList(roleId));
-
-        return new RoleInfoDTO(role.getUserList(), treeNodeList);
+        List<Long> userIds = sharpService.query("select user_id from sys_user_role where role_id = :roleId", Params.builder(1).pv("roleId", roleId).build(), Long.class);
+        List<User> users;
+        if (CollectionUtils.isNotEmpty(userIds)) {
+            users = userDAO.selectByParamsWithoutCascade(Params.builder(1).pv("userIds", userIds).build(), "id IN (:userIds)");
+        } else {
+            users = Collections.emptyList();
+        }
+        return new RoleInfoDTO(users, treeNodeList);
     }
 
     public void addPermission(Long roleId, Set<Long> permissionIds) {

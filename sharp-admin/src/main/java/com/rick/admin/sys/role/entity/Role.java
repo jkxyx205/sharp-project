@@ -29,6 +29,6 @@ public class Role extends BaseCodeEntityWithLongId {
     @ManyToMany(thirdPartyTable="sys_role_permission", referenceTable="sys_permission", referenceColumnName = "permission_id", columnDefinition = "role_id")
     List<Permission> permissionList;
 
-    @ManyToMany(thirdPartyTable="sys_user_role", referenceTable="sys_user", referenceColumnName = "user_id", columnDefinition = "role_id")
+    @ManyToMany(thirdPartyTable="sys_user_role", referenceTable="sys_user", referenceColumnName = "user_id", columnDefinition = "role_id", cascadeQuery = false)
     List<User> userList;
 }
