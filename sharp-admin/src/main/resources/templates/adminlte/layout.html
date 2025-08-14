@@ -1009,6 +1009,7 @@
             let currentElem = event.target;
             if (currentElem.parentElement.classList.contains('active')) {
               currentElem.preventRequest = true
+              return
             }
 
             currentElem.parentElement.classList.add('active');
