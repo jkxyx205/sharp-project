@@ -29,7 +29,7 @@ import java.util.*;
  * @author Rick.Xu
  * @date 2024/1/26 16:05
  */
-public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl> {
+public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl<?, E>> {
 
     protected final S baseService;
 

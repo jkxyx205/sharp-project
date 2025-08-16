@@ -706,6 +706,7 @@
       });
 
       htmx.on("htmx:afterRequest", function(evt) {
+        typeof s !== 'undefined' && window[s] && window[s]()
         $.LoadingOverlay("hide");
       });
 
@@ -776,7 +777,9 @@
         // Any status code that lie within the range of 2xx cause this function to trigger
         // Do something with response data
         console.log('after response....', response);
-        $.LoadingOverlay("hide");
+        if (!config.skipLoading) {
+          $.LoadingOverlay("show");
+        }
         if (response.data && response.data.success === false) {
           toastr.error(response.data.message);
         }

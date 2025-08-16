@@ -220,6 +220,7 @@
     });
 
     htmx.on("htmx:afterRequest", function(evt) {
+        typeof s !== 'undefined' && window[s] && window[s]()
         $.LoadingOverlay("hide");
     });
 
@@ -274,7 +275,9 @@
     axios.interceptors.request.use(function (config) {
         // Do something before request is sent
         console.log('before request....');
-        $.LoadingOverlay("show");
+        if (!config.skipLoading) {
+            $.LoadingOverlay("show");
+        }
         config.headers['Custom-Header'] = 'CustomValue'; // Example of adding a custom header
         return config;
     }, function (error) {
