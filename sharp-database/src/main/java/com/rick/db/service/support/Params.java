@@ -8,7 +8,10 @@ import java.util.Map;
 /**
  * @author Rick
  * @createdAt 2021-10-27 10:14:00
+ * JDK 9+ 使用 Maps.of
+ * Guava ImmutableMap.of
  */
+@Deprecated
 public class Params {
 
     public static ParamsBuilder builder(int expectedSize) {

@@ -22,7 +22,7 @@ import java.util.Optional;
 @Controller
 @RequestMapping("students")
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class StudentController extends BaseFormController<Student, StudentService> {
+public class StudentController extends BaseFormController<StudentService, Student, Long> {
 
     public StudentController(StudentService studentService) {
         super(studentService, "demos/student/edit-thymeleaf");

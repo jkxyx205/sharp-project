@@ -4,7 +4,6 @@ import com.rick.admin.common.exception.ResourceNotFoundException;
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
-import com.rick.db.dto.BaseEntity;
 import com.rick.db.dto.Grid;
 import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.GridUtils;
@@ -24,9 +23,9 @@ import java.util.Optional;
  * @author Rick.Xu
  * @date 2023/6/14 00:12
  */
-public class BaseApi<T extends BaseEntity, S extends BaseServiceImpl<? extends EntityDAO, T>> {
+public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID>, T extends SimpleEntity<ID>, ID> {
 
-    protected final EntityDAO<T, Long> entityDAO;
+    protected final EntityDAO<T, ID> entityDAO;
 
     protected final S baseService;
 
@@ -77,12 +76,12 @@ public class BaseApi<T extends BaseEntity, S extends BaseServiceImpl<? extends E
     }
 
     @GetMapping("{id}")
-    public T findById(@PathVariable Long id) {
+    public T findById(@PathVariable ID id) {
         return getEntityFromOptional(baseService.findById(id), id);
     }
 
     @PutMapping("{id}")
-    public SimpleEntity update(@PathVariable Long id, @RequestBody T t) {
+    public SimpleEntity update(@PathVariable ID id, @RequestBody T t) {
         t.setId(id);
         baseService.update(t);
         return t;
@@ -95,7 +94,7 @@ public class BaseApi<T extends BaseEntity, S extends BaseServiceImpl<? extends E
     }
 
     @DeleteMapping("{id}")
-    public Result<?> deleteById(@PathVariable Long id) {
+    public Result<?> deleteById(@PathVariable ID id) {
         return ResultUtils.success(baseService.deleteLogicallyById(id));
     }
 

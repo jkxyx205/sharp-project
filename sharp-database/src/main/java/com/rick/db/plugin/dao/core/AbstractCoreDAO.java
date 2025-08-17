@@ -366,7 +366,7 @@ public abstract class AbstractCoreDAO<ID> implements CoreDAO<ID> {
      * @param columnNames
      * @param conditionSQL
      * @param sqlHandler
-     * @param clazz 如何为null，则返回map
+     * @param clazz 如果为 null，则返回 map
      * @param afterSelect
      * @param <E>
      * @return

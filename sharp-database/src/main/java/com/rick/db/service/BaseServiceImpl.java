@@ -21,7 +21,7 @@ import java.util.*;
  */
 @RequiredArgsConstructor
 @Slf4j
-public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
+public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends SimpleEntity<ID>, ID> {
 
     @Getter
     protected final D baseDAO;
@@ -35,12 +35,12 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param e
      * @return
      */
-    public E save(@Valid E e) {
+    public T save(@Valid T e) {
         baseDAO.insert(e);
         return e;
     }
 
-    public Collection<E> save(@Valid Collection<E> collection) {
+    public Collection<T> save(@Valid Collection<T> collection) {
         baseDAO.insert(collection);
         return collection;
     }
@@ -51,7 +51,7 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param e
      * @return
      */
-    public E saveOrUpdate(@Valid E e) {
+    public T saveOrUpdate(@Valid T e) {
         if (e instanceof BaseCodeEntity && e.getId() == null) {
             ((EntityCodeDAO)baseDAO).assertCodeNotExists(((BaseCodeEntity) e).getCode());
         }
@@ -66,7 +66,7 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param collection
      * @return
      */
-    public Collection<E> saveOrUpdate(@Valid Collection<E> collection) {
+    public Collection<T> saveOrUpdate(@Valid Collection<T> collection) {
         baseDAO.insertOrUpdate(collection);
         return collection;
     }
@@ -76,7 +76,7 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      *
      * @param e
      */
-    public boolean update(@Valid E e) {
+    public boolean update(@Valid T e) {
         int count = baseDAO.update(e);
         if (count == 0) {
             log.warn("更新数据行数为0");
@@ -90,7 +90,7 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param id
      * @return
      */
-    public boolean deleteById(Long id) {
+    public boolean deleteById(ID id) {
         return baseDAO.deleteById(id) > 0;
     }
 
@@ -100,7 +100,7 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param id
      * @return
      */
-    public boolean deleteLogicallyById(Long id) {
+    public boolean deleteLogicallyById(ID id) {
         return baseDAO.deleteLogicallyById(id) > 0;
     }
 
@@ -111,7 +111,7 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param id
      * @return
      */
-    public Optional<E> findById(Long id) {
+    public Optional<T> findById(ID id) {
         return baseDAO.selectById(id);
     }
 
@@ -121,8 +121,8 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param id
      * @return
      */
-    public Optional<E> findByIdWithoutCascade(Long id) {
-        List<E> list = findByConditionWithoutCascade(Params.builder(1)
+    public Optional<T> findByIdWithoutCascade(ID id) {
+        List<T> list = findByConditionWithoutCascade(Params.builder(1)
                 .pv("id", id)
                 .build(), "id = :id");
         return Optional.ofNullable(list.size() == 1 ? list.get(0) : null);
@@ -134,20 +134,20 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param
      * @return
      */
-    public List<E> findAllWithoutCascade() {
-        List<E> list = findByConditionWithoutCascade(Collections.emptyMap(), "");
+    public List<T> findAllWithoutCascade() {
+        List<T> list = findByConditionWithoutCascade(Collections.emptyMap(), "");
         return list;
     }
 
-    public List<E> findByConditionWithoutCascade(Map<String, ?> params, String condition) {
-        List<E> list = sharpService.query(baseDAO.getSelectSQL() + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition),
+    public List<T> findByConditionWithoutCascade(Map<String, ?> params, String condition) {
+        List<T> list = sharpService.query(baseDAO.getSelectSQL() + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition),
                 params,
                 baseDAO.getEntityClass());
 
         return list;
     }
 
-    public List<E> findByConditionWithoutCascade(E e, String condition) {
+    public List<T> findByConditionWithoutCascade(T e, String condition) {
         return findByConditionWithoutCascade(baseDAO.entityToMap(e), condition);
     }
 
@@ -157,11 +157,11 @@ public class BaseServiceImpl<D extends EntityDAO, E extends SimpleEntity> {
      * @param
      * @return
      */
-    public List<E> findAll() {
+    public List<T> findAll() {
         return baseDAO.selectAll();
     }
 
-    public boolean exists(E e, String conditionSQL) {
+    public boolean exists(T e, String conditionSQL) {
         return exists(baseDAO.entityToMap(e), conditionSQL);
     }
 

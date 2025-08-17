@@ -15,7 +15,7 @@ import java.util.Map;
  */
 @Service
 @Validated
-public class ProjectService extends BaseServiceImpl<ProjectDAO, Project> {
+public class ProjectService extends BaseServiceImpl<ProjectDAO, Project, Long> {
 
     public ProjectService(ProjectDAO projectDAO) {
         super(projectDAO);

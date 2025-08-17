@@ -220,7 +220,6 @@
     });
 
     htmx.on("htmx:afterRequest", function(evt) {
-        typeof s !== 'undefined' && window[s] && window[s]()
         $.LoadingOverlay("hide");
     });
 
@@ -259,7 +258,7 @@
 
             loadScriptsSequentially().then(() => {
                 console.log("All external scripts loaded.");
-                window.s && window[s]();
+                typeof s !== 'undefined' && window[s] && window[s]()
             });
         });
     })();

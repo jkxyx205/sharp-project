@@ -7,7 +7,7 @@ import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.HtmlTagUtils;
 import com.rick.db.constant.SharpDbConstants;
-import com.rick.db.dto.BaseEntity;
+import com.rick.db.dto.SimpleEntity;
 import com.rick.db.plugin.dao.core.EntityDAO;
 import com.rick.db.plugin.dao.core.EntityDAOManager;
 import com.rick.db.service.BaseServiceImpl;
@@ -29,7 +29,7 @@ import java.util.*;
  * @author Rick.Xu
  * @date 2024/1/26 16:05
  */
-public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl<?, E>> {
+public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID>, T extends SimpleEntity<ID>, ID> {
 
     protected final S baseService;
 
@@ -37,12 +37,14 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl<
 
     private final String entityPropertyName;
 
-    private final Class entityClass;
+    private final Class<T> entityClass;
 
     public BaseFormController(S service, String formPage) {
         this.baseService = service;
         this.formPage = formPage;
-        this.entityClass = ClassUtils.getClassGenericsTypes(this.getClass())[0];
+        this.entityClass = (Class<T>) ClassUtils.getClassGenericsTypes(this.getClass())[1];
+//        baseService.getBaseDAO().getEntityClass();
+
         String simpleName = entityClass.getSimpleName();
         this.entityPropertyName = simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1);
     }
@@ -68,10 +70,10 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl<
     }
 
     @GetMapping("{id}/page")
-    public String gotoFormPageById(HttpServletRequest request, @PathVariable Long id, Model model) {
+    public String gotoFormPageById(HttpServletRequest request, @PathVariable ID id, Model model) {
         Map<String, String> parameterMap = HttpServletRequestUtils.getParameterStringMap(request);
 
-        Optional<E> op = baseService.findById(id);
+        Optional<T> op = baseService.findById(id);
         Object entity = op.orElseThrow(() -> new ResourceNotFoundException());
         DictUtils.fillDictLabel(entity); // 可选操作
         model.addAttribute(entityPropertyName, entity);
@@ -86,14 +88,14 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl<
 
 //    @PostMapping
 //    @ResponseBody
-//    public Result save(@RequestBody E e) {
+//    public Result save(@RequestBody T e) {
 //        baseService.save(e);
 //        return ResultUtils.success(e);
 //    }
 
     @PutMapping("{id}")
     @ResponseBody
-    public Result update(@PathVariable Long id, @RequestBody E e) {
+    public Result update(@PathVariable ID id, @RequestBody T e) {
         e.setId(id);
         baseService.update(e);
         return ResultUtils.success(e);
@@ -101,14 +103,14 @@ public class BaseFormController<E extends BaseEntity, S extends BaseServiceImpl<
 
     @PostMapping
     @ResponseBody
-    public Result saveOrUpdate(@RequestBody E e) {
+    public Result saveOrUpdate(@RequestBody T e) {
         baseService.saveOrUpdate(e);
         return ResultUtils.success(e);
     }
 
     @DeleteMapping("{id}")
     @ResponseBody
-    public Result deleteById(@PathVariable Long id) {
+    public Result deleteById(@PathVariable ID id) {
         baseService.deleteLogicallyById(id);
         return ResultUtils.success();
     }
