@@ -77,18 +77,24 @@
 
       .drawer-dialog {
         --width: 600px;
-        position: absolute;
-        z-index: 9;
+        position: fixed;
+        z-index: 9999;
         display: flex;
         flex-direction: column;
         right: calc(-1 * var(--width));
-        top: 0;
         height: 100%;
         max-width: 100%;
         width: var(--width);
         background-color: #ffffff;
         overflow: hidden;
         transition: right .3s ease;
+      }
+
+      @media (min-width: 992px) {
+        .drawer-dialog {
+          top: 57px;
+          height: calc(100% - 114px);
+        }
       }
 
       .drawer-dialog.open {
