@@ -115,7 +115,7 @@ class TableMetaResolver {
                 if (selectAnnotation.oneToOne()) {
                     subEntityClass = field.getType();
                 } else {
-                    subEntityClass = ClassUtils.getFieldGenericClass(field);
+                    subEntityClass = ClassUtils.getFieldGenericClass(field)[0];
                 }
 
                 selectAnnotationList.add(new TableMeta.SelectProperty(selectAnnotation, field, subEntityClass));
@@ -126,7 +126,7 @@ class TableMetaResolver {
                 Class<?> targetClass;
 
                 if (Collection.class.isAssignableFrom(field.getType())) {
-                    targetClass = ClassUtils.getFieldGenericClass(field);
+                    targetClass = ClassUtils.getFieldGenericClass(field)[0];
                 } else {
                     targetClass = field.getType();
                 }
@@ -141,7 +141,7 @@ class TableMetaResolver {
                 if (oneToManyAnnotation.oneToOne()) {
                     subEntityClass = field.getType();
                 } else {
-                    subEntityClass = ClassUtils.getFieldGenericClass(field);
+                    subEntityClass = ClassUtils.getFieldGenericClass(field)[0];;
                 }
 
                 oneToManyAnnotationList.add(new TableMeta.OneToManyProperty(oneToManyAnnotation, field,
@@ -187,6 +187,7 @@ class TableMetaResolver {
                     ? annotation.value() : camelToSnake(Objects.nonNull(manyToOneAnnotation) ? field.getType().getSimpleName() + "_" + DEFAULT_PRIMARY_COLUMN : field.getName()));
 
             columnNameFieldMap.put(columnName, field);
+
             columnNameMap.put(columnName, annotation);
 
             Version version = field.getAnnotation(Version.class);

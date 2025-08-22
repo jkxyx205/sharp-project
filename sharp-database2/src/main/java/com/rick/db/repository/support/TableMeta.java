@@ -1,0 +1,139 @@
+package com.rick.db.repository.support;
+
+import com.google.common.collect.Lists;
+import com.rick.db.repository.*;
+import lombok.Getter;
+import lombok.Value;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * @author Rick.Xu
+ * @date 2025/8/21 18:54
+ */
+@Getter
+public class TableMeta<T> {
+
+    private final Class<T> entityClass;
+
+    private final Table table;
+
+    private final String tableName;
+
+    private final String referenceColumnId;
+
+    private final Map<Field, Reference> referenceMap;
+
+    private final Map<Field, String> fieldColumnNameMap;
+
+    private final Map<Field, String> fieldPropertyNameMap;
+
+    private final Map<String, String> columnPropertyNameMap;
+
+    private final Map<String, Column> columnNameMap;
+
+    IdMeta idMeta;
+
+    Field versionField;
+
+    private String selectColumn;
+
+    private String updateColumn;
+
+    public TableMeta(Class<T> entityClass, Table table, String tableName, String referenceColumnId, Map<Field, Reference> referenceMap, Map<Field, String> fieldColumnNameMap, Map<Field, String> fieldPropertyNameMap, Map<String, String> columnPropertyNameMap, Map<String, Column> columnNameMap) {
+        this.entityClass = entityClass;
+        this.table = table;
+        this.tableName = tableName;
+        this.referenceColumnId = referenceColumnId;
+        this.referenceMap = referenceMap;
+        this.fieldColumnNameMap = fieldColumnNameMap;
+        this.fieldPropertyNameMap = fieldPropertyNameMap;
+        this.columnPropertyNameMap = columnPropertyNameMap;
+        this.columnNameMap = columnNameMap;
+    }
+
+    public Field getFieldByColumnName(String columnName) {
+        for (Map.Entry<Field, String> entry : fieldColumnNameMap.entrySet()) {
+            if (Objects.equals(columnName, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public List<String> getSortedColumns() {
+        List<String> sortedColumnNames = Lists.newArrayListWithCapacity(getColumnPropertyNameMap().keySet().size());
+        List<String> tailColumnNames = new ArrayList<>();
+
+        for (String columnName : getColumnPropertyNameMap().keySet()) {
+            if (isHeaderColumn(columnName)) {
+                sortedColumnNames.add(columnName);
+            } else {
+                tailColumnNames.add(columnName);
+            }
+        }
+
+        sortedColumnNames.addAll(tailColumnNames);
+        return sortedColumnNames;
+    }
+
+    private boolean isHeaderColumn(String columnName) {
+        if (columnName.equals(Constants.ID_COLUMN_NAME) ||
+                columnName.equals(Constants.CODE_COLUMN_NAME) ||
+                columnName.equals(Constants.DESCRIPTION_COLUMN_NAME)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Getter
+    public static class Reference {
+
+        Field field;
+
+        Class<?> referenceClass;
+
+        ManyToOne manyToOne;
+
+        ManyToMany manyToMany;
+
+        OneToMany oneToMany;
+
+        Select select;
+    }
+
+    @Value
+    public static class IdMeta<ID> {
+
+        Class<ID> idClass;
+
+        Id id;
+
+        String idColumnName;
+
+        String idPropertyName;
+
+        Field idField;
+
+        public String getIdPropertyName() {
+            return idField.getName();
+        }
+    }
+
+    void setSelectColumn(String selectColumn) {
+        this.selectColumn = selectColumn;
+    }
+
+    void setUpdateColumn(String updateColumn) {
+        this.updateColumn = updateColumn;
+    }
+}
+
+

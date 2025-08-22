@@ -799,7 +799,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                     List originalList = (List) propertyValue;
                     List distList = Lists.newArrayListWithExpectedSize(originalList.size());
                     if (Map.class.isAssignableFrom(originalList.get(0).getClass())) {
-                        Class<?> subEntityClass = ClassUtils.getFieldGenericClass(field);
+                        Class<?> subEntityClass = ClassUtils.getFieldGenericClass(field)[0];
                         if (BaseEntityUtils.isEntityClass(subEntityClass)) {
                             for (Object object : originalList) {
                                 distList.add(mapToEntity((Map<String, ?>) object, subEntityClass));
@@ -1418,7 +1418,7 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
                 subClass = oneToManyProperty.getField().getType();
             } else {
                 subDataList = (List<?>) getPropertyValue(t, oneToManyProperty.getField());
-                subClass = ClassUtils.getFieldGenericClass(oneToManyProperty.getField());
+                subClass = ClassUtils.getFieldGenericClass(oneToManyProperty.getField())[0];
             }
 
             Object refId = getIdValue(t);
