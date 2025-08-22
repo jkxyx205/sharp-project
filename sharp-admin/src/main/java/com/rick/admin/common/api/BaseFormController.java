@@ -145,7 +145,7 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
                 }
 
             } else if (Collection.class.isAssignableFrom(field.getType())) {
-                Class<?> classGenericsType = ClassUtils.getFieldGenericClass(field);
+                Class<?> classGenericsType = ClassUtils.getFieldGenericClass(field)[0];
                 if (classGenericsType.isEnum()) {
                     dictTypeValue = classGenericsType.getSimpleName();
                 } else if (classGenericsType == DictValue.class) {

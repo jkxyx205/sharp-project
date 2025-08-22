@@ -303,7 +303,7 @@ public class Generator {
             } else if (field.getType() == Boolean.class) {
                 columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")).setColumnWidth(80).setAlign(AlignEnum.CENTER),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
-                Class<?> clazz = ClassUtils.getFieldGenericClass(field);
+                Class<?> clazz = ClassUtils.getFieldGenericClass(field)[0];
                 if (clazz.isEnum()) {
                     type = clazz.getSimpleName();
                     columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
@@ -431,7 +431,7 @@ public class Generator {
                 htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SWITCH, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
                 htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.SINGLE_CHECKBOX, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
             } else if(Collection.class.isAssignableFrom(field.getType())) {
-                if (ClassUtils.getFieldGenericClass(field) == com.rick.fileupload.client.support.Document.class) {
+                if (ClassUtils.getFieldGenericClass(field)[0] == com.rick.fileupload.client.support.Document.class) {
                     htmlStringBuilder.append(ControlGeneratorManager.generate(formLayout, CpnTypeEnum.FILE, resolverInfo.camelEntityName, resolverInfo.camelPropertyName, resolverInfo.comment, type, additionalInfo, renderType, ifGeneratorLabel)).append("\n");
                 }
             }
@@ -495,7 +495,7 @@ public class Generator {
                     dictCategory = DictCategoryEnum.DICT_VALUE;
                 }
             } else if (Collection.class.isAssignableFrom(field.getType())) {
-                Class<?> classGenericsType = ClassUtils.getFieldGenericClass(field);
+                Class<?> classGenericsType = ClassUtils.getFieldGenericClass(field)[0];;
                 if (classGenericsType.isEnum()) {
                     dictTypeValue = classGenericsType.getSimpleName();
                     dictCategory = DictCategoryEnum.ENUM;
