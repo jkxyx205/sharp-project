@@ -2,17 +2,16 @@ package com.rick.common.util;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.util.ReflectionUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeansException;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author Rick
@@ -26,16 +25,9 @@ public class ClassUtils {
      * @param field
      * @return
      */
-    public static Class<?> getFieldGenericClass(Field field) {
-        Type type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-
-        if (type instanceof Class) {
-            return (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType)type).getRawType();
-        }
-
-        return null;
+    public static Class<?>[] getFieldGenericClass(Field field) {
+        Type[] type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+        return typeToClass(type);
     }
 
     /**
@@ -44,75 +36,96 @@ public class ClassUtils {
      * @return
      */
     public static Class<?>[] getClassGenericsTypes(Class<?> clazz) {
-        Class<?>[] classes = null;
         Type genericSuperclass = clazz.getGenericSuperclass();
         if (genericSuperclass instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) genericSuperclass)
                     .getActualTypeArguments();
+            return typeToClass(actualTypeArguments);
+        }
 
-            if (ArrayUtils.isNotEmpty(actualTypeArguments)) {
-                int length = actualTypeArguments.length;
-                 classes = new Class<?>[length];
-                for (int i = 0; i < actualTypeArguments.length; i++) {
-                    if (actualTypeArguments[i] instanceof ParameterizedTypeImpl) {
-                        classes[i] = ((ParameterizedTypeImpl)actualTypeArguments[i]).getRawType();
-                    } else if (actualTypeArguments[i] instanceof Class) {
-                        classes[i] = (Class<?>) actualTypeArguments[i];
-                    } else if (actualTypeArguments[i] instanceof TypeVariableImpl){
-                        classes[i] = ((TypeVariableImpl)actualTypeArguments[i]).getClass();
+        return null;
+    }
+
+    public static Field getField(Class<?> clazz, String name) throws NoSuchFieldException {
+        return FieldUtils.getField(clazz, name);
+
+    }
+
+    public static Field[] getAllFields(Class<?> clazz) {
+        return FieldUtils.getAllFields(clazz);
+    }
+
+    public Object getPropertyValue(Object entity, String propertyName) {
+        if (Objects.isNull(entity)) {
+            return null;
+        }
+        try {
+            return new BeanWrapperImpl(entity).getPropertyValue(propertyName);
+        } catch (BeansException exception) {
+            return null;
+        }
+    }
+
+    /**
+     * POJO setter
+     * @param bean
+     * @param field
+     * @param value
+     */
+    public static void setFieldValue(Object bean, Field field,  Object value) {
+        setPropertyValue(bean, field.getName(), value);
+    }
+
+    public void setPropertyValue(Object bean, String propertyName, Object value) {
+        String[] parts = propertyName.split("\\.");
+        Object current = bean;
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(current);
+
+        try {
+            for (int i = 0; i < parts.length - 1; i++) {
+                String part = parts[i];
+                Object property = wrapper.getPropertyValue(part);
+
+                if (property == null) {
+                    Class<?> type = wrapper.getPropertyType(part);
+                    if (type == null) {
+                        return; // 属性不存在
                     }
+                    // 通过无参构造器创建中间对象
+                    Object newInstance = type.getDeclaredConstructor().newInstance();
+                    wrapper.setPropertyValue(part, newInstance);
+                    property = newInstance;
+                }
+
+                // 切换 wrapper 到下一级
+                current = property;
+                wrapper = new BeanWrapperImpl(current);
+            }
+
+            // 设置最终属性
+            wrapper.setPropertyValue(parts[parts.length - 1], value);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set property: " + propertyName, e);
+        }
+    }
+
+    private static Class<?>[] typeToClass(Type[] actualTypeArguments) {
+        Class<?>[] classes = null;
+        if (ArrayUtils.isNotEmpty(actualTypeArguments)) {
+            int length = actualTypeArguments.length;
+            classes = new Class<?>[length];
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                if (actualTypeArguments[i] instanceof ParameterizedTypeImpl) {
+                    classes[i] = ((ParameterizedTypeImpl)actualTypeArguments[i]).getRawType();
+                } else if (actualTypeArguments[i] instanceof Class) {
+                    classes[i] = (Class<?>) actualTypeArguments[i];
+                } else if (actualTypeArguments[i] instanceof TypeVariableImpl){
+                    classes[i] = ((TypeVariableImpl)actualTypeArguments[i]).getClass();
                 }
             }
         }
 
         return classes;
-    }
-
-    public static Field getField(Class<?> clazz, String name) throws NoSuchFieldException {
-        try {
-            Field f = clazz.getDeclaredField(name);
-            f.setAccessible(true);
-            return f;
-        } catch (NoSuchFieldException e) {
-            if (clazz == Object.class) {
-                throw e;
-            }
-            return getField(clazz.getSuperclass(), name);
-        }
-
-    }
-
-    public static Field[] getAllFields(Class<?> clazz) {
-        List<Field> list = new ArrayList<>();
-        while (Objects.nonNull(clazz)) {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                if (!list.stream().map(Field::getName).collect(Collectors.toSet()).contains(field.getName())) {
-                    list.add(field);
-                }
-            }
-            clazz = clazz.getSuperclass();
-        }
-        return list.toArray(new Field[] {});
-    }
-
-    /**
-     * POJO setter
-     * @param obj
-     * @param field
-     * @param value
-     */
-    public static void setFieldValue(Object obj, Field field,  Object value) {
-        if (obj == null) {
-            return;
-        }
-
-        String propertyName = field.getName();
-
-        try {
-            ReflectionUtils.invokeMethod(obj.getClass().getMethod("set" + String.valueOf(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1), field.getType()), obj, value);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
