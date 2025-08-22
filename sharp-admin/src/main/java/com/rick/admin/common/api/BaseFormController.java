@@ -21,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -103,7 +104,7 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
 
     @PostMapping
     @ResponseBody
-    public Result saveOrUpdate(@RequestBody T e) {
+    public Result saveOrUpdate(@RequestBody @Valid T e) {
         baseService.saveOrUpdate(e);
         return ResultUtils.success(e);
     }
