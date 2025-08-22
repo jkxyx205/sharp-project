@@ -27,7 +27,7 @@ public class EntityIdCode<ID> extends EntityId<ID> {
 
     @Length(max = 32, message = "编号不能超过32个字符")
     @NotBlank
-    @Pattern(regexp = "^[0-9a-zA-Z_/%-]{1,}$", message = "CODE只能包含数字、字母、下划线、中划线")
+    @Pattern(regexp = "^[0-9a-zA-Z_#/%-]{1,}$", message = "CODE只能包含数字、字母、下划线、中划线")
     @Column(value = "code", comment = "外部可见，唯一code", nullable = false)
     private String code;
 
