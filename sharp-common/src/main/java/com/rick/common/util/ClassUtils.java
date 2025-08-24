@@ -47,8 +47,7 @@ public class ClassUtils {
     }
 
     public static Field getField(Class<?> clazz, String name) throws NoSuchFieldException {
-        return FieldUtils.getField(clazz, name);
-
+        return FieldUtils.getDeclaredField(clazz, name, true);
     }
 
     public static Field[] getAllFields(Class<?> clazz) {
