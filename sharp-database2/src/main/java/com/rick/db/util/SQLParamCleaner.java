@@ -24,7 +24,7 @@ public class SQLParamCleaner {
      * @param params 参数Map，null、空字符串、空集合的参数以及不存在的参数将被清理
      * @return 清理后的SQL
      */
-    public static String cleanSQL(String sql, Map<String, Object> params) {
+    public static String cleanSQL(String sql, Map<String, ?> params) {
         if (sql == null || sql.trim().isEmpty()) {
             return sql;
         }
@@ -684,11 +684,11 @@ public class SQLParamCleaner {
     /**
      * 获取空参数集合（包括null值、空字符串、空集合以及不存在的参数key）
      */
-    private static Set<String> getEmptyParams(Map<String, Object> params) {
+    private static Set<String> getEmptyParams(Map<String, ?> params) {
         Set<String> emptyParams = new HashSet<>();
         if (params != null) {
             // 检查存在的参数中的空值
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
+            for (Map.Entry<String, ?> entry : params.entrySet()) {
                 Object value = entry.getValue();
                 if (value == null ||
                         (value instanceof String && ((String) value).trim().isEmpty()) ||
@@ -704,7 +704,7 @@ public class SQLParamCleaner {
     /**
      * 获取所有需要清理的参数（包括空参数和不存在的参数）
      */
-    private static Set<String> getParamsToRemove(String sql, Map<String, Object> params) {
+    private static Set<String> getParamsToRemove(String sql, Map<String, ?> params) {
         Set<String> paramsToRemove = new HashSet<>();
 
         // 获取SQL中所有的参数名
