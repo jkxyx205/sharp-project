@@ -39,7 +39,7 @@ public final class GridUtils {
      * @param sql
      * @param params
      * @param countSQL 可以单独指定count的SQL，可以为null
-     * @param sortableColumns 可以允许排序的列，查询字段必须包含id列，不然mysql排序会有问题。如果为null。所有列运行排序
+     * @param sortableColumns 可以允许排序的列，查询字段必须包含id列，不然mysql排序会有问题。如果为null。所有列允许排序
      * @return
      */
     public static Grid<Map<String, Object>> list(String sql, Map<String, ?> params, String countSQL, String... sortableColumns) {

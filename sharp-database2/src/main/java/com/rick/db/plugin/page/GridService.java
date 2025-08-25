@@ -6,15 +6,11 @@ import com.rick.db.repository.support.dialect.AbstractDialect;
 import com.rick.db.util.SQLParamCleaner;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
-import static com.rick.db.repository.support.Constants.ASC;
-import static com.rick.db.repository.support.Constants.GROUP_DUMMY_TABLE_NAME;
 
 /**
  *
@@ -28,6 +24,7 @@ public class GridService {
 
     private static final int DEFAULT_PAGE_MAX_SIZE = 1000;
 
+    @Getter
     private final TableDAO tableDAO;
 
     @Getter
@@ -69,7 +66,9 @@ public class GridService {
      * @return
      */
     public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
-        sql = SQLParamCleaner.cleanSQL(sql, params);
+        Map<String, Object> formatMap = new HashMap<>();
+        sql = SQLParamCleaner.formatSql(sql, params, formatMap, getDialect());
+        params = formatMap;
         int records = 0;
         int totalPages = 0;
 
@@ -109,65 +108,6 @@ public class GridService {
                 .pageSize(model.getSize())
                 .build();
         return grid;
-    }
-
-    public void setOrderParams(PageModel pageModel, String[] sortableColumns) {
-        String groupBy = getOrderBy(GROUP_DUMMY_TABLE_NAME, pageModel.getSidx(), ASC.equalsIgnoreCase(pageModel.getSord()), sortableColumns);
-        if (StringUtils.isNotBlank(groupBy)) {
-            int blank = groupBy.indexOf(" ");
-            pageModel.setSidx(groupBy.substring(0, blank));
-            pageModel.setSord(groupBy.substring(blank + 1));
-        } else {
-            pageModel.setSidx(null);
-            pageModel.setSord(null);
-        }
-    }
-
-    public String getOrderBy(String tablePrefix, String column, Boolean asc, String[] sortableColumns) {
-        if (!sortable(column, sortableColumns, true)) {
-            return null;
-        }
-
-        tablePrefix = StringUtils.isBlank(tablePrefix) ? "" : tablePrefix + ".";
-        asc = ObjectUtils.defaultIfNull(asc, false);
-
-        return dialect.getOrderBy(tablePrefix, column, asc, sortableColumns);
-    }
-
-    public TableDAO getTableDAO() {
-        return tableDAO;
-    }
-
-    /**
-     * 是否支持排序
-     * @param column
-     * @param sortableColumns
-     * @param ignoreCase
-     * @return
-     */
-    private static boolean sortable(String column, String[] sortableColumns, boolean ignoreCase) {
-        if (StringUtils.isBlank(column) || Objects.isNull(sortableColumns)) {
-            return false;
-        }
-
-        boolean columnSortable = false;
-        for (String sortableColumn : sortableColumns) {
-            if (ignoreCase) {
-                columnSortable = sortableColumn.equalsIgnoreCase(column);
-            } else {
-                columnSortable = sortableColumn.equals(column);
-            }
-
-            if (columnSortable) {
-                break;
-            }
-        }
-
-        if (!columnSortable) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
