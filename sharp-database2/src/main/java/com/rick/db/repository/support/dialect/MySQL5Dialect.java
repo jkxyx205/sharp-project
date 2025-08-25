@@ -25,7 +25,7 @@ public class MySQL5Dialect extends AbstractDialect {
         }
 
         if (model != null)
-            sb.append(" limit ").append((model.getPage()-1) *  model.getSize()).append(",").append(model.getSize());
+            sb.append(" LIMIT ").append((model.getPage()-1) *  model.getSize()).append(",").append(model.getSize());
 
         return sb.toString();
     }
@@ -39,6 +39,7 @@ public class MySQL5Dialect extends AbstractDialect {
     public String escapeString() {
         return "escape '\\\\'";
     }
+
     @Override
     public String getOrderBy(String tablePrefix, String column, Boolean asc, String[] sortableColumns) {
         return tablePrefix + column + " " + (asc ? "asc," : "desc, ") + tablePrefix + "id ASC";
