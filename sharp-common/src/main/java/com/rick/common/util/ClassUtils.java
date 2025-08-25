@@ -54,6 +54,18 @@ public class ClassUtils {
         return FieldUtils.getAllFields(clazz);
     }
 
+    public Object getPropertyValue(Object entity, Field field) {
+        if (entity == null || field == null) {
+            throw new IllegalArgumentException("entity 和 field 不能为空");
+        }
+        try {
+            field.setAccessible(true); // 关闭访问检查
+            return field.get(entity);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("无法获取字段值: " + field.getName(), e);
+        }
+    }
+
     public Object getPropertyValue(Object entity, String propertyName) {
         if (Objects.isNull(entity)) {
             return null;
@@ -72,7 +84,13 @@ public class ClassUtils {
      * @param value
      */
     public static void setFieldValue(Object bean, Field field,  Object value) {
-        setPropertyValue(bean, field.getName(), value);
+//        setPropertyValue(bean, field.getName(), value);
+        try {
+            field.setAccessible(true);
+            field.set(bean, value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("无法设置字段值: " + field.getName(), e);
+        }
     }
 
     public void setPropertyValue(Object bean, String propertyName, Object value) {
@@ -103,7 +121,6 @@ public class ClassUtils {
 
             // 设置最终属性
             wrapper.setPropertyValue(parts[parts.length - 1], value);
-
         } catch (Exception e) {
             throw new RuntimeException("Failed to set property: " + propertyName, e);
         }

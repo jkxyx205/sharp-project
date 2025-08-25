@@ -8,9 +8,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Rick.Xu
@@ -38,7 +36,7 @@ public class TableMetaResolver {
     private static void loopAllFields(TableMeta tableMeta, StringBuilder selectColumnBuilder, StringBuilder updateColumnBuilder,
                                       Class<?> entityClass,
                                       String columnPrefix, String propertyPrefix) {
-        Field[] allFields = FieldUtils.getAllFields(entityClass);
+        Field[] allFields = uniqueFields(FieldUtils.getAllFields(entityClass));
         for (Field field : allFields) {
             Embedded embedded = field.getAnnotation(Embedded.class);
             if (Objects.nonNull(embedded)) {
@@ -138,5 +136,14 @@ public class TableMetaResolver {
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Field[] uniqueFields(Field[] fields) {
+        Map<String, Field> map = new LinkedHashMap<>();
+        for (Field f : fields) {
+            // 如果不存在才放进去（只保留第一个）
+            map.putIfAbsent(f.getName(), f);
+        }
+        return map.values().toArray(new Field[0]);
     }
 }

@@ -44,7 +44,7 @@ class TableMetaResolver {
         String name = (TABLE_PREFIX + camelToSnake(clazz.getSimpleName()));
         String tableName = StringUtils.isBlank(tableAnnotation.value()) ? name : tableAnnotation.value();
 
-        Field[] fields = ClassUtils.getAllFields(clazz);
+        Field[] fields = uniqueFields(ClassUtils.getAllFields(clazz));
         StringBuilder columnNamesBuilder = new StringBuilder();
         StringBuilder updateColumnNamesBuilder = new StringBuilder();
         StringBuilder propertiesBuilder = new StringBuilder();
@@ -257,6 +257,15 @@ class TableMetaResolver {
 
         private String propertyName;
 
+    }
+
+    public static Field[] uniqueFields(Field[] fields) {
+        Map<String, Field> map = new LinkedHashMap<>();
+        for (Field f : fields) {
+            // 如果不存在才放进去（只保留第一个）
+            map.putIfAbsent(f.getName(), f);
+        }
+        return map.values().toArray(new Field[0]);
     }
 
 }
