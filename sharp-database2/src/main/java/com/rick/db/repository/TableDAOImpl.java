@@ -208,7 +208,7 @@ public class TableDAOImpl implements TableDAO {
                             if (CollectionUtils.isEmpty(items)) {
                                 value = Collections.emptyList();
                             } else {
-                                Class<?> clazz = ClassUtils.getFieldGenericClass(FieldUtils.getDeclaredField(mappedClass, propertyName, true))[0];
+                                Class<?> clazz = ClassUtils.getFieldGenericClass(FieldUtils.getField(mappedClass, propertyName, true))[0];
                                 if (clazz.isEnum()) {
                                     value = items.stream().map(v -> getEnum(clazz, v)).collect(Collectors.toList());
                                 } else {

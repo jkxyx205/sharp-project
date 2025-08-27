@@ -1,7 +1,6 @@
-package com.rick.db.util;
+package com.rick.db.repository.support;
 
 import com.rick.common.util.EnumUtils;
-import com.rick.db.repository.support.Constants;
 import com.rick.db.repository.support.dialect.AbstractDialect;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSqlHelper;
@@ -25,6 +24,8 @@ import java.util.regex.Pattern;
  *
  */
 public class SQLParamCleaner {
+
+    private static AbstractDialect dialect;
 
     private static final int QUERY_IN_MAX_COUNT = 1000;
 
@@ -92,11 +93,15 @@ public class SQLParamCleaner {
         DATE_FORMAT_MAP.put("\\d{4}-\\d{2}-\\d{2}", "yyyy-MM-dd");
     }
 
-    public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap, AbstractDialect dialect) {
+    public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap) {
         List<String> paramNames = ParsedSqlHelper.get(srcSql);
 
         if(params == null) {
             params = Collections.emptyMap();
+        }
+
+        if (formatMap == null) {
+            formatMap = new HashMap<>();
         }
 
         srcSql = handleHolderSQL(srcSql, params);
@@ -226,6 +231,9 @@ public class SQLParamCleaner {
         return right(changeInSQL(srcSql));
     }
 
+    public static void setDialect(AbstractDialect dialect) {
+        SQLParamCleaner.dialect = dialect;
+    }
 
     private static String likeEscape(String str) {
         return str.replaceAll("%", "\\\\%")

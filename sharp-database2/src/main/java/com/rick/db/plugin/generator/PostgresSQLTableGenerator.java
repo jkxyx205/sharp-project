@@ -37,7 +37,7 @@ public class PostgresSQLTableGenerator extends TableGenerator {
 
     @Override
     protected void idColumnHandler(StringBuilder createTableSql, Field field, String columnName, Id.GenerationType strategy, Class idClass) {
-        createTableSql.append(""+(strategy == Id.GenerationType.ASSIGN ? ""+columnName+" VARCHAR(32)," : ""+columnName+" " + (strategy == Id.GenerationType.IDENTITY ? " serial" : determineSqlType(idClass)) +" NOT NULL PRIMARY KEY,"));
+        createTableSql.append((strategy == Id.GenerationType.ASSIGN ? columnName +" VARCHAR(32)" : columnName + " " + (strategy == Id.GenerationType.IDENTITY ? "serial" : determineSqlType(idClass))) +" NOT NULL PRIMARY KEY,");
     }
 
     @Override
@@ -137,7 +137,7 @@ public class PostgresSQLTableGenerator extends TableGenerator {
                     return "INTEGER";
                 }
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
+//                throw new RuntimeException(e);
             }
 //            return getTypeNameAsSnake(type);
             return "VARCHAR(32)";

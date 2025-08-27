@@ -2,8 +2,8 @@ package com.rick.db.plugin.page;
 
 import com.rick.db.repository.JdbcTemplateCallback;
 import com.rick.db.repository.TableDAO;
+import com.rick.db.repository.support.SQLParamCleaner;
 import com.rick.db.repository.support.dialect.AbstractDialect;
-import com.rick.db.util.SQLParamCleaner;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +67,7 @@ public class GridService {
      */
     public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
         Map<String, Object> formatMap = new HashMap<>();
-        sql = SQLParamCleaner.formatSql(sql, params, formatMap, getDialect());
+        sql = SQLParamCleaner.formatSql(sql, params, formatMap);
         params = formatMap;
         int records = 0;
         int totalPages = 0;

@@ -10,8 +10,8 @@ import com.rick.db.repository.TableDAOImpl;
 import com.rick.db.repository.model.DatabaseType;
 import com.rick.db.repository.support.DatabaseMetaData;
 import com.rick.db.repository.support.IdToEntityConverterFactory;
-import com.rick.db.repository.support.dialect.AbstractDialect;
-import com.rick.db.repository.support.dialect.SQLiteDialect;
+import com.rick.db.repository.support.SQLParamCleaner;
+import com.rick.db.repository.support.dialect.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -72,23 +72,19 @@ public class SharpDatabaseAutoConfiguration {
 
         @Bean
         public AbstractDialect getDialect(SharpDatabaseProperties properties) {
-            // TODO
-     /*       if (properties.getType() == DatabaseType.Oracle10g) {
-                // TODO
-                //return new OracleSqlFormatter();
+            if (properties.getType() == DatabaseType.Oracle10g) {
+                return new Oracle10gDialect();
             } else if (properties.getType() == DatabaseType.Oracle11c) {
-                // TODO
-                //return new OracleSqlFormatter();
+                return new Oracle11cDialect();
             } else if (properties.getType() == DatabaseType.SQLServer2012) {
-                // TODO
-                //return new OracleSqlFormatter();
+                return new SQLServer2012Dialect();
             } else if (properties.getType() == DatabaseType.PostgreSQL) {
-                return new PostgresSQLTableGenerator(jdbcTemplate);
+                return new PostgresDialect();
             } else if (properties.getType() == DatabaseType.MySQL5) {
-                return new MySQL5TableGenerator(jdbcTemplate);
+                return new MySQL5Dialect();
             } else if (properties.getType() == DatabaseType.MySQL8) {
-                return new MySQL8TableGenerator(jdbcTemplate);
-            } else */
+                return new MySQL8Dialect();
+            } else
 
                 if (properties.getType() == DatabaseType.SQLite) {
                 return new SQLiteDialect();
@@ -98,8 +94,9 @@ public class SharpDatabaseAutoConfiguration {
         }
 
         @Bean
-        public GridService gridService(TableDAO sharpService, AbstractDialect dialect) {
-            return new GridService(sharpService, dialect);
+        public GridService gridService(TableDAO tableDAO, AbstractDialect dialect) {
+            SQLParamCleaner.setDialect(dialect);
+            return new GridService(tableDAO, dialect);
         }
     }
 
@@ -161,7 +158,7 @@ public class SharpDatabaseAutoConfiguration {
     static class TableGeneratorConfiguration {
 
         @Bean
-        public TableGenerator initTableGenerator(JdbcTemplate jdbcTemplate, AbstractDialect dialect) {
+        public TableGenerator tableGenerator(JdbcTemplate jdbcTemplate, AbstractDialect dialect) {
             if (dialect.getType() == DatabaseType.Oracle10g) {
                 // TODO
                 //return new OracleSqlFormatter();

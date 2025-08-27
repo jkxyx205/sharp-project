@@ -37,7 +37,7 @@ public class MySQL5TableGenerator extends TableGenerator {
 
     @Override
     protected void idColumnHandler(StringBuilder createTableSql, Field field, String columnName, Id.GenerationType strategy, Class idClass) {
-        createTableSql.append(""+(strategy == Id.GenerationType.ASSIGN ? ""+columnName+" VARCHAR(32)," : ""+columnName+" " + determineSqlType(idClass))+" NOT NULL"+ (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "") +" COMMENT '主键' PRIMARY KEY,");
+        createTableSql.append(((strategy == Id.GenerationType.ASSIGN ? columnName+" VARCHAR(32)" : columnName + " " + determineSqlType(idClass)) + (strategy == Id.GenerationType.IDENTITY ? " AUTO_INCREMENT" : "")) +" NOT NULL COMMENT '主键' PRIMARY KEY,");
     }
 
     @Override
@@ -90,7 +90,7 @@ public class MySQL5TableGenerator extends TableGenerator {
                     return "INT";
                 }
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
+//                throw new RuntimeException(e);
             }
 //            return "varchar(16)";
             String enumValues = String.join(",", EnumUtils.getCodes(type).stream().map(code -> "'" + code + "'").collect(Collectors.toList()));
