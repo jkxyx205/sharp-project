@@ -16,4 +16,8 @@ public interface EntityCodeDAO<T, ID> extends EntityDAO<T, ID> {
 
     List<T> selectByCodes(@NotEmpty Collection<String> codes);
 
+    Optional<ID> selectIdByCode(@NotNull String code);
+
+    List<ID> selectIdsByCodes(@NotEmpty Collection<String> codes);
+
 }

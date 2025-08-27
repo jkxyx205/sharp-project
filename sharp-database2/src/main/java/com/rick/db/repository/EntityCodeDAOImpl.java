@@ -5,11 +5,11 @@ import com.rick.db.repository.model.EntityIdCode;
 import com.rick.db.util.OperatorUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -19,6 +19,31 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Validated // 必须加入
 public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAOImpl<T, ID> implements EntityCodeDAO<T, ID> {
+
+    @Override
+    public T insertOrUpdate(T entity) {
+       if (Objects.isNull(entity.getId())) {
+           return insert(entity);
+       } else {
+           return update(entity);
+       }
+    }
+
+    @Override
+    public T insert(T entity) {
+        if (exists("code = ?", new Object[]{entity.getCode()})) {
+            throw new RuntimeException("编号已经存在");
+        }
+        return super.insert(entity);
+    }
+
+    @Override
+    public T update(T entity) {
+        if (exists("id <> ? AND code = ?", new Object[]{entity.getId(), entity.getCode()})) {
+            throw new RuntimeException("编号已经存在");
+        }
+        return super.update(entity);
+    }
 
     @Override
     public Optional<T> selectByCode(String code) {
@@ -31,11 +56,13 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     }
 
     @Override
-    public T insertOrUpdate(T entity) {
-        if (exists("id <> ? AND code = ?", new Object[]{ObjectUtils.defaultIfNull(entity.getId(), Integer.MIN_VALUE), entity.getCode()})) {
-            throw new RuntimeException("编号已经存在");
-        }
-
-        return super.insertOrUpdate(entity);
+    public Optional<ID> selectIdByCode(String code) {
+        return OperatorUtils.expectedAsOptional(select(getTableMeta().getIdMeta().getIdClass(), getTableMeta().getIdMeta().getIdPropertyName(), "code = :code", Maps.of("code", code)));
     }
+
+    @Override
+    public List<ID> selectIdsByCodes(Collection<String> codes) {
+        return select(getTableMeta().getIdMeta().getIdClass(), getTableMeta().getIdMeta().getIdPropertyName(), "code IN (:codes)", Maps.of("code", codes));
+    }
+
 }

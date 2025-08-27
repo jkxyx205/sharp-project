@@ -376,7 +376,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Override
     public T insert(T entity) {
         return insertOrUpdate0(entity, true);
-
     }
 
     @Override
