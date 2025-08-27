@@ -402,10 +402,12 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 args.put(tableMeta.getFieldColumnNameMap().get(tableMeta.getVersionField()), 1);
             }
 
-            if (tableMeta.getIdMeta().getId().strategy() == Id.GenerationType.SEQUENCE) {
+            if (Objects.nonNull(getIdValue(entity))) {
+                tableDAO.insert(tableMeta.getTableName(), args);
+            } else if (tableMeta.getIdMeta().getId().strategy() == Id.GenerationType.SEQUENCE) {
                 args.put(tableMeta.getIdMeta().getIdPropertyName(), IdGenerator.getSequenceId());
                 tableDAO.insert(tableMeta.getTableName(), args);
-                setIdValue(entity,args.get(tableMeta.getIdMeta().getIdPropertyName()));
+                setIdValue(entity, args.get(tableMeta.getIdMeta().getIdPropertyName()));
             } else {
                 setIdValue(entity, tableDAO.insertAndReturnKey(tableMeta.getTableName(), args, tableMeta.getIdMeta().getIdPropertyName()));
             }
@@ -426,7 +428,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 args.put(tableMeta.getVersionField().getName(), dbVersion.intValue() + 1);
             }
 
-            update(tableMeta.getUpdateColumn(), tableMeta.getIdMeta().getIdPropertyName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), args);
+            update(tableMeta.getUpdateColumn(), tableMeta.getIdMeta().getIdColumnName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), args);
         }
 
         if (hasSaveReference()) {
