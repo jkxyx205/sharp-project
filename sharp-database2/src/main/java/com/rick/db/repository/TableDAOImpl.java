@@ -210,19 +210,23 @@ public class TableDAOImpl implements TableDAO {
                 if (pd != null) {
                     Object value = null;
                     try {
-                        value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
+                        value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType());
                         if (pd.getPropertyType() == List.class && value == null) {
                             value = Collections.emptyList();
-                        } else if (value.getClass().getName().equals("org.postgresql.util.PGobject")) {
-                            try {
-                                Method getValue = value.getClass().getMethod("getValue");
-                                value = getValue.invoke(value);
-                            } catch (Exception e) {
-                                throw new RuntimeException("Failed to get PGobject value", e);
-                            }
-                        }/*else if (value instanceof PGobject) {
+                        }
+
+                        if (Objects.nonNull(value)) {
+                            if (value.getClass().getName().equals("org.postgresql.util.PGobject")) {
+                                try {
+                                    Method getValue = value.getClass().getMethod("getValue");
+                                    value = getValue.invoke(value);
+                                } catch (Exception e) {
+                                    throw new RuntimeException("Failed to get PGobject value", e);
+                                }
+                            }/*else if (value instanceof PGobject) {
                             value = ((PGobject)value).getValue();
-                        }*/
+                             }*/
+                        }
 
                         bw.setPropertyValue(propertyName, value);
                     } catch (TypeMismatchException | NotWritablePropertyException e) {
