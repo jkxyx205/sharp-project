@@ -1,20 +1,24 @@
 package com.rick.db.repository;
 
-import com.rick.common.util.ClassUtils;
+import com.rick.common.util.JsonUtils;
 import com.rick.common.util.ObjectUtils;
 import com.rick.db.util.OperatorUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.beans.*;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.Resource;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -31,6 +35,10 @@ public class TableDAOImpl implements TableDAO {
 
     @Getter
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Resource
+    @Qualifier("dbConversionService")
+    private ConversionService conversionService;
 
     @Override
     public Boolean exists(String sql, Object... args) {
@@ -189,42 +197,42 @@ public class TableDAOImpl implements TableDAO {
             T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
             BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
             bw.setAutoGrowNestedPaths(true);
+            bw.setConversionService(conversionService);
 
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
 
             for (int index = 1; index <= columnCount; index++) {
-                String propertyName = org.springframework.jdbc.support.JdbcUtils.lookupColumnName(rsmd, index);
+                String column = JdbcUtils.lookupColumnName(rsmd, index);
+                String propertyName = com.rick.common.util.StringUtils.stringToCamel(column);
                 PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(lowerCaseName(propertyName)) : null);
 
                 if (pd != null) {
-                    Object value;
+                    Object value = null;
                     try {
-                        value = org.springframework.jdbc.support.JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
-
-                        if (List.class.isAssignableFrom(pd.getPropertyType())) {
-                            List<String> items = convertStringToList((String) value);
-
-                            if (CollectionUtils.isEmpty(items)) {
-                                value = Collections.emptyList();
-                            } else {
-                                Class<?> clazz = ClassUtils.getFieldGenericClass(FieldUtils.getField(mappedClass, propertyName, true))[0];
-                                if (clazz.isEnum()) {
-                                    value = items.stream().map(v -> getEnum(clazz, v)).collect(Collectors.toList());
-                                } else {
-                                    value = items;
-                                }
+                        value = JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType()) ;
+                        if (pd.getPropertyType() == List.class && value == null) {
+                            value = Collections.emptyList();
+                        } else if (value.getClass().getName().equals("org.postgresql.util.PGobject")) {
+                            try {
+                                Method getValue = value.getClass().getMethod("getValue");
+                                value = getValue.invoke(value);
+                            } catch (Exception e) {
+                                throw new RuntimeException("Failed to get PGobject value", e);
                             }
-                        }
+                        }/*else if (value instanceof PGobject) {
+                            value = ((PGobject)value).getValue();
+                        }*/
 
-                        EntityDAO entityDAO = EntityDAOManager.getDAO(pd.getPropertyType());
-                        if (Objects.nonNull(entityDAO)) {
-                            bw.setPropertyValue(propertyName + "." + entityDAO.getTableMeta().getIdMeta().getIdPropertyName(), value);
-                        } else {
-                            bw.setPropertyValue(propertyName, value);
-                        }
+                        bw.setPropertyValue(propertyName, value);
                     } catch (TypeMismatchException | NotWritablePropertyException e) {
-                        throw e;
+                        if (ObjectUtils.mayPureObject(pd.getPropertyType())) {
+                            if (value != null && value instanceof String) {
+                                bw.setPropertyValue(propertyName, JsonUtils.toObject((String) value, pd.getPropertyType()));
+                            }
+                        } else {
+                            throw new DataRetrievalFailureException("Unable to map column '" + column + "' to property " + pd.getName(), e);
+                        }
                     }
                 }
             }

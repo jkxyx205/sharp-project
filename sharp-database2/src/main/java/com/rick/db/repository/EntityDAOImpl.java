@@ -1,8 +1,7 @@
 package com.rick.db.repository;
 
-import com.rick.common.util.ClassUtils;
-import com.rick.common.util.IdGenerator;
-import com.rick.common.util.Maps;
+import com.rick.common.util.*;
+import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.repository.support.TableMeta;
 import com.rick.db.repository.support.TableMetaResolver;
 import com.rick.db.util.OperatorUtils;
@@ -38,6 +37,9 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Resource
     @Getter
     private TableDAO tableDAO;
+
+    @Resource
+    protected ValidatorHelper validatorHelper;
 
     @Getter
     private TableMeta<T> tableMeta;
@@ -384,6 +386,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     private T insertOrUpdate0(T entity, boolean insert) {
+        validatorHelper.validate(entity);
         if (hasSaveReference()) {
             for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
                 TableMeta.Reference reference = fieldReferenceEntry.getValue();
@@ -516,7 +519,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public int update(String columns, String condition, Object... args) {
-        return tableDAO.update(tableMeta.getTableName(), columns, condition, args);
+        return tableDAO.update(tableMeta.getTableName(), appendColumnVar(columns, false), condition, args);
     }
 
     @Override
@@ -602,13 +605,29 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
             return null;
         }
 
-        EntityDAO entityDAO = EntityDAOManager.getDAO(value.getClass());
-        if (Objects.nonNull(entityDAO)) {
-            return getPropertyValue(value, entityDAO.getTableMeta().getIdMeta().getIdPropertyName());
+        Class<?> vClass = value.getClass();
+
+        if (vClass.isEnum()) {
+            return EnumUtils.getCode((Enum) value);
+        } else if (Map.class.isAssignableFrom(vClass)) {
+            return JsonUtils.toJson(value);
         }
 
-        if (Collection.class.isAssignableFrom(value.getClass())) {
-            return String.valueOf(value);
+        EntityDAO entityDAO = EntityDAOManager.getDAO(vClass);
+        if (Objects.nonNull(entityDAO)) {
+            return getPropertyValue(value, entityDAO.getTableMeta().getIdMeta().getIdPropertyName());
+        } else if (Collection.class.isAssignableFrom(vClass)) {
+            if (CollectionUtils.isEmpty((Collection<?>) value)) {
+                return "[]";
+            }
+
+            if (((Collection<?>) value).iterator().next().getClass().isEnum()) {
+                return JsonUtils.toJson(((Collection)value).stream().map(v -> EnumUtils.getCode((Enum) v)).collect(Collectors.toList()));
+            }
+
+            return JsonUtils.toJson(value);
+        }  else if (com.rick.common.util.ObjectUtils.mayPureObject(value)) {
+            return JsonUtils.toJson(value);
         }
 
         return value;
@@ -616,7 +635,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     private String appendColumnVar(String columns, boolean namedVar) {
         String[] columnArr = columns.split(COLUMN_NAME_SEPARATOR_REGEX);
-        return Arrays.stream(columnArr).map(column -> namedVar ?  column + " = :" + tableMeta.getColumnPropertyNameMap().get(column) : "?").collect(Collectors.joining(", "));
+        return Arrays.stream(columnArr).map(column -> column + " = " + (namedVar ? ":" + tableMeta.getColumnPropertyNameMap().get(column) : "?")).collect(Collectors.joining(", "));
     }
 
 }

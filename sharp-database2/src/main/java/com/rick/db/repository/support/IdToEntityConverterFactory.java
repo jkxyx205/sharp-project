@@ -37,7 +37,7 @@ final public class IdToEntityConverterFactory implements ConverterFactory<Object
 
                 T t = (T) targetType.newInstance();
                 if (obj.getClass() == Long.class) {
-                    t.setId((Long) obj);
+                    t.setId(obj);
                 } else if (obj.getClass() == String.class) {
                     t.setId(Long.parseLong((String) obj));
                 }
