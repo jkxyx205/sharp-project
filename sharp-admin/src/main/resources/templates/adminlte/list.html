@@ -6,6 +6,29 @@
 <th:block layout:fragment="content" th:fragment="content" th:with="s=${#dates.createNow().time}">
     [(${report.additionalInfo['link'] != null ? report.additionalInfo['link'] : ''})]
     <style th:inline="css">
+        .card-body-scroll-panel {
+            overflow-x: auto;
+        }
+
+        @media screen and (min-width: 576px) {
+            .card-body-scroll-panel {
+                max-height: calc(100vh - 380px);
+            }
+        }
+
+        .card-body-scroll-panel table thead th::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background-color: var(--bs-border-color);
+            left: 0;
+            top: -1px;
+        }
+
+        .card-body-scroll-panel table th {
+            position:sticky; top:0; background:#fff; z-index:10; border-top: 0;
+        }
         /*[(${report.additionalInfo['css'] != null ? report.additionalInfo['css'] : ''})]*/
     </style>
 
