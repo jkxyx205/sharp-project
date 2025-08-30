@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.repository.EntityDAOImpl;
 import com.rick.formflow.form.cpn.core.FormCpnValue;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -28,7 +28,7 @@ public class FormCpnValueDAO extends EntityDAOImpl<FormCpnValue, Long> {
      * @return key: formCpnId
      */
     public Map<Long, FormCpnValue> selectByInstanceIdAsMap(Long instanceId) {
-        return selectByParams(FormCpnValue.builder().instanceId(instanceId).build())
+        return select(FormCpnValue.builder().instanceId(instanceId).build())
                 .stream().collect(Collectors.toMap(FormCpnValue::getFormCpnId, v-> v));
     }
 }

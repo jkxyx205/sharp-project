@@ -1,9 +1,9 @@
 package com.rick.formflow.form.cpn.core;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.BaseCodeEntity;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseCodeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

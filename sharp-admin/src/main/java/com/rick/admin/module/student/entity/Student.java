@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.admin.module.common.entity.CodeDescription;
 import com.rick.common.http.json.deserializer.BooleanPropertyDeserializer;
 import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
-import com.rick.db.dto.type.BaseCodeEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Embedded;
-import com.rick.db.plugin.dao.annotation.Sql;
-import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.model.IdCodeValue;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Embedded;
+import com.rick.db.repository.Select;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseCodeEntity;
+import com.rick.db.repository.model.IdCodeValue;
 import com.rick.fileupload.client.support.Document;
 import com.rick.meta.config.validator.DictValueCheck;
 import com.rick.meta.dict.model.DictType;
@@ -40,7 +40,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "t_student", comment = "学生表")
-public class Student extends BaseCodeEntityWithLongId {
+public class Student extends BaseCodeEntity<Long> {
 
 
 //    String name; 可以直接属性，其他默认
@@ -114,7 +114,7 @@ public class Student extends BaseCodeEntityWithLongId {
 
     // 数据库增加字段 user_id user_code 前端提交数据 operator { id: "1", code: "ADMIN"}
     @Embedded(columnPrefix="user_")
-    @Sql(value = "select id, code, name as description from sys_user where id = :id ", params="id@operator.id", nullWhenParamsIsNull="id")
+    @Select(value = "select id, code, name as description from sys_user where id = :id ", params="id@operator.id", nullWhenParamsIsNull="id")
     IdCodeValue operator;
 
 //    /**

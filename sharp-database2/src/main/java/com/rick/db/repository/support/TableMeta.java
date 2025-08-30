@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.Value;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REGEX;
 
 /**
  * @author Rick.Xu
@@ -40,9 +40,12 @@ public class TableMeta<T> {
 
     Field versionField;
 
+
     private String selectColumn;
 
     private String updateColumn;
+
+    private String columnNames;
 
     public TableMeta(Class<T> entityClass, Table table, String tableName, String referenceColumnId, Map<Field, Reference> referenceMap, Map<Field, String> fieldColumnNameMap, Map<Field, String> fieldPropertyNameMap, Map<String, String> columnPropertyNameMap, Map<String, Column> columnNameMap) {
         this.entityClass = entityClass;
@@ -64,6 +67,33 @@ public class TableMeta<T> {
         }
 
         return null;
+    }
+
+    public Field getFieldByPropertyName(String propertyName) {
+        for (Map.Entry<Field, String> entry : fieldPropertyNameMap.entrySet()) {
+            if (Objects.equals(propertyName, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public String getSelectConditionSQL() {
+        return getSelectSQL(selectColumn) + " WHERE " + appendColumnVar(selectColumn, true);
+    }
+
+    public String getSelectSQL(String columns) {
+        return "SELECT " + columns + " FROM " + getTableName();
+    }
+
+    public String appendColumnVar(String columns, boolean namedVar) {
+        return appendColumnVar(columns, namedVar, ", ");
+    }
+
+    public String appendColumnVar(String columns, boolean namedVar, CharSequence delimiter) {
+        String[] columnArr = columns.split(COLUMN_NAME_SEPARATOR_REGEX);
+        return Arrays.stream(columnArr).map(column -> column + " = " + (namedVar ? ":" + getColumnPropertyNameMap().get(column) : "?")).collect(Collectors.joining(delimiter));
     }
 
     public List<String> getSortedColumns() {
@@ -133,6 +163,10 @@ public class TableMeta<T> {
 
     void setUpdateColumn(String updateColumn) {
         this.updateColumn = updateColumn;
+    }
+
+    void setColumnNames(String columnNames) {
+        this.columnNames = columnNames;
     }
 }
 

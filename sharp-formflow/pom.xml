@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.rick.db</groupId>
-            <artifactId>sharp-database</artifactId>
+            <artifactId>sharp-database2</artifactId>
             <version>${sharp.version}</version>
         </dependency>
         <dependency>

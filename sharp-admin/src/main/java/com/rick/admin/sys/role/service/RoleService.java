@@ -7,9 +7,8 @@ import com.rick.admin.sys.role.entity.Role;
 import com.rick.admin.sys.role.model.RoleInfoDTO;
 import com.rick.admin.sys.user.dao.UserDAO;
 import com.rick.admin.sys.user.entity.User;
-import com.rick.db.plugin.SQLUtils;
-import com.rick.db.service.SharpService;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
+import com.rick.db.repository.TableDAO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,29 +39,30 @@ public class RoleService {
 
     PermissionService permissionService;
 
-    SharpService sharpService;
+    TableDAO tableDAO;
 
     public void removeRoleByUserId(Long roleId, Long userId) {
-        SQLUtils.delete("SYS_USER_ROLE", new Object[] {roleId, userId}, "ROLE_ID = ? and USER_ID = ?");
+        tableDAO.delete("SYS_USER_ROLE", "ROLE_ID = ? and USER_ID = ?", new Object[] {roleId, userId});
     }
 
     public List<Role> editRoles(List<Role> roleList) {
         if (CollectionUtils.isEmpty(roleList)) {
             roleDAO.deleteAll();
-            SQLUtils.execute("delete from sys_role_permission");
-            SQLUtils.execute("delete from sys_user_role");
+            tableDAO.execute("delete from sys_role_permission");
+            tableDAO.execute("delete from sys_user_role");
         } else {
             Set<Long> roleIds = roleList.stream().map(Role::getId).collect(Collectors.toSet());
-            SQLUtils.deleteNotIn(roleDAO.getTableName(), "id", roleIds);
-            SQLUtils.deleteNotIn("sys_role_permission", "role_id", roleIds);
-            SQLUtils.deleteNotIn("sys_user_role", "role_id", roleIds);
+            tableDAO.deleteNotIn(roleDAO.getTableMeta().getTableName(), "id", roleIds);
+            tableDAO.deleteNotIn("sys_role_permission", "role_id", roleIds);
+            tableDAO.deleteNotIn("sys_user_role", "role_id", roleIds);
+
 
             for (Role role : roleList) {
                 if (Objects.isNull(role.getId())) {
                     role.setCode(RandomStringUtils.randomAlphanumeric(5));
                     roleDAO.insert(role);
                 } else {
-                    roleDAO.update("name", Params.builder(1).pv("id", role.getId()).pv("name", role.getName()).build(), "id = :id");
+                    roleDAO.update("name", "id = :id", Maps.of("id", role.getId(),"name", role.getName()));
                 }
             }
         }
@@ -72,10 +72,10 @@ public class RoleService {
 
     public RoleInfoDTO getSettingsInfoByRoleId(Long roleId) {
         List<TreeNode> treeNodeList = permissionService.findTreeNodeByRoleIds(Collections.singletonList(roleId));
-        List<Long> userIds = sharpService.query("select user_id from sys_user_role where role_id = :roleId", Params.builder(1).pv("roleId", roleId).build(), Long.class);
+        List<Long> userIds = tableDAO.select(Long.class, "select user_id from sys_user_role where role_id = :roleId", Maps.of("roleId", roleId));
         List<User> users;
         if (CollectionUtils.isNotEmpty(userIds)) {
-            users = userDAO.selectByParamsWithoutCascade(Params.builder(1).pv("userIds", userIds).build(), "id IN (:userIds)");
+            users = userDAO.selectWithoutCascadeSelect(User.class, userDAO.getTableMeta().getSelectColumn(), "id IN (:userIds)", Maps.of("userIds", userIds));
         } else {
             users = Collections.emptyList();
         }
@@ -83,8 +83,8 @@ public class RoleService {
     }
 
     public void addPermission(Long roleId, Set<Long> permissionIds) {
-        SQLUtils.delete("sys_role_permission", new Object[]{true}, "is_deleted = ?");
-        SQLUtils.updateRefTable("sys_role_permission", "role_id", "permission_id", roleId, permissionIds);
+        tableDAO.delete("sys_role_permission", "is_deleted = ?", new Object[]{true});
+        tableDAO.updateRefTable("sys_role_permission", "role_id", "permission_id", roleId, permissionIds);
     }
 
     /**
@@ -93,7 +93,7 @@ public class RoleService {
      * @param userIds 用户id
      */
     public void addUser(long roleId, Set<Long> userIds) {
-        SQLUtils.delete("sys_user_role", new Object[]{true}, "is_deleted = ?");
-        SQLUtils.updateRefTable("sys_user_role", "role_id", "user_id", roleId, userIds);
+        tableDAO.delete("sys_user_role", "is_deleted = ?", new Object[]{true});
+        tableDAO.updateRefTable("sys_user_role", "role_id", "user_id", roleId, userIds);
     }
 }

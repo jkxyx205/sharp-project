@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
+import com.rick.db.repository.EntityCodeDAOImpl;
 import com.rick.formflow.form.cpn.core.Form;
 import org.springframework.stereotype.Repository;
 

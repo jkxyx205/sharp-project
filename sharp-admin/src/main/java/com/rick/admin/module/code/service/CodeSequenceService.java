@@ -1,7 +1,7 @@
 package com.rick.admin.module.code.service;
 
 import com.rick.common.util.Time2StringUtils;
-import com.rick.db.plugin.SQLUtils;
+import com.rick.db.repository.TableDAO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +18,8 @@ import java.time.Instant;
 @RequiredArgsConstructor
 @Validated
 public class CodeSequenceService {
+
+    TableDAO tableDAO;
 
     /**
      * 默认
@@ -74,7 +76,7 @@ public class CodeSequenceService {
         int[] sequences = new int[size];
 
         synchronized (category) {
-            int seq = SQLUtils.execute(con -> {
+            int seq = tableDAO.execute(con -> {
                 int sequence = 0;
                 try (PreparedStatement queryPreparedStatement = con.prepareStatement("SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ?")){
                     queryPreparedStatement.setString(1, category);

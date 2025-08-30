@@ -1,6 +1,6 @@
 package com.rick.report.core.dao;
 
-import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
+import com.rick.db.repository.EntityCodeDAOImpl;
 import com.rick.report.core.entity.Report;
 import org.springframework.stereotype.Repository;
 

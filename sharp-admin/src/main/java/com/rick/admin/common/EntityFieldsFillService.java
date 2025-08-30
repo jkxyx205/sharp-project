@@ -3,10 +3,10 @@ package com.rick.admin.common;
 import com.rick.admin.sys.user.entity.User;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.StringUtils;
-import com.rick.db.dto.BaseEntity;
-import com.rick.db.plugin.dao.annotation.Sql;
-import com.rick.db.plugin.dao.support.EntityCodeIdFillService;
-import com.rick.db.plugin.model.IdCodeValue;
+import com.rick.db.repository.Select;
+import com.rick.db.repository.model.BaseEntity;
+import com.rick.db.repository.model.IdCodeValue;
+import com.rick.db.repository.support.EntityCodeIdFillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -67,7 +67,7 @@ public class EntityFieldsFillService {
                 IdCodeValue realTypeValue = (IdCodeValue)value;
 
                 if (Objects.nonNull(value)) {
-                    Sql sql = field.getAnnotation(Sql.class);
+                    Select sql = field.getAnnotation(Select.class);
                     if (sql.value().contains("sys_user")) {
 //                       SELECT id, code, name as description from sys_user WHERE id = :id
                         Long id = entityIdFillService.fill(User.class, realTypeValue.getId(), realTypeValue.getCode());

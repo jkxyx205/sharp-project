@@ -1,8 +1,8 @@
 package com.rick.admin.core;
 
 import com.rick.admin.module.student.entity.Student;
-import com.rick.db.plugin.SQLUtils;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
+import com.rick.db.repository.TableDAO;
 import com.rick.generator.Generator;
 import com.rick.generator.control.FormLayoutEnum;
 import org.junit.jupiter.api.Test;
@@ -21,85 +21,87 @@ public class GeneratorTest {
     @Autowired
     private Generator generator;
 
+    @Autowired
+    TableDAO tableDAO;
+
     @Test
     public void testGeneratorThymeleaf() throws IOException {
-        SQLUtils.execute("Drop TABLE t_student");
+        tableDAO.execute("Drop TABLE t_student");
 
         generator.execute(Student.class,
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
-                Params.builder()
-//                        .pv(Generator.GENERATOR_CODE, true) // 是否创建 code template；如果没有指定，则没有就创建，否则不覆盖
-                        .pv(Generator.PROJECT, "admin")
-                        .pv(Generator.FORM_PAGE, "demos/student/edit-thymeleaf") // 编辑页面路径
+                Maps.of(
+//                        ,Generator.GENERATOR_CODE, true) // 是否创建 code template；如果没有指定，则没有就创建，否则不覆盖
+                        Generator.PROJECT, "admin",
+                        Generator.FORM_PAGE, "demos/student/edit-thymeleaf",// 编辑页面路径
 
-                        .pv(Generator.REPORT, true) // 是否创建 report
-                        .pv(Generator.REPORT_TEST_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/test/java/com/rick/admin/demo")
-                        .pv(Generator.REPORT_TEST_PACKAGE, "com.rick.admin.demo")
+                        Generator.REPORT, true, // 是否创建 report
+                        Generator.REPORT_TEST_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/test/java/com/rick/admin/demo",
+                        Generator.REPORT_TEST_PACKAGE, "com.rick.admin.demo",
 
                         // 表名默认 control.html
-                        .pv(Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student")
-                        .pv(Generator.CONTROL_LABEL, true)
-                        .pv(Generator.FORM_LAYOUT, FormLayoutEnum.HORIZONTAL) // 默认就是 HORIZONTAL
-//                        .pv(Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
+                        Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student",
+                        Generator.CONTROL_LABEL, true,
+                        Generator.FORM_LAYOUT, FormLayoutEnum.HORIZONTAL)); // 默认就是 HORIZONTAL
+//                        ,Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
 
-                        .build());
+
 
         executeInsertSql();
     }
 
     @Test
     public void testGeneratorVue() throws IOException {
-        SQLUtils.execute("Drop TABLE t_student");
+        tableDAO.execute("Drop TABLE t_student");
 
         generator.execute(Student.class,
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
-                Params.builder()
-                        .pv(Generator.GENERATOR_CODE, false) // 是否创建 code template
-                        .pv(Generator.PROJECT, "admin")
-                        .pv(Generator.FORM_PAGE, "demos/student/edit-vue") // 编辑页面路径
+                Maps.of(
+                        Generator.GENERATOR_CODE, false,// 是否创建 code template
+                        Generator.PROJECT, "admin",
+                        Generator.FORM_PAGE, "demos/student/edit-vue", // 编辑页面路径
 
-                        .pv(Generator.REPORT, true) // 是否创建 report
-                        .pv(Generator.REPORT_TEST_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/test/java/com/rick/admin/demo")
-                        .pv(Generator.REPORT_TEST_PACKAGE, "com.rick.admin.demo")
+                        Generator.REPORT, true, // 是否创建 report
+                        Generator.REPORT_TEST_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/test/java/com/rick/admin/demo",
+                        Generator.REPORT_TEST_PACKAGE, "com.rick.admin.demo",
 
                         // 表名默认 control.html
-                        .pv(Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student")
-                        .pv(Generator.CONTROL_LABEL, true)
-                        .pv(Generator.FORM_LAYOUT, FormLayoutEnum.INLINE)
-//                        .pv(Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
+                        Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student",
+                        Generator.CONTROL_LABEL, true,
+                        Generator.FORM_LAYOUT, FormLayoutEnum.INLINE));
+//                        ,Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
 
-                        .build());
+
 
         executeInsertSql();
     }
 
     @Test
     public void testGeneratorReact() throws IOException {
-        SQLUtils.execute("Drop TABLE t_student");
+        tableDAO.execute("Drop TABLE t_student");
 
         generator.execute(Student.class,
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
-                Params.builder()
-                        .pv(Generator.GENERATOR_CODE, false) // 是否创建 code template
-                        .pv(Generator.PROJECT, "admin")
-                        .pv(Generator.FORM_PAGE, "demos/student/edit-react") // 编辑页面路径
+                Maps.of(Generator.GENERATOR_CODE, false, // 是否创建 code template
+                        Generator.PROJECT, "admin",
+                        Generator.FORM_PAGE, "demos/student/edit-react", // 编辑页面路径
 
-                        .pv(Generator.REPORT, true) // 是否创建 report
-                        .pv(Generator.REPORT_TEST_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/test/java/com/rick/admin/demo")
-                        .pv(Generator.REPORT_TEST_PACKAGE, "com.rick.admin.demo")
+                        Generator.REPORT, true, // 是否创建 report
+                        Generator.REPORT_TEST_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/test/java/com/rick/admin/demo",
+                        Generator.REPORT_TEST_PACKAGE, "com.rick.admin.demo",
 
                         // 表名默认 control.html
-                        .pv(Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student")
-                        .pv(Generator.CONTROL_LABEL, true)
-//                        .pv(Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
+                        Generator.CONTROL_PATH, "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/resources/templates/demos/student",
+                        Generator.CONTROL_LABEL, true));
+//                        ,Generator.CONTROL_RENDER_TYPE, RenderTypeEnum.THYMELEAF)
 
-                        .build());
+
 
         executeInsertSql();
     }
 
     private void executeInsertSql() {
-        SQLUtils.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `email`, `birthday`, `age`, `is_marriage`, `unit_code`, `attachments`, `avatar`, `hobby_list`, `material_type`, `category`, `is_available`, `remark`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
+        tableDAO.execute("INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `email`, `birthday`, `age`, `is_marriage`, `unit_code`, `attachments`, `avatar`, `hobby_list`, `material_type`, `category`, `is_available`, `remark`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)\n" +
                 "VALUES\n" +
                 "\t(1, '0002', '李四', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, '[]', NULL, 0, NULL, NULL, NULL, NULL, NULL, 0),\n" +
                 "\t(2, '0001', '张三', 'M', 'fsadfsaf@163.com', '1992-11-12', 19, 1, 'EA', '[{\\\"name\\\": \\\"Rick\\\", \\\"fullName\\\": \\\"Rick\\\", \\\"fullPath\\\": \\\"null/null\\\"}]', '{\\\"id\\\": \\\"861952755730780160\\\", \\\"url\\\": \\\"http://localhost:7892/images/861952755722391552.jpeg\\\", \\\"name\\\": \\\"avatar\\\", \\\"path\\\": \\\"861952755722391552.jpeg\\\", \\\"size\\\": 68783, \\\"fullName\\\": \\\"avatar.jpeg\\\", \\\"fullPath\\\": \\\"images/861952755722391552.jpeg\\\", \\\"extension\\\": \\\"jpeg\\\", \\\"groupName\\\": \\\"images\\\", \\\"contentType\\\": \\\"image/jpeg\\\"}', '[\\\"FOOTBALL\\\", \\\"BASKETBALL\\\"]', '[{\\\"code\\\": \\\"M1\\\"}]', 'MATERIAL', 0, 'fsdfdasf', 1, '2024-08-24 22:57:24', 1, '2024-09-01 10:32:41', 0),\n" +

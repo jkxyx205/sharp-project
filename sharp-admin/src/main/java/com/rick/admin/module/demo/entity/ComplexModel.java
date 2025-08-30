@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.admin.module.common.entity.CodeDescription;
 import com.rick.admin.module.demo.model.EmbeddedValue;
 import com.rick.common.http.json.deserializer.EntityWithCodePropertyDeserializer;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Embedded;
-import com.rick.db.plugin.dao.annotation.Sql;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Embedded;
+import com.rick.db.repository.Select;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.meta.config.validator.DictValueCheck;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
@@ -35,7 +35,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "t_complex_model", comment = "测试")
-public class ComplexModel extends BaseEntityWithLongId {
+public class ComplexModel extends BaseEntity<Long> {
 
     @NotBlank
     String name;
@@ -47,7 +47,7 @@ public class ComplexModel extends BaseEntityWithLongId {
     @Embedded(columnPrefix="material_type_")
     @JsonAlias("materialType")
     @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
-    @Sql(value = "select name code, label from sys_dict WHERE type = 'MATERIAL_TYPE'  AND name = :name", params="id@materialType.code", nullWhenParamsIsNull="code")
+    @Select(value = "select name code, label from sys_dict WHERE type = 'MATERIAL_TYPE'  AND name = :name", params="id@materialType.code", nullWhenParamsIsNull="code")
     @DictType(type = "MATERIAL_TYPE") // 可以省略 从@Sql 获取label
     @DictValueCheck(type = "MATERIAL_TYPE")
     DictValue materialType;

@@ -2,9 +2,9 @@ package com.rick.admin.module.codeinput.service;
 
 import com.google.common.collect.Lists;
 import com.rick.admin.common.exception.ResourceNotFoundException;
-import com.rick.db.dto.Grid;
-import com.rick.db.plugin.GridUtils;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
+import com.rick.db.plugin.page.Grid;
+import com.rick.db.plugin.page.GridUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,10 +47,8 @@ public class CodeInputService {
     public Map<String, Object> codeSearchResult(String key) {
         CodeInputService.CodeInputContext context = SQL_MAPPING.get(key);
         List<Map<String, Object>> list = Collections.emptyList();
-        return Params.builder(2)
-                .pv("columnProperties", handlerData(context, list))
-                .pv("data", list)
-                .build();
+        return Maps.of("columnProperties", handlerData(context, list), "data", list);
+
     }
 
     public Map<String, Object> codeSearchResult(String key, String code, Map<String, Object> params) {
@@ -73,10 +71,7 @@ public class CodeInputService {
         List<Map<String, Object>> list= GridUtils.list(context.sql, params).getRows();
         List<Map<String, Object>> columnProperties = handlerData(context, list);
 
-        return Params.builder(2)
-                .pv("columnProperties", columnProperties)
-                .pv("data", list)
-                .build();
+        return Maps.of("columnProperties", columnProperties, "data", list);
     }
 
     public Map<String, Object> dialogSearchResult(String key, Map<String, Object> params) {
@@ -90,10 +85,7 @@ public class CodeInputService {
         Grid<Map<String, Object>> grid = GridUtils.list(context.sql, params);
         List<Map<String, Object>> columnProperties = handlerData(context, grid.getRows());
 
-        return Params.builder(2)
-                .pv("columnProperties", columnProperties)
-                .pv("data", grid)
-                .build();
+        return Maps.of("columnProperties", columnProperties, "data", grid);
     }
 
     class CodeInputContext {
@@ -155,10 +147,7 @@ public class CodeInputService {
         List<Map<String,Object>> columnProperties = Lists.newArrayListWithExpectedSize(context.columnLabels.size());
 
         for (int i = 0; i < context.columnLabels.size(); i++) {
-            columnProperties.add(Params.builder(1)
-                    .pv("name", context.columnNames.get(i))
-                    .pv("label", context.columnLabels.get(i))
-                    .build());
+            columnProperties.add(Maps.of("name", context.columnNames.get(i), "label", context.columnLabels.get(i)));
         }
 
         return columnProperties;

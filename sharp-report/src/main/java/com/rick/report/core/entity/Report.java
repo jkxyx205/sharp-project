@@ -1,8 +1,8 @@
 package com.rick.report.core.entity;
 
-import com.rick.db.dto.type.BaseCodeEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseCodeEntity;
 import com.rick.report.core.model.QueryField;
 import com.rick.report.core.model.ReportColumn;
 import com.rick.report.core.model.SordEnum;
@@ -33,7 +33,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_report", comment = "报表")
-public class Report extends BaseCodeEntityWithLongId {
+public class Report extends BaseCodeEntity<Long> {
 
     /**
      * 是否分页

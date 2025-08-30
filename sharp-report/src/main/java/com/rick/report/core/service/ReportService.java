@@ -7,10 +7,10 @@ import com.rick.common.http.HttpServletResponseUtils;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.JsonUtils;
-import com.rick.db.dto.Grid;
-import com.rick.db.dto.PageModel;
-import com.rick.db.dto.QueryModel;
-import com.rick.db.plugin.GridUtils;
+import com.rick.db.plugin.page.Grid;
+import com.rick.db.plugin.page.GridUtils;
+import com.rick.db.plugin.page.PageModel;
+import com.rick.db.plugin.page.QueryModel;
 import com.rick.excel.table.AbstractExportTable;
 import com.rick.excel.table.MapExcelTable;
 import com.rick.excel.table.model.AlignEnum;
@@ -61,7 +61,7 @@ public class ReportService {
     /**
      * 创建报表
      */
-    public int saveOrUpdate(@Valid Report report) {
+    public Report saveOrUpdate(@Valid Report report) {
         validateNonDeleteSql(report.getQuerySql());
         return reportDAO.insertOrUpdate(report);
     }

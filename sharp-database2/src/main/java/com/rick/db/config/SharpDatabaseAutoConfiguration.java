@@ -5,12 +5,11 @@ import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.plugin.generator.*;
 import com.rick.db.plugin.page.GridService;
 import com.rick.db.plugin.page.GridUtils;
+import com.rick.db.repository.EntityDAO;
 import com.rick.db.repository.TableDAO;
 import com.rick.db.repository.TableDAOImpl;
 import com.rick.db.repository.model.DatabaseType;
-import com.rick.db.repository.support.DatabaseMetaData;
-import com.rick.db.repository.support.IdToEntityConverterFactory;
-import com.rick.db.repository.support.SQLParamCleaner;
+import com.rick.db.repository.support.*;
 import com.rick.db.repository.support.dialect.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +53,7 @@ public class SharpDatabaseAutoConfiguration {
     static class GridServiceConfiguration {
 
         @Bean
+        @ConditionalOnMissingBean({TableDAO.class})
         public TableDAO tableDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate, SharpDatabaseProperties sharpDatabaseProperties) {
             if (sharpDatabaseProperties.isInitDatabaseMetaData()) {
                 DatabaseMetaData.initTableMapping(namedParameterJdbcTemplate.getJdbcTemplate());
@@ -65,8 +65,6 @@ public class SharpDatabaseAutoConfiguration {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-
-            // 加载
             return new TableDAOImpl(namedParameterJdbcTemplate);
         }
 
@@ -98,6 +96,12 @@ public class SharpDatabaseAutoConfiguration {
             SQLParamCleaner.setDialect(dialect);
             return new GridService(tableDAO, dialect);
         }
+
+        @Bean
+        public EntityCodeIdFillService getEntityCodeIdFillService() {
+            return new EntityCodeIdFillService();
+        }
+
     }
 
 //    @ConditionalOnProperty(prefix = "sharp.database", name = "select-cache")
@@ -110,6 +114,11 @@ public class SharpDatabaseAutoConfiguration {
         @Autowired(required = false)
         private List<ConverterFactory> converterFactories;
 
+        @Bean
+        public EntityDAOSupport entityDAOSupport(@Autowired(required = false) List<EntityDAO> entityDAOList) {
+            EntityDAOSupport entityDAOSupport = new EntityDAOSupport();
+            return entityDAOSupport;
+        }
 
         @Bean
         @ConditionalOnMissingBean
@@ -150,7 +159,6 @@ public class SharpDatabaseAutoConfiguration {
         public void setGridService(GridService gridService) {
             GridUtils gridUtils = new GridUtils();
             gridUtils.setGridService(gridService);
-
         }
     }
 

@@ -3,7 +3,7 @@ package com.rick.admin.config.dialect;
 import com.google.common.collect.Sets;
 import com.rick.admin.config.dialect.processor.*;
 import com.rick.admin.module.codeinput.service.CodeInputService;
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.formflow.form.service.FormService;
 import com.rick.meta.dict.service.DictService;
 import org.thymeleaf.dialect.AbstractProcessorDialect;
@@ -27,16 +27,16 @@ public class CustomizeProcessorDialectDialect extends AbstractProcessorDialect {
 
     private final DictService dictService;
 
-    private final SharpService sharpService;
+    private final TableDAO tableDAO;
 
     private final FormService formService;
 
     private final CodeInputService codeInputService;
 
-    public CustomizeProcessorDialectDialect(DictService dictService, SharpService sharpService, FormService formService, CodeInputService codeInputService) {
+    public CustomizeProcessorDialectDialect(DictService dictService, TableDAO tableDAO, FormService formService, CodeInputService codeInputService) {
         super(DIALECT_NAME, DIALECT_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE);
         this.dictService = dictService;
-        this.sharpService = sharpService;
+        this.tableDAO = tableDAO;
         this.formService = formService;
         this.codeInputService = codeInputService;
     }
@@ -46,8 +46,8 @@ public class CustomizeProcessorDialectDialect extends AbstractProcessorDialect {
         Set<IProcessor> processors = Sets.newHashSetWithExpectedSize(3);
 
         // 添加自定义标签
-        processors.add(new SelectProcessor(DIALECT_PREFIX, dictService, sharpService));
-        processors.add(new SelectOptionProcessor(DIALECT_PREFIX, dictService, sharpService));
+        processors.add(new SelectProcessor(DIALECT_PREFIX, dictService, tableDAO));
+        processors.add(new SelectOptionProcessor(DIALECT_PREFIX, dictService, tableDAO));
         processors.add(new SharpFormProcessor(DIALECT_PREFIX, formService));
         processors.add(new FileUploadProcessor(DIALECT_PREFIX));
         processors.add(new ImageUploadProcessor(DIALECT_PREFIX));

@@ -1,7 +1,7 @@
 package com.rick.excel.plugin;
 
-import com.rick.db.dto.QueryModel;
-import com.rick.db.service.GridService;
+import com.rick.db.plugin.page.GridService;
+import com.rick.db.plugin.page.QueryModel;
 import com.rick.excel.table.QueryResultExportTable;
 import com.rick.excel.table.model.MapTableColumn;
 

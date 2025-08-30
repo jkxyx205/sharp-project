@@ -1,6 +1,6 @@
 package com.rick.formflow.form.dao;
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.repository.EntityDAOImpl;
 import com.rick.formflow.form.cpn.core.FormCpn;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -19,7 +19,7 @@ public class FormCpnDAO extends EntityDAOImpl<FormCpn, Long> {
 
     public List<FormCpn> listByFormId(Long formId) {
         Assert.notNull(formId, "formId cannot be null");
-        return selectByParams(FormCpn.builder().formId(formId).build(), "form_id = :formId ORDER BY order_num asc");
+        return select("form_id = :formId ORDER BY order_num asc", FormCpn.builder().formId(formId).build());
     }
 
     public int deleteByFormId(Long formId) {

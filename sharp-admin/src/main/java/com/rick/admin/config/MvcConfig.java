@@ -5,7 +5,7 @@ import com.rick.admin.common.servlet.AccessFilter;
 import com.rick.common.http.exception.ApiExceptionHandler;
 import com.rick.common.http.util.MessageUtils;
 import com.rick.common.http.web.SharpWebMvcConfigurer;
-import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
+import com.rick.db.repository.support.IdToEntityConverterFactory;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

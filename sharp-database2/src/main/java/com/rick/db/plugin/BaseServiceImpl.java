@@ -39,6 +39,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, Map<String, ?> paramMap) {
+        return baseDAO.selectForKeyValue(columns, condition, paramMap);
+    }
+
+    @Override
     public List<T> select(String condition, Object... args) {
         return baseDAO.select(condition, args);
     }
@@ -59,8 +64,18 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Object... args) {
+        return baseDAO.selectWithoutCascadeSelect(clazz, columns, condition, args);
+    }
+
+    @Override
     public List<T> select(String columns, String condition, Map<String, ?> paramMap) {
         return baseDAO.select(columns, condition, paramMap);
+    }
+
+    @Override
+    public List<T> select(T example) {
+        return baseDAO.select(example);
     }
 
     @Override
@@ -85,7 +100,12 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
-        return null;
+        return baseDAO.select(clazz, columns, condition, paramMap);
+    }
+
+    @Override
+    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
+        return baseDAO.selectWithoutCascadeSelect(clazz, columns, condition, paramMap);
     }
 
     @Override
@@ -126,6 +146,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     @Override
     public T insert(T entity) {
         return baseDAO.insert(entity);
+    }
+
+    @Override
+    public T insertOrUpdate(Map<String, Object> paramMap) {
+        return baseDAO.insertOrUpdate(paramMap);
     }
 
     @Override
@@ -176,5 +201,10 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     @Override
     public TableDAO getTableDAO() {
         return baseDAO.getTableDAO();
+    }
+
+    @Override
+    public Map<String, Object> entityToMap(T entity) {
+        return baseDAO.entityToMap(entity);
     }
 }

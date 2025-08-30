@@ -1,6 +1,6 @@
 package com.rick.demo.module.code.dao;
 
-import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
+import com.rick.db.repository.EntityCodeDAOImpl;
 import com.rick.demo.module.code.entity.SerialNumber;
 import org.springframework.stereotype.Repository;
 

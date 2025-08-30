@@ -2,7 +2,7 @@ package com.rick.admin.module.student.service;
 
 import com.rick.admin.module.student.dao.StudentDAO;
 import com.rick.admin.module.student.entity.Student;
-import com.rick.db.service.BaseServiceImpl;
+import com.rick.db.plugin.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

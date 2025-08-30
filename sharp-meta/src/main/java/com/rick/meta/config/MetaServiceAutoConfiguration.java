@@ -1,7 +1,7 @@
 package com.rick.meta.config;
 
-import com.rick.db.config.GridServiceAutoConfiguration;
-import com.rick.db.service.SharpService;
+import com.rick.db.config.SharpDatabaseAutoConfiguration;
+import com.rick.db.repository.TableDAO;
 import com.rick.meta.dict.convert.*;
 import com.rick.meta.dict.dao.DictDAO;
 import com.rick.meta.dict.model.DictProperties;
@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Configuration;
  * @Copyright: 2019 www.yodean.com. All rights reserved.
  */
 @Configuration
-@ConditionalOnSingleCandidate(SharpService.class)
-@AutoConfigureAfter({GridServiceAutoConfiguration.class})
+@ConditionalOnSingleCandidate(TableDAO.class)
+@AutoConfigureAfter({SharpDatabaseAutoConfiguration.class})
 public class MetaServiceAutoConfiguration {
 
     public MetaServiceAutoConfiguration() {
@@ -45,14 +45,14 @@ public class MetaServiceAutoConfiguration {
         }
 
         @Bean
-        public DictService getDictService(SharpService sharpService, DictProperties dictProperties,
+        public DictService getDictService(TableDAO tableDAO, DictProperties dictProperties,
                                           @Autowired(required = false) DictDOSupplier dictDOSupplier) {
-            return new DictServiceImpl(sharpService, dictProperties, dictDOSupplier);
+            return new DictServiceImpl(tableDAO, dictProperties, dictDOSupplier);
         }
 
         @Bean
-        public PropertyService getPropertyService(SharpService sharpService, KeyValueProperties keyValueProperties) {
-            return new PropertyServiceImpl(sharpService, keyValueProperties);
+        public PropertyService getPropertyService(TableDAO tableDAO, KeyValueProperties keyValueProperties) {
+            return new PropertyServiceImpl(tableDAO, keyValueProperties);
         }
 
         @Bean

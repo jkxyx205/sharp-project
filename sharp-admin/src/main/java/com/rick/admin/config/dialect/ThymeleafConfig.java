@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.rick.admin.module.codeinput.service.CodeInputService;
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.formflow.form.service.FormService;
 import com.rick.meta.dict.service.DictService;
 import nz.net.ultraq.thymeleaf.LayoutDialect;
@@ -40,8 +40,8 @@ import java.time.format.DateTimeFormatter;
 public class ThymeleafConfig {
 
     @Bean
-    public CustomizeProcessorDialectDialect dictSelectDialect(DictService dictService, SharpService sharpService, FormService formService, CodeInputService codeInputService) {
-        return new CustomizeProcessorDialectDialect(dictService, sharpService, formService, codeInputService);
+    public CustomizeProcessorDialectDialect dictSelectDialect(DictService dictService, TableDAO tableDAO, FormService formService, CodeInputService codeInputService) {
+        return new CustomizeProcessorDialectDialect(dictService, tableDAO, formService, codeInputService);
     }
 
     @Bean

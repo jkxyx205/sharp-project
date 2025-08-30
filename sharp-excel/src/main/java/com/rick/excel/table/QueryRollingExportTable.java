@@ -1,6 +1,7 @@
 package com.rick.excel.table;
 
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.JdbcTemplateCallback;
+import com.rick.db.repository.TableDAO;
 import com.rick.excel.core.model.ExcelRow;
 import com.rick.excel.table.model.MapTableColumn;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,7 +21,7 @@ import java.util.Objects;
  */
 public class QueryRollingExportTable extends AbstractExportTable {
 
-    private SharpService sharpService;
+    private TableDAO tableDAO;
 
     private String sql;
 
@@ -30,14 +31,14 @@ public class QueryRollingExportTable extends AbstractExportTable {
 
     private int columnSize;
 
-    public QueryRollingExportTable(SharpService sharpService,
+    public QueryRollingExportTable(TableDAO tableDAO,
                                    String sql,
                                    Map<String, ?> params,
                                    List<MapTableColumn> tableColumnList) {
         super(tableColumnList, null);
         this.columnSize = tableColumnList.size();
         this.tableColumnList = tableColumnList;
-        this.sharpService = sharpService;
+        this.tableDAO = tableDAO;
         this.sql = sql;
         this.params = params;
     }
@@ -46,7 +47,7 @@ public class QueryRollingExportTable extends AbstractExportTable {
     public void writeRows() {
         int startY = CollectionUtils.isEmpty(tableColumnList) ? 1 : 2;
 
-        sharpService.query(sql, params, (SharpService.JdbcTemplateCallback) (jdbcTemplate, sql, args) -> {
+        tableDAO.select(sql, params, (JdbcTemplateCallback) (jdbcTemplate, sql, args) -> {
             jdbcTemplate.query(sql, args, rs -> {
                 Object[] data = new Object[columnSize];
 

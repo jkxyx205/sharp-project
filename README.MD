@@ -5,7 +5,7 @@
 ```xml
         <dependency>
             <groupId>com.rick.db</groupId>
-            <artifactId>sharp-database</artifactId>
+            <artifactId>sharp-database2</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 ```

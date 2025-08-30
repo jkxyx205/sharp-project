@@ -1,6 +1,6 @@
 package com.rick.meta.dict.model;
 
-import com.rick.db.plugin.dao.annotation.Transient;
+import com.rick.db.repository.Transient;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

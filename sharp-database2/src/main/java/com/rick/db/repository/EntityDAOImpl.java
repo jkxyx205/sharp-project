@@ -2,6 +2,7 @@ package com.rick.db.repository;
 
 import com.rick.common.util.*;
 import com.rick.common.validate.ValidatorHelper;
+import com.rick.db.repository.support.SqlHelper;
 import com.rick.db.repository.support.TableMeta;
 import com.rick.db.repository.support.TableMetaResolver;
 import com.rick.db.util.OperatorUtils;
@@ -13,8 +14,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,6 +36,9 @@ import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REG
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Validated // 必须加入
 public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
+
+    @Resource
+    private ConversionService dbConversionService;
 
     @Resource
     @Getter
@@ -82,7 +88,12 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public List<T> selectAll() {
-        return select(null);
+        return select("");
+    }
+
+    @Override
+    public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, Map<String, ?> paramMap) {
+        return tableDAO.selectForKeyValue(tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
     }
 
     @Override
@@ -112,9 +123,35 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Object... args) {
-        List<E> list = tableDAO.select(clazz, "SELECT " + columns + " FROM " + tableMeta.getTableName() + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition), args);
+        List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, args);
         cascadeSelect(clazz, (List<T>) list);
         return list;
+    }
+
+    @Override
+    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Object... args) {
+        List<E> list = tableDAO.select(clazz, tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), args);
+        return list;
+    }
+
+    @Override
+    public List<T> select(T example) {
+        if (Objects.isNull(example)) {
+            return selectAll();
+        }
+
+        Map<String, Object> paramMap = new HashMap<>();
+        StringBuilder conditionColumnBuilder = new StringBuilder();
+
+        for (Map.Entry<Field, String> entry : tableMeta.getFieldColumnNameMap().entrySet()) {
+            Object value = parsingColumnValue(entry.getKey(), entry.getValue(), getPropertyValue(example, tableMeta.getFieldPropertyNameMap().get(entry.getKey())));
+            if (Objects.nonNull(value)) {
+                paramMap.put(tableMeta.getFieldPropertyNameMap().get(entry.getKey()), value);
+                conditionColumnBuilder.append(entry.getValue()).append(",");
+            }
+        }
+
+        return select(tableMeta.getEntityClass(), tableMeta.getSelectColumn(), tableMeta.appendColumnVar(conditionColumnBuilder.toString(), true, " AND "), paramMap);
     }
 
     @Override
@@ -144,8 +181,14 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
-        List<E> list = tableDAO.select(clazz, "SELECT " + columns + " FROM " + tableMeta.getTableName() + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition), paramMap);
+        List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, paramMap);
         cascadeSelect(clazz, (List<T>) list);
+        return list;
+    }
+
+    @Override
+    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
+        List<E> list = tableDAO.select(clazz, tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
         return list;
     }
 
@@ -342,7 +385,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         int row = 0;
         // 级联删除(@OneToMany @ManyToMany)
         if (CollectionUtils.isNotEmpty(ids)) {
-
             for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
                 TableMeta.Reference reference = fieldReferenceEntry.getValue();
                 if (Objects.nonNull(reference.getManyToMany()) || Objects.nonNull(reference.getOneToMany())) {
@@ -381,6 +423,17 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     @Override
+    public T insertOrUpdate(Map<String, Object> paramMap) {
+        T entity = BeanUtils.instantiateClass(tableMeta.getEntityClass());
+        for (Map.Entry<String, ?> entry : paramMap.entrySet()) {
+            setPropertyValue(entity, entry.getKey(), entry.getValue());
+        }
+        insertOrUpdate(entity);
+        paramMap.put(tableMeta.getIdMeta().getIdPropertyName(), getIdValue(entity));
+        return entity;
+    }
+
+    @Override
     public T update(T entity) {
         return insertOrUpdate0(entity, false);
     }
@@ -406,13 +459,13 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
             }
 
             if (Objects.nonNull(getIdValue(entity))) {
-                tableDAO.insert(tableMeta.getTableName(), args);
+                tableDAO.insert(tableMeta.getTableName(), tableMeta.getColumnNames(),  args);
             } else if (tableMeta.getIdMeta().getId().strategy() == Id.GenerationType.SEQUENCE) {
                 args.put(tableMeta.getIdMeta().getIdPropertyName(), IdGenerator.getSequenceId());
-                tableDAO.insert(tableMeta.getTableName(), args);
+                tableDAO.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), args);
                 setIdValue(entity, args.get(tableMeta.getIdMeta().getIdPropertyName()));
             } else {
-                setIdValue(entity, tableDAO.insertAndReturnKey(tableMeta.getTableName(), args, tableMeta.getIdMeta().getIdPropertyName()));
+                setIdValue(entity, tableDAO.insertAndReturnKey(tableMeta.getTableName(), tableMeta.getColumnNames(), args, tableMeta.getIdMeta().getIdPropertyName()));
             }
         } else {
             Map<String, Object> args = getArgsFromEntity(entity, true);
@@ -452,7 +505,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                             }
 
                             for (Object referenceEntity : list) {
-                                tableDAO.insert(reference.getManyToMany().tableName(), Maps.of(reference.getManyToMany().joinColumnId(), getIdValue(entity), reference.getManyToMany().inverseJoinColumnId(), getIdValue(referenceEntity)));
+                                tableDAO.insert(reference.getManyToMany().tableName(), reference.getManyToMany().joinColumnId() + "," + reference.getManyToMany().inverseJoinColumnId(), Maps.of(reference.getManyToMany().joinColumnId(), getIdValue(entity), reference.getManyToMany().inverseJoinColumnId(), getIdValue(referenceEntity)));
                             }
                         }
 
@@ -501,7 +554,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public int updateById(String columns, ID id, Object... args) {
-        return update(columns, "id = :id", appendId(id, args));
+        return update(columns, "id = :id", ArrayUtils.addAll(args, id));
     }
 
     public int updateById(String columns, ID id, Map<String, ?> paramMap) {
@@ -518,20 +571,18 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     @Override
+    public Map<String, Object> entityToMap(T entity) {
+        return getArgsFromEntity(entity, true);
+    }
+
+    @Override
     public int update(String columns, String condition, Object... args) {
-        return tableDAO.update(tableMeta.getTableName(), appendColumnVar(columns, false), condition, args);
+        return tableDAO.update(tableMeta.getTableName(), tableMeta.appendColumnVar(columns, false), condition, args);
     }
 
     @Override
     public int update(String columns, String condition, Map<String, ?> paramMap) {
-        return tableDAO.update(tableMeta.getTableName(), appendColumnVar(columns, true), condition, paramMap);
-    }
-
-    public Object[] appendId(ID arg, Object... args) {
-        Object[] newArgs = new Object[args.length + 1];
-        System.arraycopy(args, 0, newArgs, 0, args.length);
-        newArgs[args.length] = arg;
-        return newArgs;
+        return tableDAO.update(tableMeta.getTableName(), tableMeta.appendColumnVar(columns, true), condition, paramMap);
     }
 
     private void setIdValue(Object entity, Object id) {
@@ -550,6 +601,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         String[] parts = propertyName.split("\\.");
         Object current = bean;
         BeanWrapperImpl wrapper = new BeanWrapperImpl(current);
+        wrapper.setConversionService(dbConversionService);
 
         try {
             for (int i = 0; i < parts.length - 1; i++) {
@@ -573,8 +625,11 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
             }
 
             // 设置最终属性
-            wrapper.setPropertyValue(parts[parts.length - 1], value);
+            if (!wrapper.isWritableProperty(parts[parts.length - 1])) {
+                return;
+            }
 
+            wrapper.setPropertyValue(parts[parts.length - 1], value);
         } catch (Exception e) {
             throw new RuntimeException("Failed to set property: " + propertyName, e);
         }
@@ -631,11 +686,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         }
 
         return value;
-    }
-
-    private String appendColumnVar(String columns, boolean namedVar) {
-        String[] columnArr = columns.split(COLUMN_NAME_SEPARATOR_REGEX);
-        return Arrays.stream(columnArr).map(column -> column + " = " + (namedVar ? ":" + tableMeta.getColumnPropertyNameMap().get(column) : "?")).collect(Collectors.joining(", "));
     }
 
 }

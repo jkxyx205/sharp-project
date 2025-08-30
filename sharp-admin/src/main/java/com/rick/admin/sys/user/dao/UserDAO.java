@@ -1,7 +1,7 @@
 package com.rick.admin.sys.user.dao;
 
 import com.rick.admin.sys.user.entity.User;
-import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
+import com.rick.db.repository.EntityCodeDAOImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -30,7 +30,7 @@ public class UserDAO extends EntityCodeDAOImpl<User, Long> {
 //    }
 
     @Override
-    public int update(User entity) {
+    public User update(User entity) {
         return super.update(entity);
     }
 }

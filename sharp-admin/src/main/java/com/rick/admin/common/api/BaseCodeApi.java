@@ -2,9 +2,9 @@ package com.rick.admin.common.api;
 
 import com.rick.admin.common.exception.ExceptionCodeEnum;
 import com.rick.admin.common.exception.ResourceNotFoundException;
-import com.rick.db.dto.BaseCodeEntity;
-import com.rick.db.plugin.dao.core.EntityCodeDAO;
-import com.rick.db.service.BaseServiceImpl;
+import com.rick.db.plugin.BaseServiceImpl;
+import com.rick.db.repository.EntityCodeDAO;
+import com.rick.db.repository.model.BaseCodeEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 

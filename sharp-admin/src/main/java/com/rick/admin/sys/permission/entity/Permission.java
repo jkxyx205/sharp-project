@@ -1,8 +1,8 @@
 package com.rick.admin.sys.permission.entity;
 
-import com.rick.db.dto.type.BaseCodeEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseCodeEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "sys_permission", comment = "权限表")
-public class Permission extends BaseCodeEntityWithLongId {
+public class Permission extends BaseCodeEntity<Long> {
 
     @Column(comment = "权限名称")
     private String name;

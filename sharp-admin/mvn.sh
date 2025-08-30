@@ -5,7 +5,7 @@ source ./config.sh
 current_dir=$(pwd)
 
 mvn clean package -Dmaven.test.skip=true
-scp $current_dir/target/$project_name-2.0-SNAPSHOT.jar root@$server_ip:$dir/$project_name/deploy
+scp $current_dir/target/$project_name-3.0-SNAPSHOT.jar root@$server_ip:$dir/$project_name/deploy
 
 #ssh dao
 # cd /usr/local/projects/dao

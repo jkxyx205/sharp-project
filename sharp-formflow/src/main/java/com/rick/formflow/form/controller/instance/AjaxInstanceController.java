@@ -3,7 +3,6 @@ package com.rick.formflow.form.controller.instance;
 
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
-import com.rick.db.constant.SharpDbConstants;
 import com.rick.formflow.form.service.FormService;
 import com.rick.formflow.form.service.bo.FormBO;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +10,8 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
+import static com.rick.db.repository.support.Constants.ID_COLUMN_NAME;
 
 /**
  * @author Rick
@@ -36,7 +37,7 @@ public class AjaxInstanceController {
     @PostMapping("{formId}")
     public Result<String> save(@RequestBody Map<String, Object> values, @PathVariable Long formId) throws BindException {
         formService.post(formId, values);
-        return ResultUtils.success(String.valueOf(values.get(SharpDbConstants.ID_COLUMN_NAME)));
+        return ResultUtils.success(String.valueOf(values.get(ID_COLUMN_NAME)));
     }
 
     @PutMapping("{formId}/{instanceId}")

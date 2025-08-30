@@ -3,16 +3,17 @@
 PROJECTS=(
 sharp-dependencies
 #sharp-common
-sharp-database
+#sharp-database
+sharp-database2
 #sharp-excel
 #sharp-meta
+#sharp-report
 #sharp-fileupload
 #sharp-formflow
 #sharp-mail
-#sharp-report
 #sharp-generator
-#sharp-sms
-#sharp-notification
+sharp-sms
+sharp-notification
 )
 
 for p in ${PROJECTS[@]}

@@ -10,7 +10,7 @@ import com.rick.admin.sys.user.entity.User;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
-import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.repository.EntityDAO;
 import com.rick.meta.dict.model.DictValue;
 import com.rick.meta.dict.service.DictUtils;
 import lombok.RequiredArgsConstructor;

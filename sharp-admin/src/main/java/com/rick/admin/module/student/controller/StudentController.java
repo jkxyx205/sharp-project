@@ -4,7 +4,6 @@ import com.rick.admin.common.api.BaseFormController;
 import com.rick.admin.common.exception.ResourceNotFoundException;
 import com.rick.admin.module.student.entity.Student;
 import com.rick.admin.module.student.service.StudentService;
-import com.rick.db.plugin.dao.core.EntityDAOManager;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Controller;
@@ -31,7 +30,7 @@ public class StudentController extends BaseFormController<StudentService, Studen
     @GetMapping("{id}")
     @ResponseBody
     public Student findById(@PathVariable Long id) {
-        Optional<Student> byId = baseService.findById(id);
+        Optional<Student> byId = baseService.selectById(id);
         return getEntityFromOptional(byId, id);
     }
 
@@ -44,6 +43,6 @@ public class StudentController extends BaseFormController<StudentService, Studen
     }
 
     protected String comment() {
-        return EntityDAOManager.getTableMeta(baseService.getBaseDAO().getEntityClass()).getTable().comment();
+        return baseService.getBaseDAO().getTableMeta().getTable().comment();
     }
 }

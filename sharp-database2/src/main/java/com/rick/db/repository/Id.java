@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 public @interface Id {
 
-    GenerationType strategy() default GenerationType.IDENTITY;
+    GenerationType strategy() default GenerationType.SEQUENCE;
 
     enum GenerationType {
         ASSIGN,

@@ -9,6 +9,7 @@ import com.rick.db.repository.support.Constants;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
  */
 @Setter
 @Getter
-public class AdditionalInfo {
+public class BaseEntityInfo implements Serializable {
 
     @Column(updatable = false, comment = "创建人")
     @JsonSerialize(using = ToStringSerializer.class)

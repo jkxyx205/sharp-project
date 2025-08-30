@@ -43,7 +43,7 @@
         <!-- 数据库操作 begin -->
         <dependency>
             <groupId>com.rick.db</groupId>
-            <artifactId>sharp-database</artifactId>
+            <artifactId>sharp-database2</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

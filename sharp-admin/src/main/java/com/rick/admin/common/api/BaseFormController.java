@@ -6,11 +6,11 @@ import com.rick.common.http.model.Result;
 import com.rick.common.http.model.ResultUtils;
 import com.rick.common.util.ClassUtils;
 import com.rick.common.util.HtmlTagUtils;
-import com.rick.db.constant.SharpDbConstants;
-import com.rick.db.dto.SimpleEntity;
-import com.rick.db.plugin.dao.core.EntityDAO;
-import com.rick.db.plugin.dao.core.EntityDAOManager;
-import com.rick.db.service.BaseServiceImpl;
+import com.rick.db.plugin.BaseServiceImpl;
+import com.rick.db.repository.EntityDAO;
+import com.rick.db.repository.EntityDAOManager;
+import com.rick.db.repository.model.EntityId;
+import com.rick.db.repository.support.TableMeta;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
 import com.rick.meta.dict.service.DictUtils;
@@ -25,12 +25,15 @@ import javax.validation.Valid;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static com.rick.db.repository.support.Constants.ID_COLUMN_NAME;
+import static com.rick.db.repository.support.Constants.LOGIC_DELETE_COLUMN_NAME;
+
 /**
  * 表单的增删改
  * @author Rick.Xu
  * @date 2024/1/26 16:05
  */
-public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID>, T extends SimpleEntity<ID>, ID> {
+public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID>, T extends EntityId<ID>, ID> {
 
     protected final S baseService;
 
@@ -74,7 +77,7 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
     public String gotoFormPageById(HttpServletRequest request, @PathVariable ID id, Model model) {
         Map<String, String> parameterMap = HttpServletRequestUtils.getParameterStringMap(request);
 
-        Optional<T> op = baseService.findById(id);
+        Optional<T> op = baseService.selectById(id);
         Object entity = op.orElseThrow(() -> new ResourceNotFoundException());
         DictUtils.fillDictLabel(entity); // 可选操作
         model.addAttribute(entityPropertyName, entity);
@@ -105,32 +108,33 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
     @PostMapping
     @ResponseBody
     public Result saveOrUpdate(@RequestBody @Valid T e) {
-        baseService.saveOrUpdate(e);
+        baseService.insertOrUpdate(e);
         return ResultUtils.success(e);
     }
 
     @DeleteMapping("{id}")
     @ResponseBody
     public Result deleteById(@PathVariable ID id) {
-        baseService.deleteLogicallyById(id);
+        baseService.deleteById(id);
         return ResultUtils.success();
     }
 
     private void addAttributeOfDict(Model model) {
         // 所有用到的字典
-        EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
-        Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
-        Map<String, String> columnNameToPropertyNameMap = entityDAO.getColumnNameToPropertyNameMap();
+        EntityDAO entityDAO = EntityDAOManager.getDAO(entityClass);
+        TableMeta tableMeta = entityDAO.getTableMeta();
 
         List<String> columnNames = entityDAO.getTableMeta().getSortedColumns();
 
         for (String columnName : columnNames) {
-            if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
+            if (ID_COLUMN_NAME.equals(columnName) || LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
                 continue;
             }
 
-            String propertyName = columnNameToPropertyNameMap.get(columnName);
-            Field field = fieldMap.get(propertyName);
+            Map<String, String> columnPropertyNameMap = tableMeta.getColumnPropertyNameMap();
+            String propertyName = columnPropertyNameMap.get(columnName);
+
+            Field field = tableMeta.getFieldByColumnName(columnName);
 
             // 是否是字典
             boolean isDictValue = field.getType().isEnum() || field.getType().getAnnotation(DictType.class) != null || field.getDeclaringClass() == DictValue.class;
@@ -140,7 +144,7 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
                 if (field.getType().isEnum()) {
                     dictTypeValue = field.getType().getSimpleName();
                 } else {
-                    Field embeddedField = fieldMap.get(StringUtils.substringBefore(propertyName, "."));
+                    Field embeddedField = tableMeta.getFieldByPropertyName(StringUtils.substringBefore(propertyName, "."));
                     DictType dictType = ObjectUtils.defaultIfNull(field.getAnnotation(DictType.class), embeddedField.getAnnotation(DictType.class));
                     dictTypeValue = dictType.type();
                 }

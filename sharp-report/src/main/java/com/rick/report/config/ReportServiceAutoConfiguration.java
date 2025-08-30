@@ -1,7 +1,7 @@
 package com.rick.report.config;
 
-import com.rick.db.config.GridServiceAutoConfiguration;
-import com.rick.db.service.GridService;
+import com.rick.db.config.SharpDatabaseAutoConfiguration;
+import com.rick.db.plugin.page.GridService;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnSingleCandidate(GridService.class)
-@AutoConfigureAfter({GridServiceAutoConfiguration.class})
+@AutoConfigureAfter({SharpDatabaseAutoConfiguration.class})
 public class ReportServiceAutoConfiguration {
 
     public ReportServiceAutoConfiguration() {

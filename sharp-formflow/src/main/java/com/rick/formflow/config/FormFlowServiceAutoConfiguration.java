@@ -1,7 +1,8 @@
 package com.rick.formflow.config;
 
-import com.rick.db.config.GridServiceAutoConfiguration;
-import com.rick.db.service.GridService;
+
+import com.rick.db.config.SharpDatabaseAutoConfiguration;
+import com.rick.db.plugin.page.GridService;
 import com.rick.formflow.form.service.FormAdvice;
 import com.rick.formflow.form.service.bo.FormBO;
 import com.rick.formflow.form.service.convert.DateTimeToStringConverter;
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 @Configuration
 @ConditionalOnSingleCandidate(GridService.class)
-@AutoConfigureAfter({GridServiceAutoConfiguration.class})
+@AutoConfigureAfter({SharpDatabaseAutoConfiguration.class})
 public class FormFlowServiceAutoConfiguration {
 
     public FormFlowServiceAutoConfiguration() {

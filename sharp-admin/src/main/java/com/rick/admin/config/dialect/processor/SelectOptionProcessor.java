@@ -1,7 +1,7 @@
 package com.rick.admin.config.dialect.processor;
 
 import com.rick.admin.config.dialect.SelectOptionHelper;
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.meta.dict.service.DictService;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.model.IModel;
@@ -29,9 +29,9 @@ public class SelectOptionProcessor extends AbstractElementTagProcessor {
 
     private final DictService dictService;
 
-    private final SharpService sharpService;
+    private final TableDAO tableDAO;
 
-    public SelectOptionProcessor(String dialectPrefix, DictService dictService, SharpService sharpService) {
+    public SelectOptionProcessor(String dialectPrefix, DictService dictService, TableDAO tableDAO) {
         super(
                 // 此处理器将仅应用于HTML模式
                 TemplateMode.HTML,
@@ -55,14 +55,14 @@ public class SelectOptionProcessor extends AbstractElementTagProcessor {
                 PRECEDENCE
         );
         this.dictService = dictService;
-        this.sharpService = sharpService;
+        this.tableDAO = tableDAO;
     }
 
     @Override
     protected void doProcess(ITemplateContext iTemplateContext, IProcessableElementTag iProcessableElementTag, IElementTagStructureHandler iElementTagStructureHandler) {
         IModelFactory modelFactory = iTemplateContext.getModelFactory();
         IModel model = modelFactory.createModel();
-        new SelectOptionHelper(dictService, sharpService)
+        new SelectOptionHelper(dictService, tableDAO)
                 .appendOptions(modelFactory, model, iProcessableElementTag, iElementTagStructureHandler);
     }
 

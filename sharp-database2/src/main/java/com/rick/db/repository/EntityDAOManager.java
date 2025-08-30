@@ -1,5 +1,6 @@
 package com.rick.db.repository;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,12 +12,16 @@ public class EntityDAOManager {
 
     private static Map<Class<?>, EntityDAO<?, ?>> map = new HashMap<>();
 
-    static void register(Class<?> entityClass, EntityDAO entityDAO) {
+    public static void register(Class<?> entityClass, EntityDAO entityDAO) {
         map.put(entityClass, entityDAO);
     }
 
-    static <T> EntityDAO<T, ?> getDAO(Class<T> entityClass) {
+    public static <T> EntityDAO<T, ?> getDAO(Class<T> entityClass) {
         return (EntityDAO<T, ?>) map.get(entityClass);
+    }
+
+    public static Collection<EntityDAO<?, ?>> getAllEntityDAO() {
+        return map.values();
     }
 
 }

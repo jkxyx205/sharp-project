@@ -1,6 +1,7 @@
 package com.rick.formflow.form.service;
 
 import com.google.common.collect.Lists;
+import com.rick.db.util.OperatorUtils;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.Form;
 import com.rick.formflow.form.cpn.core.FormCpn;
@@ -50,7 +51,7 @@ public class FormCpnService {
             configurerList = Collections.emptyList();
         } else {
             configurerList = Lists.newArrayListWithExpectedSize(configIds.size());
-            Map<Long, CpnConfigurer> configIdsMap = cpnConfigurerDAO.selectByIdsAsMap(configIds);
+            Map<Long, CpnConfigurer> configIdsMap = OperatorUtils.map(cpnConfigurerDAO.selectByIds(configIds));
             for (Long configId : configIds) {
                 configurerList.add(configIdsMap.get(configId));
             }
@@ -91,6 +92,6 @@ public class FormCpnService {
             formCpn.setOrderNum(i);
         }
         formCpnDAO.deleteByFormId(formId);
-        formCpnDAO.insert(formCpnList);
+        formCpnDAO.insertOrUpdate(formCpnList);
     }
 }

@@ -1,10 +1,12 @@
 package com.rick.common.util;
 
+import com.rick.common.http.convert.*;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
@@ -71,7 +73,11 @@ public class ClassUtils {
             return null;
         }
         try {
-            return new BeanWrapperImpl(entity).getPropertyValue(propertyName);
+            BeanWrapperImpl wrapper = new BeanWrapperImpl(entity);
+            if (!wrapper.isReadableProperty(propertyName)) {
+                return null;
+            }
+            return wrapper.getPropertyValue(propertyName);
         } catch (BeansException exception) {
             return null;
         }
@@ -98,6 +104,18 @@ public class ClassUtils {
         Object current = bean;
         BeanWrapperImpl wrapper = new BeanWrapperImpl(current);
 
+        DefaultFormattingConversionService dbConversionService= new DefaultFormattingConversionService();
+
+        dbConversionService.addConverterFactory(new StringToLocalDateConverterFactory());
+        dbConversionService.addConverterFactory(new CodeToEnumConverterFactory());
+        dbConversionService.addConverter(new JsonStringToListMapConverter());
+        dbConversionService.addConverterFactory(new JsonStringToObjectConverterFactory());
+        dbConversionService.addConverterFactory(new JsonStringToMapConverterFactory());
+        dbConversionService.addConverter(new JsonStringToCollectionConverter());
+        dbConversionService.addConverter(new JsonStringToSetMapConverter());
+        dbConversionService.addConverter(new LocalDateTimeToInstantConverter());
+        wrapper.setConversionService(dbConversionService);
+
         try {
             for (int i = 0; i < parts.length - 1; i++) {
                 String part = parts[i];
@@ -120,6 +138,10 @@ public class ClassUtils {
             }
 
             // 设置最终属性
+            if (!wrapper.isWritableProperty(parts[parts.length - 1])) {
+                return;
+            }
+
             wrapper.setPropertyValue(parts[parts.length - 1], value);
         } catch (Exception e) {
             throw new RuntimeException("Failed to set property: " + propertyName, e);

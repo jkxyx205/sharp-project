@@ -1,7 +1,7 @@
 package com.rick.admin.config.dialect;
 
 import com.google.common.collect.Lists;
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.service.DictService;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ public class SelectOptionHelper {
 
     private DictService dictService;
 
-    private SharpService sharpService;
+    private TableDAO tableDAO;
 
     private static final Map<String, List<Map<String, Object>>> groupDataMap = new HashMap<>();
 
@@ -84,7 +84,7 @@ public class SelectOptionHelper {
         if (valueList == null) {
             // 进行数据的查询 根据 key 查询
             String querySql =  dictService.getDictPropertyItemByType(key).getSql(); //PropertyUtils.getProperty(key);
-            valueList = sharpService.query(querySql, null);
+            valueList = tableDAO.select(querySql, null);
             groupDataMap.put(key, valueList);
         }
 

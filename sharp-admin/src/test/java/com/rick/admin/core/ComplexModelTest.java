@@ -3,7 +3,7 @@ package com.rick.admin.core;
 import com.rick.admin.module.common.entity.CodeDescription;
 import com.rick.admin.module.demo.entity.ComplexModel;
 import com.rick.admin.module.demo.model.EmbeddedValue;
-import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.repository.EntityDAO;
 import com.rick.meta.dict.model.DictValue;
 import com.rick.meta.dict.service.DictUtils;
 import org.junit.jupiter.api.Test;

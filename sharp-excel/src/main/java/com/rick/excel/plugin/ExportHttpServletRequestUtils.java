@@ -2,7 +2,7 @@ package com.rick.excel.plugin;
 
 import com.rick.common.http.HttpServletRequestUtils;
 import com.rick.common.http.HttpServletResponseUtils;
-import com.rick.db.dto.QueryModel;
+import com.rick.db.plugin.page.QueryModel;
 import com.rick.excel.table.model.MapTableColumn;
 import lombok.experimental.UtilityClass;
 

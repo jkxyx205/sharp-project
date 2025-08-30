@@ -1,6 +1,6 @@
 package com.rick.admin.plugin.ztree.model;
 
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ public class TreeNodeService {
 
     private static final int COLLAPSE_SIZE = 30;
 
-    private final SharpService sharpService;
+    private final TableDAO tableDAO;
 
     public List<TreeNode> getSelectTreeNode(String querySql, Map<String, Object> params) {
         List<TreeNode> treeNodeList = getStructuredTreeNode(querySql, params);
@@ -41,7 +41,7 @@ public class TreeNodeService {
     }
 
     public List<TreeNode> getTreeNode(String querySql, Map<String, Object> params) {
-       return sharpService.query(querySql, params, TreeNode.class);
+       return tableDAO.select(TreeNode.class, querySql, params);
     }
 
     public List<TreeNode> getCollapseSubNode(String querySql, Map<String, Object> params) {

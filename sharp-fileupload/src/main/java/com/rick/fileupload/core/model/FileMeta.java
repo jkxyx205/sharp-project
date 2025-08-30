@@ -2,7 +2,7 @@ package com.rick.fileupload.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rick.common.util.FileUtils;
-import com.rick.db.plugin.dao.annotation.Transient;
+import com.rick.db.repository.Transient;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,6 +1,6 @@
 package com.rick.generator.config;
 
-import com.rick.db.plugin.dao.core.TableGenerator;
+import com.rick.db.plugin.generator.TableGenerator;
 import com.rick.generator.Generator;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;

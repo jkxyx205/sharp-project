@@ -71,7 +71,7 @@ public class AuthController {
     @DeleteMapping("users/{id}")
     @ResponseBody
     public Result<Integer> deleteUser(@PathVariable Long id) {
-        return ResultUtils.success(userDAO.deleteLogicallyById(id));
+        return ResultUtils.success(userDAO.deleteById(id));
     }
 
     /**

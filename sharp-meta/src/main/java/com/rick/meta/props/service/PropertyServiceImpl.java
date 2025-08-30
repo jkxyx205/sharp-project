@@ -1,6 +1,6 @@
 package com.rick.meta.props.service;
 
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.meta.props.model.KeyValueProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.util.Assert;
 @Slf4j
 public class PropertyServiceImpl implements PropertyService, InitializingBean {
 
-    private final SharpService sharpService;
+    private final TableDAO tableDAO;
 
     private static final String INSERT_SQL = "INSERT INTO sys_property(name, value) VALUES (?, ?)";
 
@@ -49,7 +49,7 @@ public class PropertyServiceImpl implements PropertyService, InitializingBean {
     public void setProperty(String name, String value) {
         Assert.hasText(name, "property name must has text");
 
-        JdbcTemplate jdbcTemplate = sharpService.getNamedJdbcTemplate().getJdbcTemplate();
+        JdbcTemplate jdbcTemplate = tableDAO.getNamedParameterJdbcTemplate().getJdbcTemplate();
 
         int updateCount = jdbcTemplate.update(UPDATE_SQL, value, name);
 
@@ -68,7 +68,7 @@ public class PropertyServiceImpl implements PropertyService, InitializingBean {
         PropertyUtils.map.putAll(keyValueProperties.getItems());
         // 数据库属性
         try {
-            PropertyUtils.map.putAll(sharpService.queryForKeyValue(SELECT_SQL, null));
+            PropertyUtils.map.putAll(tableDAO.selectForKeyValue(SELECT_SQL, null));
         } catch (Exception e) {
             log.warn("sys_property表没有创建成功！");
         }

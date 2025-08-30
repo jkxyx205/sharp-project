@@ -1,7 +1,7 @@
 package com.rick.report.core.service;
 
-import com.rick.db.dto.Grid;
-import com.rick.db.dto.PageModel;
+import com.rick.db.plugin.page.Grid;
+import com.rick.db.plugin.page.PageModel;
 import com.rick.excel.table.AbstractExportTable;
 import com.rick.excel.table.MapExcelTable;
 import com.rick.report.core.entity.Report;

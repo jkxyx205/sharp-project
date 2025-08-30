@@ -26,7 +26,7 @@
         <poi.version>5.0.0</poi.version>
         <guava.version>20.0</guava.version>
         <mybatis-plus.version>3.4.3</mybatis-plus.version>
-        <sharp.version>2.0-SNAPSHOT</sharp.version>
+        <sharp.version>3.0-SNAPSHOT</sharp.version>
     </properties>
 
     <dependencyManagement>
@@ -39,7 +39,7 @@
             </dependency>
             <dependency>
                 <groupId>com.rick.db</groupId>
-                <artifactId>sharp-database</artifactId>
+                <artifactId>sharp-database2</artifactId>
                 <version>${sharp.version}</version>
             </dependency>
             <dependency>

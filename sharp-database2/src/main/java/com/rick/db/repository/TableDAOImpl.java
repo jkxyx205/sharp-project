@@ -1,11 +1,13 @@
 package com.rick.db.repository;
 
 import com.rick.common.util.JsonUtils;
+import com.rick.common.util.Maps;
 import com.rick.common.util.ObjectUtils;
+import com.rick.db.repository.support.SqlHelper;
 import com.rick.db.util.OperatorUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -13,17 +15,22 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import javax.sql.DataSource;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REGEX;
 
 /**
  * @author Rick.Xu
@@ -52,40 +59,100 @@ public class TableDAOImpl implements TableDAO {
 
     @Override
     public int update(String tableName, String columns, String condition, Object... args) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition), args);
+        return namedParameterJdbcTemplate.getJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), args);
     }
 
     @Override
     public int update(String tableName, String columns, String condition, Map<String, ?> paramMap) {
-        return namedParameterJdbcTemplate.update("UPDATE " + tableName + " SET " + columns + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition), paramMap);
+        return namedParameterJdbcTemplate.update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), paramMap);
+    }
+
+    @Override
+    public int deleteIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
+        return delete(tableName, deleteColumn+ " IN(:params)", Maps.of("params", deleteValues));
+    }
+
+    @Override
+    public int deleteNotIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
+        return delete(tableName, deleteColumn+ " NOT IN(:params)", Maps.of("params", deleteValues));
     }
 
     @Override
     public int delete(String tableName, String condition, Object... args) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().update("DELETE FROM "+ tableName + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition), args);
+        return namedParameterJdbcTemplate.getJdbcTemplate().update("DELETE FROM "+ tableName + SqlHelper.buildWhere(condition), args);
     }
 
     @Override
     public int delete(String tableName, String condition, Map<String, ?> paramMap) {
-        return namedParameterJdbcTemplate.update("DELETE FROM "+ tableName + (StringUtils.isBlank(condition) ? "" : " WHERE " + condition), paramMap);
+        return namedParameterJdbcTemplate.update("DELETE FROM "+ tableName + SqlHelper.buildWhere(condition), paramMap);
     }
 
     @Override
-    public int insert(String tableName, Map<String, Object> paramMap) {
+    public int insert(String tableName, String columnNames, Map<String, ?> paramMap) {
+//        String[] columnNameArr = columnNames.split(COLUMN_NAME_SEPARATOR_REGEX);
+//        Object[] params = new Object[columnNameArr.length];
+//
+//        for (int i = 0; i < columnNameArr.length; i++) {
+//            params[i] = paramMap.get(columnNameArr[i]);
+//        }
+//
+//        String insertSQL = getInsertSQL(tableName, columnNames);
+//
+//        return namedParameterJdbcTemplate.getJdbcTemplate().update(insertSQL, params);
         return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
+                .usingColumns(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
                 .execute(paramMap);
     }
 
+//    /**
+//     *
+//     * @param tableName t_xx
+//     * @param columnNames id, namme
+//     * @return INSERT INTO t_xx(id, namme) VALUES(?, ?)
+//     */
+//    private static String getInsertSQL(String tableName, String columnNames) {
+//        return String.format("INSERT INTO %s(%s) VALUES(%s)",
+//                tableName,
+//                columnNames,
+//                StringUtils.join(Collections.nCopies(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX).length, "?"), ","));
+//    }
+
     @Override
-    public Number insertAndReturnKey(String tableName, Map<String, Object> params, String... idColumnName) {
+    public Number insertAndReturnKey(String tableName, String columnNames, Map<String, ?> params, String... idColumnName) {
         return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
                 .usingGeneratedKeyColumns(idColumnName)
+                .usingColumns(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
                 .executeAndReturnKey(params);
     }
 
     @Override
     public void execute(String sql) {
         namedParameterJdbcTemplate.getJdbcTemplate().execute(sql);
+    }
+
+    /**
+     * 获取新的 connection 连接
+     * @param action
+     * @return
+     * @param <T>
+     */
+    @Override
+    public <T> T execute(ConnectionCallback<T> action) {
+        DataSource dataSource = namedParameterJdbcTemplate.getJdbcTemplate().getDataSource();
+        Connection con = null;
+        try {
+//            con = DataSourceUtils.getConnection(dataSource); // 从 spring 上下文中获取连接
+            con = dataSource.getConnection();
+            return action.doInConnection(con);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (con != null) {
+                DataSourceUtils.releaseConnection(con, dataSource);
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -125,6 +192,38 @@ public class TableDAOImpl implements TableDAO {
     @Override
     public Optional<Map<String, Object>> selectForObject(String sql, Map<String, ?> paramMap) {
         return OperatorUtils.expectedAsOptional(select(sql, paramMap));
+    }
+
+    @Override
+    public void updateRefTable(String refTableName, String keyColumn, String guestColumn, Object keyInstance, Collection<?> guestInstanceIds) {
+        // 删除
+        if (CollectionUtils.isEmpty(guestInstanceIds)) {
+            String deleteSql = String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn);
+            namedParameterJdbcTemplate.getJdbcTemplate().update(deleteSql, keyInstance);
+            return;
+        }
+
+        Map<String, Object> deleteParams = com.google.common.collect.Maps.newHashMapWithExpectedSize(1);
+        deleteParams.put("guestInstanceIds", guestInstanceIds);
+        deleteParams.put("keyInstance", keyInstance);
+        // 1. 删除
+        String deleteSql = String.format("DELETE FROM %s WHERE %s = :keyInstance AND %s NOT IN (:guestInstanceIds)", refTableName, keyColumn, guestColumn);
+        namedParameterJdbcTemplate.update(deleteSql, deleteParams);
+
+        // 2. 插入新增
+        // 2.1 库中
+        String queryAllGuestInstanceIdsSQL = String.format("SELECT %s FROM %s WHERE %s = ?", guestColumn, refTableName, keyColumn);
+        List<?> dbGuestInstanceIds = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(queryAllGuestInstanceIdsSQL, guestInstanceIds.iterator().next().getClass(), keyInstance);
+        // 2.2 新增
+        List<?> newGuestInstanceIds = guestInstanceIds.stream().filter(guestId -> !dbGuestInstanceIds.contains(guestId)).collect(Collectors.toList());
+        if (newGuestInstanceIds.size() == 0) {
+            return;
+        }
+
+        String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
+        List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
+
+        namedParameterJdbcTemplate.getJdbcTemplate().batchUpdate(insertSQL, addParams);
     }
 
     private <E> RowMapper determineRowMapper(Class<E> requiredType) {

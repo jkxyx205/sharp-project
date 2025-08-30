@@ -6,10 +6,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.util.ReflectUtils;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.annotation.Transient;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.Transient;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.formflow.form.valid.core.Validator;
 import com.rick.formflow.form.valid.core.ValidatorManager;
 import com.rick.formflow.form.valid.core.ValidatorTypeEnum;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "sys_form_configurer")
-public class CpnConfigurer extends BaseEntityWithLongId {
+public class CpnConfigurer extends BaseEntity<Long> {
 
     @NotEmpty
     @Column(nullable = false, updatable = false)

@@ -1,11 +1,11 @@
 package com.rick.admin.sys.user.entity;
 
 import com.rick.admin.sys.role.entity.Role;
-import com.rick.db.dto.type.BaseCodeEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.ManyToMany;
-import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.annotation.Transient;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.ManyToMany;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.Transient;
+import com.rick.db.repository.model.BaseCodeEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "sys_user", comment = "用户信息")
-public class User extends BaseCodeEntityWithLongId {
+public class User extends BaseCodeEntity<Long> {
 
     @Column(comment = "姓名")
     String name;
@@ -40,7 +40,7 @@ public class User extends BaseCodeEntityWithLongId {
     @Column(value = "is_available", comment = "是否可用")
     Boolean available;
 
-    @ManyToMany(thirdPartyTable="sys_user_role", referenceTable="sys_role", referenceColumnName = "role_id", columnDefinition = "user_id")
+    @ManyToMany(tableName="sys_user_role", inverseJoinColumnId = "role_id", joinColumnId = "user_id")
     List<Role> roleList;
 
     /**

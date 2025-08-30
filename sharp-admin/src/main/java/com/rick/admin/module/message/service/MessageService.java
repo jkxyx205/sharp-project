@@ -1,7 +1,7 @@
 package com.rick.admin.module.message.service;
 
 import com.rick.admin.module.message.entity.Message;
-import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.repository.EntityDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

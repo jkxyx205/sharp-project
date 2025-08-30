@@ -2,7 +2,7 @@ package com.rick.meta.dict.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.model.DictProperties;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DictServiceImpl implements DictService, InitializingBean {
 
-    private final SharpService sharpService;
+    private final TableDAO tableDAO;
 
     private final DictProperties dictProperties;
 
@@ -129,7 +129,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private List<Dict> getDbDictList(Map<String, Object> params) {
         try {
-            List<Dict> list = sharpService.query(SELECT_SQL, params, Dict.class);
+            List<Dict> list = tableDAO.select(Dict.class, SELECT_SQL, params);
             return list;
         } catch (Exception e) {
             log.warn("sys_dict表没有创建成功！");
@@ -148,7 +148,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
     }
 
     private void initSQL(String type, String sql) {
-        Map<Object, Object> keyValue = sharpService.queryForKeyValue(sql, null);
+        Map<Object, Object> keyValue = tableDAO.selectForKeyValue(sql, null);
 
         // 类型转换 Object -> String
         Map<String, String> stringKeyValue = Maps.newLinkedHashMapWithExpectedSize(keyValue.size());

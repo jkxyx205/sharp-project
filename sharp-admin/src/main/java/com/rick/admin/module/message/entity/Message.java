@@ -1,9 +1,9 @@
 package com.rick.admin.module.message.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rick.db.dto.BaseEntity;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;

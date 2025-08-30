@@ -19,9 +19,9 @@ import javax.validation.Valid;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class BaseCodeEntity<ID> extends EntityIdCode<ID> implements AdditionalInfoGetter {
+public class BaseCodeEntity<ID> extends EntityIdCode<ID> implements BaseEntityInfoGetter {
 
     @Valid
     @Embedded
-    AdditionalInfo additionalInfo;
+    BaseEntityInfo baseEntityInfo;
 }

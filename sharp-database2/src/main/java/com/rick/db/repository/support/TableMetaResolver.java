@@ -24,23 +24,25 @@ public class TableMetaResolver {
 
         StringBuilder selectColumnBuilder = new StringBuilder();
         StringBuilder updateColumnBuilder = new StringBuilder();
+        StringBuilder columnNameBuilder = new StringBuilder();
 
-        loopAllFields(tableMeta, selectColumnBuilder, updateColumnBuilder, entityClass, "", "");
+        loopAllFields(tableMeta, selectColumnBuilder, updateColumnBuilder, columnNameBuilder, entityClass, "", "");
 
         tableMeta.setSelectColumn(StringUtils.substringBeforeLast(selectColumnBuilder.toString(), ", "));
         tableMeta.setUpdateColumn(StringUtils.substringBeforeLast(updateColumnBuilder.toString(), ", "));
+        tableMeta.setColumnNames(StringUtils.substringBeforeLast(columnNameBuilder.toString(), ", "));
 
         return tableMeta;
     }
 
-    private static void loopAllFields(TableMeta tableMeta, StringBuilder selectColumnBuilder, StringBuilder updateColumnBuilder,
+    private static void loopAllFields(TableMeta tableMeta, StringBuilder selectColumnBuilder, StringBuilder updateColumnBuilder, StringBuilder columnNameBuilder,
                                       Class<?> entityClass,
                                       String columnPrefix, String propertyPrefix) {
         Field[] allFields = uniqueFields(FieldUtils.getAllFields(entityClass));
         for (Field field : allFields) {
             Embedded embedded = field.getAnnotation(Embedded.class);
             if (Objects.nonNull(embedded)) {
-                loopAllFields(tableMeta, selectColumnBuilder, updateColumnBuilder, field.getType(), embedded.columnPrefix(), field.getName() + ".");
+                loopAllFields(tableMeta, selectColumnBuilder, updateColumnBuilder, columnNameBuilder, field.getType(), embedded.columnPrefix(), field.getName() + ".");
                 continue;
             }
 
@@ -105,7 +107,7 @@ public class TableMetaResolver {
                 String propertyName = propertyPrefix + field.getName();
                 tableMeta.getColumnPropertyNameMap().put(columnName, propertyName);
                 selectColumnBuilder.append(columnName + " AS \"" + propertyName + "\"").append(", ");
-
+                columnNameBuilder.append(columnName).append(", ");
                 if (!(Objects.nonNull(tableMeta.idMeta) && columnName.equals(tableMeta.idMeta.getIdPropertyName()) || Objects.nonNull(columnAnnotation) && !columnAnnotation.updatable())) {
                     updateColumnBuilder.append(columnName).append(", ");
                 }

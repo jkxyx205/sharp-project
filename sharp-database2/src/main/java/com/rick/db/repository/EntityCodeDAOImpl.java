@@ -5,6 +5,7 @@ import com.rick.db.repository.model.EntityIdCode;
 import com.rick.db.util.OperatorUtils;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
@@ -19,6 +20,17 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Validated // 必须加入
 public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAOImpl<T, ID> implements EntityCodeDAO<T, ID> {
+
+    public EntityCodeDAOImpl() {
+    }
+
+    public EntityCodeDAOImpl(NamedParameterJdbcTemplate jdbcTemplate, Class<T> entityClass) {
+        this(new TableDAOImpl(jdbcTemplate), entityClass);
+    }
+
+    public EntityCodeDAOImpl(TableDAO tableDAO, Class<T> entityClass) {
+       super(tableDAO, entityClass);
+    }
 
     @Override
     public T insertOrUpdate(T entity) {

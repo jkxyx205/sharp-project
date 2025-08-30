@@ -1,7 +1,7 @@
 package com.rick.meta.dict.entity;
 
-import com.rick.db.dto.BaseEntity;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;

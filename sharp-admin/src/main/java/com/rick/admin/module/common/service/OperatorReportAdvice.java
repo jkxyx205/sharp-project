@@ -1,7 +1,7 @@
 package com.rick.admin.module.common.service;
 
-import com.rick.db.service.SharpService;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
+import com.rick.db.repository.TableDAO;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.service.ReportAdvice;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OperatorReportAdvice implements ReportAdvice {
 
-    private final SharpService sharpService;
+    private final TableDAO tableDAO;
 
     @Override
     public void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {
@@ -31,7 +31,7 @@ public class OperatorReportAdvice implements ReportAdvice {
             ids.add((Long) row.get("updateBy"));
         }
 
-        Map<Long, String> idValueMap = sharpService.queryForKeyValue("select id, name from sys_user where id IN (:ids)", Params.builder(1).pv("ids", ids).build());
+        Map<Long, String> idValueMap = tableDAO.selectForKeyValue("select id, name from sys_user where id IN (:ids)", Maps.of("ids", ids));
 
         for (Map<String, Object> row : rows) {
             row.put("createBy", idValueMap.get(row.get("createBy")));

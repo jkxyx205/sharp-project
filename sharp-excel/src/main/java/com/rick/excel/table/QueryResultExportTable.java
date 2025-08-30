@@ -1,7 +1,7 @@
 package com.rick.excel.table;
 
-import com.rick.db.dto.PageModel;
-import com.rick.db.service.GridService;
+import com.rick.db.plugin.page.GridService;
+import com.rick.db.plugin.page.PageModel;
 import com.rick.excel.table.model.MapTableColumn;
 
 import java.util.List;

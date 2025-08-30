@@ -1,7 +1,7 @@
 package com.rick.admin.module.student.dao;
 
 import com.rick.admin.module.student.entity.Student;
-import com.rick.db.plugin.dao.core.EntityCodeDAOImpl;
+import com.rick.db.repository.EntityCodeDAOImpl;
 import org.springframework.stereotype.Repository;
 
 /**

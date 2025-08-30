@@ -1,6 +1,6 @@
 package com.rick.report.core.model;
 
-import com.rick.db.dto.Grid;
+import com.rick.db.plugin.page.Grid;
 import com.rick.report.core.entity.Report;
 import lombok.AllArgsConstructor;
 import lombok.Data;

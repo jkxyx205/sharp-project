@@ -1,8 +1,8 @@
 package com.rick.admin.module.common.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.type.BaseCodeDescriptionEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseCodeDescriptionEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(value = "sys_code_description", comment = "编号-描述 表")
-public class CodeDescription extends BaseCodeDescriptionEntityWithLongId {
+public class CodeDescription extends BaseCodeDescriptionEntity<Long> {
 
     CategoryEnum category;
 

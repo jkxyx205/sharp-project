@@ -6,7 +6,7 @@ import com.rick.admin.sys.role.entity.Role;
 import com.rick.admin.sys.user.dao.UserDAO;
 import com.rick.admin.sys.user.entity.User;
 import com.rick.common.http.exception.BizException;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -59,15 +59,15 @@ public class UserService {
     }
 
     public boolean checkPassword(Long userId, String password) {
-        Optional<String> optional = userDAO.selectSingleValueById(userId, "password", String.class);
+        Optional<String> optional = userDAO.selectOne(String.class, "password", "id = :id", User.builder().id(userId).build());
         return passwordEncoder.matches(password, optional.orElseThrow(() -> new BizException(USER_NOT_FOUND)));
     }
 
     public void updatePassword(Long userId, String password) {
-        userDAO.update("password", Params.builder(2).pv("password", passwordEncoder.encode(password)).pv("id", userId).build(), "id = :id");
+        userDAO.update("password", "id = :id", Maps.of("password", passwordEncoder.encode(password)),"id", userId);
     }
 
     public Map<Long, String> getIdNameMapping() {
-        return userDAO.selectByParamsAsMap(null, "id, name");
+        return userDAO.selectForKeyValue("id, name", null, null);
     }
 }

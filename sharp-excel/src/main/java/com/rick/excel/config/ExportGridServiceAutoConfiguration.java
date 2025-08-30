@@ -1,12 +1,11 @@
 package com.rick.excel.config;
 
-import com.rick.db.config.GridServiceAutoConfiguration;
-import com.rick.db.service.GridService;
+import com.rick.db.config.SharpDatabaseAutoConfiguration;
+import com.rick.db.plugin.page.GridService;
 import com.rick.excel.plugin.ExportUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -20,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnSingleCandidate(GridService.class)
-@AutoConfigureAfter({GridServiceAutoConfiguration.class})
+@AutoConfigureAfter({SharpDatabaseAutoConfiguration.class})
 public class ExportGridServiceAutoConfiguration {
 
     public ExportGridServiceAutoConfiguration() {

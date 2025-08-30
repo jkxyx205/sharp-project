@@ -2,15 +2,14 @@ package com.rick.generator;
 
 
 import com.rick.common.util.ClassUtils;
+import com.rick.common.util.Maps;
 import com.rick.common.util.Time2StringUtils;
-import com.rick.db.constant.SharpDbConstants;
-import com.rick.db.dto.BaseCodeEntity;
-import com.rick.db.dto.SimpleEntity;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.core.EntityDAO;
-import com.rick.db.plugin.dao.core.EntityDAOManager;
-import com.rick.db.plugin.dao.core.TableGenerator;
-import com.rick.db.service.support.Params;
+import com.rick.db.plugin.generator.TableGenerator;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.model.BaseCodeEntity;
+import com.rick.db.repository.model.EntityId;
+import com.rick.db.repository.support.TableMeta;
+import com.rick.db.repository.support.TableMetaResolver;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.generator.control.ControlGeneratorManager;
 import com.rick.generator.control.DictCategoryEnum;
@@ -34,11 +33,16 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.rick.common.util.StringUtils.camelToSpinal;
+import static com.rick.db.repository.support.Constants.ID_COLUMN_NAME;
+import static com.rick.db.repository.support.Constants.LOGIC_DELETE_COLUMN_NAME;
 
 /**
  * @author Rick.Xu
@@ -80,7 +84,7 @@ public class Generator {
         this.tableGenerator = tableGenerator;
     }
 
-    public void execute(Class<? extends SimpleEntity> entityClass, String rootPackagePath, Map<String, Object> config) throws IOException {
+    public void execute(Class<? extends EntityId> entityClass, String rootPackagePath, Map<String, Object> config) throws IOException {
         String entityName = entityClass.getSimpleName();
         String rootPackageName = StringUtils.substringBeforeLast(entityClass.getPackage().getName(), ".");
 
@@ -251,7 +255,7 @@ public class Generator {
                 .replace("${NAME}", entityName);
     }
 
-    private void generatorReport(Class<? extends SimpleEntity> entityClass, String entityName, String reportTestPath, String reportTestPackage) throws IOException {
+    private void generatorReport(Class<? extends EntityId> entityClass, String entityName, String reportTestPath, String reportTestPackage) throws IOException {
         Assert.hasText(reportTestPath);
         Assert.hasText(reportTestPackage);
         String reportCodeTemplate = reportCodeTemplate(entityClass, entityName, reportTestPackage);
@@ -259,12 +263,12 @@ public class Generator {
         FileUtils.writeStringToFile(new File(new File(reportTestPath),entityName + "Test.java"), reportCodeTemplate, "UTF-8");
     }
 
-    private String reportCodeTemplate(Class<? extends SimpleEntity> entityClass, String entityName, String reportTestPackage) {
+    private String reportCodeTemplate(Class<? extends EntityId> entityClass, String entityName, String reportTestPackage) {
         StringBuilder queryFiledBuilder = new StringBuilder();
         StringBuilder columBuilder = new StringBuilder();
 
         AtomicInteger index = new AtomicInteger(1); // 控制样式
-        EntityDAO entityDAO = tableResolver(entityClass, resolverInfo -> {
+        TableMeta tableMeta = tableResolver(entityClass, resolverInfo -> {
             Field field = resolverInfo.field;
             String columnName = resolverInfo.columnName;
             String propertyName = resolverInfo.propertyName;
@@ -276,16 +280,16 @@ public class Generator {
             // 设置 QueryField
             if (isDictValue) {
                 if (index.get() % 2 == 1) {
-                    queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.SELECT, \""+type+"\"),\n");
+                    queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\"" + columnName + "\", \"" + comment + "\", QueryField.Type.SELECT, \"" + type + "\"),\n");
                 } else {
-                    queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.MULTIPLE_SELECT, \""+type+"\"),\n");
+                    queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\"" + columnName + "\", \"" + comment + "\", QueryField.Type.MULTIPLE_SELECT, \"" + type + "\"),\n");
                 }
             } else if (field.getType() == Boolean.class) {
-                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.CHECKBOX),\n");
-            }  else if (field.getType() == LocalDate.class) {
-                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.DATE),\n");
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\"" + columnName + "\", \"" + comment + "\", QueryField.Type.CHECKBOX),\n");
+            } else if (field.getType() == LocalDate.class) {
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\"" + columnName + "\", \"" + comment + "\", QueryField.Type.DATE),\n");
             } else if (field.getType() == LocalDateTime.class) {
-                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.DATE_RANGE),\n");
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\"" + columnName + "\", \"" + comment + "\", QueryField.Type.DATE_RANGE),\n");
             } /* else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field);
                 if (clazz == DictValue.class) {
@@ -293,30 +297,30 @@ public class Generator {
                     queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\", QueryField.Type.MULTIPLE_SELECT, \""+type+"\"),\n");
                 }
             } */ else {
-                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\""+columnName+"\", \""+comment+"\"),\n");
+                queryFiledBuilder.append((index.get() == 1 ? "" : "                        ") + "new QueryField(\"" + columnName + "\", \"" + comment + "\"),\n");
             }
             // 设置 ReportColumn
             if (field.getType() == LocalDate.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+columnName+"\", \""+comment+"\", true).setColumnWidth(80).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATE),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + columnName + "\", \"" + comment + "\", true).setColumnWidth(80).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATE),\n");
             } else if (field.getType() == LocalDateTime.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"localDateTimeConverter\")).setColumnWidth(120).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\", false, null, Arrays.asList(\"localDateTimeConverter\")).setColumnWidth(120).setAlign(AlignEnum.CENTER).setType(ReportColumn.TypeEnum.DATETIME),\n");
             } else if (field.getType() == Boolean.class) {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false, null, Arrays.asList(\"boolConverter\")).setColumnWidth(80).setAlign(AlignEnum.CENTER),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\", false, null, Arrays.asList(\"boolConverter\")).setColumnWidth(80).setAlign(AlignEnum.CENTER),\n");
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Class<?> clazz = ClassUtils.getFieldGenericClass(field)[0];
                 if (clazz.isEnum()) {
                     type = clazz.getSimpleName();
-                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
+                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\", false,\"" + type + "\", Arrays.asList(\"arrayDictConverter\")),\n");
                 } else if (clazz == DictValue.class) {
                     type = field.getAnnotation(DictType.class).type();
-                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"arrayDictConverter\")),\n");
+                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\", false,\"" + type + "\", Arrays.asList(\"arrayDictConverter\")),\n");
                 } else {
-                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
+                    columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\"),\n");
                 }
             } else if (isDictValue) { // 字典
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\", false,\""+type+"\", Arrays.asList(\"dictConverter\")),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\", false,\"" + type + "\", Arrays.asList(\"dictConverter\")),\n");
             } else {
-                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\""+propertyName+"\", \""+comment+"\"),\n");
+                columBuilder.append((index.get() == 1 ? "" : "                        ") + "new ReportColumn(\"" + propertyName + "\", \"" + comment + "\"),\n");
             }
 
             index.incrementAndGet();
@@ -351,16 +355,16 @@ public class Generator {
                 "    @Test\n" +
                 "    public void testReport() {\n" +
                 "        Report report = Report.builder()\n" +
-                "                .code(\""+entityDAO.getTableMeta().getTableName()+"\")// 　建议和数据库表名保持一致\n" +
+                "                .code(\""+tableMeta.getTableName()+"\")// 　建议和数据库表名保持一致\n" +
                 "                .tplName(\"tpl/list/ajax_list\") // 拷贝模版页面到指定目录\n" +
                 "//                .tplName(\"tpl/list/list\") // 没有特殊要求使用模版页面\n" +
                 "//                .tplName(\"tpl/list/ajax_list\") // 没有特殊要求使用模版页面\n" +
-                "                .name(\""+StringUtils.defaultString(entityDAO.getTableMeta().getTable().comment(), entityDAO.getTableMeta().getTableName())+"\")\n" +
+                "                .name(\""+StringUtils.defaultString(tableMeta.getTable().comment(), tableMeta.getTableName())+"\")\n" +
                 "                .reportAdviceName(\"operatorReportAdvice\")\n" +
                 "                .additionalInfo(Params.builder(1).pv(\"operator-bar\", true) // 显示操作按钮\n" +
                 "                        .pv(\"endpoint\", \""+(camelToSpinal(entityName) + "s")+"\")\n" +
                 "                        .build()) // 显示操作按钮\n" +
-                "                .querySql(\""+entityDAO.getSelectConditionSQL(Collections.emptyMap()).replace("\"", "\\\"").replaceAll(":is_deleted", "0")+"\")\n" +
+                "                .querySql(\""+tableMeta.getSelectConditionSQL().replace("\"", "\\\"").replaceAll(":is_deleted", "0")+"\")\n" +
                 "                .queryFieldList(Arrays.asList(\n" +
                 "                        "+queryFiledBuilder.deleteCharAt(queryFiledBuilder.length() - 2)+"" +
                 "                ))\n" +
@@ -381,7 +385,7 @@ public class Generator {
         return template.replace("${NAME}", entityName);
     }
 
-    private void generatorHtml(Class<? extends SimpleEntity> entityClass, FormLayoutEnum formLayout, String controlPath, RenderTypeEnum renderType, boolean ifGeneratorLabel) throws IOException {
+    private void generatorHtml(Class<? extends EntityId> entityClass, FormLayoutEnum formLayout, String controlPath, RenderTypeEnum renderType, boolean ifGeneratorLabel) throws IOException {
         if (StringUtils.isBlank(controlPath)) {
             return;
         }
@@ -393,10 +397,7 @@ public class Generator {
             String type = resolverInfo.dictTypeValue;
             DictCategoryEnum dictCategory = resolverInfo.dictCategory;
 
-            Map<String, Object> additionalInfo = Params.builder(2)
-                    .pv(ADDITIONAL_DICT_CATEGORY, dictCategory)
-                    .pv(ADDITIONAL_DICT_FIELD, field)
-                    .build();
+            Map<String, Object> additionalInfo = Maps.of(ADDITIONAL_DICT_CATEGORY, dictCategory,ADDITIONAL_DICT_FIELD, field);
 
             if (resolverInfo.isDictValue) {
                 if (Collection.class.isAssignableFrom(field.getType())) {
@@ -443,16 +444,16 @@ public class Generator {
         FileUtils.writeStringToFile(new File(new File(controlPath), "control-"+renderType.name().toLowerCase()+".html"), parse.toString(), "UTF-8");
     }
 
-    private EntityDAO tableResolver(Class<? extends SimpleEntity> entityClass, Consumer<ResolverInfo> resolverInfoConsumer) {
-        EntityDAO entityDAO = EntityDAOManager.getEntityDAO(entityClass);
-        Map<String, Column> columnNameMap = entityDAO.getTableMeta().getColumnNameMap();
-        Map<String, Field> fieldMap = entityDAO.getTableMeta().getFieldMap();
-        Map<String, String> columnNameToPropertyNameMap = entityDAO.getColumnNameToPropertyNameMap();
+    private TableMeta tableResolver(Class<? extends EntityId> entityClass, Consumer<ResolverInfo> resolverInfoConsumer) {
+        TableMeta tableMeta = TableMetaResolver.resolve(entityClass);
 
-        List<String> columnNames = entityDAO.getTableMeta().getSortedColumns();
+        Map<String, Column> columnNameMap = tableMeta.getColumnNameMap();
+        Map<String, String> columnNameToPropertyNameMap = tableMeta.getColumnPropertyNameMap();
+
+        List<String> columnNames = tableMeta.getSortedColumns();
 
         for (String columnName : columnNames) {
-            if (SharpDbConstants.ID_COLUMN_NAME.equals(columnName) || SharpDbConstants.LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
+            if (ID_COLUMN_NAME.equals(columnName) || LOGIC_DELETE_COLUMN_NAME.equals(columnName)) {
                 continue;
             }
 
@@ -476,7 +477,8 @@ public class Generator {
                 }
             }
 
-            Field field = fieldMap.get(propertyName);
+            Field field = tableMeta.getFieldByColumnName(columnName);
+
             String camelPropertyName = com.rick.common.util.StringUtils.stringToCamel(propertyName.replace(".", "_"));
 
             // 是否是字典
@@ -489,7 +491,7 @@ public class Generator {
                     dictTypeValue = field.getType().getSimpleName();
                     dictCategory = DictCategoryEnum.ENUM;
                 } else {
-                    Field embeddedField = fieldMap.get(StringUtils.substringBefore(propertyName, "."));
+                    Field embeddedField = tableMeta.getFieldByPropertyName(StringUtils.substringBefore(propertyName, "."));
                     dictType = ObjectUtils.defaultIfNull(field.getAnnotation(DictType.class), embeddedField.getAnnotation(DictType.class));
                     dictTypeValue = dictType.type();
                     dictCategory = DictCategoryEnum.DICT_VALUE;
@@ -509,17 +511,17 @@ public class Generator {
                 }
             }
 
-            ResolverInfo resolverInfo = ResolverInfo.builder().entityDAO(entityDAO).column(column).dictCategory(dictCategory).dictType(dictType).isDictValue(isDictValue).dictTypeValue(dictTypeValue).field(field).columnName(columnName).camelPropertyName(camelPropertyName).camelEntityName(camelEntityName).propertyName(propertyName).comment(comment).build();
+            ResolverInfo resolverInfo = ResolverInfo.builder().tableMeta(tableMeta).column(column).dictCategory(dictCategory).dictType(dictType).isDictValue(isDictValue).dictTypeValue(dictTypeValue).field(field).columnName(columnName).camelPropertyName(camelPropertyName).camelEntityName(camelEntityName).propertyName(propertyName).comment(comment).build();
             resolverInfoConsumer.accept(resolverInfo);
         }
 
-        return entityDAO;
+        return tableMeta;
     }
 
     @Builder
     private static class ResolverInfo {
 
-        EntityDAO entityDAO;
+        TableMeta tableMeta;
 
         Column column;
 

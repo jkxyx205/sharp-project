@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serializable;
+
 /**
  * @author Rick.Xu
  * @date 2025/8/14 11:46
@@ -20,7 +22,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EntityId<ID> {
+public class EntityId<ID> implements Serializable {
 
     @Id
     @JsonSerialize(using = ToStringSerializer.class)

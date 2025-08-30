@@ -1,7 +1,7 @@
 package com.rick.meta.dict.dao;
 
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.repository.EntityDAOImpl;
 import com.rick.meta.dict.entity.Dict;
 
 /**

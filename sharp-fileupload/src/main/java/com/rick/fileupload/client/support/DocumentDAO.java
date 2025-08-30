@@ -1,6 +1,6 @@
 package com.rick.fileupload.client.support;
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.repository.EntityDAOImpl;
 import org.springframework.stereotype.Repository;
 
 /**

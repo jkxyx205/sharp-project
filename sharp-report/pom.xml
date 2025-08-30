@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.rick.db</groupId>
-            <artifactId>sharp-database</artifactId>
+            <artifactId>sharp-database2</artifactId>
             <version>${sharp.version}</version>
         </dependency>
         <dependency>
@@ -37,6 +37,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rick.db</groupId>
+            <artifactId>sharp-database2</artifactId>
         </dependency>
     </dependencies>
 

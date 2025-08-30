@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.rick.db.constant.SharpDbConstants;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Id;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Id;
+import com.rick.db.repository.Table;
 import com.rick.fileupload.core.model.FileMeta;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+
+import static com.rick.db.repository.support.Constants.LOGIC_DELETE_COLUMN_NAME;
 
 /**
  * @author Rick
@@ -44,7 +45,7 @@ public class Document extends FileMeta {
     private LocalDateTime updateTime;
 
     @JsonIgnore
-    @Column(value = SharpDbConstants.LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")
+    @Column(value = LOGIC_DELETE_COLUMN_NAME, comment = "是否逻辑删除")
     private Boolean deleted;
 
 }

@@ -16,10 +16,10 @@ import javax.validation.Valid;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BaseEntity<ID> extends EntityId<ID> implements AdditionalInfoGetter {
+public class BaseEntity<ID> extends EntityId<ID> implements BaseEntityInfoGetter {
 
     @Valid
     @Embedded
-    AdditionalInfo additionalInfo;
+    BaseEntityInfo baseEntityInfo;
 
 }

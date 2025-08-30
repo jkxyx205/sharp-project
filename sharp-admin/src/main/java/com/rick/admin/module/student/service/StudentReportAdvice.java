@@ -2,7 +2,7 @@ package com.rick.admin.module.student.service;
 
 import com.rick.admin.module.common.service.OperatorReportAdvice;
 import com.rick.common.util.JsonUtils;
-import com.rick.db.service.SharpService;
+import com.rick.db.repository.TableDAO;
 import com.rick.fileupload.client.support.Document;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.support.ReportConstants;
@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 @Component
 public class StudentReportAdvice extends OperatorReportAdvice {
 
-    public StudentReportAdvice(SharpService sharpService) {
-        super(sharpService);
+    public StudentReportAdvice(TableDAO tableDAO) {
+        super(tableDAO);
     }
 
     @Override

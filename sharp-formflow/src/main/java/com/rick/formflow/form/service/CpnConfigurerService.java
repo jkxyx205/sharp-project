@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public class CpnConfigurerService {
 
     private final CpnConfigurerDAO cpnConfigurerDAO;
 
-    public int[] saveOrUpdate(List<CpnConfigurer> configurers) {
+    public Collection<CpnConfigurer> saveOrUpdate(List<CpnConfigurer> configurers) {
         for (CpnConfigurer configurer : configurers) {
             CpnManager.getCpnByType(configurer.getCpnType()).check(configurer);
 

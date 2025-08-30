@@ -60,13 +60,13 @@ public class DocumentServiceImpl implements DocumentService {
             documentList.add(parse(fileMeta));
         }
 
-        documentDAO.insert(documentList);
+        documentDAO.insertOrUpdate(documentList);
         return documentList;
     }
 
     @Override
     public void rename(long id, String name) {
-        documentDAO.updateById("name", new Object[] {name}, id);
+        documentDAO.updateById("name", id, new Object[] {name});
     }
 
     @Override
