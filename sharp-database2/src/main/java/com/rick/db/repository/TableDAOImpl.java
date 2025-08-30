@@ -119,9 +119,12 @@ public class TableDAOImpl implements TableDAO {
 
     @Override
     public Number insertAndReturnKey(String tableName, String columnNames, Map<String, ?> params, String... idColumnName) {
+        Set<String> toRemove = new HashSet<>(Arrays.asList(idColumnName));
         return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
                 .usingGeneratedKeyColumns(idColumnName)
-                .usingColumns(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
+                .usingColumns(Arrays.stream(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
+                        .filter(s -> !toRemove.contains(s))
+                        .toArray(String[]::new))
                 .executeAndReturnKey(params);
     }
 
