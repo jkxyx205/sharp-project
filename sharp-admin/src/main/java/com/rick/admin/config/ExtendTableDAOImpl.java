@@ -2,21 +2,22 @@ package com.rick.admin.config;
 
 import com.rick.admin.auth.common.UserContextHolder;
 import com.rick.admin.sys.user.entity.User;
-import com.rick.db.repository.EntityDAO;
-import com.rick.db.repository.EntityDAOManager;
-import com.rick.db.repository.TableDAO;
-import com.rick.db.repository.TableDAOImpl;
+import com.rick.db.repository.*;
 import com.rick.db.repository.support.SqlHelper;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +34,8 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 
     @Override
     public int update(String tableName, String columns, String condition, Object... args) {
-        return getNamedParameterJdbcTemplate().getJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), args);
+        columns = "update_by = ?, update_time = ?," + columns;
+        return getNamedParameterJdbcTemplate().getJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), ArrayUtils.addAll(new Object[]{getUserId(), LocalDateTime.now()}, args));
     }
 
     @Override
@@ -75,6 +77,16 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         }
     }
 
+    @Override
+    public <E> List<E> select(Class<E> clazz, String sql, Object... args) {
+        return super.select(clazz, addIsDeletedCondition(sql), args);
+    }
+
+    @Override
+    public <E> List<E> select(String sql, Map<String, ?> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
+        return super.select(addIsDeletedCondition(sql), paramMap, jdbcTemplateCallback);
+    }
+
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         tableNameDAOMap =  EntityDAOManager.getAllEntityDAO().stream().collect(Collectors.toMap(entityDAO -> entityDAO.getTableMeta().getTableName(), Function.identity()));
@@ -102,4 +114,40 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         return user.getId();
     }
 
+
+    private static final Pattern WHERE_PATTERN = Pattern.compile("\\bwhere\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ORDER_GROUP_LIMIT_PATTERN =
+            Pattern.compile("\\b(order\\s+by|group\\s+by|limit)\\b", Pattern.CASE_INSENSITIVE);
+
+    public static String addIsDeletedCondition(String sql) {
+        if (StringUtils.isBlank(sql)) {
+            return sql;
+        }
+
+        String trimmedSql = sql.trim();
+
+        Matcher whereMatcher = WHERE_PATTERN.matcher(trimmedSql);
+        Matcher clauseMatcher = ORDER_GROUP_LIMIT_PATTERN.matcher(trimmedSql);
+
+        if (whereMatcher.find()) {
+            // 已有 WHERE，找到第一个 ORDER/GROUP/LIMIT 子句位置
+            int insertPos = trimmedSql.length();
+            if (clauseMatcher.find()) {
+                insertPos = clauseMatcher.start();
+            }
+            // 在 WHERE 子句中加 AND is_deleted = false
+            return new StringBuilder(trimmedSql)
+                    .insert(insertPos, " AND is_deleted = false ")
+                    .toString();
+        } else {
+            // 没有 WHERE，插入 WHERE is_deleted = false
+            int insertPos = trimmedSql.length();
+            if (clauseMatcher.find()) {
+                insertPos = clauseMatcher.start();
+            }
+            return new StringBuilder(trimmedSql)
+                    .insert(insertPos, " WHERE is_deleted = false ")
+                    .toString();
+        }
+    }
 }
