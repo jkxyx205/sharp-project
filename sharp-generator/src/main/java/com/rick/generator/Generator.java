@@ -491,7 +491,8 @@ public class Generator {
                     dictTypeValue = field.getType().getSimpleName();
                     dictCategory = DictCategoryEnum.ENUM;
                 } else {
-                    Field embeddedField = tableMeta.getFieldByPropertyName(StringUtils.substringBefore(propertyName, "."));
+//                    Field embeddedField = tableMeta.getFieldByPropertyName(StringUtils.substringBefore(propertyName, "."));
+                    Field embeddedField = ClassUtils.getField(entityClass, StringUtils.substringBefore(propertyName, "."));
                     dictType = ObjectUtils.defaultIfNull(field.getAnnotation(DictType.class), embeddedField.getAnnotation(DictType.class));
                     dictTypeValue = dictType.type();
                     dictCategory = DictCategoryEnum.DICT_VALUE;

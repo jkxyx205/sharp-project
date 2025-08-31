@@ -133,11 +133,7 @@ public class TableMetaResolver {
             curClazz = curClazz.getSuperclass();
         }
 
-        try {
-            return ClassUtils.getField(clazz, propertyName).getType();
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
+        return ClassUtils.getField(clazz, propertyName).getType();
     }
 
     public static Field[] uniqueFields(Field[] fields) {

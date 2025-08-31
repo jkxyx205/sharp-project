@@ -102,14 +102,14 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
     public Result update(@PathVariable ID id, @RequestBody T e) {
         e.setId(id);
         baseService.update(e);
-        return ResultUtils.success(e);
+        return ResultUtils.success(e.getId());
     }
 
     @PostMapping
     @ResponseBody
     public Result saveOrUpdate(@RequestBody @Valid T e) {
         baseService.insertOrUpdate(e);
-        return ResultUtils.success(e);
+        return ResultUtils.success(e.getId());
     }
 
     @DeleteMapping("{id}")
@@ -144,7 +144,9 @@ public class BaseFormController<S extends BaseServiceImpl<? extends EntityDAO<T,
                 if (field.getType().isEnum()) {
                     dictTypeValue = field.getType().getSimpleName();
                 } else {
-                    Field embeddedField = tableMeta.getFieldByPropertyName(StringUtils.substringBefore(propertyName, "."));
+//                    entityClass.getName()
+                    Field embeddedField = ClassUtils.getField(entityClass, StringUtils.substringBefore(propertyName, "."));
+//                    Field embeddedField = tableMeta.getFieldByPropertyName(StringUtils.substringBefore(propertyName, "."));
                     DictType dictType = ObjectUtils.defaultIfNull(field.getAnnotation(DictType.class), embeddedField.getAnnotation(DictType.class));
                     dictTypeValue = dictType.type();
                 }

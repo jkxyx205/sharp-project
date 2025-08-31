@@ -1,13 +1,11 @@
 package com.rick.db.plugin.page;
 
+import com.rick.db.repository.support.SQLParamCleaner;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.rick.db.repository.support.Constants.ASC;
 import static com.rick.db.repository.support.Constants.GROUP_DUMMY_TABLE_NAME;
@@ -62,7 +60,10 @@ public final class GridUtils {
      * @return
      */
     public static List<BigDecimal> numericObject(String sql, Map<String, ?> params) {
-        return Arrays.asList(GridUtils.GRID_SERVICE.getTableDAO().selectForObject(sql, params).get().values().toArray(new BigDecimal[] {}));
+        Map<String, Object> formatMap = new HashMap<>();
+        sql = SQLParamCleaner.formatSql(sql, params, formatMap);
+
+        return Arrays.asList(GridUtils.GRID_SERVICE.getTableDAO().selectForObject(sql, formatMap).get().values().toArray(new BigDecimal[] {}));
     }
 
 

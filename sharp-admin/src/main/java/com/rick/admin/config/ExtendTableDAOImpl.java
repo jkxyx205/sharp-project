@@ -79,12 +79,12 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String sql, Object... args) {
-        return super.select(clazz, addIsDeletedCondition(sql), args);
+        return super.select(clazz, isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, args);
     }
 
     @Override
     public <E> List<E> select(String sql, Map<String, ?> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
-        return super.select(addIsDeletedCondition(sql), paramMap, jdbcTemplateCallback);
+        return super.select(isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, paramMap, jdbcTemplateCallback);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -149,5 +149,24 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
                     .insert(insertPos, " WHERE is_deleted = false ")
                     .toString();
         }
+    }
+
+    public static boolean isSimpleSingleTable(String sql) {
+        if (sql == null || sql.trim().isEmpty()) return false;
+
+        String normalized = sql.replaceAll("\\s+", " ").trim().toUpperCase();
+
+        // 基本检查
+        if (!normalized.startsWith("SELECT ") || !normalized.contains(" FROM ")) {
+            return false;
+        }
+
+        // 排除子查询：任何包含括号的都排除
+        if (sql.contains("(") || sql.contains(")")) {
+            return false;
+        }
+
+        // 排除其他多表关键字
+        return !normalized.matches(".*\\b(JOIN|UNION|EXISTS)\\b.*");
     }
 }

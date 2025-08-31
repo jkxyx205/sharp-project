@@ -89,12 +89,8 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
                 deserializePropertyName = firstLetterLowerCase(aliasMatcher.group(1));
             }
 
-            try {
-                deserializePropertyClass = ClassUtils.getField(contentClass, deserializePropertyName).getType();
-                deserializePropertyClass = getaClass(deserializePropertyClass, contentClass);
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException(e);
-            }
+            deserializePropertyClass = ClassUtils.getField(contentClass, deserializePropertyName).getType();
+            deserializePropertyClass = getaClass(deserializePropertyClass, contentClass);
 
             List<?> values = JsonUtils.toList(node, deserializePropertyClass);
 
@@ -115,12 +111,10 @@ public class NamePropertyDeserializer<T> extends JsonDeserializer<T> implements 
             String deserializePropertyName = currentName.replace(this.propertyName, "");
             deserializePropertyName = firstLetterLowerCase(deserializePropertyName);
 
-            try {
-                deserializePropertyClass = ClassUtils.getField(javaType.getRawClass(), deserializePropertyName).getType();
-                deserializePropertyClass = getaClass(deserializePropertyClass, javaType.getRawClass());
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException(e);
-            }
+
+            deserializePropertyClass = ClassUtils.getField(javaType.getRawClass(), deserializePropertyName).getType();
+            deserializePropertyClass = getaClass(deserializePropertyClass, javaType.getRawClass());
+
             if (CharSequence.class.isAssignableFrom(deserializePropertyClass)) {
                 return invokeSetPropertyMethod(deserializePropertyName, node.asText(), javaType.getRawClass(), deserializePropertyClass);
             } else if (Long.class.isAssignableFrom(deserializePropertyClass)) {

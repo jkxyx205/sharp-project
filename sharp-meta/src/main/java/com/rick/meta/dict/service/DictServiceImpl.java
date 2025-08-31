@@ -3,6 +3,7 @@ package com.rick.meta.dict.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.rick.db.repository.TableDAO;
+import com.rick.db.repository.support.SQLParamCleaner;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.model.DictProperties;
 import lombok.RequiredArgsConstructor;
@@ -129,7 +130,8 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private List<Dict> getDbDictList(Map<String, Object> params) {
         try {
-            List<Dict> list = tableDAO.select(Dict.class, SELECT_SQL, params);
+            Map<String, Object> formatMap = new HashMap<>();
+            List<Dict> list = tableDAO.select(Dict.class, SQLParamCleaner.formatSql(SELECT_SQL, params, formatMap), formatMap);
             return list;
         } catch (Exception e) {
             log.warn("sys_dict表没有创建成功！");

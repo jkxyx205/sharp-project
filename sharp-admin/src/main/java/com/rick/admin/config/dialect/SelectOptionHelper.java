@@ -39,12 +39,13 @@ public class SelectOptionHelper {
         // emptyItemText => dummyItemText
         String dummyItemText = iProcessableElementTag.hasAttribute("dummyItemText") ? StringUtils.defaultString(iProcessableElementTag.getAttributeValue("dummyItemText"), "") : "&nbsp;";
         // hideAllItem => hideDummyItemText
-        if (!iProcessableElementTag.hasAttribute("hideDummyItemText")) {
-            model.add(modelFactory.createOpenElementTag("option value=\"\""));
+
+        if (iProcessableElementTag.hasAttribute("hideSelectedDummyItemText")) {
+            model.add(modelFactory.createOpenElementTag("option value=\"\" selected disabled style=\"display:none;\""));
             model.add(modelFactory.createText(dummyItemText));
             model.add(modelFactory.createCloseElementTag("option"));
-        } else {
-            model.add(modelFactory.createOpenElementTag("option value=\"\" selected disabled hidden"));
+        } else if (!iProcessableElementTag.hasAttribute("hideDummyItemText")) {
+            model.add(modelFactory.createOpenElementTag("option value=\"\""));
             model.add(modelFactory.createText(dummyItemText));
             model.add(modelFactory.createCloseElementTag("option"));
         }

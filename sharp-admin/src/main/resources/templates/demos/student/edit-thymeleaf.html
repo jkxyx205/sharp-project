@@ -77,7 +77,7 @@
                     <div class="form-group row">
                         <label class="col-1 col-form-label required" for="unitCode">单位code</label>
                         <div class="col-4">
-                            <sp:select class="form-control" id="unitCode" name="unitCode" key="UNIT" th:value="${student.unit ne null ? student.unit.code : ''}" required />
+                            <sp:select class="form-control" id="unitCode" name="unitCode" key="UNIT" th:value="${student.unit ne null ? student.unit.code : ''}" required hideSelectedDummyItemText/>
                         </div>
                     </div>
                     <div class="form-group row">
