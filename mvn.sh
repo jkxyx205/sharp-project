@@ -2,7 +2,7 @@
 
 PROJECTS=(
 sharp-dependencies
-#sharp-common
+sharp-common
 #sharp-database
 sharp-database2
 #sharp-excel
