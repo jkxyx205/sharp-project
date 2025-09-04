@@ -1,7 +1,7 @@
 package com.rick.admin.core;
 
 import com.google.common.collect.Lists;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.cpn.core.Form;
@@ -57,9 +57,7 @@ public class UserTest {
 
                 // 3. link
                 .tplName("tpl/form/form") // link使用form， 不能是full, report 设置参数 .pv("formAction", "link")
-                .additionalInfo(Params.builder(1)
-                        .pv("label-col", 1)
-                        .build()) // 跳转新的页面编辑，适合字段多的页面
+                .additionalInfo(Maps.of("label-col", 1)) // 跳转新的页面编辑，适合字段多的页面
 
                 // 4. drawer
 //                .tplName("tpl/form/form") // drawer使用form， report 设置参数 .pv("formAction", "drawer")
@@ -75,7 +73,7 @@ public class UserTest {
 //                        .build()) // 跳转新的页面编辑，适合字段多的页面
 
 //                CpnConfigurer volumeCpn = CpnConfigurer.builder()
-//                        .additionalInfo(Params.builder(1).pv("tab-index", "2").build()) // 所属的tab index
+//                        .additionalInfo(Maps.of("tab-index", "2")) // 所属的tab index
 //                        .build();
                 .name("用户信息")
                 .formAdviceName("userFormAdvice")
@@ -108,7 +106,7 @@ public class UserTest {
                 .label("用户名")
                 .placeholder("请输入用户名")
                 .validatorList(codeRegexValidatorList)
-                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
+                .additionalInfo(Maps.of("tab-index", "1"))
                 .build();
 
         CpnConfigurer nameCpn = CpnConfigurer.builder()
@@ -117,7 +115,7 @@ public class UserTest {
                 .label("姓名")
                 .placeholder("请输入姓名")
                 .validatorList(textValidatorList)
-                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
+                .additionalInfo(Maps.of("tab-index", "1"))
                 .build();
 
         CpnConfigurer birthdayCpn = CpnConfigurer.builder()
@@ -125,7 +123,7 @@ public class UserTest {
                 .name("birthday")
                 .label("出生日期")
                 .placeholder("请输入出生日期")
-                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
+                .additionalInfo(Maps.of("tab-index", "1"))
                 .build();
 
         CpnConfigurer availableCpn = CpnConfigurer.builder()
@@ -133,7 +131,7 @@ public class UserTest {
                 .name("available")
                 .label("可用")
                 .defaultValue("1")
-                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .additionalInfo(Maps.of("tab-index", "2"))
                 .build();
 
         CpnConfigurer roleCpn = CpnConfigurer.builder()
@@ -142,14 +140,14 @@ public class UserTest {
 //                .options(Arrays.asList(new CpnConfigurer.CpnOption("694587732420202496", "管理员")))
                 .name("roleIds")
                 .label("角色")
-                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .additionalInfo(Maps.of("tab-index", "2"))
                 .build();
 
         CpnConfigurer attachmentCpn = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.FILE)
                 .name("attachment")
                 .label("附件")
-                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .additionalInfo(Maps.of("tab-index", "2"))
                 .build();
 
         List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, birthdayCpn, availableCpn, roleCpn, attachmentCpn);
@@ -174,10 +172,7 @@ public class UserTest {
                 // additionalInfo(Params.builder(1).pv("js-operator-columnr", "{{ openDetailLink('复制', scope.row.id, '复制') }}").build()) row 除编辑和删除的其他操作
 
                 // report 和 form 进行关联，可以修改表单
-                .additionalInfo(Params.builder(1)
-                        .pv("formId", "694980924206493696")
-                        .pv("formAction", "link")
-                        .build())
+                .additionalInfo(Maps.of("formId", "694980924206493696", "formAction", "link"))
 //                .querySql("SELECT id, code, name, IF(is_available, '是', '否') is_available, DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user WHERE code LIKE :code AND name LIKE :name AND is_available = :is_available AND create_time >= :create_time0 AND create_time <= :create_time1 AND id <> 1")
                 // language=SQL
                 .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, sys_user.birthday, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +

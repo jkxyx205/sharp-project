@@ -100,7 +100,8 @@ public class PermissionTest {
         permissionDAO.insertOrUpdate(delete);
 
         // 管理员分配权限
-        List<Long> permissionIds = permissionDAO.selectByParams(null, "id", Long.class);
+//        List<Long> permissionIds = permissionDAO.selectByParams(null, "id", Long.class);
+        List<Long> permissionIds = permissionDAO.select(Long.class, "id", null);
         roleService.addPermission(694587732420202496L, Sets.newHashSet(permissionIds));
     }
 }

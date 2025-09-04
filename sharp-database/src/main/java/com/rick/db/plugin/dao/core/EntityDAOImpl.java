@@ -1470,18 +1470,14 @@ public class EntityDAOImpl<T, ID> extends AbstractCoreDAO<ID> implements EntityD
         // 多的一方维护一的引用关系 20240125
         if (Objects.nonNull(data) && StringUtils.isNotBlank(reversePropertyName)) {
             // 获取对象的类型
-            try {
-                Field field = ClassUtils.getField(subEntityClass, reversePropertyName);
-                Object refValue = t;
-                if (field.getType() == Long.class) {
-                    refValue = getIdValue(t);
-                }
+            Field field = ClassUtils.getField(subEntityClass, reversePropertyName);
+            Object refValue = t;
+            if (field.getType() == Long.class) {
+                refValue = getIdValue(t);
+            }
 
-                for (Object subData : data) {
-                    setPropertyValue(subData, reversePropertyName, refValue);
-                }
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException(e);
+            for (Object subData : data) {
+                setPropertyValue(subData, reversePropertyName, refValue);
             }
         }
     }

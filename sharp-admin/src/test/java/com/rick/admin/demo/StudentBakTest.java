@@ -1,6 +1,6 @@
 package com.rick.admin.demo;
 
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.HiddenReportColumn;
 import com.rick.report.core.model.QueryField;
@@ -31,9 +31,8 @@ public class StudentBakTest {
 //                .tplName("tpl/list/list") // 没有特殊要求使用模版页面
 //                .tplName("tpl/list/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生信息")
-                .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
-                        .pv("endpoint", "students")
-                        .build()) // 显示操作按钮
+                .additionalInfo(Maps.of("operator-bar", true, "endpoint", "students") // 显示操作按钮
+                        ) // 显示操作按钮
                 .querySql("select id, name, create_time from t_student where name like :name and is_deleted = 0")
                 .queryFieldList(Arrays.asList(
                         new QueryField("name", "姓名")

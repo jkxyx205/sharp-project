@@ -2,7 +2,7 @@ package com.rick.admin.core;
 
 import com.google.common.collect.Lists;
 import com.rick.admin.module.demo.entity.ComplexModel;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.cpn.core.Form;
@@ -54,7 +54,7 @@ public class DictTest {
                 .code("sys_dict")
                 .tableName("sys_dict")
                 .tplName("tpl/form/form-full") // 弹出框显示必须是 form-full 不能是form
-                .additionalInfo(Params.builder(1).pv("showSaveFormBtn", false).build())
+                .additionalInfo(Maps.of("showSaveFormBtn", false))
                 .formAdviceName("dictFormService")
                 .name("字典")
                 .repositoryName("dictDAO")
@@ -123,7 +123,7 @@ public class DictTest {
                 .code("sys_dict")
                 .tplName("tpl/list/list")
                 .name("字典管理")
-                .additionalInfo(Params.builder(1).pv("formId", "695312747063197696").build())
+                .additionalInfo(Maps.of("formId", "695312747063197696"))
                 .querySql("select id, type, name, label, sort from sys_dict where type = :type and is_deleted = 0 order by type, sort asc")
                 .queryFieldList(Arrays.asList(
                         new QueryField("type", "分类", QueryField.Type.SELECT, "sys_dict_type")

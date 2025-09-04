@@ -1,7 +1,7 @@
 package com.rick.admin.core;
 
 import com.rick.admin.common.util.ThymeleafRenderHelper;
-import com.rick.db.dto.Grid;
+import com.rick.db.plugin.page.Grid;
 import com.rick.report.core.model.ReportDTO;
 import com.rick.report.core.service.ReportService;
 import org.junit.jupiter.api.Test;

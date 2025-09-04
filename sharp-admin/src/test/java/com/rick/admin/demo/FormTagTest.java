@@ -2,7 +2,7 @@ package com.rick.admin.demo;
 
 import com.google.common.collect.Lists;
 import com.rick.admin.core.FormSupport;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.cpn.core.Form;
@@ -45,9 +45,7 @@ public class FormTagTest {
                 .code("sys_user_form_tag")
                 .tableName("sys_user")
                 .tplName("demos/student/form-tag") // report 设置参数 .pv("formAction", "link")
-                .additionalInfo(Params.builder(1)
-                        .pv("label-col", 1)
-                        .build()) // 跳转新的页面编辑，适合字段多的页面
+                .additionalInfo(Maps.of("label-col", 1)) // 跳转新的页面编辑，适合字段多的页面
                 .name("用户信息-tag")
                 .formAdviceName("userFormAdvice")
                 .repositoryName("userDAO")
@@ -79,7 +77,7 @@ public class FormTagTest {
                 .label("用户名")
                 .placeholder("请输入用户名")
                 .validatorList(codeRegexValidatorList)
-                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
+                .additionalInfo(Maps.of("tab-index", "1"))
                 .build();
 
         CpnConfigurer nameCpn = CpnConfigurer.builder()
@@ -88,7 +86,7 @@ public class FormTagTest {
                 .label("姓名")
                 .placeholder("请输入姓名")
                 .validatorList(textValidatorList)
-                .additionalInfo(Params.builder(1).pv("tab-index", "1").build())
+                .additionalInfo(Maps.of("tab-index", "1"))
                 .build();
 
         CpnConfigurer availableCpn = CpnConfigurer.builder()
@@ -96,7 +94,7 @@ public class FormTagTest {
                 .name("available")
                 .label("可用")
                 .defaultValue("1")
-                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .additionalInfo(Maps.of("tab-index", "2"))
                 .build();
 
 //        CpnConfigurer roleCpn = CpnConfigurer.builder()
@@ -105,7 +103,7 @@ public class FormTagTest {
 ////                .options(Arrays.asList(new CpnConfigurer.CpnOption("694587732420202496", "管理员")))
 //                .name("roleIds")
 //                .label("角色")
-//                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+//                .additionalInfo(Maps.of("tab-index", "2"))
 //                .build();
 
         CpnConfigurer roleCpn = CpnConfigurer.builder()
@@ -114,14 +112,14 @@ public class FormTagTest {
 //                .options(Arrays.asList(new CpnConfigurer.CpnOption("694587732420202496", "管理员")))
                 .name("roleIds")
                 .label("角色")
-                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .additionalInfo(Maps.of("tab-index", "2"))
                 .build();
 
         CpnConfigurer attachmentCpn = CpnConfigurer.builder()
                 .cpnType(CpnTypeEnum.FILE)
                 .name("attachment")
                 .label("附件")
-                .additionalInfo(Params.builder(1).pv("tab-index", "2").build())
+                .additionalInfo(Maps.of("tab-index", "2"))
                 .build();
         List<CpnConfigurer> cpnConfigurerList = Lists.newArrayList(usernameCpn, nameCpn, availableCpn, roleCpn, attachmentCpn);
         return cpnConfigurerList;
@@ -136,11 +134,7 @@ public class FormTagTest {
                 .reportAdviceName("userReportAdvice")
 
                 // report 和 form 进行关联，可以修改表单
-                .additionalInfo(Params.builder(1)
-                        .pv("formId", "859875429241106432")
-                        .pv("formAction", "link")
-                        .pv(ReportConstants.ADDITIONAL_OPERATOR_BAR, true)
-                        .build())
+                .additionalInfo(Maps.of("formId", "859875429241106432", "formAction", "link", ReportConstants.ADDITIONAL_OPERATOR_BAR, true))
                 // language=SQL
                 .querySql(" SELECT sys_user.id, sys_user.code, sys_user.name, sys_user.birthday, IF(sys_user.is_available, '是', '否') is_available, t.name role_name, u.name create_name, DATE_FORMAT(sys_user.create_time, '%Y-%m-%d %H:%i:%s') create_time FROM sys_user\n" +
                         " LEFT JOIN sys_user u on u.id = sys_user.create_by\n" +

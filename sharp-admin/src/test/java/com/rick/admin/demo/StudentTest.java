@@ -1,6 +1,6 @@
 package com.rick.admin.demo;
 
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.*;
 import com.rick.report.core.service.ReportService;
@@ -29,9 +29,8 @@ public class StudentTest {
 //                .tplName("tpl/list/ajax_list") // 没有特殊要求使用模版页面
                 .name("学生表")
                 .reportAdviceName("studentReportAdvice")
-                .additionalInfo(Params.builder(1).pv("operator-bar", true) // 显示操作按钮
-                        .pv("endpoint", "students")
-                        .build()) // 显示操作按钮
+                .additionalInfo(Maps.of("operator-bar", true, "endpoint", "students") // 显示操作按钮
+                       ) // 显示操作按钮
                 .querySql("SELECT t_student.name AS \"name\",t_student.gender AS \"gender\",t_student.email AS \"email\",t_student.birthday AS \"birthday\",t_student.age AS \"age\",t_student.is_marriage AS \"marriage\",t_student.unit_code AS \"unit.code\",t_student.attachments AS \"attachments\",t_student.avatar AS \"avatar\",t_student.hobby_list AS \"hobbyList\",t_student.material_type AS \"materialTypeList\",t_student.category AS \"category\",t_student.is_available AS \"available\",t_student.remark AS \"remark\",t_student.code AS \"code\",t_student.create_by AS \"createBy\",t_student.create_time AS \"createTime\",t_student.update_by AS \"updateBy\",t_student.update_time AS \"updateTime\",t_student.is_deleted AS \"deleted\",t_student.id AS \"id\" FROM t_student WHERE name = :name AND gender = :gender AND email = :email AND birthday = :birthday AND age = :age AND is_marriage = :is_marriage AND is_marriage = :marriage AND unit_code = :unit_code AND unit_code = :unitCode AND attachments = :attachments AND avatar = :avatar AND hobby_list = :hobby_list AND hobby_list = :hobbyList AND material_type = :material_type AND material_type = :materialTypeList AND category = :category AND is_available = :is_available AND is_available = :available AND remark = :remark AND code = :code AND create_by = :create_by AND create_by = :createBy AND create_time = :create_time AND create_time = :createTime AND update_by = :update_by AND update_by = :updateBy AND update_time = :update_time AND update_time = :updateTime AND is_deleted = 0 AND is_deleted = :deleted AND id = :id")
                 .queryFieldList(Arrays.asList(
                         new QueryField("code", "外部可见，唯一code"),

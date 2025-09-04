@@ -1,7 +1,6 @@
 package com.rick.admin.demo;
 
 import com.rick.common.util.Maps;
-import com.rick.db.service.support.Params;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.model.HiddenReportColumn;
 import com.rick.report.core.model.QueryField;
@@ -33,14 +32,14 @@ public class HtmxTest {
                 .name("字典管理-htmx")
                 .reportAdviceName("dictHtmxReportAdvice")
                 .summaryColumnNames("sort")
-                .additionalInfo(Params.builder(2).pv("formId", "695312747063197696")
+                .additionalInfo(Maps.of("formId", "695312747063197696", "formAction", "drawer", "select", true))
                         // 1. link
 //                        .pv("formAction", "link")
 //                        .pv("formPage", "demos/htmx/form")
                         // 2. drawer
-                        .pv("formAction", "drawer")
+//                        .pv("formAction", "drawer")
                         // .pv("formPage", "tpl/form/form-full") // drawer 默认使用 tpl/form/form-full，从 form tplName 继承
-                        .pv("select", true).build())
+//                        .pv("select", true).build())
                 .querySql("select id, type, name, label, sort from sys_dict where type = :type and is_deleted = 0 order by type, sort asc")
                 .queryFieldList(Arrays.asList(
                         new QueryField("type", "分类", QueryField.Type.SELECT, "sys_dict_type")
