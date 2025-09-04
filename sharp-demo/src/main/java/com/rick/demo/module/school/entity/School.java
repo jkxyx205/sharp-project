@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializer;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.*;
+import com.rick.db.repository.*;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.demo.module.project.domain.entity.Address;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +29,7 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_school", comment = "学校")
-public class School extends BaseEntityWithLongId {
+public class School extends BaseEntity<Long> {
 
     @Column(comment = "学校名称")
     private String name;
@@ -71,7 +71,7 @@ public class School extends BaseEntityWithLongId {
      */
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
 //    @JsonAlias("schoolLicenseId")
-    @ManyToOne(value = "school_license_id", parentTable = "t_school_license", comment = "证书信息")
+    @ManyToOne(value = "school_license_id", comment = "证书信息")
     private SchoolLicense schoolLicense;
 
     /**
@@ -80,7 +80,7 @@ public class School extends BaseEntityWithLongId {
      */
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @JsonAlias("studentIds")
-    @OneToMany(subTable = "t_school_student", joinValue = "school_id", cascadeInsertOrUpdate = false)
+    @OneToMany(joinColumnId = "school_id", mappedBy = "school")
     private List<Student> studentList;
 
     /**
@@ -89,7 +89,7 @@ public class School extends BaseEntityWithLongId {
      */
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @JsonAlias("teacherIds")
-    @ManyToMany(thirdPartyTable = "t_school_teacher_related", columnDefinition = "school_id", referenceTable = "t_school_teacher", referenceColumnName = "teacher_id")
+    @ManyToMany(tableName = "t_school_teacher_related", joinColumnId = "school_id", inverseJoinColumnId = "teacher_id")
     private List<Teacher> teacherList;
 
     @AllArgsConstructor

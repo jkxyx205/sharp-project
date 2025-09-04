@@ -1,10 +1,10 @@
 package com.rick.demo.module.school.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.ManyToOne;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.ManyToOne;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +13,8 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+
+;
 
 /**
  * @author Rick
@@ -24,7 +26,7 @@ import java.util.Map;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_school_student", comment = "学生")
-public class Student extends BaseEntityWithLongId {
+public class Student extends BaseEntity<Long> {
 
     @Column(comment = "姓名")
     private String name;
@@ -35,7 +37,7 @@ public class Student extends BaseEntityWithLongId {
     @Column(comment = "性别")
     private SexEnum sex;
 
-    @ManyToOne(value = "school_id", parentTable = "t_school")
+    @ManyToOne(value = "school_id")
     private School school;
 
     @AllArgsConstructor

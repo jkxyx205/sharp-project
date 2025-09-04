@@ -1,12 +1,14 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.plugin.dao.annotation.Id;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Id;
+import com.rick.db.repository.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+;
 
 /**
  * @author Rick

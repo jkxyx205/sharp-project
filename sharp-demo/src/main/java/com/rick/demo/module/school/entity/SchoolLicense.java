@@ -1,14 +1,16 @@
 package com.rick.demo.module.school.entity;
 
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.OneToMany;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.OneToMany;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+;
 
 /**
  * @author Rick
@@ -20,7 +22,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_school_license", comment = "学校证书")
-public class SchoolLicense extends BaseEntityWithLongId {
+public class SchoolLicense extends BaseEntity<Long> {
 
     @Column(comment = "证书编号")
     private String number;
@@ -28,7 +30,7 @@ public class SchoolLicense extends BaseEntityWithLongId {
     @Column(comment = "备注")
     private String remark;
 
-    @OneToMany(subTable = "t_school", joinValue = "school_license_id", oneToOne = true, cascadeInsertOrUpdate = false)
+    @OneToMany(joinColumnId = "school_license_id", oneToOne = true, cascadeSave = false)
     private School school;
 
 }

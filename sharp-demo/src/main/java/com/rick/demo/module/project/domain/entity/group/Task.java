@@ -1,9 +1,9 @@
 package com.rick.demo.module.project.domain.entity.group;
 
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.annotation.ToStringValue;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.ToStringValue;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.Dept;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+;
+
 /**
  * @author Rick
  * @createdAt 2022-03-01 14:24:00
@@ -27,7 +29,7 @@ import java.util.Map;
 @Setter
 @Table(value = "t_task", comment = "任务表")
 @NoArgsConstructor
-public class Task extends BaseEntityWithLongId {
+public class Task extends BaseEntity<Long> {
 
     @Column(nullable = true, comment = "任务名称")
     private String taskName;

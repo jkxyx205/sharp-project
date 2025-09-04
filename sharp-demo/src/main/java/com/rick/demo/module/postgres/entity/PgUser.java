@@ -1,8 +1,8 @@
 package com.rick.demo.module.postgres.entity;
 
-import com.rick.db.dto.SimpleEntity;
-import com.rick.db.plugin.dao.annotation.OneToMany;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.OneToMany;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.EntityId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +10,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+
+;
 
 /**
  * @author Rick.Xu
@@ -21,13 +23,13 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_pg_user", comment = "用户信息")
-public class PgUser extends SimpleEntity<Long> {
+public class PgUser extends EntityId<Long> {
 
     private String name;
 
     private Short age;
 
-    @OneToMany(subTable = "t_pg_user_item", reversePropertyName = "pgUser", cascadeInsertOrUpdate = true, joinValue = "t_pg_user_id")
+    @OneToMany(mappedBy = "pgUser", joinColumnId = "t_pg_user_id")
     private List<PgUserItem> pgUserItemList;
 
 }

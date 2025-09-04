@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.NamePropertyDeserializer;
 import com.rick.common.http.web.param.ParamName;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.*;
+import com.rick.db.repository.*;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.demo.module.project.domain.entity.Person;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_book", comment = "书")
-public class Book extends BaseEntityWithLongId {
+public class Book extends BaseEntity<Long> {
 
     private String title;
 
@@ -40,7 +40,7 @@ public class Book extends BaseEntityWithLongId {
     @JsonAlias("personId")
 //    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @JsonDeserialize(using = NamePropertyDeserializer.class)
-    @ManyToOne(value = "person_id", parentTable = "t_person")
+    @ManyToOne(value = "person_id")
     private Person person;
 
     /**
@@ -50,20 +50,19 @@ public class Book extends BaseEntityWithLongId {
     @JsonAlias({"tagIds", "tagIdList"})
 //    @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
     @JsonDeserialize(using = NamePropertyDeserializer.class)
-    @ManyToMany(thirdPartyTable = "t_book_tag",
-            referenceTable = "t_tag", referenceColumnName = "tag_id", columnDefinition="book_id")
+    @ManyToMany(tableName = "t_book_tag", inverseJoinColumnId = "tag_id", joinColumnId="book_id")
     private List<Tag> tagList;
 
-    @Sql("select * from t_person")
+    @Select("select * from t_person")
     private List<Person> allPerson;
 
-    @Sql("select * from t_person where id = 552098712424472576")
+    @Select("select * from t_person where id = 552098712424472576")
     private Person p1;
 
-    @Sql(value = "select * from t_person where id = :id", params = "id@person.id")
+    @Select(value = "select * from t_person where id = :id", params = "id@person.id")
     private Person p2;
 
-    @Sql(value = "select * from t_person where id = :id AND name like :title", params = "id@person.id, title@title")
+    @Select(value = "select * from t_person where id = :id AND name like :title", params = "id@person.id, title@title")
     private Person p3;
 
 }

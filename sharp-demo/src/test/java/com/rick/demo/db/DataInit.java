@@ -1,6 +1,5 @@
 package com.rick.demo.db;
 
-import com.rick.db.plugin.SQLUtils;
 import lombok.experimental.UtilityClass;
 
 import java.util.Arrays;

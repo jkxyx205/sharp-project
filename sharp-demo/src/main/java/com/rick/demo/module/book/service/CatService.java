@@ -1,6 +1,6 @@
 package com.rick.demo.module.book.service;
 
-import com.rick.db.plugin.dao.core.EntityDAO;
+import com.rick.db.repository.EntityDAO;
 import com.rick.demo.module.book.entity.Cat;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class CatService {
 
-    EntityDAO catDAO;
+    EntityDAO<Cat, Long> catDAO;
 
-    public int save(Cat cat) {
+    public Cat save(Cat cat) {
        return catDAO.insert(cat);
     }
 

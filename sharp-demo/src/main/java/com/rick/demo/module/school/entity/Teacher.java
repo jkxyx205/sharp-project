@@ -1,9 +1,9 @@
 package com.rick.demo.module.school.entity;
 
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.ManyToMany;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.ManyToMany;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +11,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+
+;
 
 /**
  * @author Rick
@@ -22,7 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_school_teacher", comment = "教师")
-public class Teacher extends BaseEntityWithLongId {
+public class Teacher extends BaseEntity<Long> {
 
     @Column(comment = "姓名")
     private String name;
@@ -30,7 +32,7 @@ public class Teacher extends BaseEntityWithLongId {
     @Column(comment = "年龄")
     private Integer age;
 
-    @ManyToMany(thirdPartyTable = "t_school_teacher_related", columnDefinition = "teacher_id", referenceTable = "t_school", referenceColumnName = "school_id")
+    @ManyToMany(tableName = "t_school_teacher_related", joinColumnId = "teacher_id", inverseJoinColumnId = "school_id")
     private List<School> schoolList;
 
 }

@@ -1,9 +1,9 @@
 package com.rick.demo.module.form.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+;
+
 
 /**
  * @author Rick
@@ -27,7 +29,7 @@ import java.util.Map;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_user", comment = "人员信息表")
-public class User extends BaseEntityWithLongId {
+public class User extends BaseEntity<Long> {
 
     @Column(comment = "姓名", nullable = false)
     private String name;

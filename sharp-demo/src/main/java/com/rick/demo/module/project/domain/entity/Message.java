@@ -1,8 +1,8 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.SimpleEntity;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.EntityId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +10,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
+
+;
 
 /**
  * @author Rick
@@ -21,7 +23,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @SuperBuilder
 @Table(value = "t_message", comment = "消息")
-public class Message extends SimpleEntity<Long> {
+public class Message extends EntityId<Long> {
 
     private String text;
 

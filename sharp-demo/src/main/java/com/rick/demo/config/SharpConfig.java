@@ -3,8 +3,6 @@ package com.rick.demo.config;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.rick.common.validate.ValidatorHelper;
-import com.rick.db.plugin.dao.support.ColumnAutoFill;
-import com.rick.db.plugin.dao.support.DefaultColumnAutoFill;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.impl.fastdfs.FastDFSInputStreamStore;
 import com.rick.fileupload.impl.oos.MinioInputStreamStore;
@@ -15,10 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.csource.common.MyException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.validation.Validator;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Rick
@@ -31,24 +29,8 @@ public class SharpConfig {
     private final Validator validator;
 
     @Bean
-    public ColumnAutoFill fill() {
-        return new ColumnAutoFill() {
-            @Override
-            public Map<String, Object> insertFill(String idPropertyName, Object id) {
-                Map<String, Object> fill = new DefaultColumnAutoFill().insertFill(idPropertyName, id);
-                fill.put("create_by", 0L);
-                fill.put("update_by", 0L);
-                fill.put("group_id", 99L);
-                return fill;
-            }
-
-            @Override
-            public Map<String, Object> updateFill() {
-                Map<String, Object> fill = new DefaultColumnAutoFill().updateFill();
-                fill.put("update_by", 0L);
-                return fill;
-            }
-        };
+    public ExtendTableDAOImpl tableDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        return new ExtendTableDAOImpl(namedParameterJdbcTemplate);
     }
 
     @Bean

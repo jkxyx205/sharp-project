@@ -1,10 +1,10 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.OneToMany;
-import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.annotation.ToStringValue;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.OneToMany;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.ToStringValue;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.demo.module.project.domain.enums.SexEnum;
 import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import lombok.Getter;
@@ -17,6 +17,8 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
+;
+
 /**
  * @author rick
  */
@@ -25,7 +27,7 @@ import java.util.Map;
 @Setter
 @Table(value = "t_project1", comment = "任务")
 @NoArgsConstructor
-public class Project extends BaseEntityWithLongId {
+public class Project extends BaseEntity<Long> {
 
     @NotBlank(message = "项目名称不能为空")
     @Column(comment="项目名称")
@@ -53,7 +55,7 @@ public class Project extends BaseEntityWithLongId {
     @ToStringValue
     private PhoneNumber phoneNumber;
 
-    @OneToMany(subTable = "t_project_detail1", reversePropertyName = "project", cascadeInsertOrUpdate = true, joinValue = "project_id")
+    @OneToMany(mappedBy = "project", joinColumnId = "project_id")
     private List<ProjectDetail> projectDetailList;
 
     private Map<String, Object> map;

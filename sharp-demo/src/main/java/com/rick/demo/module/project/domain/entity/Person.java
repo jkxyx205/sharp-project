@@ -3,11 +3,11 @@ package com.rick.demo.module.project.domain.entity;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rick.common.http.json.deserializer.EntityWithLongIdPropertyDeserializer;
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.ManyToMany;
-import com.rick.db.plugin.dao.annotation.ManyToOne;
-import com.rick.db.plugin.dao.annotation.Sql;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.ManyToMany;
+import com.rick.db.repository.ManyToOne;
+import com.rick.db.repository.Select;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,21 +26,21 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("t_person")
-public class Person extends BaseEntityWithLongId {
+public class Person extends BaseEntity<Long> {
 
     private String name;
 
     private String sex;
 
-    @ManyToMany(thirdPartyTable = "t_person_role", referenceColumnName = "role_id", columnDefinition = "person_id", referenceTable = "t_role")
+    @ManyToMany(tableName = "t_person_role", inverseJoinColumnId = "role_id", joinColumnId = "person_id")
     private List<Role> roleList;
 
     @JsonAlias({"idCard", "id_card_id"})
     @JsonDeserialize(using = EntityWithLongIdPropertyDeserializer.class)
-    @ManyToOne(parentTable = "t_person_id_card", value = "id_card_id", cascadeInsertOrUpdate = true)
+    @ManyToOne(value = "id_card_id", cascadeSave = true)
     private IdCard idCard;
 
-    @Sql("select * from t_role")
+    @Select("select * from t_role")
     private List<Role> roleAll;
 
 }

@@ -1,6 +1,6 @@
 package com.rick.demo.module.book.dao;
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.repository.EntityDAOImpl;
 import com.rick.demo.module.book.entity.Book;
 import org.springframework.stereotype.Repository;
 

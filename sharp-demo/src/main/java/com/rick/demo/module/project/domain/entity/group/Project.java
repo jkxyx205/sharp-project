@@ -1,8 +1,8 @@
 package com.rick.demo.module.project.domain.entity.group;
 
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.db.plugin.dao.annotation.ToStringValue;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.ToStringValue;
+import com.rick.db.repository.model.BaseEntity;
 import com.rick.demo.module.project.domain.entity.Address;
 import com.rick.demo.module.project.domain.entity.PhoneNumber;
 import com.rick.demo.module.project.domain.enums.SexEnum;
@@ -16,6 +16,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+;
+
 /**
  * @author rick
  */
@@ -24,7 +26,7 @@ import java.util.List;
 @Setter
 @Table(value = "t_project2")
 @NoArgsConstructor
-public class Project extends BaseEntityWithLongId {
+public class Project extends BaseEntity<Long> {
 
     @NotBlank(message = "项目名称不能为空")
     private String title;

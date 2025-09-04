@@ -1,6 +1,8 @@
 package com.rick.demo.db;
 
-import com.rick.db.plugin.dao.core.EntityDAOSupport;
+import com.rick.db.repository.EntityDAO;
+import com.rick.db.repository.TableDAO;
+import com.rick.db.util.OperatorUtils;
 import com.rick.demo.module.book.dao.BookDAO;
 import com.rick.demo.module.book.entity.Book;
 import com.rick.demo.module.book.model.BookQuery;
@@ -24,17 +26,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BookSqlTest {
 
     @Autowired
-    private EntityDAOSupport entityDAOSupport;
+    private TableDAO tableDAO;
 
     @Autowired
     private BookDAO bookDAO;
 
+    @Autowired
+    private EntityDAO<BookQuery, Long> bookQueryDAO;
+
     @Test
     public void testSqlQuery() {
-        List<BookQuery> query = entityDAOSupport.query("select * from t_book where id = 617342584087388160", null, BookQuery.class);
+        List<BookQuery> query = tableDAO.select(BookQuery.class, "select * from t_book where id = 617342584087388160");
         System.out.println(query);
 
-        Optional<BookQuery> optional = entityDAOSupport.queryForObject("select * from t_book where id = 617342584087388160", null, BookQuery.class);
+        Optional<BookQuery> optional = OperatorUtils.expectedAsOptional(tableDAO.select(BookQuery.class, "select * from t_book where id = 617342584087388160"));
         System.out.println(optional.get());
 
         final Book book = bookDAO.selectById(617321100761636864L).get();
@@ -47,7 +52,9 @@ public class BookSqlTest {
         bookQuery.setId(617342584087388160L);
         bookQuery.setPersonId("552100575806939136");
 
-        entityDAOSupport.query(bookQuery);
+//        entityDAOSupport.query(bookQuery);
+        List<BookQuery> select = bookQueryDAO.select(bookQuery);
+
         System.out.println(bookQuery);
     }
 

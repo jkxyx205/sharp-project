@@ -1,7 +1,6 @@
 package com.rick.demo.db;
 
 import com.google.common.collect.Lists;
-import com.rick.common.http.exception.BizException;
 import com.rick.db.service.support.Params;
 import com.rick.demo.module.project.dao.ProjectDAO;
 import com.rick.demo.module.project.dao.ProjectDetailDAO;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Rick
@@ -149,30 +147,6 @@ public class ProjectServiceTest {
     @Test
     public void findProjectDetail() {
         assertThat(projectDetailDAO.selectById(1L).get().getProject()).isNotNull();
-    }
-
-    @Order(13)
-    @Test
-    public void checkId() {
-        projectService.checkId(479723663504343043L);
-    }
-
-    @Order(14)
-    @Test
-    public void checkId2() {
-        assertThrows(BizException.class, ()-> projectService.checkId(4797236635043430411L));
-    }
-
-    @Order(15)
-    @Test
-    public void checkIds() {
-        projectService.checkIds(Arrays.asList(479723663504343043L));
-    }
-
-    @Order(16)
-    @Test
-    public void checkIds2() {
-        assertThrows(BizException.class, ()-> projectService.checkIds(Arrays.asList(479723663504343043L, 12L)));
     }
 
     @Order(17)

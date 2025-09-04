@@ -1,11 +1,13 @@
 package com.rick.demo.module.book.entity;
 
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+
+;
 
 /**
  * @author Rick.Xu

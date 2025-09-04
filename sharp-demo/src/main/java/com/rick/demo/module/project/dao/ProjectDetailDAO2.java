@@ -1,7 +1,7 @@
 package com.rick.demo.module.project.dao;
 
 
-import com.rick.db.plugin.dao.core.EntityDAOImpl;
+import com.rick.db.repository.EntityDAOImpl;
 import com.rick.demo.module.project.domain.entity.group.ProjectDetail2;
 import org.springframework.stereotype.Repository;
 

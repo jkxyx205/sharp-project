@@ -1,13 +1,15 @@
 package com.rick.demo.module.project.domain.entity;
 
-import com.rick.db.dto.type.BaseEntityWithLongId;
-import com.rick.db.plugin.dao.annotation.OneToMany;
-import com.rick.db.plugin.dao.annotation.Table;
+import com.rick.db.repository.OneToMany;
+import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+;
 
 /**
  * @author Rick
@@ -19,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Table("t_person_id_card")
-public class IdCard extends BaseEntityWithLongId {
+public class IdCard extends BaseEntity<Long> {
 
     private String idNum;
 
@@ -29,7 +31,7 @@ public class IdCard extends BaseEntityWithLongId {
      * 一对一
      * oneToOne = true
      */
-    @OneToMany(subTable = "t_person", joinValue = "id_card_id", cascadeInsertOrUpdate = true, oneToOne = true, reversePropertyName = "idCard")
+    @OneToMany(joinColumnId = "id_card_id", oneToOne = true, mappedBy = "idCard")
     private Person person;
 
 }

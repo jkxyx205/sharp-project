@@ -33,7 +33,7 @@ public class ProjectController {
      */
     @GetMapping("get")
     public Result<List<Project>> get(Project project) {
-        return ResultUtils.success(projectDAO.selectByParams(project));
+        return ResultUtils.success(projectDAO.select(project));
     }
 
     /**

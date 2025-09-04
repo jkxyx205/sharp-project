@@ -4,7 +4,7 @@ import com.rick.common.http.exception.ApiExceptionHandler;
 import com.rick.common.http.util.MessageUtils;
 import com.rick.common.http.web.SharpWebMvcConfigurer;
 import com.rick.common.validate.ServiceMethodValidationInterceptor;
-import com.rick.db.plugin.dao.support.IdToEntityConverterFactory;
+import com.rick.db.repository.support.IdToEntityConverterFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

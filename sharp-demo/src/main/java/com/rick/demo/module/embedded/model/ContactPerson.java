@@ -1,8 +1,8 @@
 package com.rick.demo.module.embedded.model;
 
-import com.rick.db.plugin.dao.annotation.Column;
-import com.rick.db.plugin.dao.annotation.ManyToOne;
-import com.rick.db.plugin.dao.annotation.OneToMany;
+import com.rick.db.repository.Column;
+import com.rick.db.repository.ManyToOne;
+import com.rick.db.repository.OneToMany;
 import com.rick.demo.module.embedded.entity.Vendor;
 import com.rick.demo.module.project.domain.entity.Role;
 import lombok.*;
@@ -29,9 +29,9 @@ public class ContactPerson {
     @Column("contact_phone")
     private String phone;
 
-    @OneToMany(subTable = "t_company_vendor", joinValue = "company_id", cascadeInsertOrUpdate = true, reversePropertyName = "companyId", cascadeDeleteLogically = false)
+    @OneToMany(joinColumnId = "company_id", mappedBy = "companyId")
     private List<Vendor> vendorList;
 
-    @ManyToOne(value = "role_id", parentTable = "t_role", cascadeInsertOrUpdate = true)
+    @ManyToOne(value = "role_id", cascadeSave = true)
     private Role role;
 }

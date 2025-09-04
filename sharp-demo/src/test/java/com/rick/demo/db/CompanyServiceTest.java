@@ -88,7 +88,7 @@ class CompanyServiceTest {
 
     @Test
     public void testFindById() {
-        List<Company> list = companyDAO.selectByIds(664989107511951360L);
+        List<Company> list = companyDAO.selectByIds(Arrays.asList(664989107511951360L));
         list.forEach(System.out::println);
     }
 
