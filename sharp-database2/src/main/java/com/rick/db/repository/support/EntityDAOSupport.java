@@ -58,7 +58,7 @@ public class EntityDAOSupport {
         provider.addIncludeFilter(new AnnotationTypeFilter(Table.class));
 //        String[] packages = sharpDatabaseProperties.getEntityBasePackage().split(",\\s+");
 //        for (String packagePath : packages) {
-            registerDAO(provider, "com.rick.admin");
+            registerDAO(provider, getMainPackage());
 //        }
 
     }
@@ -69,6 +69,21 @@ public class EntityDAOSupport {
         for (BeanDefinition beanDefinition : scanList) {
             getEntityDAO(Class.forName(beanDefinition.getBeanClassName()));
         }
+    }
+
+    public String getMainPackage() {
+        String mainClass = context.getEnvironment().getProperty("sun.java.command");
+        if (mainClass != null) {
+            String className = mainClass.split(" ")[0];
+            try {
+                Package pkg = Class.forName(className).getPackage();
+                return pkg.getName();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
     }
 
 }

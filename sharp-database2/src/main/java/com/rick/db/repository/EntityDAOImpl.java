@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.validation.annotation.Validated;
@@ -662,7 +663,9 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
         Class<?> vClass = value.getClass();
 
-        if (vClass.isEnum()) {
+        if (AnnotatedElementUtils.hasAnnotation(field, ToStringValue.class)) {
+            return value.toString();
+        } else if (vClass.isEnum()) {
             return EnumUtils.getCode((Enum) value);
         } else if (Map.class.isAssignableFrom(vClass)) {
             return JsonUtils.toJson(value);

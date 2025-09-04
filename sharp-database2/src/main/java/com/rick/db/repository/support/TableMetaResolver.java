@@ -19,7 +19,11 @@ public class TableMetaResolver {
 
     public <T> TableMeta resolve(Class<T> entityClass) {
         Table tableAnnotation = entityClass.getAnnotation(Table.class);
-        TableMeta tableMeta = new TableMeta(entityClass, tableAnnotation, Objects.nonNull(tableAnnotation) ? tableAnnotation.value() : com.rick.common.util.StringUtils.camelToSnake(entityClass.getSimpleName()), com.rick.common.util.StringUtils.camelToSnake(entityClass.getSimpleName()) + "_id",
+        if (tableAnnotation == null) {
+            return null;
+        }
+
+        TableMeta tableMeta = new TableMeta(entityClass, tableAnnotation, StringUtils.isNotBlank(tableAnnotation.value()) ? tableAnnotation.value() : com.rick.common.util.StringUtils.camelToSnake(entityClass.getSimpleName()), com.rick.common.util.StringUtils.camelToSnake(entityClass.getSimpleName()) + "_id",
                 new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 
         StringBuilder selectColumnBuilder = new StringBuilder();
