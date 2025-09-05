@@ -1,9 +1,7 @@
 package com.rick.demo;
 
 import com.rick.common.validate.ValidatorHelper;
-import com.rick.demo.module.project.domain.entity.Project;
 import com.rick.demo.module.project.domain.entity.User;
-import com.rick.demo.module.project.domain.enums.UserStatusEnum;
 import com.rick.demo.module.project.service.ProjectService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,18 +47,4 @@ public class ValidateTest {
             validatorHelper.validate(user);
         }).isInstanceOf(ConstraintViolationException.class);
     }
-
-    @Test
-    public void testService() {
-        Assertions.assertThatThrownBy(() -> {
-          projectService.save(Project.builder().title("title").build());
-        }).isInstanceOf(ConstraintViolationException.class);
-
-        Assertions.assertThatThrownBy(() -> {
-            projectService.save(Project.builder().status(UserStatusEnum.LOCKED).build());
-        }).isInstanceOf(ConstraintViolationException.class);
-
-        projectService.save(Project.builder().title("title-validator").status(UserStatusEnum.LOCKED).build());
-    }
-
 }

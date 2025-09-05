@@ -28,7 +28,7 @@ public class SharpConfig {
 
     private final Validator validator;
 
-    @Bean
+//    @Bean
     public ExtendTableDAOImpl tableDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         return new ExtendTableDAOImpl(namedParameterJdbcTemplate);
     }

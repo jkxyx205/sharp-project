@@ -87,9 +87,6 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
-        for (EntityDAO<?, ?> entityDAO : EntityDAOManager.getAllEntityDAO()) {
-            System.out.println(entityDAO.getTableMeta().getTableName());
-        }
         tableNameDAOMap =  EntityDAOManager.getAllEntityDAO().stream().collect(Collectors.toMap(entityDAO -> entityDAO.getTableMeta().getTableName(), Function.identity()));
     }
 

@@ -1,7 +1,7 @@
 package com.rick.demo.formflow;
 
 import com.google.common.collect.Lists;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.cpn.core.Form;
@@ -278,9 +278,7 @@ public class UserCpnCreateTest {
                 .cpnType(CpnTypeEnum.TABLE)
                 .name("school_experience")
                 .label("学习经历")
-                .additionalInfo(Params.builder()
-                        .pv("columns", Arrays.asList(yearCpn, schoolNameCpn))
-                        .build())
+                .additionalInfo(Maps.of("columns", Arrays.asList(yearCpn, schoolNameCpn)))
                 .defaultValue("[[\"2021-2022\", \"四川大学\"], [\"2012-2015\", \"永安高中\"]]")
                 .build();
 

@@ -1,7 +1,7 @@
 package com.rick.demo.formflow;
 
 import com.google.common.collect.Lists;
-import com.rick.db.service.support.Params;
+import com.rick.common.util.Maps;
 import com.rick.formflow.form.cpn.core.CpnConfigurer;
 import com.rick.formflow.form.cpn.core.CpnTypeEnum;
 import com.rick.formflow.form.service.CpnConfigurerService;
@@ -105,9 +105,7 @@ public class CpnTest {
                 .name("info")
                 .label("信息收集")
                 .placeholder("请输入信息收集")
-                .additionalInfo(Params.builder()
-                          .pv("columns", Arrays.asList(cpnConfigurerText, cpnConfigurerNumber))
-                        .build())
+                .additionalInfo(Maps.of("columns", Arrays.asList(cpnConfigurerText, cpnConfigurerNumber)))
                 .validatorList(tableValidatorList)
                 .build();
 
