@@ -1,11 +1,13 @@
 package com.rick.db.repository.support;
 
 import com.rick.common.util.StringUtils;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.repository.*;
 import com.rick.db.repository.model.BaseCodeEntity;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -27,6 +29,9 @@ public class EntityDAOSupport {
 
     @Resource
     private ApplicationContext context;
+
+    @Autowired
+    private SharpDatabaseProperties sharpDatabaseProperties;
 
     @Resource
     private TableDAO tableDAO;
@@ -56,11 +61,8 @@ public class EntityDAOSupport {
                 false);
         // 只扫描注解是 @Table 的类
         provider.addIncludeFilter(new AnnotationTypeFilter(Table.class));
-//        String[] packages = sharpDatabaseProperties.getEntityBasePackage().split(",\\s+");
-//        for (String packagePath : packages) {
-            registerDAO(provider, getMainPackage());
-//        }
 
+        registerDAO(provider, org.apache.commons.lang3.StringUtils.defaultString(sharpDatabaseProperties.getEntityBasePackage(), getMainPackage()));
     }
 
     private void registerDAO(ClassPathScanningCandidateComponentProvider provider, String packagePath) throws ClassNotFoundException {
@@ -71,7 +73,7 @@ public class EntityDAOSupport {
         }
     }
 
-    public String getMainPackage() {
+    private String getMainPackage() {
         String mainClass = context.getEnvironment().getProperty("sun.java.command");
         if (mainClass != null) {
             String className = mainClass.split(" ")[0];

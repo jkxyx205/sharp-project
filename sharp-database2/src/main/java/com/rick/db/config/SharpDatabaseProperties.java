@@ -23,4 +23,6 @@ public class SharpDatabaseProperties {
     private String databaseProductVersion;
 
     private boolean initDatabaseMetaData = false;
+
+    private String entityBasePackage;
 }
