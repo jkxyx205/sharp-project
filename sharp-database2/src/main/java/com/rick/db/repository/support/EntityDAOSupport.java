@@ -3,7 +3,7 @@ package com.rick.db.repository.support;
 import com.rick.common.util.StringUtils;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.repository.*;
-import com.rick.db.repository.model.BaseCodeEntity;
+import com.rick.db.repository.model.EntityIdCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class EntityDAOSupport {
         boolean isNotInstance = (entityDAO == null);
 
         if (isNotInstance) {
-            entityDAO =  BaseCodeEntity.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(tableDAO, entityClass) :
+            entityDAO =  EntityIdCode.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(tableDAO, entityClass) :
                     new EntityDAOImpl(tableDAO, entityClass);
 
             EntityDAOManager.register(entityClass, entityDAO);

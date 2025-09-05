@@ -1,7 +1,6 @@
 package com.rick.db.repository;
 
 import com.rick.common.util.*;
-import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.repository.support.SqlHelper;
 import com.rick.db.repository.support.TableMeta;
 import com.rick.db.repository.support.TableMetaResolver;
@@ -44,9 +43,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Resource
     @Getter
     private TableDAO tableDAO;
-
-    @Resource
-    protected ValidatorHelper validatorHelper;
 
     @Getter
     private TableMeta<T> tableMeta;
@@ -440,7 +436,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     private T insertOrUpdate0(T entity, boolean insert) {
-        validatorHelper.validate(entity);
         if (hasSaveReference()) {
             for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
                 TableMeta.Reference reference = fieldReferenceEntry.getValue();
