@@ -5,7 +5,6 @@ import com.rick.formflow.form.cpn.core.FormCpn;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -24,7 +23,7 @@ public class FormCpnDAO extends EntityDAOImpl<FormCpn, Long> {
 
     public int deleteByFormId(Long formId) {
         Assert.notNull(formId, "formId cannot be null");
-        return delete("form_id", Arrays.asList(formId));
+        return delete("form_id = ?", formId);
     }
 
 }
