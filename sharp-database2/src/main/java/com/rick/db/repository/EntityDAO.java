@@ -23,25 +23,25 @@ public interface EntityDAO<T, ID> {
 
     List<T> selectAll();
 
-    <K, V> Map<K, V> selectForKeyValue(String columns, String condition, Map<String, ?> paramMap);
+    <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, Map<String, ?> paramMap);
 
     List<T> select(String condition, Object... args);
 
     List<T> select(String condition, Map<String, ?> paramMap);
 
-    List<T> selectWithColumns(String columns, String condition, Object... args);
+    List<T> selectWithColumns(@NotBlank String columns, String condition, Object... args);
 
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Object... args);
 
     <E> List<E> selectWithoutCascadeSelect(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Object... args);
 
-    List<T> select(String columns, String condition, Map<String, ?> paramMap);
+    List<T> select(@NotBlank String columns, String condition, Map<String, ?> paramMap);
 
     List<T> select(T example);
 
     List<T> select(String condition, T example);
 
-    List<T> select(String columns, String condition, T example);
+    List<T> select(@NotBlank String columns, String condition, T example);
 
     <E> Optional<E> selectOne(@NotNull Class<E> clazz, @NotBlank String columns, String condition, T example);
 
@@ -75,15 +75,15 @@ public interface EntityDAO<T, ID> {
 
     Collection<T> insertOrUpdate(@Valid Collection<T> entityList);
 
-    int updateById(String columns, @NotNull ID id, Object... args);
+    int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
 
     int update(@NotBlank String columns, String condition, Object... args);
 
     int update(@NotBlank String columns, String condition, Map<String, ?> paramMap);
 
-    int updateById(String columns, ID id, Map<String, ?> paramMap);
+    int updateById(@NotBlank String columns, ID id, Map<String, ?> paramMap);
 
-    int updateByIds(String columns, Collection<ID> ids, Map<String, ?> paramMap);
+    int updateByIds(@NotBlank String columns, Collection<ID> ids, Map<String, ?> paramMap);
 
     TableMeta getTableMeta();
 

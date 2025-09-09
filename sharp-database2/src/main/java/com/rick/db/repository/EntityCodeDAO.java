@@ -1,7 +1,7 @@
 package com.rick.db.repository;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +12,11 @@ import java.util.Optional;
  */
 public interface EntityCodeDAO<T, ID> extends EntityDAO<T, ID> {
 
-    Optional<T> selectByCode(@NotNull String code);
+    Optional<T> selectByCode(@NotBlank String code);
 
     List<T> selectByCodes(@NotEmpty Collection<String> codes);
 
-    Optional<ID> selectIdByCode(@NotNull String code);
+    Optional<ID> selectIdByCode(@NotBlank String code);
 
     List<ID> selectIdsByCodes(@NotEmpty Collection<String> codes);
 
