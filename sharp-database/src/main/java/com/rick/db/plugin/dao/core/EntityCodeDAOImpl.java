@@ -136,7 +136,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
      */
     @Override
     public Optional<T> selectByCode(String code) {
-        Assert.notNull(code, "code cannot be null");
+        Assert.hasText(code, "code cannot be empty");
         List<T> list = selectByParams(Params.builder(1).pv("code", code).build(), "code = :code");
         return expectedAsOptional(list);
     }
@@ -155,7 +155,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public ID selectIdByCodeOrThrowException(String code) {
-        Assert.notNull(code, "code cannot be null");
+        Assert.hasText(code, "code cannot be empty");
         Optional<ID> idOptional = selectIdByCode(code);
         if (idOptional.isPresent()) {
             return idOptional.get();
@@ -187,7 +187,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public <T> Optional<T> selectSingleValueByCode(String code, String columnName, Class<T> clazz) {
-        Assert.notNull(code, "code cannot be null");
+        Assert.hasText(code, "code cannot be empty");
         List<T> values = selectByParams(Params.builder(1).pv("code", code).build(), columnName, "code = :code", clazz);
         return expectedAsOptional(values);
     }
@@ -249,7 +249,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public void assertCodeNotExists(String code) {
-        Assert.notNull(code, "code cannot be null");
+        Assert.hasText(code, "code cannot be empty");
 
         if (existsByParams(Params.builder(1).pv("code", code).build(), "code = :code")) {
             throw new BizException(ResultUtils.fail(400, entityComment() + " code=" + code + " 已经存在", code));
@@ -263,7 +263,7 @@ public class EntityCodeDAOImpl<T extends BaseCodeEntity, ID> extends EntityDAOIm
 
     @Override
     public void assertCodeExists(String code, Map<String, Object> conditionParams, String condition) {
-        Assert.notNull(code, "code cannot be null");
+        Assert.hasText(code, "code cannot be empty");
         if (!existsByParams(Params.builder(1 + conditionParams.size()).pv("code", code).pvAll(conditionParams).build(), "code = :code" + (StringUtils.isBlank(condition) ? "" : " AND " + condition))) {
             throw new BizException(ResultUtils.fail(404, entityComment() + " code=" + code + "不存在", code));
         }

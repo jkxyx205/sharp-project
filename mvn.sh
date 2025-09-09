@@ -2,14 +2,14 @@
 
 PROJECTS=(
 sharp-dependencies
-#sharp-common
+sharp-common
 sharp-database
-#sharp-excel
-#sharp-meta
-#sharp-fileupload
-#sharp-formflow
-#sharp-mail
-#sharp-report
+sharp-excel
+sharp-meta
+sharp-fileupload
+sharp-formflow
+sharp-mail
+sharp-report
 #sharp-generator
 #sharp-sms
 #sharp-notification
