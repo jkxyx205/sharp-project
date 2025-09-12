@@ -94,6 +94,10 @@ public class SQLParamCleaner {
     }
 
     public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap) {
+        return formatSql(srcSql, params, formatMap, false);
+    }
+
+    public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap, boolean isSetIsNull) {
         List<String> paramNames = ParsedSqlHelper.get(srcSql);
 
         if(params == null) {
@@ -114,7 +118,7 @@ public class SQLParamCleaner {
             Object param = params.get(name);
 
             if(Objects.isNull(param)) {
-                srcSql = ignoreAndReturnSQL(srcSql, h);
+                srcSql = isSetIsNull ? setIsNullAndReturnSQL(srcSql, h) : ignoreAndReturnSQL(srcSql, h);
                 continue;
             }
 
@@ -138,7 +142,7 @@ public class SQLParamCleaner {
             }
 
             if(value.getClass() == String.class && StringUtils.isBlank((CharSequence)value)) {
-                srcSql = ignoreAndReturnSQL(srcSql, h);
+                srcSql = isSetIsNull ? setIsNullAndReturnSQL(srcSql, h) : ignoreAndReturnSQL(srcSql, h);
                 continue;
             }
 
@@ -183,7 +187,7 @@ public class SQLParamCleaner {
                     sb.toString();
                     srcSql = srcSql.replaceAll("((?i)in)\\s*[(]\\s*:" + h.param + "\\s*[)]", sb.toString());
                 } else {
-                    srcSql = ignoreAndReturnSQL(srcSql, h);
+                    srcSql = isSetIsNull ? setIsNullAndReturnSQL(srcSql, h) : ignoreAndReturnSQL(srcSql, h);
                 }
             } else if("LIKE".equalsIgnoreCase(h.operator)) {
                 srcSql = srcSql.replaceAll("\\b" + h.full + "\\b", Matcher.quoteReplacement(new StringBuilder("UPPER(").append(h.column).append(") ").append(h.operator).append(dialect.contactString(name)).append(" ").append(dialect.escapeString()).toString()));
@@ -454,5 +458,27 @@ public class SQLParamCleaner {
 
 
         return  srcSql.replaceAll(rightRegex, "");
+    }
+
+    private static String setIsNullAndReturnSQL(String srcSql, ParamHolder h) {
+        String condition = BEFORE_END + h.full.replace(".", "\\.").replace("(", "\\(").replace(")", "\\)").replace("$", "\\$") + AFTER_END;
+        String rightRegex = "(?s)((?i)(\\s+)|(,\\s*))?" + condition;
+        String leftRegex = condition + "(?s)((?i)(\\s+)|(\\s*,))?";
+        String firstWhereCondition = "(?s).*((?i)where)\\s+" + condition + ".*";
+        String firstSetCondition = "(?s).*((?i)set)\\s+" + condition + ".*";
+
+        String nullCondition = " " + h.column + " IS NULL ";
+
+        if (srcSql.matches(firstSetCondition)) {
+            return srcSql.replaceAll(leftRegex, nullCondition);
+        }  else if(srcSql.matches(firstWhereCondition)) {
+            if (isOnlyCause(srcSql, condition)) {
+                return srcSql.replaceAll("(?i)(where)?\\s*" + condition + "", "WHERE" + nullCondition);
+            }
+
+            return srcSql.replaceAll(leftRegex, nullCondition);
+        }
+
+        return  srcSql.replaceAll(rightRegex, nullCondition);
     }
 }
