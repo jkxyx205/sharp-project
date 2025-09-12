@@ -32,15 +32,18 @@ public class FormatSQLTest {
         String s13 = "select NOW() from a where (b = :b)";
         String s14 = "select NOW() from a where ((b = :b)) and name = :name";
         String s15 = "select NOW() from a where (name is NULL or name = :name1)";
+        String s16 = "select name, email from sys_user where  name = :name AND email = :email";
+//        String s16 = "select name, email from sys_user where  name = :name";
 
         OracleSqlFormatter oracleSqlFormatter = new OracleSqlFormatter();
 
         Map<String, Object> returnMap =  new HashMap<>();
 
         Map<String, Object> params = new HashMap<>();
-        params.put("a", "hello");
-        params.put("ageq", "hello222");
-        params.put("name", "hello222");
+//        params.put("a", "hello");
+//        params.put("ageq", "hello222");
+//        params.put("name", "hello222");
+//        params.put("email", "11@qq.com");
 //        params.put("keyword", "hello222");
 //
 //        System.out.println(oracleSqlFormatter.formatSql(s1, params, returnMap));
@@ -57,7 +60,8 @@ public class FormatSQLTest {
 //        System.out.println(oracleSqlFormatter.formatSql(s12, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s13, params, returnMap));
 //        System.out.println(oracleSqlFormatter.formatSql(s14, params, returnMap));
-          System.out.println(oracleSqlFormatter.formatSql(s15, params, returnMap));
+//          System.out.println(oracleSqlFormatter.formatSql(s15, params, returnMap));
+          System.out.println(oracleSqlFormatter.formatSql(s16, params, returnMap, true));
 
     }
 }
