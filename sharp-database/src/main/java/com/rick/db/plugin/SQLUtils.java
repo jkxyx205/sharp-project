@@ -421,10 +421,14 @@ public final class SQLUtils {
     }
 
     public static String extractWhereCondition(String sql) {
-        sql = sql.toLowerCase(); // 为了简化匹配
-        int whereIndex = sql.indexOf("where");
-        if (whereIndex != -1) {
-            return sql.substring(whereIndex + 5).trim();
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                "\\bwhere\\b",
+                java.util.regex.Pattern.CASE_INSENSITIVE
+        );
+        java.util.regex.Matcher matcher = pattern.matcher(sql);
+
+        if (matcher.find()) {
+            return sql.substring(matcher.end()).trim();
         }
         return "";
     }
