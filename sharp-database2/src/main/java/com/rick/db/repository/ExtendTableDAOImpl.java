@@ -1,6 +1,5 @@
-package com.rick.demo.config;
+package com.rick.db.repository;
 
-import com.rick.db.repository.*;
 import com.rick.db.repository.support.SqlHelper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -107,8 +106,12 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     }
 
     public long getUserId() {
+//        User user = UserContextHolder.get();
+//        user = (user == null) ? User.builder().id(1L).build() : user;
+//        return user.getId();
         return 1L;
     }
+
 
     private static final Pattern WHERE_PATTERN = Pattern.compile("\\bwhere\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern ORDER_GROUP_LIMIT_PATTERN =
@@ -116,10 +119,6 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 
     public static String addIsDeletedCondition(String sql) {
         if (StringUtils.isBlank(sql)) {
-            return sql;
-        }
-
-        if (sql.indexOf("sys_user") > -1) {
             return sql;
         }
 

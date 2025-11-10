@@ -2,6 +2,7 @@ package com.rick.admin.config;
 
 
 import com.rick.common.validate.ValidatorHelper;
+import com.rick.db.repository.ExtendTableDAOImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
