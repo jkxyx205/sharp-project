@@ -100,7 +100,7 @@ public class TableMeta<T> {
         List<String> sortedColumnNames = Lists.newArrayListWithCapacity(getColumnPropertyNameMap().keySet().size());
         List<String> tailColumnNames = new ArrayList<>();
 
-        for (String columnName : getColumnPropertyNameMap().keySet()) {
+        for (String columnName : getColumnNames().split(", ")) {
             if (isHeaderColumn(columnName)) {
                 sortedColumnNames.add(columnName);
             } else {
