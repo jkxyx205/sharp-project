@@ -169,13 +169,13 @@ public class SharpDatabaseAutoConfiguration {
         public TableGenerator tableGenerator(JdbcTemplate jdbcTemplate, AbstractDialect dialect) {
             if (dialect.getType() == DatabaseType.Oracle10g) {
                 // TODO
-                //return new OracleSqlFormatter();
+                //return new Oracle10gTableGenerator();
             } else if (dialect.getType() == DatabaseType.Oracle11c) {
                 // TODO
-                //return new OracleSqlFormatter();
+                //return new Oracle11cTableGenerator();
             } else if (dialect.getType() == DatabaseType.SQLServer2012) {
                 // TODO
-                //return new OracleSqlFormatter();
+                //return new SQLServer2012TableGenerator();
             } else if (dialect.getType() == DatabaseType.PostgreSQL) {
                 return new PostgresSQLTableGenerator(jdbcTemplate);
             } else if (dialect.getType() == DatabaseType.MySQL5) {
