@@ -3,7 +3,6 @@ package com.rick.common.http.web.param;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ParamNameProcessor extends ServletModelAttributeMethodProcessor {
 
     @Resource
-    @Lazy
     private RequestMappingHandlerAdapter requestMappingHandlerAdapter;
 
     private static final Map<Class<?>, Map<String, String>> PARAM_MAPPINGS_CACHE = new ConcurrentHashMap<>(256);

@@ -10,23 +10,20 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.rick.common.http.convert.CodeToEnumConverterFactory;
 import com.rick.common.http.web.param.ParamNameProcessor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +34,10 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
 
     @Resource
     private JacksonProperties jacksonProperties;
+
+    @Resource
+    @Lazy
+    private ParamNameProcessor paramNameProcessor;
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -80,25 +81,8 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
         return new ParamNameProcessor();
     }
 
-    @Bean
-    public BeanPostProcessor beanPostProcessor(ParamNameProcessor paramNameProcessor) {
-        return new BeanPostProcessor() {
-
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-                return bean;
-            }
-
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof RequestMappingHandlerAdapter) {
-                    RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
-                    List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>(adapter.getArgumentResolvers());
-                    argumentResolvers.add(0, paramNameProcessor);
-                    adapter.setArgumentResolvers(argumentResolvers);
-                }
-                return bean;
-            }
-        };
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(0, paramNameProcessor); // 插入到最前面
     }
 }
