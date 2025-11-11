@@ -83,6 +83,7 @@ public class MvcConfig extends SharpWebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        super.addArgumentResolvers(resolvers);
         resolvers.add(new UserHandlerMethodArgumentResolver());
     }
 

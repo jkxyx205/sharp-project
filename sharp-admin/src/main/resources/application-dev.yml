@@ -17,6 +17,7 @@ spring:
 
 logging:
   level:
+    root: WARN
     com.rick.admin: DEBUG
     com.rick.db: DEBUG
   file:
