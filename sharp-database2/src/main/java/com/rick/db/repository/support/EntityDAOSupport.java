@@ -62,30 +62,15 @@ public class EntityDAOSupport {
         // 只扫描注解是 @Table 的类
         provider.addIncludeFilter(new AnnotationTypeFilter(Table.class));
 
-        registerDAO(provider, org.apache.commons.lang3.StringUtils.defaultString(sharpDatabaseProperties.getEntityBasePackage(), getMainPackage()));
+        registerDAO(provider, sharpDatabaseProperties.getEntityBasePackage());
     }
 
-    private void registerDAO(ClassPathScanningCandidateComponentProvider provider, String packagePath) throws ClassNotFoundException {
+    private void registerDAO(ClassPathScanningCandidateComponentProvider provider, @NonNull String packagePath) throws ClassNotFoundException {
         Set<BeanDefinition> scanList = provider.findCandidateComponents(packagePath);
 
         for (BeanDefinition beanDefinition : scanList) {
             getEntityDAO(Class.forName(beanDefinition.getBeanClassName()));
         }
-    }
-
-    private String getMainPackage() {
-        String mainClass = context.getEnvironment().getProperty("sun.java.command");
-        if (mainClass != null) {
-            String className = mainClass.split(" ")[0];
-            try {
-                Package pkg = Class.forName(className).getPackage();
-                return pkg.getName();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return null;
     }
 
 }
