@@ -59,4 +59,9 @@ public class SQLServer2012Dialect extends AbstractDialect {
     public DatabaseType getType() {
         return DatabaseType.SQLServer2012;
     }
+
+    @Override
+    public String summaryFun(String column) {
+        return "CAST(SUM("+column+") AS DECIMAL(20,3))";
+    }
 }

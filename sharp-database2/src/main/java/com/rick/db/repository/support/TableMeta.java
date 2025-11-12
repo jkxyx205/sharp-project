@@ -1,7 +1,9 @@
 package com.rick.db.repository.support;
 
 import com.google.common.collect.Lists;
+import com.rick.db.config.Context;
 import com.rick.db.repository.*;
+import com.rick.db.repository.model.DatabaseType;
 import lombok.Getter;
 import lombok.Value;
 
@@ -39,7 +41,6 @@ public class TableMeta<T> {
     IdMeta idMeta;
 
     Field versionField;
-
 
     private String selectColumn;
 
@@ -93,7 +94,22 @@ public class TableMeta<T> {
 
     public String appendColumnVar(String columns, boolean namedVar, CharSequence delimiter) {
         String[] columnArr = columns.split(COLUMN_NAME_SEPARATOR_REGEX);
-        return Arrays.stream(columnArr).map(column -> column + " = " + (namedVar ? ":" + getColumnPropertyNameMap().get(column) : "?")).collect(Collectors.joining(delimiter));
+
+        return Arrays.stream(columnArr).map(column -> {
+            String suffixType = "";
+            if (Context.getDialect().getType() == DatabaseType.PostgreSQL) {
+                Column annotation = columnNameMap.get(column);
+                if (Objects.nonNull(annotation)) {
+                    if ("json".equals(annotation.columnDefinition())) {
+                        suffixType = "::json";
+                    } else if ("jsonb".equals(annotation.columnDefinition())) {
+                        suffixType = "::jsonb";
+                    }
+                }
+            }
+
+            return column + " = " + (namedVar ? ":" + getColumnPropertyNameMap().get(column) : "?") + suffixType;
+        }).collect(Collectors.joining(delimiter));
     }
 
     public List<String> getSortedColumns() {

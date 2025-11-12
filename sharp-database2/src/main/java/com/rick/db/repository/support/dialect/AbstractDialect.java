@@ -45,7 +45,7 @@ public abstract class AbstractDialect {
      * @param
      * @return
      */
-    protected String removeOrders(String sqlString) {
+    public String removeOrders(String sqlString) {
         Matcher m = orderSQLPattern.matcher(sqlString);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
@@ -64,5 +64,7 @@ public abstract class AbstractDialect {
     public abstract String getOrderBy(String tablePrefix, String column, Boolean asc, String[] sortableColumns);
 
     public abstract DatabaseType getType();
+
+    public abstract String summaryFun(String column);
 
 }

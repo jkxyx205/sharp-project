@@ -70,25 +70,26 @@ public class SharpDatabaseAutoConfiguration {
 
         @Bean
         public AbstractDialect getDialect(SharpDatabaseProperties properties) {
-            if (properties.getType() == DatabaseType.Oracle10g) {
-                return new Oracle10gDialect();
-            } else if (properties.getType() == DatabaseType.Oracle11c) {
-                return new Oracle11cDialect();
-            } else if (properties.getType() == DatabaseType.SQLServer2012) {
-                return new SQLServer2012Dialect();
-            } else if (properties.getType() == DatabaseType.PostgreSQL) {
-                return new PostgresDialect();
-            } else if (properties.getType() == DatabaseType.MySQL5) {
-                return new MySQL5Dialect();
-            } else if (properties.getType() == DatabaseType.MySQL8) {
-                return new MySQL8Dialect();
-            } else
+            AbstractDialect dialect = null;
 
-                if (properties.getType() == DatabaseType.SQLite) {
-                return new SQLiteDialect();
+            if (properties.getType() == DatabaseType.Oracle10g) {
+                dialect = new Oracle10gDialect();
+            } else if (properties.getType() == DatabaseType.Oracle11c) {
+                dialect = new Oracle11cDialect();
+            } else if (properties.getType() == DatabaseType.SQLServer2012) {
+                dialect = new SQLServer2012Dialect();
+            } else if (properties.getType() == DatabaseType.PostgreSQL) {
+                dialect = new PostgresDialect();
+            } else if (properties.getType() == DatabaseType.MySQL5) {
+                dialect = new MySQL5Dialect();
+            } else if (properties.getType() == DatabaseType.MySQL8) {
+                dialect = new MySQL8Dialect();
+            } else if (properties.getType() == DatabaseType.SQLite) {
+                dialect = new SQLiteDialect();
             }
 
-            return null;
+            Context.setDialect(dialect);
+            return dialect;
         }
 
         @Bean

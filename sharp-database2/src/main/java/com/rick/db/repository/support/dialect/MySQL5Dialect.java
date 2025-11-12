@@ -49,4 +49,9 @@ public class MySQL5Dialect extends AbstractDialect {
     public DatabaseType getType() {
         return DatabaseType.MySQL5;
     }
+
+    @Override
+    public String summaryFun(String column) {
+        return "CONVERT(sum("+column+"), DECIMAL(20,3))";
+    }
 }

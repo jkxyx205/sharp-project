@@ -49,4 +49,9 @@ public class PostgresDialect extends AbstractDialect {
     public DatabaseType getType() {
         return DatabaseType.PostgreSQL;
     }
+
+    @Override
+    public String summaryFun(String column) {
+        return "CAST(SUM("+column+") AS NUMERIC(20,3))";
+    }
 }

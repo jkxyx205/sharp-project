@@ -49,4 +49,9 @@ public class SQLiteDialect extends AbstractDialect {
     public DatabaseType getType() {
         return DatabaseType.SQLite;
     }
+
+    @Override
+    public String summaryFun(String column) {
+        return "CAST(SUM("+column+") AS NUMERIC)";
+    }
 }

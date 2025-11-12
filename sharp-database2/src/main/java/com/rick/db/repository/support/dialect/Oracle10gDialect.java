@@ -64,7 +64,12 @@ public class Oracle10gDialect extends AbstractDialect {
     }
 
     @Override
-    protected String removeOrders(String sqlString) {
+    public String summaryFun(String column) {
+        return "CAST(SUM("+column+") AS NUMBER(20,3))";
+    }
+
+    @Override
+    public String removeOrders(String sqlString) {
         if (sqlString.matches("(?is)(.*)LISTAGG(.*)")) {
             return sqlString;
         }
