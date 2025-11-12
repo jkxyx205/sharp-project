@@ -28,9 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -148,7 +146,13 @@ public class ReportController {
     @GetMapping("{id}/more/{instanceIds}")
     @ResponseBody
     public List<Map<String, Object>> detailByIds(@PathVariable Long id, @PathVariable String instanceIds) {
-        return reportService.list(id, Maps.of("ids", instanceIds, PageModel.PARAM_SIZE, -1)).getGridMap().getRows();
+        Set<Long> instanceIdSet = Arrays.stream(instanceIds.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(Long::parseLong)
+                .collect(Collectors.toSet());
+
+        return reportService.list(id, Maps.of("ids", instanceIdSet, PageModel.PARAM_SIZE, -1)).getGridMap().getRows();
     }
 
     @GetMapping("{id}/export")

@@ -11,6 +11,7 @@ import com.rick.db.plugin.page.Grid;
 import com.rick.db.plugin.page.GridUtils;
 import com.rick.db.plugin.page.PageModel;
 import com.rick.db.plugin.page.QueryModel;
+import com.rick.db.repository.support.dialect.AbstractDialect;
 import com.rick.excel.table.AbstractExportTable;
 import com.rick.excel.table.MapExcelTable;
 import com.rick.excel.table.model.AlignEnum;
@@ -58,6 +59,8 @@ public class ReportService {
 
     public static final Map<Long, Report> reportCacheMap = new HashMap<>();
 
+    public final AbstractDialect dialect;
+
     /**
      * 创建报表
      */
@@ -94,6 +97,8 @@ public class ReportService {
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
+        requestMap = new HashMap<>(requestMap);
+
         Report report = findById(id).get();
         init(report);
         mergeParams(report, requestMap);
@@ -133,7 +138,7 @@ public class ReportService {
             }
 
             if (CollectionUtils.isNotEmpty(summaryQueryColumnNameList)) {
-                summarySQL = "SELECT " + summaryQueryColumnNameList.stream().map(c -> "CONVERT(sum("+c+"), DECIMAL(20,3))").collect(Collectors.joining(", ")) +
+                summarySQL = "SELECT " + summaryQueryColumnNameList.stream().map(c -> dialect.summaryFun(c)).collect(Collectors.joining(", ")) +
                         report.getQuerySql().substring(report.getQuerySql().indexOf("FROM"));
             }
         }
@@ -149,7 +154,7 @@ public class ReportService {
                 List<BigDecimal> summaryList;
 
                 if (StringUtils.isNotBlank(summarySQL)) {
-                    summaryList = GridUtils.numericObject(summarySQL, requestMap);
+                    summaryList = GridUtils.numericObject(dialect.removeOrders(summarySQL), requestMap);
                 } else {
                     summaryList = new ArrayList<>();
                 }
