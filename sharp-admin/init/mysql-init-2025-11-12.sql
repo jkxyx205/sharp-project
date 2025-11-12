@@ -7,7 +7,7 @@
 #
 # Host: localhost (MySQL 9.1.0)
 # Database: sharp-admin
-# Generation Time: 2025-06-18 00:20:36 +0000
+# Generation Time: 2025-11-12 09:55:04 +0000
 # ************************************************************
 
 
@@ -87,24 +87,21 @@ LOCK TABLES `sys_dict` WRITE;
 
 INSERT INTO `sys_dict` (`id`, `type`, `name`, `label`, `sort`, `remark`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(965742343984533504,'MATERIAL','1111','xx000',0,NULL,1,'2025-06-15 20:48:15',1,'2025-06-16 17:15:32',b'1'),
-	(966407499286597632,'MATERIAL','23232','23322332',0,NULL,1,'2025-06-17 16:51:21',1,'2025-06-18 06:35:58',b'0'),
 	(965718041910333440,'MATERIAL','232323','擦1223',0,NULL,1,'2025-06-15 19:11:41',1,'2025-06-17 16:34:24',b'0'),
-	(966136233518452736,'MATERIAL','2323232','2323',0,NULL,1,'2025-06-16 22:53:26',1,'2025-06-16 22:53:26',b'0'),
-	(966407543490367488,'MATERIAL','2332','233232',2,NULL,1,'2025-06-17 16:51:31',1,'2025-06-18 06:56:03',b'0'),
-	(3,'MATERIAL','M1','2222',0,NULL,1,'2024-11-28 11:16:22',1,'2025-06-17 19:33:07',b'0'),
-	(4,'MATERIAL','M2','物料2',1,NULL,1,'2024-11-28 11:16:22',1,'2025-06-18 06:55:58',b'0'),
+	(993337397435449344,'MATERIAL','FKA','FKA',0,NULL,1,'2025-08-31 00:21:09',1,'2025-08-31 11:55:00',b'0'),
+	(3,'MATERIAL','M1','FF',0,NULL,1,'2024-11-28 11:16:22',1,'2025-08-31 11:56:58',b'0'),
+	(4,'MATERIAL','M2','物料2',1,NULL,1,'2024-11-28 11:16:22',1,'2025-06-20 14:57:21',b'0'),
 	(5,'MATERIAL','M3','物料3',2,NULL,1,'2024-11-28 11:16:22',1,'2025-06-18 06:36:39',b'0'),
 	(6,'MATERIAL','M4','物料4',3,NULL,1,'2024-11-28 11:16:22',1,'2024-11-28 11:16:22',b'0'),
-	(966407581775974400,'MATERIAL_TYPE','23322','23323',0,NULL,1,'2025-06-17 16:51:40',1,'2025-06-17 16:51:40',b'0'),
 	(965717198205112320,'MATERIAL_TYPE','FEAT','产品',9,NULL,1,'2025-06-15 19:08:20',1,'2025-06-15 19:08:20',b'0'),
-	(695367653333712896,'MATERIAL_TYPE','HIBE','耗材用品',8,NULL,1,'2024-11-28 11:16:22',1,'2025-06-18 06:35:55',b'0'),
+	(695367653333712896,'MATERIAL_TYPE','HIBE','耗材用品',8,NULL,1,'2024-11-28 11:16:22',1,'2025-08-07 22:50:13',b'0'),
+	(993184320610910208,'MATERIAL_TYPE','qps','qps222',22,NULL,1,'2025-08-30 14:12:52',1,'2025-08-30 14:13:16',b'0'),
 	(965742162547331072,'MATERIAL_TYPE','UAT','SUATSUAT',92,NULL,1,'2025-06-15 20:47:32',1,'2025-06-18 06:36:09',b'0'),
+	(993192096057802752,'MATERIAL_TYPE','USD','美刀2',0,NULL,1,'2025-08-30 14:43:46',1,'2025-08-30 14:43:52',b'0'),
 	(862375391526948864,'UNIT','BAG','包',9,NULL,1,'2024-11-28 11:16:22',1,'2025-06-18 08:18:34',b'0'),
-	(1,'UNIT','EA','个12',0,NULL,1,'2024-11-28 11:16:22',1,'2025-06-18 08:18:03',b'0'),
+	(1,'UNIT','EA','北北',99,NULL,1,'2024-11-28 11:16:22',1,'2025-11-11 20:00:23',b'0'),
 	(2,'UNIT','KG','千克',1,NULL,1,'2024-11-28 11:16:22',1,'2025-06-16 14:11:53',b'0'),
-	(965722206296363008,'UNIT','KGG','拆',0,NULL,1,'2025-06-15 19:28:14',1,'2025-06-17 15:44:02',b'0'),
-	(966005952312528896,'UNIT','tc','tctctc',0,NULL,1,'2025-06-16 14:15:44',1,'2025-06-16 17:15:29',b'1');
+	(965722206296363008,'UNIT','KGG','拆',0,NULL,1,'2025-06-15 19:28:14',1,'2025-08-31 11:54:57',b'0');
 
 /*!40000 ALTER TABLE `sys_dict` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -151,7 +148,13 @@ VALUES
 	(893484203360915456,'1369-1','jpeg','image/jpeg',78402,'upload','893484203331555328.jpeg',1,'2024-11-28 11:20:12',1,'2024-11-28 11:20:12',b'0'),
 	(893484216723968000,'865259019386826752','jpeg','image/jpeg',78402,'images','893484216702996480.jpeg',1,'2024-11-28 11:20:15',1,'2024-11-28 11:20:15',b'0'),
 	(906928521023086592,'采购讨论3','svg','image/svg+xml',441964,'upload','906928520754651136.svg',1,'2025-01-04 13:43:07',1,'2025-01-04 13:43:07',b'0'),
-	(906928534818152448,'1369-1','jpeg','image/jpeg',78402,'images','906928534776209408.jpeg',1,'2025-01-04 13:43:10',1,'2025-01-04 13:43:10',b'0');
+	(906928534818152448,'1369-1','jpeg','image/jpeg',78402,'images','906928534776209408.jpeg',1,'2025-01-04 13:43:10',1,'2025-01-04 13:43:10',b'0'),
+	(993489506172682240,'F5V8WS3asAAFJsC','webp','image/webp',81884,'images','993489505593868288.webp',1,'2025-08-31 10:25:34',1,'2025-08-31 10:25:34',b'0'),
+	(993493983751573504,'avatar','png','image/png',474418,'images','993493983420223488.png',1,'2025-08-31 10:43:22',1,'2025-08-31 10:43:22',b'0'),
+	(993494015250796544,'WechatIMG740','jpeg','image/jpeg',179599,'upload','993494015238213632.jpeg',1,'2025-08-31 10:43:29',1,'2025-08-31 10:43:29',b'0'),
+	(993494738977951744,'default_avatar','png','image/png',4937,'images','993494738625630208.png',1,'2025-08-31 10:46:22',1,'2025-08-31 10:46:22',b'0'),
+	(993494753335054336,'default_avatar','png','image/png',4937,'upload','993494753322471424.png',1,'2025-08-31 10:46:25',1,'2025-08-31 10:46:25',b'0'),
+	(1020051287976202240,'default_avatar','png','image/png',4937,'upload','1020051287804235776.png',1,'2025-11-12 17:32:36',1,'2025-11-12 17:32:36',b'0');
 
 /*!40000 ALTER TABLE `sys_document` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -220,21 +223,21 @@ LOCK TABLES `sys_form_configurer` WRITE;
 
 INSERT INTO `sys_form_configurer` (`id`, `name`, `label`, `type`, `validators`, `options`, `data_source`, `default_value`, `placeholder`, `is_disabled`, `cpn_value_converter_name`, `additional_info`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(728895409610559488,'type','分类','SELECT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]','sys_dict_type',NULL,'请输入分类',NULL,NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
-	(728895409639919616,'name','编码','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入编码',NULL,NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
-	(728895409639919617,'label','显示值','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入显示值',NULL,NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
-	(728895409639919618,'sort','排序号','INTEGER_NUMBER','[]','[]',NULL,'0',NULL,NULL,NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
-	(728895456838422528,'code','用户名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入用户名',NULL,NULL,'{\"tab-index\":\"1\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
-	(728895456842616832,'name','姓名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入姓名',NULL,NULL,'{\"tab-index\":\"1\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
-	(728895456842616833,'available','可用','SWITCH','[]','[]',NULL,'1',NULL,NULL,NULL,'{\"tab-index\":\"2\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
-	(728895456842616834,'roleIds','角色','CHECKBOX','[]','[]','sys_role',NULL,NULL,NULL,NULL,'{\"tab-index\":\"2\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
-	(893463693533122560,'birthday','出生日期','DATE','[]','[]',NULL,NULL,'请输入出生日期',NULL,NULL,'{\"tab-index\":\"1\"}',1,'2024-11-28 09:58:42',1,'2025-06-12 20:20:17',b'0'),
-	(893463693533122561,'attachment','附件','FILE','[]','[]',NULL,NULL,NULL,NULL,NULL,'{\"tab-index\":\"2\"}',1,'2024-11-28 09:58:42',1,'2025-06-12 20:20:17',b'0'),
-	(946731519580336128,'code','用户名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入用户名',NULL,NULL,'{\"tab-index\":\"1\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
-	(946731519584530432,'name','姓名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入姓名',NULL,NULL,'{\"tab-index\":\"1\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
-	(946731519584530433,'available','可用','SWITCH','[]','[]',NULL,'1',NULL,NULL,NULL,'{\"tab-index\":\"2\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
-	(946731519584530434,'roleIds','角色','MULTIPLE_SELECT','[]','[]','sys_role',NULL,NULL,NULL,NULL,'{\"tab-index\":\"2\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
-	(946731519584530435,'attachment','附件','FILE','[]','[]',NULL,NULL,NULL,NULL,NULL,'{\"tab-index\":\"2\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0');
+	(728895409610559488,'type','分类','SELECT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]','sys_dict_type',NULL,'请输入分类',b'0',NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
+	(728895409639919616,'name','编码','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入编码',b'0',NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
+	(728895409639919617,'label','显示值','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入显示值',b'0',NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
+	(728895409639919618,'sort','排序号','INTEGER_NUMBER','[]','[]',NULL,'0',NULL,b'0',NULL,NULL,1,'2023-09-01 07:03:06',1,'2025-04-24 09:46:02',b'0'),
+	(728895456838422528,'code','用户名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入用户名',b'0',NULL,'{\"tab-index\":\"1\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
+	(728895456842616832,'name','姓名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入姓名',b'0',NULL,'{\"tab-index\":\"1\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
+	(728895456842616833,'available','可用','SWITCH','[]','[]',NULL,'1',NULL,b'0',NULL,'{\"tab-index\":\"2\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
+	(728895456842616834,'roleIds','角色','CHECKBOX','[]','[]','sys_role',NULL,NULL,b'0',NULL,'{\"tab-index\":\"2\"}',1,'2023-09-01 07:03:17',1,'2025-06-12 20:20:17',b'0'),
+	(893463693533122560,'birthday','出生日期','DATE','[]','[]',NULL,NULL,'请输入出生日期',b'0',NULL,'{\"tab-index\":\"1\"}',1,'2024-11-28 09:58:42',1,'2025-06-12 20:20:17',b'0'),
+	(893463693533122561,'attachment','附件','FILE','[]','[]',NULL,NULL,NULL,b'0',NULL,'{\"tab-index\":\"2\"}',1,'2024-11-28 09:58:42',1,'2025-06-12 20:20:17',b'0'),
+	(946731519580336128,'code','用户名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"regex\":\"^[0-9a-zA-Z_\\\\/%\\\\-]{1,}$\",\"message\":\"CODE只能包含数字、字母、下划线、中划线\",\"validatorType\":\"REGEX\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入用户名',b'0',NULL,'{\"tab-index\":\"1\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
+	(946731519584530432,'name','姓名','TEXT','[{\"required\":true,\"validatorType\":\"REQUIRED\",\"message\":\"必填项需要填写\"},{\"min\":0,\"max\":16,\"validatorType\":\"LENGTH\",\"message\":\"长度范围 0 - 16 个字符\"}]','[]',NULL,NULL,'请输入姓名',b'0',NULL,'{\"tab-index\":\"1\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
+	(946731519584530433,'available','可用','SWITCH','[]','[]',NULL,'1',NULL,b'0',NULL,'{\"tab-index\":\"2\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
+	(946731519584530434,'roleIds','角色','MULTIPLE_SELECT','[]','[]','sys_role',NULL,NULL,b'0',NULL,'{\"tab-index\":\"2\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0'),
+	(946731519584530435,'attachment','附件','FILE','[]','[]',NULL,NULL,NULL,b'0',NULL,'{\"tab-index\":\"2\"}',1,'2025-04-24 09:46:01',1,'2025-04-24 09:46:01',b'0');
 
 /*!40000 ALTER TABLE `sys_form_configurer` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -413,7 +416,8 @@ LOCK TABLES `sys_role` WRITE;
 
 INSERT INTO `sys_role` (`id`, `code`, `name`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(694587732420202496,'admin','管理员',1,'2023-05-29 14:56:38',1,'2023-12-11 17:01:34',b'0');
+	(694587732420202496,'admin','管理员',1,'2023-05-29 14:56:38',1,'2025-08-10 09:36:13',b'0'),
+	(993337581380845568,'BR01W','tt',1,'2025-08-31 00:21:53',1,'2025-08-31 00:21:53',b'0');
 
 /*!40000 ALTER TABLE `sys_role` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -462,7 +466,9 @@ VALUES
 	(694587732420202496,946731526417051648,b'0'),
 	(694587732420202496,946731526484160512,b'0'),
 	(694587732420202496,946731526521909248,b'0'),
-	(694587732420202496,946731526555463680,b'0');
+	(694587732420202496,946731526555463680,b'0'),
+	(993337581380845568,946731526370914304,b'0'),
+	(993337581380845568,946731526417051648,b'0');
 
 /*!40000 ALTER TABLE `sys_role_permission` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -492,8 +498,12 @@ LOCK TABLES `sys_user` WRITE;
 
 INSERT INTO `sys_user` (`id`, `code`, `name`, `password`, `birthday`, `is_available`, `attachment`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(1,'admin','管理员','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS','2024-11-28',b'1','[]',1,'2023-05-29 14:55:03',1,'2024-12-10 19:37:01',b'0'),
-	(786079661661646848,'test','测试','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS',NULL,b'1','[]',1,'2023-05-29 14:55:03',1,'2025-06-16 17:42:04',b'0');
+	(1,'ADMIN','BS','$2a$10$DbZnHsxNr67IOCFEoD8xRukVsA7PSWKC3rwj15JmxuoZKKq4revvi','2024-11-28',b'1',NULL,1,'2023-05-29 14:55:03',1,'2025-11-11 20:00:07',b'0'),
+	(786079661661646848,'TEST','测试','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS','2025-08-30',b'1',NULL,1,'2023-05-29 14:55:03',1,'2025-08-30 14:32:26',b'0'),
+	(993189332623835136,'2323','北北2','$2a$10$u0ZNnKciy5IeP/s82yqmy.ToHgwTc/IyIZLJFuWNkSjiNc2sEU0k.','2025-08-30',b'1',NULL,1,'2025-08-30 14:32:47',1,'2025-08-30 14:34:12',b'1'),
+	(993189973249245184,'322','32232','$2a$10$99Evl/dvlLZv94eDDdQVaeyBAkSvx7kQxYn1eGpjkom.cLmFM8zlK','2025-08-05',b'1',NULL,1,'2025-08-30 14:35:20',1,'2025-11-12 11:55:32',b'1'),
+	(993191048798814208,'3233','233233','$2a$10$a56eRX49c61ybLzNFwRYIuIjema0ym3iJ4/czESn1ucjR4a4qniFm','2025-08-06',b'1',NULL,1,'2025-08-30 14:39:36',1,'2025-11-12 11:55:36',b'1'),
+	(993191708046934016,'TOMCAT','tomcat2','$2a$10$u0CD7ZFl.3GYGpsqjjq3vedGRKAiTYrzb5JZX3iqg43tv95NL99n2','2025-08-30',b'1',NULL,1,'2025-08-30 14:42:14',1,'2025-08-30 14:42:36',b'1');
 
 /*!40000 ALTER TABLE `sys_user` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -514,7 +524,10 @@ LOCK TABLES `sys_user_role` WRITE;
 
 INSERT INTO `sys_user_role` (`user_id`, `role_id`, `is_deleted`)
 VALUES
-	(1,694587732420202496,b'0');
+	(1,694587732420202496,b'0'),
+	(786079661661646848,694587732420202496,b'0'),
+	(786079661661646848,993337581380845568,b'0'),
+	(993189332623835136,993337581380845568,b'0');
 
 /*!40000 ALTER TABLE `sys_user_role` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -601,8 +614,11 @@ INSERT INTO `t_student` (`id`, `code`, `name`, `gender`, `email`, `birthday`, `a
 VALUES
 	(2,'0001','张三','M','fsadfsaf@163.com','1992-11-12',19,b'1','EA','[{\"id\": \"861948954584059904\", \"url\": \"http://localhost:7892/attachments/861948954575671296.xls\", \"name\": \"报关单\", \"path\": \"861948954575671296.xls\", \"size\": 65536, \"fullName\": \"报关单.xls\", \"fullPath\": \"attachments/861948954575671296.xls\", \"extension\": \"xls\", \"groupName\": \"attachments\", \"contentType\": \"application/vnd.ms-excel\"}, {\"id\": \"861948954584059905\", \"url\": \"http://localhost:7892/attachments/861948954575671297.zip\", \"name\": \"鱼皮 - Java 学习路线一条龙版本 V2.mindnode\", \"path\": \"861948954575671297.zip\", \"size\": 408174, \"fullName\": \"鱼皮 - Java 学习路线一条龙版本 V2.mindnode.zip\", \"fullPath\": \"attachments/861948954575671297.zip\", \"extension\": \"zip\", \"groupName\": \"attachments\", \"contentType\": \"application/zip\"}]','{\"id\": \"861952755730780160\", \"url\": \"http://localhost:7892/images/861952755722391552.jpeg\", \"name\": \"avatar\", \"path\": \"861952755722391552.jpeg\", \"size\": 68783, \"fullName\": \"avatar.jpeg\", \"fullPath\": \"images/861952755722391552.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"images\", \"contentType\": \"image/jpeg\"}','[\"FOOTBALL\", \"BASKETBALL\"]','[{\"code\": \"M1\"}]','MATERIAL',b'0','fsdfdasf',NULL,NULL,1,'2024-08-24 22:57:24',1,'2025-01-04 13:43:21',b'0'),
 	(861949024788320256,'00012','库房','M','1050216579@qq.com','2024-08-28',2,b'1','EA','[{\"id\": \"861948954584059904\", \"url\": \"http://localhost:7892/attachments/861948954575671296.xls\", \"name\": \"报关单\", \"path\": \"861948954575671296.xls\", \"size\": 65536, \"fullName\": \"报关单.xls\", \"fullPath\": \"attachments/861948954575671296.xls\", \"extension\": \"xls\", \"groupName\": \"attachments\", \"contentType\": \"application/vnd.ms-excel\"}, {\"id\": \"861948954584059905\", \"url\": \"http://localhost:7892/attachments/861948954575671297.zip\", \"name\": \"鱼皮 - Java 学习路线一条龙版本 V2.mindnode\", \"path\": \"861948954575671297.zip\", \"size\": 408174, \"fullName\": \"鱼皮 - Java 学习路线一条龙版本 V2.mindnode.zip\", \"fullPath\": \"attachments/861948954575671297.zip\", \"extension\": \"zip\", \"groupName\": \"attachments\", \"contentType\": \"application/zip\"}]','{\"id\": \"861952755730780160\", \"url\": \"http://localhost:7892/images/861952755722391552.jpeg\", \"name\": \"avatar\", \"path\": \"861952755722391552.jpeg\", \"size\": 68783, \"fullName\": \"avatar.jpeg\", \"fullPath\": \"images/861952755722391552.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"images\", \"contentType\": \"image/jpeg\"}','[\"BASKETBALL\", \"FOOTBALL\"]','[{\"code\": \"M1\"}, {\"code\": \"M4\"}]','PURCHASING_ORG',b'1','这里是简介',786079661661646848,'test',1,'2024-09-02 10:50:40',1,'2025-01-11 13:02:19',b'0'),
-	(861953021922283520,'111','李岁2','F','fsadfsaf@163.com','2024-09-02',23,b'0','KG','[{\"id\": \"861952982621655040\", \"url\": \"http://localhost:7892/attachments/861952982609072128.jpeg\", \"name\": \"avatar\", \"path\": \"861952982609072128.jpeg\", \"size\": 68783, \"fullName\": \"avatar.jpeg\", \"fullPath\": \"attachments/861952982609072128.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"attachments\", \"contentType\": \"image/jpeg\"}, {\"id\": \"861952982625849344\", \"url\": \"http://localhost:7892/attachments/861952982613266432.csv\", \"name\": \"Google Passwords\", \"path\": \"861952982613266432.csv\", \"size\": 13191, \"fullName\": \"Google Passwords.csv\", \"fullPath\": \"attachments/861952982613266432.csv\", \"extension\": \"csv\", \"groupName\": \"attachments\", \"contentType\": \"text/csv\"}, {\"id\": \"861967956609896448\", \"url\": \"http://localhost:7892/attachments/861967956597313536.pdf\", \"name\": \"线上VI指南\", \"path\": \"861967956597313536.pdf\", \"size\": 463981, \"fullName\": \"线上VI指南.pdf\", \"fullPath\": \"attachments/861967956597313536.pdf\", \"extension\": \"pdf\", \"groupName\": \"attachments\", \"contentType\": \"application/pdf\"}]','{\"id\": \"861976822831681536\", \"url\": \"http://localhost:7892/images/861976822642937856.webp\", \"name\": \"F5V8WS3asAAFJsC\", \"path\": \"861976822642937856.webp\", \"size\": 81884, \"fullName\": \"F5V8WS3asAAFJsC.webp\", \"fullPath\": \"images/861976822642937856.webp\", \"extension\": \"webp\", \"groupName\": \"images\", \"contentType\": \"image/webp\"}','[\"BASKETBALL\", \"FOOTBALL\"]','[{\"code\": \"M1\"}, {\"code\": \"M3\"}, {\"code\": \"M4\"}]','SALES_ORG',b'0','hello world',1,'admin',1,'2024-09-02 11:06:33',1,'2025-01-06 17:52:58',b'0'),
-	(906928548739047424,'00035','TEST','M','10502165791@qq.com','2025-01-01',90,b'1','EA','[{\"id\": \"906928521023086592\", \"url\": \"http://localhost:7892/upload/906928520754651136.svg\", \"name\": \"采购讨论3\", \"path\": \"906928520754651136.svg\", \"size\": 441964, \"fullName\": \"采购讨论3.svg\", \"fullPath\": \"upload/906928520754651136.svg\", \"extension\": \"svg\", \"groupName\": \"upload\", \"contentType\": \"image/svg+xml\"}]','{\"id\": \"906928534818152448\", \"url\": \"http://localhost:7892/images/906928534776209408.jpeg\", \"name\": \"1369-1\", \"path\": \"906928534776209408.jpeg\", \"size\": 78402, \"fullName\": \"1369-1.jpeg\", \"fullPath\": \"images/906928534776209408.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"images\", \"contentType\": \"image/jpeg\"}','[\"FOOTBALL\"]','[{\"code\": \"M1\"}]','MATERIAL',b'1','00',1,'admin',1,'2025-01-04 13:43:14',1,'2025-01-11 13:02:58',b'0');
+	(861953021922283520,'111','李岁','F','fsadfsaf@163.com','2024-09-02',23,b'0','KG','[{\"id\": \"861952982621655040\", \"url\": \"http://localhost:7892/attachments/861952982609072128.jpeg\", \"name\": \"avatar\", \"path\": \"861952982609072128.jpeg\", \"size\": 68783, \"fullName\": \"avatar.jpeg\", \"fullPath\": \"attachments/861952982609072128.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"attachments\", \"contentType\": \"image/jpeg\"}, {\"id\": \"861952982625849344\", \"url\": \"http://localhost:7892/attachments/861952982613266432.csv\", \"name\": \"Google Passwords\", \"path\": \"861952982613266432.csv\", \"size\": 13191, \"fullName\": \"Google Passwords.csv\", \"fullPath\": \"attachments/861952982613266432.csv\", \"extension\": \"csv\", \"groupName\": \"attachments\", \"contentType\": \"text/csv\"}, {\"id\": \"861967956609896448\", \"url\": \"http://localhost:7892/attachments/861967956597313536.pdf\", \"name\": \"线上VI指南\", \"path\": \"861967956597313536.pdf\", \"size\": 463981, \"fullName\": \"线上VI指南.pdf\", \"fullPath\": \"attachments/861967956597313536.pdf\", \"extension\": \"pdf\", \"groupName\": \"attachments\", \"contentType\": \"application/pdf\"}]','{\"id\": \"861976822831681536\", \"url\": \"http://localhost:7892/images/861976822642937856.webp\", \"name\": \"F5V8WS3asAAFJsC\", \"path\": \"861976822642937856.webp\", \"size\": 81884, \"fullName\": \"F5V8WS3asAAFJsC.webp\", \"fullPath\": \"images/861976822642937856.webp\", \"extension\": \"webp\", \"groupName\": \"images\", \"contentType\": \"image/webp\"}','[\"BASKETBALL\", \"FOOTBALL\"]','[{\"code\": \"M1\"}, {\"code\": \"M1\"}, {\"code\": \"M3\"}, {\"code\": \"M3\"}, {\"code\": \"M4\"}, {\"code\": \"M4\"}]','SALES_ORG',b'0','hello world',1,'admin',1,'2024-09-02 11:06:33',1,'2025-08-18 02:54:26',b'0'),
+	(906928548739047424,'00035','TEST2','M','10502165791@qq.com','2025-01-01',90,b'1','EA','[{\"id\": \"906928521023086592\", \"url\": \"http://localhost:7892/upload/906928520754651136.svg\", \"name\": \"采购讨论3\", \"path\": \"906928520754651136.svg\", \"size\": 441964, \"fullName\": \"采购讨论3.svg\", \"fullPath\": \"upload/906928520754651136.svg\", \"extension\": \"svg\", \"groupName\": \"upload\", \"contentType\": \"image/svg+xml\"}]','{\"id\": \"906928534818152448\", \"url\": \"http://localhost:7892/images/906928534776209408.jpeg\", \"name\": \"1369-1\", \"path\": \"906928534776209408.jpeg\", \"size\": 78402, \"fullName\": \"1369-1.jpeg\", \"fullPath\": \"images/906928534776209408.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"images\", \"contentType\": \"image/jpeg\"}','[\"FOOTBALL\"]','[{\"code\": \"M1\"}, {\"code\": \"M1\"}]','MATERIAL',b'1','0022',1,'admin',1,'2025-01-04 13:43:14',1,'2025-08-31 10:41:54',b'0'),
+	(993494022410473472,'0003','徐稼渊','M','jkxyx205@163.com','2024-09-03',18,b'1','EA','[{\"id\": \"993494015250796544\", \"url\": \"http://127.0.0.1:7892/upload/993494015238213632.jpeg\", \"name\": \"WechatIMG740\", \"path\": \"993494015238213632.jpeg\", \"size\": 179599, \"fullName\": \"WechatIMG740.jpeg\", \"fullPath\": \"upload/993494015238213632.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"upload\", \"contentType\": \"image/jpeg\"}]','{\"id\": \"993493983751573504\", \"url\": \"http://127.0.0.1:7892/images/993493983420223488.png\", \"name\": \"avatar\", \"path\": \"993493983420223488.png\", \"size\": 474418, \"fullName\": \"avatar.png\", \"fullPath\": \"images/993493983420223488.png\", \"extension\": \"png\", \"groupName\": \"images\", \"contentType\": \"image/png\"}','[\"FOOTBALL\"]','[{\"code\": \"232323\"}]','MATERIAL',b'1','2323',993191048798814208,'3233',1,'2025-08-31 10:43:31',1,'2025-08-31 11:29:45',b'0'),
+	(993494811031900160,'111111','1112','F','nakolis912@lxheir.com','2025-11-12',11,b'1','KG','[{\"id\": \"993494753335054336\", \"url\": \"http://127.0.0.1:7892/upload/993494753322471424.png\", \"name\": \"default_avatar\", \"path\": \"993494753322471424.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"upload/993494753322471424.png\", \"extension\": \"png\", \"groupName\": \"upload\", \"contentType\": \"image/png\"}]','{\"id\": \"993494738977951744\", \"url\": \"http://127.0.0.1:7892/images/993494738625630208.png\", \"name\": \"default_avatar\", \"path\": \"993494738625630208.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"images/993494738625630208.png\", \"extension\": \"png\", \"groupName\": \"images\", \"contentType\": \"image/png\"}','[\"BASKETBALL\", \"FOOTBALL\"]','[{\"code\": \"232323\"}]','MATERIAL',b'1','11',1,'admin',1,'2025-08-31 10:46:39',1,'2025-11-12 17:32:07',b'0'),
+	(1020051341008982016,'1121','北北','F','1050216579@qq.com','2025-11-05',23,b'1','KG','[{\"id\": \"1020051287976202240\", \"url\": \"http://127.0.0.1:7892/upload/1020051287804235776.png\", \"name\": \"default_avatar\", \"path\": \"1020051287804235776.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"upload/1020051287804235776.png\", \"extension\": \"png\", \"groupName\": \"upload\", \"contentType\": \"image/png\"}]',NULL,'[\"FOOTBALL\"]','[{\"code\": \"FKA\"}, {\"code\": \"M1\"}]','MATERIAL',b'0','11',1,'ADMIN',1,'2025-11-12 17:32:49',1,'2025-11-12 17:32:49',b'0');
 
 /*!40000 ALTER TABLE `t_student` ENABLE KEYS */;
 UNLOCK TABLES;
