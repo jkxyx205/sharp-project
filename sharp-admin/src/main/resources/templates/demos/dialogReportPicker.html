@@ -149,7 +149,7 @@
         value: ['1'],
         name: "userIds",
         required: true,
-        params: {id: "1"}, // 初始化 筛选id = 1 的用户,
+        params: {id: "1"}, // 初始化 筛选id = 1 的用户, postgres下 id 不能是字符串
         beforeShow: function (reportDialog) {
             // 根据业务需求更改查询参数
             reportDialog.options.params = {id: userId}

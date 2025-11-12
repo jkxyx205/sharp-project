@@ -22,6 +22,9 @@
     <springProfile name="dev-prod">
         <include resource="logback/logback-dev.xml"/>
     </springProfile>
+    <springProfile name="dev-postgres">
+        <include resource="logback/logback-dev.xml"/>
+    </springProfile>
 
     <!--idea 可以运行，bash运行找不到-->
     <!--<include resource="logback/logback-${spring.profiles.active}.xml"/>-->

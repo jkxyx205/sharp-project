@@ -6,11 +6,11 @@ import com.rick.db.repository.TableDAO;
 import com.rick.fileupload.client.support.Document;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.support.ReportConstants;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -30,16 +30,28 @@ public class StudentReportAdvice extends OperatorReportAdvice {
 
         // 文件解析
         for (Map<String, Object> row : rows) {
-            if (StringUtils.isNotBlank((String) row.get("attachments"))) {
-                List<Document> list = JsonUtils.toList((String)row.get("attachments"), Document.class);
+            Object attachmentsObject = row.get("attachments");
+            if (Objects.nonNull(attachmentsObject)) {
+                List<Document> list = JsonUtils.toList(row.get("attachments").toString(), Document.class);
                 row.put("attachments", list.stream().map(document -> document.getName()).collect(Collectors.joining(",")));
             }
 
-            if (StringUtils.isNotBlank((String) row.get("avatar"))) {
-                Document avatar = JsonUtils.toObject((String) row.get("avatar"), Document.class);
+            Object avatarObject = row.get("avatar");
+            if (Objects.nonNull(avatarObject)) {
+                Document avatar = JsonUtils.toObject(avatarObject.toString(), Document.class);
                 row.put("avatar", avatar == null ? "/img/default_avatar.png" : avatar.getUrl());
             } else {
                 row.put("avatar","/img/default_avatar.png");
+            }
+
+            Object hobbyListObject = row.get("hobbyList");
+            if (Objects.nonNull(hobbyListObject)) {
+                row.put("hobbyList", hobbyListObject.toString());
+            }
+
+            Object materialTypeListObject = row.get("materialTypeList");
+            if (Objects.nonNull(materialTypeListObject)) {
+                row.put("materialTypeList", materialTypeListObject.toString());
             }
 
         }

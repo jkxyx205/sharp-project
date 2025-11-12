@@ -81,15 +81,18 @@ public class Student extends BaseCodeEntity<Long> {
     @DictValueCheck(type = "UNIT")
     DictValue unit;
 
+    @Column(columnDefinition = "json")
     List<Document> attachments;
 
+    @Column(columnDefinition = "json")
     Document avatar;
 
     @NotEmpty(message = "兴趣爱好必须选择一个")
     @Valid
+    @Column(columnDefinition = "json")
     List<HobbyEnum> hobbyList;
 
-    @Column(comment = "物料类型", value = "material_type")
+    @Column(comment = "物料类型", value = "material_type", columnDefinition = "json")
     @DictType(type = "MATERIAL")
     List<DictValue> materialTypeList;
 
