@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.rick.db.repository.EntityDAOManager.targetSelect;
@@ -125,9 +126,11 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Object... args) {
-        List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, args);
-        cascadeSelect(clazz, (List<T>) list);
-        return list;
+        return watchSelect(() -> {
+            List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, args);
+            cascadeSelect(clazz, (List<T>) list);
+            return list;
+        });
     }
 
     @Override
@@ -183,19 +186,11 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
-        if (Objects.isNull(targetSelect.get())) {
-            targetSelect.set(tableMeta.getEntityClass());
-        }
-
-        List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, paramMap);
-        cascadeSelect(clazz, (List<T>) list);
-
-        if (targetSelect.get() == tableMeta.getEntityClass()) {
-            targetSelect.remove();
-            threadLocalEntity.remove();
-        }
-
-        return list;
+        return watchSelect(() -> {
+            List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, paramMap);
+            cascadeSelect(clazz, (List<T>) list);
+            return list;
+        });
     }
 
     @Override
@@ -748,6 +743,19 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         }
 
         args.put(column, pGobject);
+    }
+
+    private <E> List<E> watchSelect(Supplier selectResultSupplier) {
+        targetSelect.set(targetSelect.get() + 1);
+        List<E> list = (List<E>) selectResultSupplier.get();
+        targetSelect.set(targetSelect.get() - 1);
+
+        if (targetSelect.get() == 0) {
+            targetSelect.remove();
+            threadLocalEntity.remove();
+        }
+
+        return list;
     }
 
 }
