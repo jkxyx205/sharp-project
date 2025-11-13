@@ -1,5 +1,6 @@
 package com.rick.db.repository;
 
+import com.rick.common.http.exception.BizException;
 import com.rick.common.util.Maps;
 import com.rick.db.repository.model.EntityIdCode;
 import com.rick.db.util.OperatorUtils;
@@ -44,7 +45,7 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     @Override
     public T insert(T entity) {
         if (exists("code = ?", new Object[]{entity.getCode()})) {
-            throw new RuntimeException("编号已经存在");
+            throw new BizException("编号已经存在");
         }
         return super.insert(entity);
     }
@@ -52,7 +53,7 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     @Override
     public T update(T entity) {
         if (exists("id <> ? AND code = ?", new Object[]{entity.getId(), entity.getCode()})) {
-            throw new RuntimeException("编号已经存在");
+            throw new BizException("编号已经存在");
         }
         return super.update(entity);
     }

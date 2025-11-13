@@ -1,5 +1,6 @@
 package com.rick.db.repository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,5 +24,9 @@ public class EntityDAOManager {
     public static Collection<EntityDAO<?, ?>> getAllEntityDAO() {
         return map.values();
     }
+
+    static final ThreadLocal<Collection<Object>> threadLocalEntity = ThreadLocal.withInitial(ArrayList::new);
+
+    static final ThreadLocal targetSelect = new ThreadLocal();
 
 }
