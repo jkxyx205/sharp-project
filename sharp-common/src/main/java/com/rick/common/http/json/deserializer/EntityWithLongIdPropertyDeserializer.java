@@ -45,7 +45,7 @@ public class EntityWithLongIdPropertyDeserializer<T> extends JsonDeserializer<T>
             }
 
             Class<?> contentClass = javaType.getContentType().getRawClass();
-            if (node.get(0).isNumber()) {
+            if (node.get(0).isNumber() || node.get(0).isTextual()) {
                 List<Long> ids = JsonUtils.toList(node, Long.class);
                 if (CollectionUtils.isEmpty(ids)) {
                     return (T) Collections.emptyList();
