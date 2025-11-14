@@ -44,8 +44,22 @@ public class TableMetaResolver {
                                       String columnPrefix, String propertyPrefix) {
         Field[] allFields = uniqueFields(FieldUtils.getAllFields(entityClass));
         for (Field field : allFields) {
+            Select select = field.getAnnotation(Select.class);
+
             Embedded embedded = field.getAnnotation(Embedded.class);
             if (Objects.nonNull(embedded)) {
+                if (Objects.nonNull(select)) {
+                    TableMeta.Reference reference = new TableMeta.Reference();
+                    reference.select = select;
+                    reference.field = field;
+                    if (Collection.class.isAssignableFrom(field.getType())) {
+                        reference.referenceClass = ClassUtils.getFieldGenericClass(field)[0];
+                    } else {
+                        reference.referenceClass = field.getType();
+                    }
+                    tableMeta.getReferenceMap().put(field, reference);
+                }
+
                 loopAllFields(tableMeta, selectColumnBuilder, updateColumnBuilder, columnNameBuilder, field.getType(), embedded.columnPrefix(), field.getName() + ".");
                 continue;
             }
@@ -53,7 +67,6 @@ public class TableMetaResolver {
             ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
             OneToMany oneToMany = field.getAnnotation(OneToMany.class);
             ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-            Select select = field.getAnnotation(Select.class);
 
             if (Objects.nonNull(manyToMany) || Objects.nonNull(manyToOne) || Objects.nonNull(oneToMany) || Objects.nonNull(select)) {
                 TableMeta.Reference reference = new TableMeta.Reference();
