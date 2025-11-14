@@ -51,6 +51,8 @@ public interface EntityDAO<T, ID> {
 
     <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap);
 
+    <K, V> Map<K, V> selectWithoutCascadeSelect(@NotBlank String columns, String condition, Map<String, ?> paramMap);
+
     Boolean exists(String condition, Object... args);
 
     Boolean exists(String condition, T example);
@@ -74,6 +76,8 @@ public interface EntityDAO<T, ID> {
     T insertOrUpdate(@Valid @NotNull T entity);
 
     Collection<T> insertOrUpdate(@Valid Collection<T> entityList);
+
+    Collection<T> insertOrUpdate(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue);
 
     int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
 

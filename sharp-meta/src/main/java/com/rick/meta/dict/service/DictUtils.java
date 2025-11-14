@@ -111,8 +111,10 @@ final public class DictUtils {
                         fieldValue = iterator.next();
                         if (fieldValue instanceof DictValue) {
                             Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
-                            ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
-                            ((DictValue)fieldValue).setType(dictType.type());
+                            if (dictLabel.isPresent()) {
+                                ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
+                                ((DictValue)fieldValue).setType(dictType.type());
+                            }
                         } else if (mayEntityObject(fieldValue)) {
                             fillDictLabel(fieldValue);
                         }

@@ -24,7 +24,7 @@ public class TableMetaResolver {
         }
 
         TableMeta tableMeta = new TableMeta(entityClass, tableAnnotation, StringUtils.isNotBlank(tableAnnotation.value()) ? tableAnnotation.value() : com.rick.common.util.StringUtils.camelToSnake(entityClass.getSimpleName()), com.rick.common.util.StringUtils.camelToSnake(entityClass.getSimpleName()) + "_id",
-                new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+                new HashMap<>(), new IdentityHashMap<>(), new IdentityHashMap<>(), new HashMap<>(), new HashMap<>());
 
         StringBuilder selectColumnBuilder = new StringBuilder();
         StringBuilder updateColumnBuilder = new StringBuilder();

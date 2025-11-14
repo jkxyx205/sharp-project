@@ -109,6 +109,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public <K, V> Map<K, V> selectWithoutCascadeSelect(String columns, String condition, Map<String, ?> paramMap) {
+        return baseDAO.selectWithoutCascadeSelect(columns, condition, paramMap);
+    }
+
+    @Override
     public Boolean exists(String condition, Object... args) {
         return baseDAO.exists(condition, args);
     }
@@ -166,6 +171,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     @Override
     public Collection<T> insertOrUpdate(Collection<T> entityList) {
         return baseDAO.insertOrUpdate(entityList);
+    }
+
+    @Override
+    public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue) {
+        return baseDAO.insertOrUpdate(entityList, refColumnName, refValue);
     }
 
     @Override

@@ -199,6 +199,11 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return list;
     }
 
+    @Override
+    public <K, V> Map<K, V> selectWithoutCascadeSelect(String columns, String condition, Map<String, ?> paramMap) {
+        return tableDAO.selectForKeyValue(tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
+    }
+
     public void cascadeSelect(Class<?> clazz, List<T> list) {
         if (clazz == tableMeta.getEntityClass() && hasSelectReference()) {
             // 级联查询
@@ -420,6 +425,29 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     @Override
+    public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue) {
+        if (CollectionUtils.isEmpty(entityList)) {
+            delete(refColumnName + " = ?", refValue);
+        } else {
+            Set<?> ids = entityList.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(ids)) {
+                delete(refColumnName + " = ?", refValue);
+            } else {
+                Map<String, Object> paramMap = new LinkedHashMap();
+                paramMap.put("ids", ids);
+                paramMap.put("referenceId", refValue);
+                delete("id NOT IN (:ids) AND "+ refColumnName +" = :referenceId", paramMap);
+            }
+
+            for (T referenceEntity : entityList) {
+                insertOrUpdate(referenceEntity);
+            }
+        }
+
+        return entityList;
+    }
+
+    @Override
     public T insertOrUpdate(T entity) {
         return insertOrUpdate0(entity, Objects.isNull(getIdValue(entity)));
     }
@@ -445,7 +473,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return insertOrUpdate0(entity, false);
     }
 
-    private T insertOrUpdate0(T entity, boolean insert) {
+    protected T insertOrUpdate0(T entity, boolean insert) {
         return watchSelect(() -> {
             threadLocalEntity.get().add(entity);
             if (hasSaveReference()) {
