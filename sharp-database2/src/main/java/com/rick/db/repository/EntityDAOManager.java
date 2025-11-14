@@ -27,6 +27,6 @@ public class EntityDAOManager {
 
     static final ThreadLocal<Collection<Object>> threadLocalEntity = ThreadLocal.withInitial(ArrayList::new);
 
-    static final ThreadLocal<Integer> targetSelect = ThreadLocal.withInitial(() -> 0);
+    static final ThreadLocal<Integer> localStack = ThreadLocal.withInitial(() -> 0);
 
 }

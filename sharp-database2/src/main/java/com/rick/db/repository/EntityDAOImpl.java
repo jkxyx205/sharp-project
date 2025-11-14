@@ -33,7 +33,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.rick.db.repository.EntityDAOManager.targetSelect;
+import static com.rick.db.repository.EntityDAOManager.localStack;
 import static com.rick.db.repository.EntityDAOManager.threadLocalEntity;
 import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REGEX;
 
@@ -126,10 +126,10 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Object... args) {
-        return watchSelect(() -> {
+        return (List<E>) watchSelect(() -> {
             List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, args);
             cascadeSelect(clazz, (List<T>) list);
-            return list;
+            return (T) list;
         });
     }
 
@@ -186,10 +186,10 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
-        return watchSelect(() -> {
+        return (List<E>) watchSelect(() -> {
             List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, paramMap);
             cascadeSelect(clazz, (List<T>) list);
-            return list;
+            return (T) list;
         });
     }
 
@@ -446,126 +446,143 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     private T insertOrUpdate0(T entity, boolean insert) {
-        if (hasSaveReference()) {
-            for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
-                TableMeta.Reference reference = fieldReferenceEntry.getValue();
+        return watchSelect(() -> {
+            threadLocalEntity.get().add(entity);
+            if (hasSaveReference()) {
+                for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
+                    TableMeta.Reference reference = fieldReferenceEntry.getValue();
 
-                if (Objects.nonNull(reference.getManyToOne()) && reference.getManyToOne().cascadeSave()) {
-                    EntityDAO referenceDAO = EntityDAOManager.getDAO(reference.getReferenceClass());
-                    Object referenceEntity = getPropertyValue(entity, reference.getField().getName());
-                    referenceDAO.insertOrUpdate(referenceEntity);
-                }
-            }
-        }
-
-        if (insert) {
-            Map<String, Object> args = getArgsFromEntity(entity, false);
-
-            if (Context.getDialect().getType() == DatabaseType.PostgreSQL) {
-                for (Map.Entry<String, Object> arg : args.entrySet()) {
-                    Column annotation = tableMeta.getColumnNameMap().get(arg.getKey());
-                    if (Objects.nonNull(annotation)) {
-                        if ("json".equals(annotation.columnDefinition())) {
-                            postgresJsonHandler(arg.getKey(), "json", args);
-                        } else if ("jsonb".equals(annotation.columnDefinition())) {
-                            postgresJsonHandler(arg.getKey(), "jsonb", args);
+                    if (Objects.nonNull(reference.getManyToOne()) && reference.getManyToOne().cascadeSave()) {
+                        EntityDAO referenceDAO = EntityDAOManager.getDAO(reference.getReferenceClass());
+                        Object referenceEntity = getPropertyValue(entity, reference.getField().getName());
+                        if (!threadLocalEntity.get().contains(referenceEntity)) {
+                            referenceDAO.insertOrUpdate(referenceEntity);
                         }
                     }
                 }
             }
 
-            if (Objects.nonNull(tableMeta.getVersionField())) {
-                args.put(tableMeta.getFieldColumnNameMap().get(tableMeta.getVersionField()), 1);
-            }
+            if (insert) {
+                Map<String, Object> args = getArgsFromEntity(entity, false);
 
-            if (Objects.nonNull(getIdValue(entity))) {
-                tableDAO.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), args);
-            } else if (tableMeta.getIdMeta().getId().strategy() == Id.GenerationType.SEQUENCE) {
-                args.put(tableMeta.getIdMeta().getIdPropertyName(), IdGenerator.getSequenceId());
-                tableDAO.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), args);
-                setIdValue(entity, args.get(tableMeta.getIdMeta().getIdPropertyName()));
+                if (Context.getDialect().getType() == DatabaseType.PostgreSQL) {
+                    for (Map.Entry<String, Object> arg : args.entrySet()) {
+                        Column annotation = tableMeta.getColumnNameMap().get(arg.getKey());
+                        if (Objects.nonNull(annotation)) {
+                            if ("json".equals(annotation.columnDefinition())) {
+                                postgresJsonHandler(arg.getKey(), "json", args);
+                            } else if ("jsonb".equals(annotation.columnDefinition())) {
+                                postgresJsonHandler(arg.getKey(), "jsonb", args);
+                            }
+                        }
+                    }
+                }
+
+                if (Objects.nonNull(tableMeta.getVersionField())) {
+                    args.put(tableMeta.getFieldColumnNameMap().get(tableMeta.getVersionField()), 1);
+                }
+
+                if (Objects.nonNull(getIdValue(entity))) {
+                    tableDAO.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), args);
+                } else if (tableMeta.getIdMeta().getId().strategy() == Id.GenerationType.SEQUENCE) {
+                    args.put(tableMeta.getIdMeta().getIdPropertyName(), IdGenerator.getSequenceId());
+                    tableDAO.insert(tableMeta.getTableName(), tableMeta.getColumnNames(), args);
+                    setIdValue(entity, args.get(tableMeta.getIdMeta().getIdPropertyName()));
+                } else {
+                    setIdValue(entity, tableDAO.insertAndReturnKey(tableMeta.getTableName(), tableMeta.getColumnNames(), args, tableMeta.getIdMeta().getIdPropertyName()));
+                }
             } else {
-                setIdValue(entity, tableDAO.insertAndReturnKey(tableMeta.getTableName(), tableMeta.getColumnNames(), args, tableMeta.getIdMeta().getIdPropertyName()));
-            }
-        } else {
-            Map<String, Object> args = getArgsFromEntity(entity, true);
-            if (Objects.nonNull(tableMeta.getVersionField())) {
-                String versionColumn = tableMeta.getFieldColumnNameMap().get(tableMeta.getVersionField());
-                Number version = (Number) getPropertyValue(entity, tableMeta.getVersionField().getName());
-                if (Objects.isNull(version)) {
-                    throw new IllegalArgumentException("version field cannot be null");
+                Map<String, Object> args = getArgsFromEntity(entity, true);
+                if (Objects.nonNull(tableMeta.getVersionField())) {
+                    String versionColumn = tableMeta.getFieldColumnNameMap().get(tableMeta.getVersionField());
+                    Number version = (Number) getPropertyValue(entity, tableMeta.getVersionField().getName());
+                    if (Objects.isNull(version)) {
+                        throw new IllegalArgumentException("version field cannot be null");
+                    }
+
+                    Number dbVersion = select(Number.class, versionColumn, "id = ?", args.get(tableMeta.getIdMeta().getIdPropertyName())).get(0);
+                    if (dbVersion.intValue() > version.intValue()) {
+                        throw new IllegalArgumentException("version field is old");
+                    }
+
+                    args.put(tableMeta.getVersionField().getName(), dbVersion.intValue() + 1);
                 }
 
-                Number dbVersion = select(Number.class, versionColumn, "id = ?", args.get(tableMeta.getIdMeta().getIdPropertyName())).get(0);
-                if (dbVersion.intValue() > version.intValue()) {
-                    throw new IllegalArgumentException("version field is old");
-                }
-
-                args.put(tableMeta.getVersionField().getName(), dbVersion.intValue() + 1);
+                update(tableMeta.getUpdateColumn(), tableMeta.getIdMeta().getIdColumnName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), args);
             }
 
-            update(tableMeta.getUpdateColumn(), tableMeta.getIdMeta().getIdColumnName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), args);
-        }
+            if (hasSaveReference()) {
+                for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
+                    TableMeta.Reference reference = fieldReferenceEntry.getValue();
+                    if (Objects.nonNull(reference.getManyToMany()) || Objects.nonNull(reference.getOneToMany())) {
+                        EntityDAO referenceDAO = EntityDAOManager.getDAO(reference.getReferenceClass());
+                        if (Objects.nonNull(reference.getManyToMany())) {
+                            List<Object> list = (List<Object>) getPropertyValue(entity, reference.getField().getName());
 
-        if (hasSaveReference()) {
-            for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
-                TableMeta.Reference reference = fieldReferenceEntry.getValue();
-                if (Objects.nonNull(reference.getManyToMany()) || Objects.nonNull(reference.getOneToMany())) {
-                    EntityDAO referenceDAO = EntityDAOManager.getDAO(reference.getReferenceClass());
-                    if (Objects.nonNull(reference.getManyToMany())) {
-                        List<Object> list = (List<Object>) getPropertyValue(entity, reference.getField().getName());
+                            tableDAO.delete(reference.getManyToMany().tableName(), reference.getManyToMany().joinColumnId()+" = ?", getIdValue(entity));
 
-                        tableDAO.delete(reference.getManyToMany().tableName(), reference.getManyToMany().joinColumnId()+" = ?", getIdValue(entity));
+                            if (CollectionUtils.isNotEmpty(list)) {
+                                if (reference.getManyToMany().cascadeSave()) {
+                                    for (Object referenceEntity : list) {
+                                        if (!threadLocalEntity.get().contains(referenceEntity)) {
+                                            referenceDAO.insertOrUpdate(referenceEntity);
+                                        }
+                                    }
+                                }
 
-                        if (CollectionUtils.isNotEmpty(list)) {
-                            if (reference.getManyToMany().cascadeSave()) {
                                 for (Object referenceEntity : list) {
-                                    referenceDAO.insertOrUpdate(referenceEntity);
+                                    tableDAO.insert(reference.getManyToMany().tableName(), reference.getManyToMany().joinColumnId() + "," + reference.getManyToMany().inverseJoinColumnId(), Maps.of(reference.getManyToMany().joinColumnId(), getIdValue(entity), reference.getManyToMany().inverseJoinColumnId(), getIdValue(referenceEntity)));
                                 }
                             }
 
-                            for (Object referenceEntity : list) {
-                                tableDAO.insert(reference.getManyToMany().tableName(), reference.getManyToMany().joinColumnId() + "," + reference.getManyToMany().inverseJoinColumnId(), Maps.of(reference.getManyToMany().joinColumnId(), getIdValue(entity), reference.getManyToMany().inverseJoinColumnId(), getIdValue(referenceEntity)));
+                        } else if (Objects.nonNull(reference.getOneToMany()) && reference.getOneToMany().cascadeSave()) {
+                            List<Object> list = null;
+                            if (reference.getOneToMany().oneToOne()) {
+                                Object referenceEntity = getPropertyValue(entity, reference.getField().getName());
+                                if (Objects.nonNull(referenceEntity)) {
+                                    list = Arrays.asList(referenceEntity);
+                                }
+                            } else {
+                                list = (List<Object>)getPropertyValue(entity, reference.getField().getName());
                             }
-                        }
 
-                    } else if (Objects.nonNull(reference.getOneToMany()) && reference.getOneToMany().cascadeSave()) {
-                        List<Object> list = null;
-                        if (reference.getOneToMany().oneToOne()) {
-                            Object referenceEntity = getPropertyValue(entity, reference.getField().getName());
-                            if (Objects.nonNull(referenceEntity)) {
-                                list = Arrays.asList(referenceEntity);
-                            }
-                        } else {
-                            list = (List<Object>)getPropertyValue(entity, reference.getField().getName());
-                        }
-
-                        String referenceColumnId = StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId());
-                        ID idValue = (ID) getIdValue(entity);
-                        if (CollectionUtils.isEmpty(list)) {
-                            referenceDAO.delete(referenceColumnId + " = ?", idValue);
-                        } else {
-                            Set<?> ids = list.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
-                            if (CollectionUtils.isEmpty(ids)) {
+                            String referenceColumnId = StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId());
+                            ID idValue = (ID) getIdValue(entity);
+                            if (CollectionUtils.isEmpty(list)) {
                                 referenceDAO.delete(referenceColumnId + " = ?", idValue);
                             } else {
-                                Map<String, Object> paramMap = new LinkedHashMap();
-                                paramMap.put("ids", ids);
-                                paramMap.put("referenceId", idValue);
-                                referenceDAO.delete("id NOT IN (:ids) AND "+ referenceColumnId +" = :referenceId", paramMap);
-                            }
+                                Set<?> ids = list.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
+                                if (CollectionUtils.isEmpty(ids)) {
+                                    referenceDAO.delete(referenceColumnId + " = ?", idValue);
+                                } else {
+                                    Map<String, Object> paramMap = new LinkedHashMap();
+                                    paramMap.put("ids", ids);
+                                    paramMap.put("referenceId", idValue);
+                                    referenceDAO.delete("id NOT IN (:ids) AND "+ referenceColumnId +" = :referenceId", paramMap);
+                                }
 
-                            for (Object referenceEntity : list) {
-                                setPropertyValue(referenceEntity, reference.getOneToMany().mappedBy(), entity);
-                                referenceDAO.insertOrUpdate(referenceEntity);
+                                for (Object referenceEntity : list) {
+                                    Field mappedField = EntityDAOManager.getDAO(referenceEntity.getClass()).getTableMeta().getFieldByPropertyName(reference.getOneToMany().mappedBy());
+                                    Object value;
+                                    if (mappedField.getType() == entity.getClass()) {
+                                        value = entity;
+                                    } else {
+                                        value = getIdValue(entity);
+                                    }
+
+                                    setPropertyValue(referenceEntity, reference.getOneToMany().mappedBy(), value);
+                                    if (!threadLocalEntity.get().contains(referenceEntity)) {
+                                        referenceDAO.insertOrUpdate(referenceEntity);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        return entity;
+            return entity;
+        });
     }
 
     private boolean hasSaveReference() {
@@ -745,17 +762,17 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         args.put(column, pGobject);
     }
 
-    private <E> List<E> watchSelect(Supplier selectResultSupplier) {
-        targetSelect.set(targetSelect.get() + 1);
-        List<E> list = (List<E>) selectResultSupplier.get();
-        targetSelect.set(targetSelect.get() - 1);
+    private T watchSelect(Supplier<T> sqlHandlerSupplier) {
+        localStack.set(localStack.get() + 1);
+        T t = sqlHandlerSupplier.get();
+        localStack.set(localStack.get() - 1);
 
-        if (targetSelect.get() == 0) {
-            targetSelect.remove();
+        if (localStack.get() <= 0) {
+            localStack.remove();
             threadLocalEntity.remove();
         }
 
-        return list;
+        return t;
     }
 
 }
