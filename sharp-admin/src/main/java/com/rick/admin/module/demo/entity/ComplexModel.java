@@ -47,7 +47,7 @@ public class ComplexModel extends BaseEntity<Long> {
     @Embedded(columnPrefix="material_type_")
     @JsonAlias("materialType")
     @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
-    @Select(value = "select name code, label from sys_dict WHERE type = 'MATERIAL_TYPE'  AND name = :name", params="id@materialType.code", nullWhenParamsIsNull="code")
+    @Select(value = "select name code, label from sys_dict WHERE type = 'MATERIAL_TYPE'  AND name = :name", params="name@materialType.code", nullWhenParamsIsNull="code")
     @DictType(type = "MATERIAL_TYPE") // 可以省略 从@Sql 获取label
     @DictValueCheck(type = "MATERIAL_TYPE")
     DictValue materialType;
