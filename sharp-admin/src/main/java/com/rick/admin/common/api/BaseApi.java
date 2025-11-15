@@ -104,7 +104,7 @@ public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID
     }
 
     protected ResourceNotFoundException getResourceNotFoundException(Object key) {
-        return new ResourceNotFoundException(comment() + " id = " + key + "不存在");
+        return new ResourceNotFoundException(comment() + " id = " + key);
     }
 
     protected String comment() {
