@@ -57,7 +57,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     @Override
     public int delete(String tableName, String condition, Object... args) {
         if (Objects.nonNull(tableNameDAOMap.get(tableName))) {
-            return update(tableName, "is_deleted = ?", condition, ArrayUtils.addAll(new Object[]{true}, args));
+            return update(tableName, "is_deleted = ?", condition + " AND is_deleted = false", ArrayUtils.addAll(new Object[]{true}, args));
         } else {
             return super.delete(tableName, condition, args);
         }
@@ -68,7 +68,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         if (Objects.nonNull(tableNameDAOMap.get(tableName))) {
             Map<String, Object> mergedParamMap = new HashMap<>(paramMap);
             mergedParamMap.put("deleted", true);
-            return update(tableName, "is_deleted = :deleted", condition, mergedParamMap);
+            return update(tableName, "is_deleted = :deleted", condition + " AND is_deleted = false", mergedParamMap);
         } else {
             return super.delete(tableName, condition, paramMap);
         }
