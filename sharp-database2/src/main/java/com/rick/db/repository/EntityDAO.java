@@ -27,6 +27,8 @@ public interface EntityDAO<T, ID> {
 
     List<T> select(String condition, Object... args);
 
+    List<T> select(Map<String, ?> paramMap);
+
     List<T> select(String condition, Map<String, ?> paramMap);
 
     List<T> selectWithColumns(@NotBlank String columns, String condition, Object... args);

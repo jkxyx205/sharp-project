@@ -6,6 +6,7 @@ import com.rick.db.repository.*;
 import com.rick.db.repository.model.DatabaseType;
 import lombok.Getter;
 import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -48,6 +49,10 @@ public class TableMeta<T> {
 
     private String columnNames;
 
+    private String selectConditionSQLCache;
+
+    private String conditionSQLCache;
+
     public TableMeta(Class<T> entityClass, Table table, String tableName, String referenceColumnId, Map<Field, Reference> referenceMap, Map<Field, String> fieldColumnNameMap, Map<Field, String> fieldPropertyNameMap, Map<String, String> columnPropertyNameMap, Map<String, Column> columnNameMap) {
         this.entityClass = entityClass;
         this.table = table;
@@ -81,7 +86,17 @@ public class TableMeta<T> {
     }
 
     public String getSelectConditionSQL() {
-        return getSelectSQL(selectColumn) + " WHERE " + appendColumnVar(selectColumn, true);
+        if (StringUtils.isBlank(selectConditionSQLCache)) {
+            selectConditionSQLCache = getSelectSQL(selectColumn) + " WHERE " + getConditionSQL();
+        }
+        return selectConditionSQLCache;
+    }
+
+    public String getConditionSQL() {
+        if (StringUtils.isBlank(conditionSQLCache)) {
+            conditionSQLCache =  appendColumnVar(columnNames, true, " AND ");
+        }
+        return conditionSQLCache;
     }
 
     public String getSelectSQL(String columns) {

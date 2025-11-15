@@ -87,6 +87,9 @@ public class SQLParamCleaner {
     private static final Pattern fullPattern = Pattern.compile(FULL_REGEX);
     private static final Pattern paramPattern = Pattern.compile(PARAM_REGEX);
 
+    private static final Pattern PARAM_PATTERN = Pattern.compile(":(\\w+)\\.(\\w+)");
+
+
     static {
         DATE_FORMAT_MAP = new HashMap<>(2);
         DATE_FORMAT_MAP.put("\\d{4}/\\d{2}/\\d{2}", "yyyy/MM/dd");
@@ -98,6 +101,8 @@ public class SQLParamCleaner {
     }
 
     public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap, boolean isSetIsNull) {
+        srcSql = normalizeSqlParams(srcSql);
+
         List<String> paramNames = ParsedSqlHelper.get(srcSql);
 
         if(params == null) {
@@ -480,5 +485,27 @@ public class SQLParamCleaner {
         }
 
         return  srcSql.replaceAll(rightRegex, nullCondition);
+    }
+
+    private static String normalizeSqlParams(String sql) {
+        sql = sql.replaceAll("::\\w+", "");
+
+        Matcher matcher = PARAM_PATTERN.matcher(sql);
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            String obj = matcher.group(1);
+            String field = matcher.group(2);
+
+            // 首字母大写
+            String fieldCamel = Character.toUpperCase(field.charAt(0)) + field.substring(1);
+
+            String replacement = ":" + obj + fieldCamel;
+
+            matcher.appendReplacement(sb, replacement);
+        }
+
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }

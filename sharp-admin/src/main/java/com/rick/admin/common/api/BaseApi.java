@@ -11,14 +11,14 @@ import com.rick.db.repository.EntityDAO;
 import com.rick.db.repository.TableDAO;
 import com.rick.db.repository.model.EntityId;
 import com.rick.db.repository.support.SQLParamCleaner;
+import com.rick.db.util.OperatorUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Rick.Xu
@@ -44,14 +44,26 @@ public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID
     @GetMapping
     public Grid<Map<String, Object>> list(HttpServletRequest request) {
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
-        return GridUtils.list(SQLParamCleaner.formatSql(entityDAO.getTableMeta().getSelectConditionSQL(), params, new HashMap<>()), params);
+        Grid<Map<String, Object>> grid = GridUtils.list(SQLParamCleaner.formatSql(entityDAO.getTableMeta().getSelectConditionSQL(), params, new HashMap<>()), params);
+//        return GridUtils.list(SQLParamCleaner.formatSql(entityDAO.getTableMeta().getSelectConditionSQL(), params, new HashMap<>()), params);
+
+        List<Map<String, Object>> formatList = grid.getRows().stream().map(row -> flattenKeys(row)).collect(Collectors.toList());
+        grid.getRows().clear();
+        grid.getRows().addAll(formatList);
+        return grid;
     }
 
     @GetMapping("one")
-    public Map<String, Object> one(HttpServletRequest request) {
+    public Optional<T> one(HttpServletRequest request) {
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
-        return tableDAO.selectForObject(SQLParamCleaner.formatSql(entityDAO.getTableMeta().getSelectConditionSQL(), params, new HashMap<>()), params).orElseThrow(() -> getResourceNotFoundException(null));
+        return OperatorUtils.expectedAsOptional(entityDAO.select(SQLParamCleaner.formatSql(" WHERE " + entityDAO.getTableMeta().getConditionSQL(), params, new HashMap<>()).replaceAll(" WHERE ", ""), params));
     }
+
+//    @GetMapping("one")
+//    public Map<String, Object> one(HttpServletRequest request) {
+//        Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
+//        return tableDAO.selectForObject(SQLParamCleaner.formatSql(entityDAO.getTableMeta().getSelectConditionSQL(), params, new HashMap<>()), params).orElseThrow(() -> getResourceNotFoundException(null));
+//    }
 
 //    @PostMapping
 //    public EntityId save(@RequestBody T t) {
@@ -109,5 +121,37 @@ public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID
 
     protected String comment() {
         return entityDAO.getTableMeta().getTable().comment();
+    }
+
+    public static Map<String, Object> flattenKeys(Map<String, Object> source) {
+        Map<String, Object> result = new HashMap<>();
+
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            String key = entry.getKey();
+
+            if (key.contains(".")) {
+                String[] parts = key.split("\\.");
+                if (parts.length == 2) {
+                    String obj = parts[0];
+                    String field = parts[1];
+                    String fieldCamel = Character.toUpperCase(field.charAt(0)) + field.substring(1);
+
+                    key = obj + fieldCamel; // 替换 key
+                }
+            }
+
+            Object value = entry.getValue();
+            if (Objects.nonNull(value)) {
+//                if (value instanceof PGobject pgObject) {
+//                    String value1 = pgObject.getValue();
+//                    value = JsonUtils.toJsonNode(value1);
+//                }
+
+                result.put(key, value);
+            }
+
+        }
+
+        return result;
     }
 }

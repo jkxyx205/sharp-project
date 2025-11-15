@@ -49,6 +49,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public List<T> select(Map<String, ?> paramMap) {
+        return baseDAO.select(paramMap);
+    }
+
+    @Override
     public List<T> select(String condition, Map<String, ?> paramMap) {
         return baseDAO.select(condition, paramMap);
     }
