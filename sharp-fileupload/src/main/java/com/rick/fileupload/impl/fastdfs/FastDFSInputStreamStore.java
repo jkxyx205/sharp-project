@@ -66,7 +66,7 @@ public class FastDFSInputStreamStore extends AbstractInputStreamStore {
 
     private static TrackerServer getTrackerServer() throws IOException {
         TrackerClient trackerClient = new TrackerClient();
-        TrackerServer trackerServer = trackerClient.getConnection();
+        TrackerServer trackerServer = trackerClient.getTrackerServer();
         return trackerServer;
     }
 
