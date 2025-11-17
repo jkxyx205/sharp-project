@@ -119,6 +119,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public void cascadeSelect(List<T> list) {
+        baseDAO.cascadeSelect(list);
+    }
+
+    @Override
     public Boolean exists(String condition, Object... args) {
         return baseDAO.exists(condition, args);
     }

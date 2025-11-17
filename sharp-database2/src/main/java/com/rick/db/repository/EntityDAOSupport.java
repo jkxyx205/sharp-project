@@ -1,13 +1,12 @@
-package com.rick.db.repository.support;
+package com.rick.db.repository;
 
 import com.rick.common.util.StringUtils;
 import com.rick.db.config.SharpDatabaseProperties;
-import com.rick.db.repository.*;
 import com.rick.db.repository.model.EntityIdCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +16,9 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,7 +32,7 @@ public class EntityDAOSupport {
     @Resource
     private ApplicationContext context;
 
-    @Autowired
+    @Resource
     private SharpDatabaseProperties sharpDatabaseProperties;
 
     @Resource
@@ -62,7 +64,41 @@ public class EntityDAOSupport {
         // 只扫描注解是 @Table 的类
         provider.addIncludeFilter(new AnnotationTypeFilter(Table.class));
 
-        registerDAO(provider, sharpDatabaseProperties.getEntityBasePackage());
+        String[] packages = sharpDatabaseProperties.getEntityBasePackage().split(",\\s+");
+        for (String packagePath : packages) {
+            registerDAO(provider, packagePath);
+        }
+    }
+
+    public <T> List<T> select(Class<T> clazz, String sql, Map<String, Object> params) {
+        List<T> list = tableDAO.select(clazz, sql, params);
+        select(list);
+        return list;
+    }
+
+    public <T> List<T> select(Class<T> clazz, String sql, Object args) {
+        List<T> list = tableDAO.select(clazz, sql, args);
+        select(list);
+        return list;
+    }
+
+    public <T> T select(T t) {
+        if (t == null) {
+            return null;
+        }
+
+        select(Arrays.asList(t));
+        return t;
+    }
+
+    public <T> List<T> select(List<T> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return list;
+        }
+
+        EntityDAO<T, ?> entityDAO = getEntityDAO(list.get(0).getClass());
+        entityDAO.cascadeSelect(list);
+        return list;
     }
 
     private void registerDAO(ClassPathScanningCandidateComponentProvider provider, @NonNull String packagePath) throws ClassNotFoundException {

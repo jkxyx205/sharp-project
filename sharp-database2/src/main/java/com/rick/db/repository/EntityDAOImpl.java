@@ -220,7 +220,12 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return tableDAO.selectForKeyValue(tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
     }
 
-    public void cascadeSelect(Class<?> clazz, List<T> list) {
+    @Override
+    public void cascadeSelect(List<T> list) {
+        cascadeSelect(tableMeta.getEntityClass(), list);
+    }
+
+    void cascadeSelect(Class<?> clazz, List<T> list) {
         if (clazz == tableMeta.getEntityClass() && hasSelectReference()) {
             // 级联查询
             selectReference(list);

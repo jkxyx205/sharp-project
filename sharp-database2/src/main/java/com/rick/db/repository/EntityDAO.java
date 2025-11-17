@@ -55,6 +55,8 @@ public interface EntityDAO<T, ID> {
 
     <K, V> Map<K, V> selectWithoutCascadeSelect(@NotBlank String columns, String condition, Map<String, ?> paramMap);
 
+    void cascadeSelect(List<T> list);
+
     Boolean exists(String condition, Object... args);
 
     Boolean exists(String condition, T example);
