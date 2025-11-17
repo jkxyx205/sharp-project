@@ -19,11 +19,11 @@ public class QueryModel {
 
     private PageModel pageModel;
 
-    private Map<String, ?> params;
+    private Map<String, Object> params;
 
     private QueryModel() {}
 
-    public static QueryModel of(Map<String, ?> requestMap) {
+    public static QueryModel of(Map<String, Object> requestMap) {
         QueryModel queryModel = new QueryModel();
 
         PageModel pageModel = new PageModel();

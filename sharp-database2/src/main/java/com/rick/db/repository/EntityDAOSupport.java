@@ -3,10 +3,12 @@ package com.rick.db.repository;
 import com.rick.common.util.StringUtils;
 import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.repository.model.EntityIdCode;
+import com.rick.db.repository.support.InsertUpdateCallback;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -35,6 +37,9 @@ public class EntityDAOSupport {
     @Resource
     private SharpDatabaseProperties sharpDatabaseProperties;
 
+    @Autowired(required = false)
+    private InsertUpdateCallback insertUpdateCallback;
+
     @Resource
     private TableDAO tableDAO;
 
@@ -43,8 +48,8 @@ public class EntityDAOSupport {
         boolean isNotInstance = (entityDAO == null);
 
         if (isNotInstance) {
-            entityDAO =  EntityIdCode.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(tableDAO, entityClass) :
-                    new EntityDAOImpl(tableDAO, entityClass);
+            entityDAO =  EntityIdCode.class.isAssignableFrom(entityClass) ? new EntityCodeDAOImpl(tableDAO, entityClass, insertUpdateCallback) :
+                    new EntityDAOImpl(tableDAO, entityClass, insertUpdateCallback);
 
             EntityDAOManager.register(entityClass, entityDAO);
 

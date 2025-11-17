@@ -39,7 +39,7 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, Map<String, ?> paramMap) {
+    public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, Map<String, Object> paramMap) {
         return baseDAO.selectForKeyValue(columns, condition, paramMap);
     }
 
@@ -49,12 +49,12 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public List<T> select(Map<String, ?> paramMap) {
+    public List<T> select(Map<String, Object> paramMap) {
         return baseDAO.select(paramMap);
     }
 
     @Override
-    public List<T> select(String condition, Map<String, ?> paramMap) {
+    public List<T> select(String condition, Map<String, Object> paramMap) {
         return baseDAO.select(condition, paramMap);
     }
 
@@ -74,7 +74,7 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public List<T> select(String columns, String condition, Map<String, ?> paramMap) {
+    public List<T> select(String columns, String condition, Map<String, Object> paramMap) {
         return baseDAO.select(columns, condition, paramMap);
     }
 
@@ -104,17 +104,17 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
+    public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap) {
         return baseDAO.select(clazz, columns, condition, paramMap);
     }
 
     @Override
-    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap) {
+    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap) {
         return baseDAO.selectWithoutCascadeSelect(clazz, columns, condition, paramMap);
     }
 
     @Override
-    public <K, V> Map<K, V> selectWithoutCascadeSelect(String columns, String condition, Map<String, ?> paramMap) {
+    public <K, V> Map<K, V> selectWithoutCascadeSelect(String columns, String condition, Map<String, Object> paramMap) {
         return baseDAO.selectWithoutCascadeSelect(columns, condition, paramMap);
     }
 
@@ -154,7 +154,7 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public int delete(String condition, Map<String, ?> paramMap) {
+    public int delete(String condition, Map<String, Object> paramMap) {
         return baseDAO.delete(condition, paramMap);
     }
 
@@ -199,17 +199,17 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public int update(String columns, String condition, Map<String, ?> paramMap) {
+    public int update(String columns, String condition, Map<String, Object> paramMap) {
         return baseDAO.update(columns, condition, paramMap);
     }
 
     @Override
-    public int updateById(String columns, ID id, Map<String, ?> paramMap) {
+    public int updateById(String columns, ID id, Map<String, Object> paramMap) {
         return baseDAO.updateById(columns, id, paramMap);
     }
 
     @Override
-    public int updateByIds(String columns, Collection<ID> ids, Map<String, ?> paramMap) {
+    public int updateByIds(String columns, Collection<ID> ids, Map<String, Object> paramMap) {
         return baseDAO.updateByIds(columns, ids, paramMap);
     }
 

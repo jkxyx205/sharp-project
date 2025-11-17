@@ -23,13 +23,13 @@ public interface EntityDAO<T, ID> {
 
     List<T> selectAll();
 
-    <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, Map<String, ?> paramMap);
+    <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
     List<T> select(String condition, Object... args);
 
-    List<T> select(Map<String, ?> paramMap);
+    List<T> select(Map<String, Object> paramMap);
 
-    List<T> select(String condition, Map<String, ?> paramMap);
+    List<T> select(String condition, Map<String, Object> paramMap);
 
     List<T> selectWithColumns(@NotBlank String columns, String condition, Object... args);
 
@@ -37,7 +37,7 @@ public interface EntityDAO<T, ID> {
 
     <E> List<E> selectWithoutCascadeSelect(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Object... args);
 
-    List<T> select(@NotBlank String columns, String condition, Map<String, ?> paramMap);
+    List<T> select(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
     List<T> select(T example);
 
@@ -49,11 +49,11 @@ public interface EntityDAO<T, ID> {
 
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, T example);
 
-    <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Map<String, ?> paramMap);
+    <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Map<String, Object> paramMap);
 
-    <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, ?> paramMap);
+    <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap);
 
-    <K, V> Map<K, V> selectWithoutCascadeSelect(@NotBlank String columns, String condition, Map<String, ?> paramMap);
+    <K, V> Map<K, V> selectWithoutCascadeSelect(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
     void cascadeSelect(List<T> list);
 
@@ -69,7 +69,7 @@ public interface EntityDAO<T, ID> {
 
     int delete(String condition, Object... args);
 
-    int delete(String condition, Map<String, ?> paramMap);
+    int delete(String condition, Map<String, Object> paramMap);
 
     T insert(@Valid @NotNull T entity);
 
@@ -87,11 +87,11 @@ public interface EntityDAO<T, ID> {
 
     int update(@NotBlank String columns, String condition, Object... args);
 
-    int update(@NotBlank String columns, String condition, Map<String, ?> paramMap);
+    int update(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
-    int updateById(@NotBlank String columns, ID id, Map<String, ?> paramMap);
+    int updateById(@NotBlank String columns, ID id, Map<String, Object> paramMap);
 
-    int updateByIds(@NotBlank String columns, Collection<ID> ids, Map<String, ?> paramMap);
+    int updateByIds(@NotBlank String columns, Collection<ID> ids, Map<String, Object> paramMap);
 
     TableMeta getTableMeta();
 

@@ -53,7 +53,7 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public Boolean exists(String sql, Map<String, ?> paramMap) {
+    public Boolean exists(String sql, Map<String, Object> paramMap) {
         return select(String.class, sql + " LIMIT 1", paramMap).size() > 0 ? true : false;
     }
 
@@ -63,7 +63,7 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public int update(String tableName, String columns, String condition, Map<String, ?> paramMap) {
+    public int update(String tableName, String columns, String condition, Map<String, Object> paramMap) {
         return namedParameterJdbcTemplate.update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), paramMap);
     }
 
@@ -83,12 +83,12 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public int delete(String tableName, String condition, Map<String, ?> paramMap) {
+    public int delete(String tableName, String condition, Map<String, Object> paramMap) {
         return namedParameterJdbcTemplate.update("DELETE FROM "+ tableName + SqlHelper.buildWhere(condition), paramMap);
     }
 
     @Override
-    public int insert(String tableName, String columnNames, Map<String, ?> paramMap) {
+    public int insert(String tableName, String columnNames, Map<String, Object> paramMap) {
 //        String[] columnNameArr = columnNames.split(COLUMN_NAME_SEPARATOR_REGEX);
 //        Object[] params = new Object[columnNameArr.length];
 //
@@ -118,7 +118,7 @@ public class TableDAOImpl implements TableDAO {
 //    }
 
     @Override
-    public Number insertAndReturnKey(String tableName, String columnNames, Map<String, ?> params, String... idColumnName) {
+    public Number insertAndReturnKey(String tableName, String columnNames, Map<String, Object> params, String... idColumnName) {
         Set<String> toRemove = new HashSet<>(Arrays.asList(idColumnName));
         return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
                 .usingGeneratedKeyColumns(idColumnName)
@@ -164,24 +164,24 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public <E> List<E> select(Class<E> clazz, String sql, Map<String, ?> paramMap) {
+    public <E> List<E> select(Class<E> clazz, String sql, Map<String, Object> paramMap) {
         return select(sql, paramMap, (jdbcTemplate, sql2, paramMap2) -> namedParameterJdbcTemplate.query(sql2, paramMap2, determineRowMapper(clazz)));
     }
 
     @Override
-    public List<Map<String, Object>> select(String sql, Map<String, ?> paramMap) {
+    public List<Map<String, Object>> select(String sql, Map<String, Object> paramMap) {
         return select(sql, paramMap, (jdbcTemplate, sql2, paramMap2) -> namedParameterJdbcTemplate.query(sql2, paramMap2, new ColumnMapRowMapper()));
     }
 
     @Override
-    public <E> List<E> select(String sql, Map<String, ?> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
+    public <E> List<E> select(String sql, Map<String, Object> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
         return jdbcTemplateCallback.select(namedParameterJdbcTemplate, sql, paramMap);
     }
 
     @Override
-    public <K, V> Map<K, V> selectForKeyValue(String sql, Map<String, ?> params) {
+    public <K, V> Map<K, V> selectForKeyValue(String sql, Map<String, Object> paramMap) {
         final Map<K, V> m = new LinkedHashMap();
-        select(sql, params, (jdbcTemplate, sql2, args) -> {
+        select(sql, paramMap, (jdbcTemplate, sql2, args) -> {
             jdbcTemplate.query(sql2, args, rs -> {
                 m.put((K) rs.getObject(1), (V) rs.getObject(2));
             });
@@ -193,7 +193,7 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public Optional<Map<String, Object>> selectForObject(String sql, Map<String, ?> paramMap) {
+    public Optional<Map<String, Object>> selectForObject(String sql, Map<String, Object> paramMap) {
         return OperatorUtils.expectedAsOptional(select(sql, paramMap));
     }
 

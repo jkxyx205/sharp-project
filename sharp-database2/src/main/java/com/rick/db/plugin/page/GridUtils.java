@@ -27,11 +27,11 @@ public final class GridUtils {
         GridUtils.GRID_SERVICE = gridService;
     }
 
-    public static Grid<Map<String, Object>> list(String sql, Map<String, ?> params) {
+    public static Grid<Map<String, Object>> list(String sql, Map<String, Object> params) {
         return list(sql, params, null, (String) params.get(PageModel.PARAM_SIDX));
     }
 
-    public static Grid<Map<String, Object>> list(String sql, Map<String, ?> params, String countSQL) {
+    public static Grid<Map<String, Object>> list(String sql, Map<String, Object> params, String countSQL) {
         return list(sql, params, countSQL, (String) params.get(PageModel.PARAM_SIDX));
     }
     /**
@@ -42,7 +42,7 @@ public final class GridUtils {
      * @param sortableColumns 可以允许排序的列，查询字段必须包含id列，不然mysql排序会有问题。如果为null。所有列允许排序
      * @return
      */
-    public static Grid<Map<String, Object>> list(String sql, Map<String, ?> params, String countSQL, String... sortableColumns) {
+    public static Grid<Map<String, Object>> list(String sql, Map<String, Object> params, String countSQL, String... sortableColumns) {
         QueryModel queryModel = QueryModel.of(params);
 
         PageModel pageModel = queryModel.getPageModel();
@@ -59,7 +59,7 @@ public final class GridUtils {
      * @param params
      * @return
      */
-    public static List<BigDecimal> numericObject(String sql, Map<String, ?> params) {
+    public static List<BigDecimal> numericObject(String sql, Map<String, Object> params) {
         Map<String, Object> formatMap = new HashMap<>();
         sql = SQLParamCleaner.formatSql(sql, params, formatMap);
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.repository.Column;
 import com.rick.db.repository.support.Constants;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
  */
 @Setter
 @Getter
+@EqualsAndHashCode
 public class BaseEntityInfo implements Serializable {
 
     @Column(updatable = false, comment = "创建人")

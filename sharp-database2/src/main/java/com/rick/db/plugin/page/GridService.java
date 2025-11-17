@@ -35,23 +35,23 @@ public class GridService {
         this.dialect = dialect;
     }
 
-    public Grid<Map<String, Object>> query(String sql, PageModel model, Map<String, ?> params) {
+    public Grid<Map<String, Object>> query(String sql, PageModel model, Map<String, Object> params) {
         return query(sql, model, params, "");
     }
 
-    public Grid<Map<String, Object>> query(String sql, PageModel model, Map<String, ?> params, String countSQL) {
+    public Grid<Map<String, Object>> query(String sql, PageModel model, Map<String, Object> params, String countSQL) {
         return query(sql, model, params, (jdbcTemplate, sql2, args) -> tableDAO.select(sql2, args), countSQL);
     }
 
-    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, Class<T> clazz) {
+    public <T> Grid<T> query(String sql, PageModel model, Map<String, Object> params, Class<T> clazz) {
         return query(sql, model, params, clazz, null);
     }
 
-    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, Class<T> clazz, String countSQL) {
+    public <T> Grid<T> query(String sql, PageModel model, Map<String, Object> params, Class<T> clazz, String countSQL) {
         return query(sql, model, params, (jdbcTemplate, sql2, args) -> tableDAO.select(clazz, sql2, args), countSQL);
     }
 
-    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback) {
+    public <T> Grid<T> query(String sql, PageModel model, Map<String, Object> params, JdbcTemplateCallback<T> jdbcTemplateCallback) {
         return query(sql, model, params, jdbcTemplateCallback, null);
     }
 
@@ -65,7 +65,7 @@ public class GridService {
      * @param <T>
      * @return
      */
-    public <T> Grid<T> query(String sql, PageModel model, Map<String, ?> params, JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
+    public <T> Grid<T> query(String sql, PageModel model, Map<String, Object> params, JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
         Map<String, Object> formatMap = new HashMap<>();
         sql = SQLParamCleaner.formatSql(sql, params, formatMap);
         params = formatMap;

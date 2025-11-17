@@ -36,21 +36,20 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public int update(String tableName, String columns, String condition, Map<String, ?> paramMap) {
-        HashMap<String, Object> mergedParamMap = new HashMap<>(paramMap);
-        mergedParamMap.put("baseEntityInfo.updateBy", getUserId());
-        mergedParamMap.put("baseEntityInfo.updateTime", LocalDateTime.now());
-        mergedParamMap.put("baseEntityInfo.deleted", false);
-        return getNamedParameterJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), mergedParamMap);
+    public int update(String tableName, String columns, String condition, Map<String, Object> paramMap) {
+        paramMap.put("baseEntityInfo.updateBy", getUserId());
+        paramMap.put("baseEntityInfo.updateTime", LocalDateTime.now());
+        paramMap.put("baseEntityInfo.deleted", false);
+        return getNamedParameterJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), paramMap);
     }
 
     @Override
-    public int insert(String tableName, String columnNames, Map<String, ?> paramMap) {
+    public int insert(String tableName, String columnNames, Map<String, Object> paramMap) {
         return super.insert(tableName, columnNames, addInsertInfo(tableName, paramMap));
     }
 
     @Override
-    public Number insertAndReturnKey(String tableName, String columnNames, Map<String, ?> paramMap, String... idColumnName) {
+    public Number insertAndReturnKey(String tableName, String columnNames, Map<String, Object> paramMap, String... idColumnName) {
         return super.insertAndReturnKey(tableName, columnNames, addInsertInfo(tableName, paramMap), idColumnName);
     }
 
@@ -64,7 +63,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public int delete(String tableName, String condition, Map<String, ?> paramMap) {
+    public int delete(String tableName, String condition, Map<String, Object> paramMap) {
         if (Objects.nonNull(tableNameDAOMap.get(tableName))) {
             Map<String, Object> mergedParamMap = new HashMap<>(paramMap);
             mergedParamMap.put("deleted", true);
@@ -80,7 +79,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public <E> List<E> select(String sql, Map<String, ?> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
+    public <E> List<E> select(String sql, Map<String, Object> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
         return super.select(isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, paramMap, jdbcTemplateCallback);
     }
 
@@ -89,20 +88,19 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         tableNameDAOMap =  EntityDAOManager.getAllEntityDAO().stream().collect(Collectors.toMap(entityDAO -> entityDAO.getTableMeta().getTableName(), Function.identity()));
     }
 
-    private Map<String, Object> addInsertInfo(String tableName, Map<String, ?> paramMap) {
-        Map<String, Object> mergedParamMap = new HashMap<>(paramMap);
+    private Map<String, Object> addInsertInfo(String tableName, Map<String, Object> paramMap) {
         if (Objects.nonNull(tableNameDAOMap.get(tableName))) {
             LocalDateTime now = LocalDateTime.now();
             long userId = getUserId();
 
-            mergedParamMap.put("create_by", userId);
-            mergedParamMap.put("create_time", now);
-            mergedParamMap.put("update_by", userId);
-            mergedParamMap.put("update_time", now);
+            paramMap.put("create_by", userId);
+            paramMap.put("create_time", now);
+            paramMap.put("update_by", userId);
+            paramMap.put("update_time", now);
         }
 
-        mergedParamMap.put("is_deleted", false);
-        return mergedParamMap;
+        paramMap.put("is_deleted", false);
+        return paramMap;
     }
 
     public long getUserId() {

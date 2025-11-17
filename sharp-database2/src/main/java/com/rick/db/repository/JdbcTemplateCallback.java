@@ -7,6 +7,6 @@ import java.util.Map;
 
 public interface JdbcTemplateCallback<T> {
 
-    List<T> select(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, ?> paramMap);
+    List<T> select(NamedParameterJdbcTemplate jdbcTemplate, String sql, Map<String, Object> paramMap);
 
 }

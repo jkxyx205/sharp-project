@@ -96,11 +96,11 @@ public class SQLParamCleaner {
         DATE_FORMAT_MAP.put("\\d{4}-\\d{2}-\\d{2}", "yyyy-MM-dd");
     }
 
-    public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap) {
+    public static String formatSql(String srcSql, Map<String, Object> params, Map<String, Object> formatMap) {
         return formatSql(srcSql, params, formatMap, false);
     }
 
-    public static String formatSql(String srcSql, Map<String, ?> params, Map<String, Object> formatMap, boolean isSetIsNull) {
+    public static String formatSql(String srcSql, Map<String, Object> params, Map<String, Object> formatMap, boolean isSetIsNull) {
         srcSql = normalizeSqlParams(srcSql);
 
         List<String> paramNames = ParsedSqlHelper.get(srcSql);
@@ -406,7 +406,7 @@ public class SQLParamCleaner {
     private static final char PREFIX_END =  '{';
     private static final char SUFFIX = '}';
 
-    private static String handleHolderSQL(String srcSQL, Map<String, ?> params) {
+    private static String handleHolderSQL(String srcSQL, Map<String, Object> params) {
         char[] sqlChar = srcSQL.toCharArray();
         int len = sqlChar.length;
 

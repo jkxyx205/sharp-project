@@ -25,7 +25,7 @@ public class QueryRollingExportTable extends AbstractExportTable {
 
     private String sql;
 
-    private Map<String, ?> params;
+    private Map<String, Object> params;
 
     private List<MapTableColumn>  tableColumnList;
 
@@ -33,7 +33,7 @@ public class QueryRollingExportTable extends AbstractExportTable {
 
     public QueryRollingExportTable(TableDAO tableDAO,
                                    String sql,
-                                   Map<String, ?> params,
+                                   Map<String, Object> params,
                                    List<MapTableColumn> tableColumnList) {
         super(tableColumnList, null);
         this.columnSize = tableColumnList.size();

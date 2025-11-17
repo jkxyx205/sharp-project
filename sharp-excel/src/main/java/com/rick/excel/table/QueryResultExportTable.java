@@ -22,14 +22,14 @@ public class QueryResultExportTable extends MapExcelTable {
 
     private String sql;
 
-    private Map<String, ?> params;
+    private Map<String, Object> params;
 
     private PageModel pageModel;
 
     public QueryResultExportTable(GridService gridService,
                                   String sql,
                                   PageModel pageModel,
-                                  Map<String, ?> params,
+                                  Map<String, Object> params,
                                   List<MapTableColumn> tableColumnList) {
         super(tableColumnList, null);
         this.gridService = gridService;

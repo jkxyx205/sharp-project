@@ -104,7 +104,7 @@ public final class HttpServletRequestUtils {
         return map;
     }
 
-    public static Map<String, ?> getParameterMap(HttpServletRequest request, Map<String, ?> extendParams) {
+    public static Map<String, Object> getParameterMap(HttpServletRequest request, Map<String, ?> extendParams) {
         Map<String, Object> requestParams = HttpServletRequestUtils.getParameterMap(request);
         Map mergeParams = requestParams;
 
