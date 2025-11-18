@@ -8,6 +8,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +79,11 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     @Override
     public <E> List<E> select(Class<E> clazz, String sql, Object... args) {
         return super.select(clazz, isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, args);
+    }
+
+    @Override
+    public <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String sql, Map<String, Object> paramMap) {
+        return super.select(clazz, isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, paramMap);
     }
 
     @Override

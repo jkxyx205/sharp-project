@@ -310,7 +310,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                             List<Object> groupReferenceList = map.get(getIdValue(t));
                             setPropertyValue(t, reference.getField().getName(), CollectionUtils.isEmpty(groupReferenceList) ? null : groupReferenceList.iterator().next());
                         } else {
-                            setPropertyValue(t, reference.getField().getName(), map.get(getIdValue(t)));
+                            setPropertyValue(t, reference.getField().getName(), ObjectUtils.defaultIfNull(map.get(getIdValue(t)), Collections.emptyList()));
                         }
                     }
                 } else if (Objects.nonNull(reference.getManyToOne()) && reference.getManyToOne().cascadeSelect()) {

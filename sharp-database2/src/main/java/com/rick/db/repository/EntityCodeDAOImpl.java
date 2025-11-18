@@ -44,11 +44,15 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
 
     @Override
     public T insertOrUpdate(T entity) {
-       if (Objects.isNull(entity.getId())) {
-           return insert(entity);
-       } else {
-           return update(entity);
-       }
+        if (entity.getId() == null && entity.getCode() != null) {
+            fillEntityIdByCode(entity);
+        }
+
+        if (Objects.isNull(entity.getId())) {
+            return insert(entity);
+        } else {
+            return update(entity);
+        }
     }
 
     @Override
