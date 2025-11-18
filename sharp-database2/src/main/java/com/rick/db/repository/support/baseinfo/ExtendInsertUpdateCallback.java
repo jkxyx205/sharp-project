@@ -1,9 +1,10 @@
-package com.rick.db.repository.support;
+package com.rick.db.repository.support.baseinfo;
 
 import com.rick.db.repository.model.BaseCodeEntity;
 import com.rick.db.repository.model.BaseEntity;
 import com.rick.db.repository.model.BaseEntityInfo;
 import com.rick.db.repository.model.BaseEntityInfoGetter;
+import com.rick.db.repository.support.InsertUpdateCallback;
 
 import java.time.LocalDateTime;
 import java.util.Map;

@@ -1,5 +1,6 @@
-package com.rick.db.repository;
+package com.rick.db.repository.support.baseinfo;
 
+import com.rick.db.repository.*;
 import com.rick.db.repository.support.SqlHelper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
