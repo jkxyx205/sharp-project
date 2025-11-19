@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * @author Rick.Xu
@@ -81,7 +82,14 @@ public interface EntityDAO<T, ID> {
 
     Collection<T> insertOrUpdate(@Valid Collection<T> entityList);
 
+    Collection<T> insertOrUpdateTable(Collection<T> entityList);
+
+    Collection<T> insertOrUpdateTable(Collection<T> entityList, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer);
+
     Collection<T> insertOrUpdate(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue);
+
+    Collection<T> insertOrUpdate(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer);
+
 
     int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
 

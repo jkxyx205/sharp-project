@@ -1,5 +1,6 @@
 package com.rick.db.repository;
 
+import com.google.common.collect.Sets;
 import com.rick.common.util.*;
 import com.rick.db.config.Context;
 import com.rick.db.repository.model.DatabaseType;
@@ -28,6 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -424,16 +426,36 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 TableMeta.Reference reference = fieldReferenceEntry.getValue();
                 if (Objects.nonNull(reference.getManyToMany()) || Objects.nonNull(reference.getOneToMany())) {
                     if (Objects.nonNull(reference.getManyToMany()) && reference.getManyToMany().cascadeDelete()) {
+                        // TODO 检查是否可以删除 ManyToMany 端的数据
                         tableDAO.delete(reference.getManyToMany().tableName(), reference.getManyToMany().joinColumnId()+" IN (:ids)", Maps.of("ids", ids));
                     } else if (Objects.nonNull(reference.getOneToMany()) && reference.getOneToMany().cascadeDelete()) {
                         EntityDAO referenceDAO = EntityDAOManager.getDAO(reference.getReferenceClass());
-                        row += referenceDAO.delete(StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId()) + " IN (:ids)", Maps.of("ids", ids));
+                        if (reference.getOneToMany().cascadeSaveItemDelete()) {
+                            if (reference.getOneToMany().cascadeSaveItemDeleteCheck()) {
+                                itemDeletedCheckCallback0(referenceDAO, resolveDeletedIds(null, referenceDAO.select(referenceDAO.getTableMeta().getIdMeta().getIdClass(), referenceDAO.getTableMeta().getIdMeta().getIdPropertyName(), StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId()) + " IN (:ids)", Maps.of("ids", ids))));
+                            }
+                            row += referenceDAO.delete(StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId()) + " IN (:ids)", Maps.of("ids", ids));
+                        }
                     }
                 }
             }
         }
 
         return row;
+    }
+
+    private void itemDeletedCheckCallback0(EntityDAO referenceDAO, Collection<ID> deletedIds) {
+        if (CollectionUtils.isNotEmpty(deletedIds))
+            itemDeletedCheckCallback(referenceDAO, deletedIds);
+    }
+
+    /**
+     * deletedIds 不可能为空
+     * @param referenceDAO
+     * @param deletedIds
+     */
+    protected void itemDeletedCheckCallback(EntityDAO referenceDAO, Collection<ID> deletedIds) {
+        // 子类继承处理，deletedIds 不可能为空
     }
 
     @Override
@@ -448,18 +470,77 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     @Override
+    public Collection<T> insertOrUpdateTable(Collection<T> entityList) {
+        return insertOrUpdateTable(entityList,  true, null);
+    }
+
+    @Override
+    public Collection<T> insertOrUpdateTable(Collection<T> entityList, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        return insertOrUpdate0(entityList, null, null, deleteItem, deletedIdsConsumer);
+    }
+
+    @Override
     public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue) {
+        return insertOrUpdate(entityList, refColumnName, refValue, true, null);
+    }
+
+    @Override
+    public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        return insertOrUpdate0(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
+    }
+
+    private Collection<ID> resolveDeletedIds(Collection<?> entityList, List<ID> idInDbList) {
         if (CollectionUtils.isEmpty(entityList)) {
-            delete(refColumnName + " = ?", refValue);
-        } else {
-            Set<?> ids = entityList.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
-            if (CollectionUtils.isEmpty(ids)) {
-                delete(refColumnName + " = ?", refValue);
+            return idInDbList;
+        }
+
+        Set<ID> deletedIds = Sets.newHashSetWithExpectedSize(idInDbList.size());
+        if (CollectionUtils.isNotEmpty(idInDbList)) {
+            List<ID> idUpdateList = entityList.stream().map(this::getIdValue).collect(Collectors.toList());
+            for (ID idInDb : idInDbList) {
+                if (!idUpdateList.contains(idInDb)) {
+                    deletedIds.add(idInDb);
+                }
+            }
+        }
+
+        return deletedIds;
+    }
+
+    protected Collection<T> insertOrUpdate0(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        if (deleteItem && Objects.nonNull(deletedIdsConsumer)) {
+            // 检查 id 是否允许被删除
+            Collection<ID> deletedIds = resolveDeletedIds(entityList, select(tableMeta.getIdMeta().getIdClass(), tableMeta.getIdMeta().getIdPropertyName(), refColumnName + " = :refValue", Maps.of("refValue", refValue)));
+            if (CollectionUtils.isNotEmpty(deletedIds))
+                deletedIdsConsumer.accept(deletedIds);
+        }
+
+        if (CollectionUtils.isEmpty(entityList) && deleteItem) {
+            if (Objects.isNull(refColumnName)) {
+                deleteAll();
             } else {
-                Map<String, Object> paramMap = new LinkedHashMap();
-                paramMap.put("ids", ids);
-                paramMap.put("referenceId", refValue);
-                delete("id NOT IN (:ids) AND "+ refColumnName +" = :referenceId", paramMap);
+                delete(refColumnName + " = ?", refValue);
+            }
+        } else {
+            if (deleteItem) {
+                Set<?> ids = entityList.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
+                if (CollectionUtils.isEmpty(ids)) {
+                    if (Objects.isNull(refColumnName)) {
+                        deleteAll();
+                    } else {
+                        delete(refColumnName + " = ?", refValue);
+                    }
+                } else {
+                    Map<String, Object> paramMap = new LinkedHashMap();
+                    paramMap.put("ids", ids);
+                    paramMap.put("referenceId", refValue);
+
+                    if (Objects.isNull(refColumnName)) {
+                        delete("id NOT IN (:ids)", paramMap);
+                    } else {
+                        delete("id NOT IN (:ids) AND "+ refColumnName +" = :referenceId", paramMap);
+                    }
+                }
             }
 
             for (T referenceEntity : entityList) {
@@ -603,18 +684,25 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                             }
 
                             String referenceColumnId = StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId());
-                            ID idValue = (ID) getIdValue(entity);
-                            if (CollectionUtils.isEmpty(list)) {
+                            ID idValue = getIdValue(entity);
+                            // TODO 检查
+                            if (reference.getOneToMany().cascadeSaveItemDeleteCheck()) {
+                                itemDeletedCheckCallback0(referenceDAO, resolveDeletedIds(list, referenceDAO.select(referenceDAO.getTableMeta().getIdMeta().getIdClass(), referenceDAO.getTableMeta().getIdMeta().getIdPropertyName(), referenceColumnId +" = :referenceId", Maps.of("referenceId", idValue))));
+                            }
+
+                            if (CollectionUtils.isEmpty(list) && reference.getOneToMany().cascadeSaveItemDelete()) {
                                 referenceDAO.delete(referenceColumnId + " = ?", idValue);
                             } else {
-                                Set<?> ids = list.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
-                                if (CollectionUtils.isEmpty(ids)) {
-                                    referenceDAO.delete(referenceColumnId + " = ?", idValue);
-                                } else {
-                                    Map<String, Object> paramMap = new LinkedHashMap();
-                                    paramMap.put("ids", ids);
-                                    paramMap.put("referenceId", idValue);
-                                    referenceDAO.delete("id NOT IN (:ids) AND "+ referenceColumnId +" = :referenceId", paramMap);
+                                if (reference.getOneToMany().cascadeSaveItemDelete()) {
+                                    Set<?> ids = list.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
+                                    if (CollectionUtils.isEmpty(ids)) {
+                                        referenceDAO.delete(referenceColumnId + " = ?", idValue);
+                                    } else {
+                                        Map<String, Object> paramMap = new LinkedHashMap();
+                                        paramMap.put("ids", ids);
+                                        paramMap.put("referenceId", idValue);
+                                        referenceDAO.delete("id NOT IN (:ids) AND "+ referenceColumnId +" = :referenceId", paramMap);
+                                    }
                                 }
 
                                 for (Object referenceEntity : list) {
@@ -700,12 +788,12 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         setPropertyValue(entity, EntityDAOManager.getDAO(entity.getClass()).getTableMeta().getIdMeta().getIdPropertyName(), id);
     }
 
-    private Object getIdValue(Object entity) {
+    private ID getIdValue(Object entity) {
         if (Objects.isNull(entity)) {
             return null;
         }
 
-        return getPropertyValue(entity, EntityDAOManager.getDAO(entity.getClass()).getTableMeta().getIdMeta().getIdPropertyName());
+        return (ID) getPropertyValue(entity, EntityDAOManager.getDAO(entity.getClass()).getTableMeta().getIdMeta().getIdPropertyName());
     }
 
     private void setPropertyValue(Object bean, String propertyName, Object value) {

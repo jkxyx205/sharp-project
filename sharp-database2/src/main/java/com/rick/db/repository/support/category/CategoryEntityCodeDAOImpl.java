@@ -2,19 +2,19 @@ package com.rick.db.repository.support.category;
 
 import com.rick.common.http.exception.BizException;
 import com.rick.common.util.Maps;
-import com.rick.db.repository.EntityCodeDAO;
 import com.rick.db.repository.EntityCodeDAOImpl;
 import com.rick.db.repository.model.EntityIdCode;
 import com.rick.db.util.OperatorUtils;
-import lombok.NonNull;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * 如果有通过 category 会区分不同的分组，比如 CodeDescription
@@ -24,14 +24,18 @@ import java.util.stream.Collectors;
  */
 public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<E>, ID, E extends Enum<E>> extends EntityCodeDAOImpl<T, ID> {
 
-    public void insert(@NotNull E category, Collection<T> list) {
+    public void insertOrUpdate(@NotNull E category, Collection<T> list) {
+        insertOrUpdate(category, list, true, null);
+    }
+
+    public void insertOrUpdate(@NotNull E category, Collection<T> list, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
         if (CollectionUtils.isNotEmpty(list)) {
             for (T t : list) {
-                 t.setCategory(category);
+                t.setCategory(category);
             }
         }
 
-        insertOrUpdate(list, "category", category.name());
+        insertOrUpdate(list, "category", category.name(), deleteItem, deletedIdsConsumer);
     }
 
     @Override
@@ -51,11 +55,11 @@ public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<
         return insertOrUpdate0(entity, false);
     }
 
-    @Override
-    public Collection<T> insertOrUpdate(Collection<T> entityList, @NonNull String refColumnName, @NonNull Object refValue) {
-        fillEntityIdsByCodes(this, entityList);
-        return super.insertOrUpdate(entityList, refColumnName, refValue);
-    }
+//    @Override
+//    protected Collection<T> insertOrUpdate0(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+//        fillEntityIdsByCodes(this, entityList);
+//        return super.insertOrUpdate0(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
+//    }
 
     public Optional<T> selectByCategoryAndCode(@NotNull E category, @NotBlank String code) {
         return OperatorUtils.expectedAsOptional(select("code = ? AND category = ?", code, category.name()));
@@ -74,27 +78,27 @@ public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<
         }
     }
 
-    private void fillEntityIdsByCodes(EntityCodeDAO<T, ID> entityCodeDAO, Collection<T> entities) {
-        if (CollectionUtils.isNotEmpty(entities)) {
-            Set<String> emptyIdCategorySet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(e -> e.getCategory().name()).collect(Collectors.toSet());
-            if (CollectionUtils.isNotEmpty(emptyIdCategorySet)) {
-
-                List<T> list = entityCodeDAO.selectWithoutCascadeSelect(entityCodeDAO.getTableMeta().getEntityClass(), "code, id, category", "category IN (:category)", Maps.of("category", emptyIdCategorySet));
-                if (CollectionUtils.isNotEmpty(list)) {
-                    MultiKeyMap<Object, ID> multiKeyMap = new MultiKeyMap();
-
-                    for (T t : list) {
-                        multiKeyMap.put(t.getCategory(), t.getCode(), t.getId());
-                    }
-
-                    for (T t : entities) {
-                        // fillIds
-                        if (Objects.isNull(t.getId()) && multiKeyMap.containsKey(t.getCategory(), t.getCode())) {
-                            t.setId(multiKeyMap.get(t.getCategory(), t.getCode()));
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    private void fillEntityIdsByCodes(EntityCodeDAO<T, ID> entityCodeDAO, Collection<T> entities) {
+//        if (CollectionUtils.isNotEmpty(entities)) {
+//            Set<String> emptyIdCategorySet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(e -> e.getCategory().name()).collect(Collectors.toSet());
+//            if (CollectionUtils.isNotEmpty(emptyIdCategorySet)) {
+//
+//                List<T> list = entityCodeDAO.selectWithoutCascadeSelect(entityCodeDAO.getTableMeta().getEntityClass(), "code, id, category", "category IN (:category)", Map.of("category", emptyIdCategorySet));
+//                if (CollectionUtils.isNotEmpty(list)) {
+//                    MultiKeyMap<Object, ID> multiKeyMap = new MultiKeyMap();
+//
+//                    for (T t : list) {
+//                        multiKeyMap.put(t.getCategory(), t.getCode(), t.getId());
+//                    }
+//
+//                    for (T t : entities) {
+//                        // fillIds
+//                        if (Objects.isNull(t.getId()) && multiKeyMap.containsKey(t.getCategory(), t.getCode())) {
+//                            t.setId(multiKeyMap.get(t.getCategory(), t.getCode()));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

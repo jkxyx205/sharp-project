@@ -6,7 +6,6 @@ import com.rick.db.repository.model.EntityIdCode;
 import com.rick.db.repository.support.InsertUpdateCallback;
 import com.rick.db.util.OperatorUtils;
 import lombok.AccessLevel;
-import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -15,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -33,21 +33,12 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     }
 
     public EntityCodeDAOImpl(TableDAO tableDAO, Class<T> entityClass, InsertUpdateCallback insertUpdateCallback) {
-       super(tableDAO, entityClass, insertUpdateCallback);
-    }
-
-    @Override
-    public Collection<T> insertOrUpdate(Collection<T> entityList, @NonNull String refColumnName, @NonNull Object refValue) {
-        fillEntityIdsByCodes(this, entityList, refColumnName, refValue);
-        return super.insertOrUpdate(entityList, refColumnName, refValue);
+        super(tableDAO, entityClass, insertUpdateCallback);
     }
 
     @Override
     public T insertOrUpdate(T entity) {
-        if (entity.getId() == null && entity.getCode() != null) {
-            fillEntityIdByCode(entity);
-        }
-
+        fillEntityIdByCode(entity);
         if (Objects.isNull(entity.getId())) {
             return insert(entity);
         } else {
@@ -70,6 +61,12 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
             throw new BizException("编号已经存在");
         }
         return super.update(entity);
+    }
+
+    @Override
+    protected Collection<T> insertOrUpdate0(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        fillEntityIdsByCodes(this, entityList, refColumnName, refValue);
+        return super.insertOrUpdate0(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
     }
 
     @Override
@@ -105,7 +102,8 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
         if (CollectionUtils.isNotEmpty(entities)) {
             Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(EntityIdCode::getCode).collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
-                Map<String, ID> codeIdMap = entityCodeDAO.selectWithoutCascadeSelect("code, id", "code IN (:codes)" + (StringUtils.isBlank(refColumnName) ? "" : (" AND " + refColumnName + " = :refColumnName")), Maps.of("codes", emptyIdCodeSet, "refColumnName", refValue));
+                Map<String, ID> codeIdMap = entityCodeDAO.selectWithoutCascadeSelect("code, id", "code IN (:codes)" + (StringUtils.isBlank(refColumnName) ? "" : (" AND " + refColumnName + " = :refColumnName")),
+                        StringUtils.isBlank(refColumnName) ? Maps.of("codes", emptyIdCodeSet) : Maps.of("codes", emptyIdCodeSet, "refColumnName", refValue));
 
                 if (MapUtils.isNotEmpty(codeIdMap)) {
                     for (T t : entities) {

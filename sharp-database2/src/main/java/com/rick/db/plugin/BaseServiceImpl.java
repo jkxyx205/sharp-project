@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * @author Rick.Xu
@@ -184,8 +185,23 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public Collection<T> insertOrUpdateTable(Collection<T> entityList) {
+        return baseDAO.insertOrUpdateTable(entityList);
+    }
+
+    @Override
+    public Collection<T> insertOrUpdateTable(Collection<T> entityList, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        return baseDAO.insertOrUpdateTable(entityList, deleteItem, deletedIdsConsumer);
+    }
+
+    @Override
     public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue) {
         return baseDAO.insertOrUpdate(entityList, refColumnName, refValue);
+    }
+
+    @Override
+    public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        return insertOrUpdate(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
     }
 
     @Override
