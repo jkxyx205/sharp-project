@@ -78,17 +78,17 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 
     @Override
     public <E> List<E> select(Class<E> clazz, String sql, Object... args) {
-        return super.select(clazz, isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, args);
+        return super.select(clazz, addIsDeletedCondition(sql), args);
     }
 
     @Override
     public <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String sql, Map<String, Object> paramMap) {
-        return super.select(clazz, isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, paramMap);
+        return super.select(clazz, addIsDeletedCondition(sql), paramMap);
     }
 
     @Override
     public <E> List<E> select(String sql, Map<String, Object> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
-        return super.select(isSimpleSingleTable(sql) ? addIsDeletedCondition(sql) : sql, paramMap, jdbcTemplateCallback);
+        return super.select(addIsDeletedCondition(sql), paramMap, jdbcTemplateCallback);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -108,16 +108,17 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         }
 
         paramMap.put("is_deleted", false);
+        addInsertInfo(paramMap);
         return paramMap;
     }
 
-    public long getUserId() {
-//        User user = UserContextHolder.get();
-//        user = (user == null) ? User.builder().id(1L).build() : user;
-//        return user.getId();
+    protected long getUserId() {
         return 1L;
     }
 
+    protected void addInsertInfo(Map<String, Object> paramMap) {
+
+    }
 
     private static final Pattern WHERE_PATTERN = Pattern.compile("\\bwhere\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern ORDER_GROUP_LIMIT_PATTERN =
@@ -129,6 +130,10 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         }
 
         String trimmedSql = sql.trim();
+
+        if (!SqlSingleTableChecker.isSingleTableQuery(sql)) {
+            return sql;
+        }
 
         Matcher whereMatcher = WHERE_PATTERN.matcher(trimmedSql);
         Matcher clauseMatcher = ORDER_GROUP_LIMIT_PATTERN.matcher(trimmedSql);
@@ -155,22 +160,4 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         }
     }
 
-    public static boolean isSimpleSingleTable(String sql) {
-        if (sql == null || sql.trim().isEmpty()) return false;
-
-        String normalized = sql.replaceAll("\\s+", " ").trim().toUpperCase();
-
-        // 基本检查
-        if (!normalized.startsWith("SELECT ") || !normalized.contains(" FROM ")) {
-            return false;
-        }
-
-        // 排除子查询：任何包含括号的都排除
-        if (sql.contains("(") || sql.contains(")")) {
-            return false;
-        }
-
-        // 排除其他多表关键字
-        return !normalized.matches(".*\\b(JOIN|UNION|EXISTS)\\b.*");
-    }
 }
