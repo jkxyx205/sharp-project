@@ -3,7 +3,7 @@ package com.rick.demo.config;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.rick.common.validate.ValidatorHelper;
-import com.rick.db.repository.ExtendTableDAOImpl;
+import com.rick.db.repository.support.baseinfo.ExtendTableDAOImpl;
 import com.rick.fileupload.core.InputStreamStore;
 import com.rick.fileupload.impl.fastdfs.FastDFSInputStreamStore;
 import com.rick.fileupload.impl.oos.MinioInputStreamStore;
