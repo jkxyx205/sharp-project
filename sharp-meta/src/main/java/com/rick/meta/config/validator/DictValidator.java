@@ -1,10 +1,10 @@
 package com.rick.meta.config.validator;
 
+import com.rick.db.repository.TableDAO;
+import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
 import com.rick.meta.dict.service.DictService;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
@@ -16,19 +16,18 @@ import java.util.Objects;
  * @date 2024/8/19 01:56
  */
 @Component
-@RequiredArgsConstructor
-public class DictValidator implements ConstraintValidator<DictValueCheck, DictValue> {
+public class DictValidator extends AbstractDictValidator implements ConstraintValidator<DictType, DictValue> {
 
-    private final DictService dictService;
+    public DictValidator(DictService dictService, TableDAO tableDAO) {
+        super(dictService, tableDAO);
+    }
 
     @Override
     public boolean isValid(DictValue dictValue, ConstraintValidatorContext constraintValidatorContext) {
         if (Objects.nonNull(dictValue) && StringUtils.isNotBlank(dictValue.getCode())) {
-            ConstraintValidatorContextImpl impl = (ConstraintValidatorContextImpl) constraintValidatorContext;
-
-            DictValueCheck dictValueCheck = (DictValueCheck) impl.getConstraintDescriptor().getAnnotation();
-            String type = dictValueCheck.type();
-            return dictService.getDictByTypeAndName(type, dictValue.getCode()).isPresent();
+            return isValid(constraintValidatorContext, dictValue.getCode(), label -> {
+                dictValue.setLabel(label);
+            });
         }
 
         return true;

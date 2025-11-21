@@ -2,6 +2,8 @@ package com.rick.meta.config;
 
 import com.rick.db.config.SharpDatabaseAutoConfiguration;
 import com.rick.db.repository.TableDAO;
+import com.rick.meta.config.validator.Dict2Validator;
+import com.rick.meta.config.validator.DictValidator;
 import com.rick.meta.dict.convert.*;
 import com.rick.meta.dict.dao.DictDAO;
 import com.rick.meta.dict.model.DictProperties;
@@ -83,6 +85,16 @@ public class MetaServiceAutoConfiguration {
         @Bean
         public ArrayDictConverter arrayDictConverter(DictService dictService) {
             return new ArrayDictConverter(dictService);
+        }
+
+        @Bean
+        public DictValidator dictValidator(DictService dictService, TableDAO tableDAO) {
+            return new DictValidator(dictService, tableDAO);
+        }
+
+        @Bean
+        public Dict2Validator dict2Validator(DictService dictService, TableDAO tableDAO) {
+            return new Dict2Validator(dictService, tableDAO);
         }
     }
 }

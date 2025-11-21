@@ -14,6 +14,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,11 @@ public class DictServiceImpl implements DictService, InitializingBean {
     private final DictDOSupplier dictDOSupplier;
 
     private static final String SELECT_SQL = "SELECT id, type, name, label, sort, remark FROM sys_dict WHERE type = :type ORDER BY sort";
+
+    @PostConstruct
+    public void init() {
+        DictUtils.tableDAO = tableDAO;
+    }
 
     @Override
     public DictProperties.Item getDictPropertyItemByType(String type) {

@@ -14,7 +14,6 @@ import com.rick.db.repository.Table;
 import com.rick.db.repository.model.BaseCodeEntity;
 import com.rick.db.repository.model.IdCodeValue;
 import com.rick.fileupload.client.support.Document;
-import com.rick.meta.config.validator.DictValueCheck;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
 import lombok.*;
@@ -78,7 +77,6 @@ public class Student extends BaseCodeEntity<Long> {
     //    看看更强大的 NamePropertyDeserializer，支持集合
     @JsonDeserialize(using = NamePropertyDeserializer.class)
     @DictType(type = "UNIT")
-    @DictValueCheck(type = "UNIT")
     DictValue unit;
 
     @Column(columnDefinition = "json")

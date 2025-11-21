@@ -2,6 +2,8 @@ package com.rick.meta.dict.service;
 
 
 import com.rick.common.util.ObjectUtils;
+import com.rick.db.repository.TableDAO;
+import com.rick.db.util.OperatorUtils;
 import com.rick.meta.dict.entity.Dict;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
@@ -27,6 +29,8 @@ import java.util.*;
 final public class DictUtils {
 
     public static Map<String, List<Dict>> dictMap;
+
+    static TableDAO tableDAO;
 
     public static List<Dict> getDict(String key) {
         return ListUtils.unmodifiableList(ListUtils.emptyIfNull(dictMap.get(key)));
@@ -71,7 +75,7 @@ final public class DictUtils {
             fillDictLabel(map.values());
         }
 
-       if (obj instanceof DictValue) {
+        if (obj instanceof DictValue) {
             DictValue dictValue = (DictValue) obj;
             if (StringUtils.isNotBlank(dictValue.getCode()) && StringUtils.isNotBlank(dictValue.getType())) {
                 getDictLabel(dictValue.getType(), dictValue.getCode()).ifPresent(dict -> dictValue.setLabel(dict.getLabel()));
@@ -82,7 +86,7 @@ final public class DictUtils {
             return;
         }
 
-       Field[] allFields = FieldUtils.getAllFields(obj.getClass());
+        Field[] allFields = FieldUtils.getAllFields(obj.getClass());
         for (Field field : allFields) {
             Method method;
             try {
@@ -94,14 +98,21 @@ final public class DictUtils {
 
                 DictType dictType = field.getAnnotation(DictType.class);
                 if (field.getType() == DictValue.class && dictType != null && fieldValue != null) {
-                    String type = dictType.type();
+
                     DictValue dictValue = (DictValue) fieldValue;
                     if (StringUtils.isNotBlank(dictValue.getCode())) {
-                        Optional<Dict> dictLabel = getDictLabel(type, dictValue.getCode());
-                        dictLabel.ifPresent(value -> {
-                            dictValue.setLabel(value.getLabel());
-                            dictValue.setType(value.getType());
-                        });
+                        String type = dictType.type();
+                        if (StringUtils.isNotBlank(type)) {
+                            Optional<Dict> dictLabel = getDictLabel(type, dictValue.getCode());
+                            dictLabel.ifPresent(value -> {
+                                dictValue.setLabel(value.getLabel());
+                                dictValue.setType(value.getType());
+                            });
+                        } else {
+                            OperatorUtils.expectedAsOptional(tableDAO.select(dictType.sql(), dictValue.getCode())).ifPresent(value -> {
+                                dictValue.setLabel((String) value.get("label"));
+                            });
+                        }
                     }
                 } else if (Iterable.class.isAssignableFrom(fieldValue.getClass())) {
                     // 集合

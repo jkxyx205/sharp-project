@@ -85,7 +85,7 @@ public class SelectOptionHelper {
         if (valueList == null) {
             // 进行数据的查询 根据 key 查询
             String querySql =  dictService.getDictPropertyItemByType(key).getSql(); //PropertyUtils.getProperty(key);
-            valueList = tableDAO.select(querySql, null);
+            valueList = tableDAO.select(querySql);
             groupDataMap.put(key, valueList);
         }
 
