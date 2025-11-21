@@ -16,6 +16,8 @@ import java.util.Optional;
  */
 public interface TableDAO {
 
+    List<Map<String, Object>> select(String sql, Object... args);
+
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String sql, Object... args);
 
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String sql, Map<String, Object> paramMap);
