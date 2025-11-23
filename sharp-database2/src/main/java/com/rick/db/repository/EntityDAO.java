@@ -26,6 +26,10 @@ public interface EntityDAO<T, ID> {
 
     <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
+    <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, Object... args);
+
+    <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, T example);
+
     List<T> select(String condition, Object... args);
 
     List<T> select(Map<String, Object> paramMap);
@@ -36,7 +40,7 @@ public interface EntityDAO<T, ID> {
 
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Object... args);
 
-    <E> List<E> selectWithoutCascadeSelect(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Object... args);
+    <E> List<E> selectWithoutCascade(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Object... args);
 
     List<T> select(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
@@ -46,21 +50,29 @@ public interface EntityDAO<T, ID> {
 
     List<T> select(@NotBlank String columns, String condition, T example);
 
-    <E> Optional<E> selectOne(@NotNull Class<E> clazz, @NotBlank String columns, String condition, T example);
-
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, T example);
 
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String columns, String condition, Map<String, Object> paramMap);
 
-    <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap);
+    <E> List<E> selectWithoutCascade(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap);
 
-    <K, V> Map<K, V> selectWithoutCascadeSelect(@NotBlank String columns, String condition, Map<String, Object> paramMap);
+    <E> List<E> selectWithoutCascade(Class<E> clazz, String columns, String condition, T example);
 
     void cascadeSelect(List<T> list);
 
-    Boolean exists(String condition, Object... args);
+    boolean exists(@NotNull ID id);
 
-    Boolean exists(String condition, T example);
+    boolean exists(String condition, Object... args);
+
+    boolean exists(String condition, Map<String, Object> paramMap);
+
+    boolean exists(String condition, T example);
+
+    long count(String condition, Object... args);
+
+    long count(String condition, Map<String, Object> paramMap);
+
+    long count(String condition, T example);
 
     int deleteById(@NotNull ID id);
 
@@ -90,16 +102,21 @@ public interface EntityDAO<T, ID> {
 
     Collection<T> insertOrUpdate(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer);
 
-
-    int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
-
     int update(@NotBlank String columns, String condition, Object... args);
 
     int update(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
-    int updateById(@NotBlank String columns, ID id, Map<String, Object> paramMap);
+    int update(@NotBlank String columns, String condition, T example);
+
+    int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
+
+    int updateById(@NotBlank String columns, @NotNull ID id, Map<String, Object> paramMap);
+
+    int updateById(@NotBlank String columns, @NotNull ID id, T example);
 
     int updateByIds(@NotBlank String columns, Collection<ID> ids, Map<String, Object> paramMap);
+
+    int updateByIds(@NotBlank String columns, Collection<ID> ids, T example);
 
     TableMeta getTableMeta();
 

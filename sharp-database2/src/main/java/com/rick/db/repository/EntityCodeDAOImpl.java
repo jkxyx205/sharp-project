@@ -102,7 +102,7 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
         if (CollectionUtils.isNotEmpty(entities)) {
             Set<String> emptyIdCodeSet = entities.stream().filter(t -> Objects.isNull(t.getId())).map(EntityIdCode::getCode).collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(emptyIdCodeSet)) {
-                Map<String, ID> codeIdMap = entityCodeDAO.selectWithoutCascadeSelect("code, id", "code IN (:codes)" + (StringUtils.isBlank(refColumnName) ? "" : (" AND " + refColumnName + " = :refColumnName")),
+                Map<String, ID> codeIdMap = entityCodeDAO.selectForKeyValue("code, id", "code IN (:codes)" + (StringUtils.isBlank(refColumnName) ? "" : (" AND " + refColumnName + " = :refColumnName")),
                         StringUtils.isBlank(refColumnName) ? Maps.of("codes", emptyIdCodeSet) : Maps.of("codes", emptyIdCodeSet, "refColumnName", refValue));
 
                 if (MapUtils.isNotEmpty(codeIdMap)) {

@@ -8,6 +8,7 @@ import com.rick.db.repository.support.*;
 import com.rick.db.util.OperatorUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -49,8 +50,9 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Resource
     private ConversionService dbConversionService;
 
-    @Resource
     @Getter
+    @Setter
+    @Resource
     private TableDAO tableDAO;
 
     @Getter
@@ -83,7 +85,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Override
     public Optional<T> selectById(ID id) {
 //        return namedParameterJdbcTemplate.getJdbcTemplate().queryForObject("SELECT "+selectColumn+" FROM "+ tableName +" WHERE id = ?", new BeanPropertyRowMapper<>(clazz), id);
-        List<T> list = select("id = ?", id);
+        List<T> list = select(tableMeta.getIdMeta().getIdColumnName() + " = ?", id);
         return OperatorUtils.expectedAsOptional(list);
     }
 
@@ -132,21 +134,35 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     @Override
-    public Boolean exists(String condition, Object... args) {
-        return select(String.class, "1", (StringUtils.isBlank(condition) ? "" : condition)+ " LIMIT 1", args).size() > 0 ? true : false;
+    public boolean exists(String condition, Object... args) {
+//        return tableDAO.exists(tableMeta.getSelectSQL("1") + SqlHelper.buildWhere(condition), args);
+        return select(String.class, "1", (StringUtils.isBlank(condition) ? "" : condition)+ " LIMIT 1", args).size() > 0;
+    }
+
+    @Override
+    public boolean exists(String condition, Map<String, Object> paramMap) {
+//        return tableDAO.exists(tableMeta.getSelectSQL("1") + SqlHelper.buildWhere(condition), paramMap);
+        return select(String.class, "1", (StringUtils.isBlank(condition) ? "" : condition)+ " LIMIT 1", paramMap).size() > 0;
+    }
+
+    @Override
+    public boolean exists(String condition, T example) {
+//        return selectWithoutCascadeSelect(String.class, "1", (StringUtils.isBlank(condition) ? "" : condition)+ " LIMIT 1", example).size() > 0;
+//        return tableDAO.exists(tableMeta.getSelectSQL("1") + SqlHelper.buildWhere(condition), getArgsFromEntity(example, true));
+        return select(String.class, "1", (StringUtils.isBlank(condition) ? "" : condition)+ " LIMIT 1", example).size() > 0;
     }
 
     @Override
     public <E> List<E> select(Class<E> clazz, String columns, String condition, Object... args) {
         return (List<E>) watchSelect(() -> {
-            List<E> list = selectWithoutCascadeSelect(clazz, columns, condition, args);
+            List<E> list = selectWithoutCascade(clazz, columns, condition, args);
             cascadeSelect(clazz, (List<T>) list);
             return (T) list;
         });
     }
 
     @Override
-    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Object... args) {
+    public <E> List<E> selectWithoutCascade(Class<E> clazz, String columns, String condition, Object... args) {
         List<E> list = tableDAO.select(clazz, tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), args);
         return list;
     }
@@ -182,13 +198,18 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     }
 
     @Override
-    public Boolean exists(String condition, T example) {
-        return select(String.class, "1", (StringUtils.isBlank(condition) ? "" : condition)+ " LIMIT 1", example).size() > 0 ? true : false;
+    public long count(String condition, Object... args) {
+        return select(Long.class, "count(*)", condition, args).get(0);
     }
 
     @Override
-    public <E> Optional<E> selectOne(Class<E> clazz, String columns, String condition, T example) {
-        return OperatorUtils.expectedAsOptional(select(clazz, columns, condition, example));
+    public long count(String condition, Map<String, Object> paramMap) {
+        return select(Long.class, "count(*)", condition, paramMap).get(0);
+    }
+
+    @Override
+    public long count(String condition, T example) {
+        return select(Long.class, "count(*)", condition, example).get(0);
     }
 
     @Override
@@ -203,30 +224,45 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     private  <E> List<E> select(Class<E> clazz, String sql, Map<String, Object> paramMap) {
         return (List<E>) watchSelect(() -> {
-            List<E> list = selectWithoutCascadeSelect(clazz, sql, paramMap);
+            List<E> list = selectWithoutCascade(clazz, sql, paramMap);
             cascadeSelect(clazz, (List<T>) list);
             return (T) list;
         });
     }
 
     @Override
-    public <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap) {
-        return selectWithoutCascadeSelect(clazz,tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
+    public <E> List<E> selectWithoutCascade(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap) {
+        return selectWithoutCascade(clazz,tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
     }
 
-    private  <E> List<E> selectWithoutCascadeSelect(Class<E> clazz, String sql, Map<String, Object> paramMap) {
+    @Override
+    public <E> List<E> selectWithoutCascade(Class<E> clazz, String columns, String condition, T example) {
+        return selectWithoutCascade(clazz, columns, condition, getArgsFromEntity(example, true));
+    }
+
+    private  <E> List<E> selectWithoutCascade(Class<E> clazz, String sql, Map<String, Object> paramMap) {
         List<E> list = tableDAO.select(clazz, sql, paramMap);
         return list;
     }
 
     @Override
-    public <K, V> Map<K, V> selectWithoutCascadeSelect(String columns, String condition, Map<String, Object> paramMap) {
-        return tableDAO.selectForKeyValue(tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
+    public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, Object... args) {
+        return tableDAO.selectForKeyValue(tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), args);
+    }
+
+    @Override
+    public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, T example) {
+        return selectForKeyValue(columns, condition, getArgsFromEntity(example, true));
     }
 
     @Override
     public void cascadeSelect(List<T> list) {
         cascadeSelect(tableMeta.getEntityClass(), list);
+    }
+
+    @Override
+    public boolean exists(ID id) {
+        return exists(tableMeta.getIdMeta().getIdColumnName() + " = ?", id);
     }
 
     private void cascadeSelect(Class<?> clazz, List<T> list) {
@@ -244,7 +280,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         // 级联查询(@OneToMany @ManyToMany @ManyToOne)
         if (CollectionUtils.isNotEmpty(list)) {
             threadLocalEntity.get().addAll(list);
-            Set<ID> ids = list.stream().map(t -> (ID)getIdValue(t)).collect(Collectors.toSet());
+            Set<ID> ids = list.stream().map(t -> getIdValue(t)).collect(Collectors.toSet());
 
             List<?> referenceList;
             for (Map.Entry<Field, TableMeta.Reference> fieldReferenceEntry : tableMeta.getReferenceMap().entrySet()) {
@@ -378,7 +414,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public int deleteById(ID id) {
-        return delete("id = ?", id);
+        return delete(tableMeta.getIdMeta().getIdColumnName()+ " = ?", id);
     }
 
     @Override
@@ -633,7 +669,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                         throw new IllegalArgumentException("version field cannot be null");
                     }
 
-                    Number dbVersion = select(Number.class, versionColumn, "id = ?", args.get(tableMeta.getIdMeta().getIdPropertyName())).get(0);
+                    Number dbVersion = select(Number.class, versionColumn, tableMeta.getIdMeta().getIdColumnName() + " = ?", args.get(tableMeta.getIdMeta().getIdPropertyName())).get(0);
                     if (dbVersion.intValue() > version.intValue()) {
                         throw new IllegalArgumentException("version field is old");
                     }
@@ -685,7 +721,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
                             String referenceColumnId = StringUtils.defaultIfBlank(reference.getOneToMany().joinColumnId(), tableMeta.getReferenceColumnId());
                             ID idValue = getIdValue(entity);
-                            // TODO 检查
                             if (reference.getOneToMany().cascadeSaveItemDeleteCheck()) {
                                 itemDeletedCheckCallback0(referenceDAO, resolveDeletedIds(list, referenceDAO.select(referenceDAO.getTableMeta().getIdMeta().getIdClass(), referenceDAO.getTableMeta().getIdMeta().getIdPropertyName(), referenceColumnId +" = :referenceId", Maps.of("referenceId", idValue))));
                             }
@@ -694,6 +729,8 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                                 referenceDAO.delete(referenceColumnId + " = ?", idValue);
                             } else {
                                 if (reference.getOneToMany().cascadeSaveItemDelete()) {
+                                    handlerReferenceListBefore(referenceDAO, list, referenceColumnId, idValue);
+
                                     Set<?> ids = list.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
                                     if (CollectionUtils.isEmpty(ids)) {
                                         referenceDAO.delete(referenceColumnId + " = ?", idValue);
@@ -733,15 +770,25 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return MapUtils.isNotEmpty(tableMeta.getReferenceMap()) && tableMeta.getReferenceMap().values().stream().anyMatch(reference -> Objects.nonNull(reference.getManyToMany()) || (Objects.nonNull(reference.getOneToMany()) && reference.getOneToMany().cascadeSave()) || (Objects.nonNull(reference.getManyToOne()) && reference.getManyToOne().cascadeSave()));
     }
 
+
+    protected void handlerReferenceListBefore(EntityDAO entityCodeDAO, List<?> entities, String refColumnName, Object refValue) {
+
+    }
+
     @Override
     public int updateById(String columns, ID id, Object... args) {
-        return update(columns, "id = :id", ArrayUtils.addAll(args, id));
+        return update(columns, tableMeta.getIdMeta().getIdColumnName() + " = :id", ArrayUtils.addAll(args, id));
     }
 
     public int updateById(String columns, ID id, Map<String, Object> paramMap) {
         Map<String, Object> args = new LinkedHashMap<>(paramMap);
         args.put("id", id);
-        return update(columns, "id = :id", args);
+        return update(columns, tableMeta.getIdMeta().getIdColumnName() + " = :id", args);
+    }
+
+    @Override
+    public int updateById(String columns, ID id, T example) {
+        return updateById(columns, id, getArgsFromEntity(example, true));
     }
 
     @Override
@@ -749,6 +796,11 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         Map<String, Object> args = new LinkedHashMap<>(paramMap);
         args.put("ids", ids);
         return update(columns, "id IN (:ids)", args);
+    }
+
+    @Override
+    public int updateByIds(String columns, Collection<ID> ids, T example) {
+        return updateByIds(columns, ids, getArgsFromEntity(example, true));
     }
 
     @Override
@@ -782,6 +834,11 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Override
     public int update(String columns, String condition, Map<String, Object> paramMap) {
         return tableDAO.update(tableMeta.getTableName(), tableMeta.appendColumnVar(columns, true), condition, paramMap);
+    }
+
+    @Override
+    public int update(String columns, String condition, T example) {
+        return update(columns, condition, getArgsFromEntity(example, true));
     }
 
     private void setIdValue(Object entity, Object id) {

@@ -18,21 +18,25 @@ public interface TableDAO {
 
     List<Map<String, Object>> select(String sql, Object... args);
 
+    List<Map<String, Object>> select(String sql, Map<String, Object> paramMap);
+
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String sql, Object... args);
 
     <E> List<E> select(@NotNull Class<E> clazz, @NotBlank String sql, Map<String, Object> paramMap);
 
-    List<Map<String, Object>> select(String sql, Map<String, Object> paramMap);
+    <K, V> Map<K, V> selectForKeyValue(String sql, Object... args);
 
     <K, V> Map<K, V> selectForKeyValue(String sql, Map<String, Object> paramMap);
+
+    Optional<Map<String, Object>> selectForObject(String sql, Object... args);
 
     Optional<Map<String, Object>> selectForObject(String sql, Map<String, Object> paramMap);
 
     <E> List<E> select(String sql, Map<String, Object> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback);
 
-    Boolean exists(@NotBlank String sql, Object... args);
+    boolean exists(@NotBlank String sql, Object... args);
 
-    Boolean exists(@NotBlank String sql, Map<String, Object> paramMap);
+    boolean exists(@NotBlank String sql, Map<String, Object> paramMap);
 
     int update(String tableName, String columns, String condition, Object... args);
 
@@ -45,6 +49,8 @@ public interface TableDAO {
     int delete(String tableName, String condition, Object... args);
 
     int delete(String tableName, String condition, Map<String, Object> paramMap);
+
+    int insert(String tableName, String columnNames, Object... args);
 
     int insert(String tableName, String columnNames, Map<String, Object> paramMap);
 

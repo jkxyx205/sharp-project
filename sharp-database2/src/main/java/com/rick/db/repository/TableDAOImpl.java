@@ -48,13 +48,13 @@ public class TableDAOImpl implements TableDAO {
     private ConversionService conversionService;
 
     @Override
-    public Boolean exists(String sql, Object... args) {
-        return select(sql + " LIMIT 1", args).size() > 0 ? true : false;
+    public boolean exists(String sql, Object... args) {
+        return select(sql + " LIMIT 1", args).size() > 0;
     }
 
     @Override
-    public Boolean exists(String sql, Map<String, Object> paramMap) {
-        return select(sql + " LIMIT 1", paramMap).size() > 0 ? true : false;
+    public boolean exists(String sql, Map<String, Object> paramMap) {
+        return select(sql + " LIMIT 1", paramMap).size() > 0;
     }
 
     @Override
@@ -85,6 +85,22 @@ public class TableDAOImpl implements TableDAO {
     @Override
     public int delete(String tableName, String condition, Map<String, Object> paramMap) {
         return namedParameterJdbcTemplate.update("DELETE FROM "+ tableName + SqlHelper.buildWhere(condition), paramMap);
+    }
+
+    @Override
+    public int insert(String tableName, String columnNames, Object... args) {
+        String[] columns = columnNames.split("\\s*,\\s*"); // 按逗号分隔并去掉空格
+
+        if (columns.length != args.length) {
+            throw new IllegalArgumentException("列名数量与参数数量不一致");
+        }
+
+        Map<String, Object> paramMap = new HashMap<>();
+        for (int i = 0; i < columns.length; i++) {
+            paramMap.put(columns[i], args[i]);
+        }
+
+        return insert(tableName, columnNames, paramMap);
     }
 
     @Override
@@ -174,6 +190,18 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
+    public <K, V> Map<K, V> selectForKeyValue(String sql, Object... args) {
+        List<Map<String, Object>> list = select(sql, args);
+        final Map<K, V> m = new LinkedHashMap();
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (Map<String, Object> map : list) {
+                m.putAll((Map<? extends K, ? extends V>) map);
+            }
+        }
+        return m;
+    }
+
+    @Override
     public List<Map<String, Object>> select(String sql, Map<String, Object> paramMap) {
         return select(sql, paramMap, (jdbcTemplate, sql2, paramMap2) -> namedParameterJdbcTemplate.query(sql2, paramMap2, new ColumnMapRowMapper()));
     }
@@ -195,6 +223,11 @@ public class TableDAOImpl implements TableDAO {
         });
 
         return m;
+    }
+
+    @Override
+    public Optional<Map<String, Object>> selectForObject(String sql, Object... args) {
+        return OperatorUtils.expectedAsOptional(select(sql, args));
     }
 
     @Override
