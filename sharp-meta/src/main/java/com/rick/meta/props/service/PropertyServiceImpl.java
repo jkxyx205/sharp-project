@@ -23,7 +23,7 @@ public class PropertyServiceImpl implements PropertyService, InitializingBean {
 
     private static final String UPDATE_SQL = "UPDATE sys_property SET value = ? WHERE name = ?";
 
-    private static final String SELECT_SQL = "SELECT name, value FROM sys_property WHERE name = :name";
+    private static final String SELECT_SQL = "SELECT name, value FROM sys_property";
 
     private final KeyValueProperties keyValueProperties;
 
