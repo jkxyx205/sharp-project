@@ -44,8 +44,11 @@ public class AbstractDictValidator {
                     labelConsumer.accept(optional.get().getLabel());
                 return true;
             }
-        } else{
-            List<Map<String, Object>> list = tableDAO.select(dictType.sql(), new Object[]{code});
+        }
+
+        String sql = dictType.sql();
+        if (StringUtils.isNotBlank(sql)){
+            List<Map<String, Object>> list = tableDAO.select(sql, new Object[]{code});
             if (list.size() == 1) {
                 if (Objects.nonNull(labelConsumer))
                     labelConsumer.accept((String) list.get(0).get("label"));

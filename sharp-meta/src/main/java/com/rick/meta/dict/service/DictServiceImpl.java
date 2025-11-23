@@ -156,7 +156,7 @@ public class DictServiceImpl implements DictService, InitializingBean {
     }
 
     private void initSQL(String type, String sql) {
-        Map<Object, Object> keyValue = tableDAO.selectForKeyValue(sql, null);
+        Map<Object, Object> keyValue = tableDAO.selectForKeyValue(sql);
 
         // 类型转换 Object -> String
         Map<String, String> stringKeyValue = Maps.newLinkedHashMapWithExpectedSize(keyValue.size());

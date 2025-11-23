@@ -68,7 +68,7 @@ public class PropertyServiceImpl implements PropertyService, InitializingBean {
         PropertyUtils.map.putAll(keyValueProperties.getItems());
         // 数据库属性
         try {
-            PropertyUtils.map.putAll(tableDAO.selectForKeyValue(SELECT_SQL, null));
+            PropertyUtils.map.putAll(tableDAO.selectForKeyValue(SELECT_SQL));
         } catch (Exception e) {
             log.warn("sys_property表没有创建成功！");
         }

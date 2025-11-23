@@ -108,10 +108,11 @@ final public class DictUtils {
                                 dictValue.setLabel(value.getLabel());
                                 dictValue.setType(value.getType());
                             });
-                        } else {
-                            OperatorUtils.expectedAsOptional(tableDAO.select(dictType.sql(), dictValue.getCode())).ifPresent(value -> {
-                                dictValue.setLabel((String) value.get("label"));
-                            });
+                        }
+
+                        String sql = dictType.sql();
+                        if(StringUtils.isBlank(dictValue.getLabel()) && StringUtils.isNotBlank(sql)) {
+                            OperatorUtils.expectedAsOptional(tableDAO.select(DictValue.class, sql, dictValue.getCode())).ifPresent(value -> dictValue.setLabel(value.getLabel()));
                         }
                     }
                 } else if (Iterable.class.isAssignableFrom(fieldValue.getClass())) {
