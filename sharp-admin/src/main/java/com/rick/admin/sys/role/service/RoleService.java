@@ -75,7 +75,7 @@ public class RoleService {
         List<Long> userIds = tableDAO.select(Long.class, "select user_id from sys_user_role where role_id = :roleId", Maps.of("roleId", roleId));
         List<User> users;
         if (CollectionUtils.isNotEmpty(userIds)) {
-            users = userDAO.selectWithoutCascadeSelect(User.class, userDAO.getTableMeta().getSelectColumn(), "id IN (:userIds)", Maps.of("userIds", userIds));
+            users = userDAO.selectWithoutCascade(User.class, userDAO.getTableMeta().getSelectColumn(), "id IN (:userIds)", Maps.of("userIds", userIds));
         } else {
             users = Collections.emptyList();
         }

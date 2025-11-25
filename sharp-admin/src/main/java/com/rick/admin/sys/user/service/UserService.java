@@ -7,6 +7,7 @@ import com.rick.admin.sys.user.dao.UserDAO;
 import com.rick.admin.sys.user.entity.User;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.util.Maps;
+import com.rick.db.util.OperatorUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -59,7 +60,7 @@ public class UserService {
     }
 
     public boolean checkPassword(Long userId, String password) {
-        Optional<String> optional = userDAO.selectOne(String.class, "password", "id = :id", User.builder().id(userId).build());
+        Optional<String> optional = OperatorUtils.expectedAsOptional(userDAO.select(String.class, "password", "id = :id", User.builder().id(userId).build()));
         return passwordEncoder.matches(password, optional.orElseThrow(() -> new BizException(USER_NOT_FOUND)));
     }
 
@@ -68,6 +69,6 @@ public class UserService {
     }
 
     public Map<Long, String> getIdNameMapping() {
-        return userDAO.selectForKeyValue("id, name", null, null);
+        return userDAO.selectForKeyValue("id, name", null);
     }
 }

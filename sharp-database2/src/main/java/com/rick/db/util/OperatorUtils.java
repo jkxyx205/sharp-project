@@ -1,8 +1,10 @@
 package com.rick.db.util;
 
+import com.rick.common.function.SFunction;
 import com.rick.db.repository.model.EntityId;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import java.util.List;
@@ -32,5 +34,17 @@ public class OperatorUtils {
 
     public static <ID, T extends EntityId<ID>> Map<ID, T> map(List<T> list) {
         return list.stream().collect(Collectors.toMap(EntityId::getId, Function.identity()));
+    }
+
+    public static <R, T> Map<R, T> map(List<T> list, SFunction<T, R> function) {
+        return list.stream().collect(Collectors.toMap(t -> function.isMethodReference() ? (R) new BeanWrapperImpl(t).getPropertyValue(function.getPropertyName()) : function.apply(t), Function.identity()));
+    }
+
+    public static <ID, T extends EntityId<ID>> Map<ID, List<T>> groupMap(List<T> list) {
+        return list.stream().collect(Collectors.groupingBy(EntityId::getId));
+    }
+
+    public static <R, T> Map<R, List<T>> groupMap(List<T> list, SFunction<T, R> function) {
+        return list.stream().collect(Collectors.groupingBy(t -> function.isMethodReference() ? (R) new BeanWrapperImpl(t).getPropertyValue(function.getPropertyName()) : function.apply(t)));
     }
 }
