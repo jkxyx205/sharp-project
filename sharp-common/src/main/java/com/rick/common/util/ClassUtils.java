@@ -2,17 +2,12 @@ package com.rick.common.util;
 
 import com.rick.common.http.convert.*;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
-import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.Objects;
 
 /**
@@ -149,21 +144,64 @@ public class ClassUtils {
     }
 
     private static Class<?>[] typeToClass(Type[] actualTypeArguments) {
-        Class<?>[] classes = null;
-        if (ArrayUtils.isNotEmpty(actualTypeArguments)) {
-            int length = actualTypeArguments.length;
-            classes = new Class<?>[length];
-            for (int i = 0; i < actualTypeArguments.length; i++) {
-                if (actualTypeArguments[i] instanceof ParameterizedTypeImpl) {
-                    classes[i] = ((ParameterizedTypeImpl)actualTypeArguments[i]).getRawType();
-                } else if (actualTypeArguments[i] instanceof Class) {
-                    classes[i] = (Class<?>) actualTypeArguments[i];
-                } else if (actualTypeArguments[i] instanceof TypeVariableImpl){
-                    classes[i] = ((TypeVariableImpl)actualTypeArguments[i]).getClass();
+        if (actualTypeArguments == null || actualTypeArguments.length == 0) {
+            return new Class<?>[0];
+        }
+
+        Class<?>[] classes = new Class<?>[actualTypeArguments.length];
+
+        for (int i = 0; i < actualTypeArguments.length; i++) {
+            Type type = actualTypeArguments[i];
+
+            if (type instanceof Class<?>) {
+                // 普通类，例如 String.class
+                classes[i] = (Class<?>) type;
+
+            } else if (type instanceof ParameterizedType) {
+                // List<String> → raw type = List.class
+                classes[i] = (Class<?>) ((ParameterizedType) type).getRawType();
+
+            } else if (type instanceof TypeVariable<?>) {
+                // 处理 T 等泛型变量
+                TypeVariable<?> tv = (TypeVariable<?>) type;
+                Type[] bounds = tv.getBounds(); // T extends Number → bounds[0] = Number.class
+                if (bounds != null && bounds.length > 0 && bounds[0] instanceof Class<?>) {
+                    classes[i] = (Class<?>) bounds[0];  // 上界
+                } else {
+                    classes[i] = Object.class; // 无上界 → Object
                 }
+
+            } else if (type instanceof GenericArrayType) {
+                // T[] 或 List<String>[] 这种类型
+                Type componentType = ((GenericArrayType) type).getGenericComponentType();
+                Class<?> componentClass = resolveToClass(componentType);
+                classes[i] = java.lang.reflect.Array.newInstance(componentClass, 0).getClass();
+
+            } else {
+                // 无法处理的情况（WildcardType 等）
+                classes[i] = Object.class;
             }
         }
 
         return classes;
     }
+
+    private static Class<?> resolveToClass(Type type) {
+        if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        } else if (type instanceof TypeVariable<?>) {
+            TypeVariable<?> tv = (TypeVariable<?>) type;
+            Type[] bounds = tv.getBounds();
+            if (bounds != null && bounds.length > 0 && bounds[0] instanceof Class<?>) {
+                return (Class<?>) bounds[0];
+            }
+        } else if (type instanceof GenericArrayType) {
+            Class<?> componentClass = resolveToClass(((GenericArrayType) type).getGenericComponentType());
+            return java.lang.reflect.Array.newInstance(componentClass, 0).getClass();
+        }
+        return Object.class;
+    }
+
 }
