@@ -322,7 +322,7 @@ public class ExcelWriter {
         if (object instanceof Boolean) {
             cell.setCellValue((Boolean) object);
         } else if (Date.class.isAssignableFrom(object.getClass())) {
-            cell.setCellValue(Time2StringUtils.format((java.sql.Date) object));
+            cell.setCellValue(Time2StringUtils.format((Date) object));
         } else if (object.getClass() == LocalDate.class) {
             cell.setCellValue(Time2StringUtils.format((LocalDate) object));
         } else if (object.getClass() == LocalDateTime.class) {
