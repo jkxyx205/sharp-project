@@ -167,6 +167,7 @@ public class ReportService {
             }
         }
 
+        grid.getAdditionalInfo().putAll(requestMap);
         return new ReportDTO(report, convert(grid, report), grid, summaryMap);
     }
 
@@ -263,6 +264,7 @@ public class ReportService {
                 .pageSize(grid.getPageSize())
                 .page(grid.getPage())
                 .totalPages(grid.getTotalPages())
+                .additionalInfo(grid.getAdditionalInfo())
                 .records(grid.getRecords())
                 .build();
     }

@@ -7,6 +7,7 @@ import lombok.Value;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Rick.Xu on 2016/03/22.
@@ -41,6 +42,8 @@ public class Grid<T> implements Serializable {
      * 数据项
      */
     private List<T> rows;
+
+    private Map<String, Object> additionalInfo;
 
     public static <T> Grid<T> emptyInstance(int pageSize) {
         Grid<T> grid = Grid.builder().totalPages(0)

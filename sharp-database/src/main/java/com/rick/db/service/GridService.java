@@ -7,6 +7,7 @@ import com.rick.db.formatter.AbstractSqlFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +98,7 @@ public class GridService {
                 .rows(rows)
                 .records(records)
                 .pageSize(model.getSize())
+                .additionalInfo(new HashMap<>())
                 .build();
         return grid;
     }
