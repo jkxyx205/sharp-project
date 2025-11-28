@@ -21,9 +21,9 @@ public class CodeDescriptionTest {
     @Test
     public void testSave() {
         codeDescriptionService.saveAll(CodeDescription.CategoryEnum.MATERIAL, Arrays.asList(
-                CodeDescription.builder().code("M1").description("物料组1").sort(0).build(),
-                CodeDescription.builder().code("M3").description("物料组3").sort(1).build(),
-                CodeDescription.builder().code("M4").description("物料组4").sort(2).build()
+                CodeDescription.builder().code("MM1").description("物料组1").sort(0).build(),
+                CodeDescription.builder().code("MM3").description("物料组3").sort(1).build(),
+                CodeDescription.builder().code("MM4").description("物料组4").sort(2).build()
         ));
     }
 
