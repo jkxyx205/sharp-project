@@ -14,7 +14,6 @@ import com.rick.db.plugin.dao.annotation.Sql;
 import com.rick.db.plugin.dao.annotation.Table;
 import com.rick.db.plugin.model.IdCodeValue;
 import com.rick.fileupload.client.support.Document;
-import com.rick.meta.config.validator.DictValueCheck;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
 import lombok.*;
@@ -78,7 +77,6 @@ public class Student extends BaseCodeEntityWithLongId {
     //    看看更强大的 NamePropertyDeserializer，支持集合
     @JsonDeserialize(using = NamePropertyDeserializer.class)
     @DictType(type = "UNIT")
-    @DictValueCheck(type = "UNIT")
     DictValue unit;
 
     List<Document> attachments;

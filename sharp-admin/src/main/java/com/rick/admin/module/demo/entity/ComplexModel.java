@@ -11,7 +11,6 @@ import com.rick.db.plugin.dao.annotation.Column;
 import com.rick.db.plugin.dao.annotation.Embedded;
 import com.rick.db.plugin.dao.annotation.Sql;
 import com.rick.db.plugin.dao.annotation.Table;
-import com.rick.meta.config.validator.DictValueCheck;
 import com.rick.meta.dict.model.DictType;
 import com.rick.meta.dict.model.DictValue;
 import lombok.*;
@@ -49,7 +48,7 @@ public class ComplexModel extends BaseEntityWithLongId {
     @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
     @Sql(value = "select name code, label from sys_dict WHERE type = 'MATERIAL_TYPE'  AND name = :name", params="name@materialType.code", nullWhenParamsIsNull="code")
     @DictType(type = "MATERIAL_TYPE") // 可以省略 从@Sql 获取label
-    @DictValueCheck(type = "MATERIAL_TYPE")
+
     DictValue materialType;
 
     /**
@@ -59,7 +58,6 @@ public class ComplexModel extends BaseEntityWithLongId {
     @JsonAlias("unit")
     @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
     @DictType(type = "UNIT")
-    @DictValueCheck(type = "UNIT")
     DictValue unit;
 
     /**
@@ -82,7 +80,6 @@ public class ComplexModel extends BaseEntityWithLongId {
     @JsonAlias("categoryDict")
     @JsonDeserialize(using = EntityWithCodePropertyDeserializer.class)
     @DictType(type = "CategoryEnum")
-    @DictValueCheck(type = "CategoryEnum")
     DictValue categoryDict;
 
     @Column(comment = "年龄", nullable = false)
