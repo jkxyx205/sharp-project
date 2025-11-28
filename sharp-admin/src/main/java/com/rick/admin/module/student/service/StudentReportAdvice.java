@@ -2,6 +2,7 @@ package com.rick.admin.module.student.service;
 
 import com.rick.admin.module.common.service.OperatorReportAdvice;
 import com.rick.common.util.JsonUtils;
+import com.rick.db.plugin.page.Grid;
 import com.rick.db.repository.TableDAO;
 import com.rick.fileupload.client.support.Document;
 import com.rick.report.core.entity.Report;
@@ -25,8 +26,10 @@ public class StudentReportAdvice extends OperatorReportAdvice {
     }
 
     @Override
-    public void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {
-        super.beforeSetRow(report, rows, requestMap);
+    public void beforeSetRow(Report report, Grid<Map<String, Object>> grid, Map<String, Object> requestMap) {
+        super.beforeSetRow(report, grid, requestMap);
+
+        List<Map<String, Object>> rows = grid.getRows();
 
         // 文件解析
         for (Map<String, Object> row : rows) {

@@ -1,6 +1,7 @@
 package com.rick.admin.module.common.service;
 
 import com.rick.common.util.Maps;
+import com.rick.db.plugin.page.Grid;
 import com.rick.db.repository.TableDAO;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.service.ReportAdvice;
@@ -22,10 +23,10 @@ public class OperatorReportAdvice implements ReportAdvice {
     private final TableDAO tableDAO;
 
     @Override
-    public void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {
-        ReportAdvice.super.beforeSetRow(report, rows, requestMap);
-
+    public void beforeSetRow(Report report, Grid<Map<String, Object>> grid, Map<String, Object> requestMap) {
         List<Long> ids = new ArrayList<>();
+        List<Map<String, Object>> rows = grid.getRows();
+
         for (Map<String, Object> row : rows) {
             ids.add((Long) row.get("createBy"));
             ids.add((Long) row.get("updateBy"));

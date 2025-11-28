@@ -145,7 +145,7 @@ public class ReportService {
 
         Grid<Map<String, Object>> grid = GridUtils.list(report.getQuerySql(), requestMap);
         if (reportAdvice != null && CollectionUtils.isNotEmpty(grid.getRows())) {
-            reportAdvice.beforeSetRow(report, grid.getRows(), requestMap);
+            reportAdvice.beforeSetRow(report, grid, requestMap);
         }
 
         Map<String, BigDecimal> summaryMap = null;
@@ -267,6 +267,7 @@ public class ReportService {
                 .page(grid.getPage())
                 .totalPages(grid.getTotalPages())
                 .records(grid.getRecords())
+                .additionalInfo(grid.getAdditionalInfo())
                 .build();
     }
 

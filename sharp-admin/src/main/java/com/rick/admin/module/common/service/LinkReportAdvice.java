@@ -1,11 +1,11 @@
 package com.rick.admin.module.common.service;
 
 import com.rick.common.util.FileUtils;
+import com.rick.db.plugin.page.Grid;
 import com.rick.report.core.entity.Report;
 import com.rick.report.core.service.ReportAdvice;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,11 +16,9 @@ import java.util.Map;
 public class LinkReportAdvice implements ReportAdvice {
 
     @Override
-    public void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {
-        ReportAdvice.super.beforeSetRow(report, rows, requestMap);
-
+    public void beforeSetRow(Report report, Grid<Map<String, Object>> grid, Map<String, Object> requestMap) {
         // 判断是否是图片
-        for (Map<String, Object> row : rows) {
+        for (Map<String, Object> row : grid.getRows()) {
             row.put("isImageType", FileUtils.isImageType((String) row.get("extension")));
         }
     }

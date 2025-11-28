@@ -106,6 +106,7 @@ public class GridService {
                 .rows(rows)
                 .records(records)
                 .pageSize(model.getSize())
+                .additionalInfo(new HashMap<>())
                 .build();
         return grid;
     }
