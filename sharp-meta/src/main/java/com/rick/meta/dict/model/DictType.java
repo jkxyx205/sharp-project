@@ -1,7 +1,6 @@
 package com.rick.meta.dict.model;
 
-import com.rick.meta.config.validator.Dict2Validator;
-import com.rick.meta.config.validator.DictValidator;
+import com.rick.meta.config.validator.*;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -14,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ElementType.FIELD})
 @Retention(RUNTIME)
-@Constraint(validatedBy = {DictValidator.class, Dict2Validator.class})
+@Constraint(validatedBy = {DictDictValueValidator.class, DictDictValueListValidator.class, DictStringValidator.class, DictStringListValidator.class, DefaultDictValidator.class})
 @Documented
 public @interface DictType {
     String message() default "code %s 不存在";
