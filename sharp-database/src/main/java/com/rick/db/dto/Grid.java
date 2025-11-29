@@ -6,6 +6,7 @@ import lombok.Value;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,7 @@ public class Grid<T> implements Serializable {
                 .rows(Collections.EMPTY_LIST)
                 .pageSize(pageSize)
                 .records(0)
+                .additionalInfo(new HashMap())
                 .build();
         return grid;
     }
