@@ -5,10 +5,14 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static com.fasterxml.jackson.databind.node.JsonNodeType.NUMBER;
+import static com.fasterxml.jackson.databind.node.JsonNodeType.STRING;
 
 public class EnumCustomizeDeserializer extends JsonDeserializer<Enum<?>> implements ContextualDeserializer {
 
@@ -48,14 +52,30 @@ public class EnumCustomizeDeserializer extends JsonDeserializer<Enum<?>> impleme
 
         if (currentToken == JsonToken.VALUE_STRING) {
             String code = jsonParser.getText();
-            return deserializeByCode(enumClass, code, jsonParser);
+            return deserializeByCode(enumClass, code, String.class, jsonParser);
+        }
+
+        if (currentToken == JsonToken.VALUE_NUMBER_INT) {
+            int code = jsonParser.getIntValue();
+            return deserializeByCode(enumClass, code, int.class, jsonParser);
         }
 
         if (currentToken == JsonToken.START_OBJECT) {
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);
             if (node.has("code")) {
-                String code = node.get("code").asText();
-                return deserializeByCode(enumClass, code, jsonParser);
+                JsonNodeType codeNode = node.get("code").getNodeType();
+
+                if (codeNode == STRING) {
+                    String code = node.get("code").asText();
+                    return deserializeByCode(enumClass, code, String.class, jsonParser);
+                }
+
+                if (codeNode == NUMBER) {
+                    int code = node.get("code").asInt();
+                    return deserializeByCode(enumClass, code, int.class, jsonParser);
+                }
+
+
             }
             throw new JsonParseException(jsonParser, "Expected 'code' field in enum object");
         }
@@ -71,19 +91,19 @@ public class EnumCustomizeDeserializer extends JsonDeserializer<Enum<?>> impleme
     /**
      * 通过code反序列化枚举
      */
-    private Enum<?> deserializeByCode(Class<? extends Enum> enumClass, String code, JsonParser jsonParser) throws IOException {
-        if (code == null || code.trim().isEmpty()) {
+    private Enum<?> deserializeByCode(Class<? extends Enum> enumClass, Object code, Class codeClass, JsonParser jsonParser) throws IOException {
+        if (code == null || (code instanceof String && ((String)code).trim().isEmpty())) {
             return null;
         }
 
         try {
             // 尝试调用枚举的 valueOfCode 方法
-            Method valueOfCodeMethod = enumClass.getMethod("valueOfCode", String.class);
+            Method valueOfCodeMethod = enumClass.getMethod("valueOfCode", codeClass);
             return (Enum<?>) valueOfCodeMethod.invoke(null, code);
         } catch (NoSuchMethodException e) {
             // 如果没有 valueOfCode 方法，使用标准的 valueOf
             try {
-                return Enum.valueOf(enumClass, code);
+                return Enum.valueOf(enumClass, code.toString());
             } catch (IllegalArgumentException ex) {
                 throw new JsonParseException(jsonParser,
                         "Cannot deserialize enum " + enumClass.getSimpleName() + " with code: " + code, ex);
