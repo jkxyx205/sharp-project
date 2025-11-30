@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.rick.common.http.convert.CodeToEnumConverterFactory;
+import com.rick.common.http.json.deserializer.EnumCustomizeDeserializer;
 import com.rick.common.http.web.param.ParamNameProcessor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,7 @@ public class SharpWebMvcConfigurer implements WebMvcConfigurer {
             simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
             simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(pattern)));
             simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//            simpleModule.addDeserializer(Enum.class, new EnumJsonDeserializer());
+            simpleModule.addDeserializer(Enum.class, new EnumCustomizeDeserializer());
             objectMapper.registerModule(simpleModule);
             objectMapper.setDateFormat(new SimpleDateFormat(pattern));
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
