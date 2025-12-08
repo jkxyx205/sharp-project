@@ -13,7 +13,7 @@
     <groupId>com.rick</groupId>
     <artifactId>sharp-dependencies</artifactId>
     <packaging>pom</packaging>
-    <version>2.5.4</version>
+    <version>1.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,7 +26,7 @@
         <poi.version>5.0.0</poi.version>
         <guava.version>20.0</guava.version>
         <mybatis-plus.version>3.4.3</mybatis-plus.version>
-        <sharp.version>2.0-SNAPSHOT</sharp.version>
+        <sharp.version>1.0-SNAPSHOT</sharp.version>
     </properties>
 
     <dependencyManagement>

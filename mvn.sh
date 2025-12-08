@@ -7,7 +7,8 @@ sharp-database
 sharp-meta
 sharp-fileupload
 sharp-formflow
-#sharp-mail
+sharp-mail
+sharp-excel
 sharp-report
 sharp-generator
 sharp-sms

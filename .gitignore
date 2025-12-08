@@ -143,6 +143,7 @@ Temporary Items
 ### Gradle ###
 .gradle
 build/
+sharp-admin/deploy/**/*.jar
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -167,5 +168,6 @@ gradle-app.setting
 .idea
 target
 control-*.html
-
+node_modules
+.env*
 # End of https://www.toptal.com/developers/gitignore/api/macos,jetbrains+iml,java,gradle

@@ -17,7 +17,7 @@
 
     <properties>
         <thymeleaf-extras-springsecurity5-version>3.0.4.RELEASE</thymeleaf-extras-springsecurity5-version>
-        <sharp.version>2.0-SNAPSHOT</sharp.version>
+        <sharp.version>1.0-SNAPSHOT</sharp.version>
     </properties>
 
     <dependencies>
