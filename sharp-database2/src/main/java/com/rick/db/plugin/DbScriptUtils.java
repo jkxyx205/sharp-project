@@ -34,7 +34,7 @@ public class DbScriptUtils {
                 if (line.startsWith("--") || line.isEmpty()) {
                     continue;
                 }
-                sqlBuilder.append(line);
+                sqlBuilder.append(line).append("\r\n");
                 // If a statement ends with a semicolon, execute it
                 if (line.endsWith(";")) {
                     String sql = sqlBuilder.toString();
