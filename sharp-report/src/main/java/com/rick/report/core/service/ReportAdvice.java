@@ -48,5 +48,5 @@ public interface ReportAdvice {
      * @param rows  fetchDataWithoutSql，提供 list 数据
      * @return
      */
-    default MapExcelTable getMapExcelTable(Report report, Map<String, ?> params, PageModel pageModel, List<Map<String, Object>> rows) {return null;}
+    default MapExcelTable getMapExcelTable(Report report, Map<String, Object> params, PageModel pageModel, List<Map<String, Object>> rows) {return null;}
 }
