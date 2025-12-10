@@ -31,7 +31,7 @@ public final class ExportHttpServletRequestUtils {
      * @param columnList 导出列的内容和样式信息
      * @throws IOException
      */
-    public static void export(String sql, HttpServletRequest request, Map<String, ?> extendParams, HttpServletResponse response, String fileName, List<MapTableColumn> columnList) throws IOException {
+    public static void export(String sql, HttpServletRequest request, Map<String, Object> extendParams, HttpServletResponse response, String fileName, List<MapTableColumn> columnList) throws IOException {
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request, extendParams);
         QueryModel queryModel = QueryModel.of(params);
         queryModel.getPageModel().setSize(-1);
