@@ -17,11 +17,11 @@ public class MessagingSendService {
 
     public static final String URL = "https://us-central1-fir-cloudmessaging-4e2cd.cloudfunctions.net/send";
 
-    public void send(String to, String title, String message) {
+    public void send(String token, String title, String message) {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType JSON = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(JSON, "{\n    \"data\": {\n        \"to\": \""+to+"\",\n        \"ttl\": 60,\n        \"priority\": \"high\",\n        \"data\": {\n            \"text\": {\n                \"title\": \""+title+"\",\n                \"message\": \""+message+"\",\n                \"clipboard\": true\n            }\n        }\n    }\n}"
+        RequestBody body = RequestBody.create(JSON, "{\n    \"data\": {\n        \"to\": \""+token+"\",\n        \"ttl\": 60,\n        \"priority\": \"high\",\n        \"data\": {\n            \"text\": {\n                \"title\": \""+title+"\",\n                \"message\": \""+message+"\",\n                \"clipboard\": true\n            }\n        }\n    }\n}"
                 );
         Request request = new Request.Builder()
                 .url(URL)
