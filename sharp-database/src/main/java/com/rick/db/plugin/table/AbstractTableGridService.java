@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public abstract class AbstractTableGridService {
 
-    public Grid<Map<String, Object>> list(Map<String, ?> params) {
+    public Grid<Map<String, Object>> list(Map<String, Object> params) {
         return GridUtils.list(getListSQL(), params, getCountSQL());
     }
 
@@ -24,7 +24,7 @@ public abstract class AbstractTableGridService {
         return list(request, null);
     }
 
-    public Grid<Map<String, Object>> list(HttpServletRequest request, Map<String, ?> extendParams) {
+    public Grid<Map<String, Object>> list(HttpServletRequest request, Map<String, Object> extendParams) {
         return GridUtils.list(getListSQL(), HttpServletRequestUtils.getParameterMap(request, extendParams), getCountSQL());
     }
 
@@ -32,11 +32,11 @@ public abstract class AbstractTableGridService {
         return summary(request, null);
     }
 
-    public List<BigDecimal> summary(HttpServletRequest request, Map<String, ?> extendParams) {
+    public List<BigDecimal> summary(HttpServletRequest request, Map<String, Object> extendParams) {
         return summary(HttpServletRequestUtils.getParameterMap(request, extendParams));
     }
 
-    public List<BigDecimal> summary(Map<String, ?> params) {
+    public List<BigDecimal> summary(Map<String, Object> params) {
         ExceptionCode.notNull(getSummarySQL(), "getSummarySQL need overwrite");
         return GridUtils.numericObject(getSummarySQL(), params);
     }

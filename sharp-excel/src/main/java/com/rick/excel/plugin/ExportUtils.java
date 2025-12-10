@@ -30,7 +30,7 @@ public final class ExportUtils {
      * @param columnList 需要显示的列。MapTableColumn#name列的字段名 MapTableColumn#label显示名称
      * @throws IOException
      */
-    public static final void export(String sql, Map<String, ?> params, OutputStream outputStream, List<MapTableColumn> columnList) throws IOException {
+    public static final void export(String sql, Map<String, Object> params, OutputStream outputStream, List<MapTableColumn> columnList) throws IOException {
         QueryModel queryModel = QueryModel.of(params);
         queryModel.getPageModel().setSize(-1);
 
