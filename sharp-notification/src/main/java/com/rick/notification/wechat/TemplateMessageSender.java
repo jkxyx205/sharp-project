@@ -3,7 +3,6 @@ package com.rick.notification.wechat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.Map;
  * @author Rick.Xu
  * @date 2025/4/27 20:47
  */
-@Service
 @RequiredArgsConstructor
 @Slf4j
 public class TemplateMessageSender {
