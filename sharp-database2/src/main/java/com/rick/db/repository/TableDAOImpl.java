@@ -191,13 +191,11 @@ public class TableDAOImpl implements TableDAO {
 
     @Override
     public <K, V> Map<K, V> selectForKeyValue(String sql, Object... args) {
-        List<Map<String, Object>> list = select(sql, args);
         final Map<K, V> m = new LinkedHashMap();
-        if (CollectionUtils.isNotEmpty(list)) {
-            for (Map<String, Object> map : list) {
-                m.putAll((Map<? extends K, ? extends V>) map);
-            }
-        }
+        namedParameterJdbcTemplate.getJdbcTemplate().query(sql, rs -> {
+            m.put((K) rs.getObject(1), (V) rs.getObject(2));
+        }, args);
+
         return m;
     }
 
