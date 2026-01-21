@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,19 +22,20 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ROLE_admin')")
+@RequestMapping("logs")
 public class LogController {
 
     @Value("${logging.file.path}")
     private String logFilePath;
 
-//    @GetMapping(value = "logs/info", produces = "text/plain;charset=UTF-8")
+//    @GetMapping(produces = "text/plain;charset=UTF-8")
 //    public String info() throws IOException {
 //        File path = new File(logFilePath);
 //        File infoLog = new File(path, "logback."+Time2StringUtils.format(LocalDate.now())+".log");
 //        return FileUtils.readFileToString(infoLog, Charset.defaultCharset());
 //    }
 
-//    @GetMapping(value = "logs/info", produces = "text/html;charset=UTF-8")
+//    @GetMapping(produces = "text/html;charset=UTF-8")
 //    public String infoPage() {
 //        return "<!DOCTYPE html>" +
 //                "<html>" +
@@ -75,7 +77,7 @@ public class LogController {
 //                "</html>";
 //    }
 
-    @GetMapping(value = "logs/info", produces = "text/html;charset=UTF-8")
+    @GetMapping(produces = "text/html;charset=UTF-8")
     public String infoPage() {
         // language=HTML
         return "<!DOCTYPE html>" +
@@ -172,7 +174,7 @@ public class LogController {
                 "</html>";
     }
 
-    @GetMapping(value = "logs/api", produces = "text/plain;charset=UTF-8")
+    @GetMapping(value = "api", produces = "text/plain;charset=UTF-8")
     public String infoApi(@RequestParam(defaultValue = "info") String level) throws IOException {
         // dev
 //        File path = new File(logFilePath);
