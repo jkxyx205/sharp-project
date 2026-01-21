@@ -39,7 +39,7 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
                              HttpServletResponse response, Object handler) {
         Object principal = request.getUserPrincipal();
         String username = "anon";
-        String name = "anno";
+        String name = "anon";
         AdminUserDetails userDetails;
         if (Objects.nonNull(principal)) {
             userDetails = (AdminUserDetails) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
@@ -90,13 +90,15 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
         //客户端请求参数值
         String requestParam = "";
 
-        if (request.getRequestURI().matches(".*[.](js|css|png|jpeg|jpg)") ||
+        if (request.getRequestURI().matches(".*[.](js|css|png|jpeg|jpg)") || "anon".equals(username) ||
                 request.getRequestURI().equals("/") ||
                 request.getRequestURI().endsWith("/error") ||
                 request.getRequestURI().endsWith("/forbidden") ||
                 request.getRequestURI().endsWith("/password") ||
                 request.getRequestURI().endsWith("/kaptcha") ||
-                request.getRequestURI().endsWith("/login")) {
+                request.getRequestURI().endsWith("/login") ||
+                request.getRequestURI().endsWith("/logs/info") ||
+                request.getRequestURI().endsWith("/logs/api")) {
             return;
         }
 
