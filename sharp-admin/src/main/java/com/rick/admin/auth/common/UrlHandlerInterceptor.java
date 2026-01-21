@@ -102,7 +102,7 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
                 request.getRequestURI().endsWith("/password") ||
                 request.getRequestURI().endsWith("/kaptcha") ||
                 request.getRequestURI().endsWith("/login") ||
-                request.getRequestURI().endsWith("/logs/info") ||
+                request.getRequestURI().endsWith("/logs") ||
                 request.getRequestURI().endsWith("/logs/api")) {
             return;
         }
