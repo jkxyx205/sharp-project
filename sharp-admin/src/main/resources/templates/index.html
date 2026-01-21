@@ -147,12 +147,17 @@
                         </li>
                         <li class="nav-item" sec:authorize="hasAuthority('sys_dict')">
                             <a class="nav-link" href="javascript:addTab('sys_dict', '字典管理', '/reports/695316160014499840')">
-                                <i class="nav-icon icon-notebook"></i> 字典管理
+                                <i class="nav-icon icon-note"></i> 字典管理
                             </a>
                         </li>
                         <li class="nav-item" sec:authorize="hasAuthority('sys_dict')">
                             <a class="nav-link" href="javascript:addTab('file-manager', '文件管理', '/reports/858372486293622784')">
                                 <i class="nav-icon icon-notebook"></i> 文件（图床）管理
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('ROLE_admin')">
+                            <a class="nav-link" href="javascript:addTab('logs', '日志查看', '/logs/info')">
+                                <i class="nav-icon icon-notebook"></i> 日志查看
                             </a>
                         </li>
                     </ul>
