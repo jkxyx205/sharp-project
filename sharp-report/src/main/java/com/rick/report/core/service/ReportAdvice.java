@@ -5,6 +5,7 @@ import com.rick.db.dto.PageModel;
 import com.rick.excel.table.AbstractExportTable;
 import com.rick.excel.table.MapExcelTable;
 import com.rick.report.core.entity.Report;
+import com.rick.report.core.model.ReportDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,6 +27,8 @@ public interface ReportAdvice {
     default void beforeQuery(Report report, Map<String, Object> requestMap) {}
 
     default void beforeSetRow(Report report, List<Map<String, Object>> rows, Map<String, Object> requestMap) {}
+
+    default void beforeReturn(ReportDTO reportDTO) {}
 
     default void combineSummaryList(Report report, List<BigDecimal> summaryList, Map<String, Object> requestMap, String conditionSql){}
 
