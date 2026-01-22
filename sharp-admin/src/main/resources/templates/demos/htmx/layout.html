@@ -225,6 +225,11 @@
         $.LoadingOverlay("hide");
     });
 
+    // 网络错误
+    htmx.on("htmx:sendError", function(evt) {
+        toastr.error('网络错误!');
+    });
+
     (function () {
         const loadedScripts = new Set();
 
