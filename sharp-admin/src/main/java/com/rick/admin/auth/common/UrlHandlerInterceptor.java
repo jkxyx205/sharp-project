@@ -80,7 +80,7 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
         //客户端操作系统类型
         String osType = userAgent.getOperatingSystem().getName();
         //客户端ip
-        String clientIp = request.getRemoteAddr();
+        String clientIp = HttpServletRequestUtils.getClientIpAddress(request);
         //客户端port
         int clientPort = request.getRemotePort();
         //请求方式
