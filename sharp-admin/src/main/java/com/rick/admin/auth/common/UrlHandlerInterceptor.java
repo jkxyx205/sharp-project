@@ -37,7 +37,7 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
                              HttpServletResponse response, Object handler) {
         Object principal = request.getUserPrincipal();
         String username = "anon";
-        String name = "anno";
+        String name = "anon";
         AdminUserDetails userDetails;
         if (Objects.nonNull(principal)) {
             userDetails = (AdminUserDetails) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
@@ -83,7 +83,7 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
         //客户端操作系统类型
         String osType = userAgent.getOperatingSystem().getName();
         //客户端ip
-        String clientIp = request.getRemoteAddr();
+        String clientIp = HttpServletRequestUtils.getClientIpAddress(request);
         //客户端port
         int clientPort = request.getRemotePort();
         //请求方式
@@ -93,13 +93,15 @@ public class UrlHandlerInterceptor implements HandlerInterceptor {
         //客户端请求参数值
         String requestParam = "";
 
-        if (request.getRequestURI().matches(".*[.](js|css|png|jpeg|jpg)") ||
+        if (request.getRequestURI().matches(".*[.](js|css|png|jpeg|jpg)") || "anon".equals(username) ||
                 request.getRequestURI().equals("/") ||
                 request.getRequestURI().endsWith("/error") ||
                 request.getRequestURI().endsWith("/forbidden") ||
                 request.getRequestURI().endsWith("/password") ||
                 request.getRequestURI().endsWith("/kaptcha") ||
-                request.getRequestURI().endsWith("/login")) {
+                request.getRequestURI().endsWith("/login") ||
+                request.getRequestURI().endsWith("/logs") ||
+                request.getRequestURI().endsWith("/logs/api")) {
             return;
         }
 
