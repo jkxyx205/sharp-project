@@ -170,7 +170,12 @@ public class ReportService {
             }
         }
 
-        return new ReportDTO(report, convert(grid, report), grid, summaryMap);
+        ReportDTO reportDTO = new ReportDTO(report, convert(grid, report), grid, summaryMap);
+
+        if (reportAdvice != null) {
+            reportAdvice.beforeReturn(reportDTO);
+        }
+        return reportDTO;
     }
 
     public void init(Report report) {
