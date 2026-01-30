@@ -32,6 +32,11 @@ public interface EntityDAO<T, ID> {
 
     List<T> select(String condition, Object... args);
 
+    /**
+     * 不定参数查询，参见 SQLParamCleaner.formatSql
+     * @param paramMap
+     * @return
+     */
     List<T> select(Map<String, Object> paramMap);
 
     List<T> select(String condition, Map<String, Object> paramMap);
