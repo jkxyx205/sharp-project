@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,9 +65,14 @@ public class GridService {
      * @return
      */
     public <T> Grid<T> query(String sql, PageModel model, Map<String, Object> params, JdbcTemplateCallback<T> jdbcTemplateCallback, String countSQL) {
-        Map<String, Object> formatMap = new HashMap<>();
-        sql = SQLParamCleaner.formatSql(sql, params, formatMap);
-        params = formatMap;
+//        Map<String, Object> formatMap = new HashMap<>();
+//        sql = SQLParamCleaner.formatSql(sql, params, formatMap);
+//        params = formatMap;
+
+        SQLParamCleaner.FormatParam formatParam = SQLParamCleaner.formatSql(sql, params);
+        sql = formatParam.getFormatSql();
+        params = formatParam.getFormatMap();
+
         int records = 0;
         int totalPages = 0;
 
@@ -106,7 +110,6 @@ public class GridService {
                 .rows(rows)
                 .records(records)
                 .pageSize(model.getSize())
-                .additionalInfo(new HashMap<>())
                 .build();
         return grid;
     }

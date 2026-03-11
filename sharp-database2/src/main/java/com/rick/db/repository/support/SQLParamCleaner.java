@@ -2,6 +2,7 @@ package com.rick.db.repository.support;
 
 import com.rick.common.util.EnumUtils;
 import com.rick.db.repository.support.dialect.AbstractDialect;
+import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSqlHelper;
 
@@ -96,10 +97,22 @@ public class SQLParamCleaner {
         DATE_FORMAT_MAP.put("\\d{4}-\\d{2}-\\d{2}", "yyyy-MM-dd");
     }
 
+    public static FormatParam formatSql(String srcSql, Map<String, Object> params) {
+        return formatSql(srcSql, params, false);
+    }
+
+    public static FormatParam formatSql(String srcSql, Map<String, Object> params, boolean isSetIsNull) {
+        Map<String, Object> formatMap = new HashMap<>();
+        String formatSql = formatSql(srcSql, params, formatMap, isSetIsNull);
+        return new FormatParam(formatSql, formatMap);
+    }
+
+    @Deprecated
     public static String formatSql(String srcSql, Map<String, Object> params, Map<String, Object> formatMap) {
         return formatSql(srcSql, params, formatMap, false);
     }
 
+    @Deprecated
     public static String formatSql(String srcSql, Map<String, Object> params, Map<String, Object> formatMap, boolean isSetIsNull) {
         srcSql = normalizeSqlParams(srcSql);
 
@@ -113,7 +126,7 @@ public class SQLParamCleaner {
             formatMap = new HashMap<>();
         }
 
-        srcSql = handleHolderSQL(srcSql, params);
+        srcSql = replaceVars(srcSql, params);
 
         List<ParamHolder> paramList = splitParam(srcSql, fullPattern, paramPattern);
 
@@ -406,11 +419,11 @@ public class SQLParamCleaner {
     private static final char PREFIX_END =  '{';
     private static final char SUFFIX = '}';
 
-    private static String handleHolderSQL(String srcSQL, Map<String, Object> params) {
-        char[] sqlChar = srcSQL.toCharArray();
+    public static String replaceVars(String template, Map<String, Object> params) {
+        char[] sqlChar = template.toCharArray();
         int len = sqlChar.length;
 
-        StringBuilder sqlBuilder = new StringBuilder(len);
+        StringBuilder templateBuilder = new StringBuilder(len);
 
         StringBuilder holderBuilder = new StringBuilder();
 
@@ -427,7 +440,7 @@ public class SQLParamCleaner {
                 Object holderValue = params.get(holderBuilder.toString());
                 String resultText = Objects.nonNull(holderValue) ? String.valueOf(holderValue) : "";
 
-                sqlBuilder.append(resultText);
+                templateBuilder.append(resultText);
                 holderBuilder.delete(0, holderBuilder.length());
                 continue;
             }
@@ -437,11 +450,11 @@ public class SQLParamCleaner {
             }
 
             if (!findHolder) {
-                sqlBuilder.append(c);
+                templateBuilder.append(c);
             }
         }
 
-        return sqlBuilder.toString();
+        return templateBuilder.toString();
     }
 
     private static String ignoreAndReturnSQL(String srcSql, ParamHolder h) {
@@ -450,17 +463,22 @@ public class SQLParamCleaner {
         String leftRegex = condition + "(?s)((?i)(\\s+(and|or))|(\\s*,))?";
         String firstWhereCondition = "(?s).*((?i)where)\\s+" + condition + ".*";
         String firstSetCondition = "(?s).*((?i)set)\\s+" + condition + ".*";
+        // 判断条件是否出现在片段开头（前面没有 WHERE/SET，也没有 AND/OR）
+        String firstBareCondition = "(?s)^\\s*" + condition + ".*";
 
         if (srcSql.matches(firstSetCondition)) {
             return srcSql.replaceAll(leftRegex, "");
-        }  else if(srcSql.matches(firstWhereCondition)) {
+        } else if (srcSql.matches(firstWhereCondition)) {
             if (isOnlyCause(srcSql, condition)) {
                 return srcSql.replaceAll("(?i)(where)?\\s*" + condition + "", "");
             }
 
             return srcSql.replaceAll(leftRegex, "");
+        } else if (srcSql.matches(firstBareCondition)) {
+            // ← 新增：纯条件片段，且是第一个条件
+            // 删除条件本身 + 后面的 AND/OR
+            return srcSql.replaceAll(leftRegex, "");
         }
-
 
         return  srcSql.replaceAll(rightRegex, "");
     }
@@ -507,5 +525,11 @@ public class SQLParamCleaner {
 
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    @Value
+    public static class FormatParam {
+        String formatSql;
+        Map<String, Object> formatMap;
     }
 }
