@@ -1,0 +1,65 @@
+package com.rick.db.plugin.table;
+
+import com.rick.common.http.HttpServletRequestUtils;
+import com.rick.common.http.exception.ExceptionCode;
+import com.rick.db.plugin.page.Grid;
+import com.rick.db.plugin.page.GridUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author Rick
+ * @createdAt 2021-10-15 09:37:00
+ */
+public abstract class AbstractTableGridService {
+
+    public Grid<Map<String, Object>> list(Map<String, Object> params) {
+        return GridUtils.list(getListSQL(), params, getCountSQL());
+    }
+
+    public Grid<Map<String, Object>> list(HttpServletRequest request) {
+        return list(request, null);
+    }
+
+    public Grid<Map<String, Object>> list(HttpServletRequest request, Map<String, Object> extendParams) {
+        return GridUtils.list(getListSQL(), HttpServletRequestUtils.getParameterMap(request, extendParams), getCountSQL());
+    }
+
+    public List<BigDecimal> summary(HttpServletRequest request) {
+        return summary(request, null);
+    }
+
+    public List<BigDecimal> summary(HttpServletRequest request, Map<String, Object> extendParams) {
+        return summary(HttpServletRequestUtils.getParameterMap(request, extendParams));
+    }
+
+    public List<BigDecimal> summary(Map<String, Object> params) {
+        ExceptionCode.notNull(getSummarySQL(), "getSummarySQL need overwrite");
+        return GridUtils.numericObject(getSummarySQL(), params);
+    }
+
+    /**
+     * 列合计SQL
+     * @return
+     */
+    public String getSummarySQL() {
+        return null;
+    }
+
+    /**
+     * 查询SQL
+     * @return
+     */
+    public abstract String getListSQL();
+
+    /**
+     * 查询count SQL
+     * @return
+     */
+    public String getCountSQL() {
+        return null;
+    }
+}
