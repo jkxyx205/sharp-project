@@ -5,11 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.rick.db.repository.Column;
+import com.rick.db.repository.Embedded;
 import com.rick.db.repository.Id;
 import com.rick.db.repository.Table;
+import com.rick.db.repository.model.BaseEntityInfo;
+import com.rick.db.repository.model.BaseEntityInfoGetter;
 import com.rick.fileupload.core.model.FileMeta;
 import lombok.Data;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 
 import static com.rick.db.repository.support.Constants.LOGIC_DELETE_COLUMN_NAME;
@@ -20,7 +24,11 @@ import static com.rick.db.repository.support.Constants.LOGIC_DELETE_COLUMN_NAME;
  */
 @Table("sys_document")
 @Data
-public class Document extends FileMeta {
+public class Document extends FileMeta implements BaseEntityInfoGetter {
+
+    @Valid
+    @Embedded
+    BaseEntityInfo baseEntityInfo;
 
     @Id
     @JsonSerialize(using = ToStringSerializer.class)
