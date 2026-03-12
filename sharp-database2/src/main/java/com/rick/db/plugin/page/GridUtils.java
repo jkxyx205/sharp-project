@@ -5,7 +5,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.rick.db.repository.support.Constants.ASC;
 import static com.rick.db.repository.support.Constants.GROUP_DUMMY_TABLE_NAME;
@@ -60,10 +63,11 @@ public final class GridUtils {
      * @return
      */
     public static List<BigDecimal> numericObject(String sql, Map<String, Object> params) {
-        Map<String, Object> formatMap = new HashMap<>();
-        sql = SQLParamCleaner.formatSql(sql, params, formatMap);
+//        Map<String, Object> formatMap = new HashMap<>();
+//        sql = SQLParamCleaner.formatSql(sql, params, formatMap);
 
-        return Arrays.asList(GridUtils.GRID_SERVICE.getTableDAO().selectForObject(sql, formatMap).get().values().toArray(new BigDecimal[] {}));
+        SQLParamCleaner.FormatParam formatParam = SQLParamCleaner.formatSql(sql, params);
+        return Arrays.asList(GridUtils.GRID_SERVICE.getTableDAO().selectForObject(formatParam.getFormatSql(), formatParam.getFormatMap()).get().values().toArray(new BigDecimal[] {}));
     }
 
 

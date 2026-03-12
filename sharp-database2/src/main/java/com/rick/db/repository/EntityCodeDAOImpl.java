@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
@@ -67,6 +68,22 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     protected Collection<T> insertOrUpdate0(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
         fillEntityIdsByCodes(this, entityList, refColumnName, refValue);
         return super.insertOrUpdate0(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
+    }
+
+    @Override
+    public <S> Optional<S> selectByCode(String code, String columnName, Class<S> clazz) {
+        Assert.hasText(code, "code cannot be null");
+        Assert.hasText(columnName, "columnName cannot be null");
+        List<S> values = select(clazz, columnName, "code = ?", code);
+        return OperatorUtils.expectedAsOptional(values);
+    }
+
+    @Override
+    public <S> List<S> selectByCodes(Collection<String> codes, String columnName, Class<S> clazz){
+        Assert.notEmpty(codes, "codes cannot be null");
+        Assert.hasText(columnName, "columnName cannot be null");
+        List<S> values = select(clazz, columnName, "code IN (:codes)", Maps.of("codes", codes));
+        return values;
     }
 
     @Override

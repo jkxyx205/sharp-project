@@ -136,8 +136,11 @@ public class DictServiceImpl implements DictService, InitializingBean {
 
     private List<Dict> getDbDictList(Map<String, Object> params) {
         try {
-            Map<String, Object> formatMap = new HashMap<>();
-            List<Dict> list = tableDAO.select(Dict.class, SQLParamCleaner.formatSql(SELECT_SQL, params, formatMap), formatMap);
+//            Map<String, Object> formatMap = new HashMap<>();
+//            List<Dict> list = tableDAO.select(Dict.class, SQLParamCleaner.formatSql(SELECT_SQL, params, formatMap), formatMap);
+
+            SQLParamCleaner.FormatParam formatParam = SQLParamCleaner.formatSql(SELECT_SQL, params);
+            List<Dict> list = tableDAO.select(Dict.class,  formatParam.getFormatSql(),  formatParam.getFormatMap());
             return list;
         } catch (Exception e) {
             log.warn("sys_dict表没有创建成功！");
