@@ -103,7 +103,7 @@ public final class SQLUtils {
     public static int insert(String tableName, String columnNames, Object[] params) {
         String insertSQL = getInsertSQL(tableName, columnNames);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}]", insertSQL, params);
+            log.debug("SQL => [{}], args:=> [{}]", insertSQL, Arrays.toString(params));
         }
         return SQLUtils.JDBC_TEMPLATE.update(insertSQL, params);
     }
@@ -119,7 +119,7 @@ public final class SQLUtils {
     public static int[] insert(String tableName, String columnNames, List<Object[]> paramsList) {
         String insertSQL = getInsertSQL(tableName, columnNames);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}]", insertSQL, paramsList);
+            log.debug("SQL => [{}], args:=> [{}]", insertSQL, paramsListToString(paramsList));
         }
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, paramsList);
     }
@@ -175,7 +175,7 @@ public final class SQLUtils {
     public static int update(String tableName, String updateColumnNames, Object[] params, String conditionSQL) {
         String updateSQL = getUpdateSQL(tableName, updateColumnNames, conditionSQL);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}]", updateSQL, params);
+            log.debug("SQL => [{}], args:=> [{}]", updateSQL, Arrays.toString(params));
         }
         return SQLUtils.JDBC_TEMPLATE.update(updateSQL, params);
     }
@@ -191,7 +191,7 @@ public final class SQLUtils {
     public static int[] update(String tableName, String updateColumnNames, List<Object[]> paramsList, String conditionSQL) {
         String updateSQL = getUpdateSQL(tableName, updateColumnNames, conditionSQL);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}]", updateSQL, paramsList);
+            log.debug("SQL => [{}], args:=> [{}]", updateSQL, paramsListToString(paramsList));
         }
         return SQLUtils.JDBC_TEMPLATE.batchUpdate(updateSQL, paramsList);
     }
@@ -280,7 +280,7 @@ public final class SQLUtils {
         String deleteSql = "DELETE FROM " + tableName + " WHERE " + conditionSQL;
         int deletedCount =  SQLUtils.JDBC_TEMPLATE.update(deleteSql, params);
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSql, params, deletedCount);
+            log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSql, Arrays.toString(params), deletedCount);
         }
         return deletedCount;
     }
@@ -343,7 +343,7 @@ public final class SQLUtils {
         String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
         List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
         if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], args:=> [{}, {}]", insertSQL, addParams);
+            log.debug("SQL => [{}], args:=> [{}, {}]", insertSQL, paramsListToString(addParams));
         }
 
         SQLUtils.JDBC_TEMPLATE.batchUpdate(insertSQL, addParams);
@@ -476,7 +476,7 @@ public final class SQLUtils {
 
             deletedCount += SQLUtils.JDBC_TEMPLATE.update(deleteSQL, mergedParams);
             if (log.isDebugEnabled()) {
-                log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSQL, mergedParams, deletedCount);
+                log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSQL, Arrays.toString(mergedParams), deletedCount);
             }
         }
 
@@ -634,4 +634,9 @@ public final class SQLUtils {
         Object[] apply(Object value);
     }
 
+    private static String paramsListToString(List<Object[]> paramsList) {
+        return paramsList.stream()
+                .map(Arrays::toString)
+                .collect(Collectors.joining("\n"));
+    }
 }
