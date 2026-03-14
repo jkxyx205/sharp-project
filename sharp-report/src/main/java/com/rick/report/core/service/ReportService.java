@@ -97,7 +97,8 @@ public class ReportService {
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
-        requestMap = new HashMap<>(requestMap);
+        // 传入 传出 requestMap cannot be null
+//        requestMap = new HashMap<>(requestMap);
 
         Report report = findById(id).get();
         init(report);
