@@ -97,7 +97,7 @@ public class ReportService {
     }
 
     public ReportDTO list(long id, Map<String, Object> requestMap) {
-        // 传入 传出 requestMap cannot be null
+        // 传入 传出 requestMap，requestMap cannot be null，可以操作的 Map
 //        requestMap = new HashMap<>(requestMap);
 
         Report report = findById(id).get();
