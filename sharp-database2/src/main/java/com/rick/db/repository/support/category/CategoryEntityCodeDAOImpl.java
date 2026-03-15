@@ -35,7 +35,7 @@ public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<
             }
         }
 
-        insertOrUpdate(list, "category", category.name(), deleteItem, deletedIdsConsumer);
+        insertOrUpdateTable(list, "category", category.name(), deleteItem, deletedIdsConsumer);
     }
 
     @Override

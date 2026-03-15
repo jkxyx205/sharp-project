@@ -38,9 +38,19 @@ public interface TableDAO {
 
     boolean exists(@NotBlank String sql, Map<String, Object> paramMap);
 
-    int update(String tableName, String columns, String condition, Object... args);
+    /**
+     *
+     * @param tableName
+     * @param columnsCondition postgres 如果是 json 类型，?::json，需要加后缀 ::json，不能简单的通过 columns 去构造 ？
+     * @param condition
+     * @param args
+     * @return
+     */
+    int update(String tableName, String columnsCondition, String condition, Object... args);
 
-    int update(String tableName, String columns, String condition, Map<String, Object> paramMap);
+    int update(String tableName, String columnsCondition, String condition, Map<String, Object> paramMap);
+
+    int[] batchUpdate(String tableName, String columnsCondition, String condition, List<Object[]> paramsList);
 
     int deleteIn(String tableName, String deleteColumn, Collection<?> deleteValues);
 
@@ -53,6 +63,16 @@ public interface TableDAO {
     int insert(String tableName, String columnNames, Object... args);
 
     int insert(String tableName, String columnNames, Map<String, Object> paramMap);
+
+    /**
+     *
+     * @param tableName
+     * @param columnNames
+     * @param columnsCondition
+     * @param paramsList
+     * @return ids
+     */
+    List<Object> batchInsert(String tableName, String columnNames, String columnsCondition, List<Object[]> paramsList);
 
     Number insertAndReturnKey(String tableName, String columnNames, Map<String, Object> params, String... idColumnName);
 

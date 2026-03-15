@@ -209,6 +209,36 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public int[] insertOrUpdate(List<Map<String, Object>> paramMap) {
+        return baseDAO.insertOrUpdate(paramMap);
+    }
+
+    @Override
+    public T insertWithoutCascade(T entity) {
+        return baseDAO.insertWithoutCascade(entity);
+    }
+
+    @Override
+    public T updateWithoutCascade(T entity) {
+        return baseDAO.updateWithoutCascade(entity);
+    }
+
+    @Override
+    public Collection<T> insertWithoutCascade(Collection<T> entityList) {
+        return baseDAO.insertWithoutCascade(entityList);
+    }
+
+    @Override
+    public Collection<T> updateWithoutCascade(Collection<T> entityList) {
+        return baseDAO.updateWithoutCascade(entityList);
+    }
+
+    @Override
+    public Collection<T> insertOrUpdateWithoutCascade(Collection<T> entityList) {
+        return baseDAO.insertOrUpdateWithoutCascade(entityList);
+    }
+
+    @Override
     public T update(T entity) {
         return baseDAO.update(entity);
     }
@@ -229,20 +259,19 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public Collection<T> insertOrUpdateTable(Collection<T> entityList, String refColumnName, Object refValue) {
+        return baseDAO.insertOrUpdateTable(entityList, refColumnName, refValue);
+    }
+
+    @Override
     public Collection<T> insertOrUpdateTable(Collection<T> entityList, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
         return baseDAO.insertOrUpdateTable(entityList, deleteItem, deletedIdsConsumer);
     }
 
     @Override
-    public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue) {
-        return baseDAO.insertOrUpdate(entityList, refColumnName, refValue);
+    public Collection<T> insertOrUpdateTable(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
+        return baseDAO.insertOrUpdateTable(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
     }
-
-    @Override
-    public Collection<T> insertOrUpdate(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
-        return insertOrUpdate(entityList, refColumnName, refValue, deleteItem, deletedIdsConsumer);
-    }
-
     @Override
     public int updateById(String columns, ID id, Object... args) {
         return baseDAO.updateById(columns, id, args);
@@ -261,6 +290,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     @Override
     public int update(String columns, String condition, T example) {
         return baseDAO.update(columns, condition, example);
+    }
+
+    @Override
+    public int[] batchUpdate(String columns, String condition, List<Object[]> paramsList) {
+        return new int[0];
     }
 
     @Override

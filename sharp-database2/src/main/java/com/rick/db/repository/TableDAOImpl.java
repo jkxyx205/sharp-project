@@ -16,17 +16,16 @@ import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,6 +64,11 @@ public class TableDAOImpl implements TableDAO {
     @Override
     public int update(String tableName, String columns, String condition, Map<String, Object> paramMap) {
         return namedParameterJdbcTemplate.update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), paramMap);
+    }
+
+    @Override
+    public int[] batchUpdate(String tableName, String columnsCondition, String condition, List<Object[]> paramsList) {
+        return namedParameterJdbcTemplate.getJdbcTemplate().batchUpdate("UPDATE " + tableName + " SET " + columnsCondition + SqlHelper.buildWhere(condition), paramsList);
     }
 
     @Override
@@ -118,6 +122,32 @@ public class TableDAOImpl implements TableDAO {
         return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
                 .usingColumns(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
                 .execute(paramMap);
+    }
+
+    @Override
+    public List<Object> batchInsert(String tableName, String columnsName, String varCondition, List<Object[]> paramsList) {
+        String insertSQL = SqlHelper.getInsertSQL(tableName, columnsName, varCondition);
+//        return namedParameterJdbcTemplate.getJdbcTemplate().batchUpdate(insertSQL, paramsList);
+
+        List<Object> ids = new ArrayList<>();
+
+        for (Object[] params : paramsList) {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            namedParameterJdbcTemplate.getJdbcTemplate().update(
+                    con -> {
+                        PreparedStatement ps = con.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS);
+                        for (int j = 0; j < params.length; j++) {
+                            ps.setObject(j + 1, params[j]);
+                        }
+                        return ps;
+                    },
+                    keyHolder
+            );
+
+            ids.add(keyHolder.getKey());
+        }
+
+        return ids;
     }
 
 //    /**

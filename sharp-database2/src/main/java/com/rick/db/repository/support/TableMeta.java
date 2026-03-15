@@ -18,40 +18,56 @@ import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REG
  * @author Rick.Xu
  * @date 2025/8/21 18:54
  */
-@Getter
+//@Getter
 public class TableMeta<T> {
 
+    @Getter
     private final Class<T> entityClass;
 
+    @Getter
     private final Table table;
 
+    @Getter
     private final String tableName;
 
+    @Getter
     private final String referenceColumnId;
 
+    @Getter
     private final Map<Field, Reference> referenceMap;
 
+    @Getter
     private final Map<Field, String> fieldColumnNameMap;
 
+    @Getter
     private final Map<Field, String> fieldPropertyNameMap;
 
+    @Getter
     private final Map<String, String> columnPropertyNameMap;
 
+    @Getter
     private final Map<String, Column> columnNameMap;
 
+    @Getter
     IdMeta idMeta;
 
+    @Getter
     Field versionField;
 
+    @Getter
     private String selectColumn;
 
+    @Getter
     private String updateColumn;
 
+    @Getter
     private String columnNames;
 
     private String selectConditionSQLCache;
 
     private String conditionSQLCache;
+
+    private String[] columnNameArrayCache;
 
     public TableMeta(Class<T> entityClass, Table table, String tableName, String referenceColumnId, Map<Field, Reference> referenceMap, Map<Field, String> fieldColumnNameMap, Map<Field, String> fieldPropertyNameMap, Map<String, String> columnPropertyNameMap, Map<String, Column> columnNameMap) {
         this.entityClass = entityClass;
@@ -92,22 +108,42 @@ public class TableMeta<T> {
         return selectConditionSQLCache;
     }
 
+    public String[] getColumnNameArray() {
+        if (Objects.isNull(columnNameArrayCache)) {
+            columnNameArrayCache = columnNames.split(COLUMN_NAME_SEPARATOR_REGEX);
+        }
+        return columnNameArrayCache;
+    }
+
     public String getConditionSQL() {
         if (StringUtils.isBlank(conditionSQLCache)) {
-            conditionSQLCache =  appendColumnVar(columnNames, true, " AND ");
+            conditionSQLCache = appendColumnVar(columnNames, true, " AND ");
         }
         return conditionSQLCache;
+    }
+
+    public String getSelectSQL() {
+        return getSelectSQL(getSelectColumn());
     }
 
     public String getSelectSQL(String columns) {
         return "SELECT " + columns + " FROM " + getTableName();
     }
 
+
+//    public String getInsertSQL() {
+//        return SqlHelper.getInsertSQL(tableName, getSelectColumn());
+//    }
+
     public String appendColumnVar(String columns, boolean namedVar) {
         return appendColumnVar(columns, namedVar, ", ");
     }
 
     public String appendColumnVar(String columns, boolean namedVar, CharSequence delimiter) {
+        return appendColumnVar(columns, namedVar, delimiter, true);
+    }
+
+    public String appendColumnVar(String columns, boolean namedVar, CharSequence delimiter, boolean columnVar) {
         String[] columnArr = columns.split(COLUMN_NAME_SEPARATOR_REGEX);
 
         return Arrays.stream(columnArr).map(column -> {
@@ -123,7 +159,12 @@ public class TableMeta<T> {
                 }
             }
 
-            return column + " = " + (namedVar ? ":" + getColumnPropertyNameMap().get(column) : "?") + suffixType;
+            if (columnVar) {
+                return column + " = " + (namedVar ? ":" + getColumnPropertyNameMap().get(column) : "?") + suffixType;
+            }
+
+            return  "?" + suffixType;
+
         }).collect(Collectors.joining(delimiter));
     }
 

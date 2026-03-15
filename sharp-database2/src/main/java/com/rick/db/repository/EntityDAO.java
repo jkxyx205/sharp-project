@@ -103,27 +103,41 @@ public interface EntityDAO<T, ID> {
 
     T insert(@Valid @NotNull T entity);
 
-    T insertOrUpdate(@Valid @NotNull Map<String, Object> paramMap);
-
     T update(@Valid @NotNull T entity);
 
     T insertOrUpdate(@Valid @NotNull T entity);
 
     Collection<T> insertOrUpdate(@Valid Collection<T> entityList);
 
+    T insertOrUpdate(@Valid @NotNull Map<String, Object> paramMap);
+
+    int[] insertOrUpdate(List<Map<String, Object>> paramMap);
+
+    T insertWithoutCascade(@Valid @NotNull T entity);
+
+    T updateWithoutCascade(@Valid @NotNull T entity);
+
+    Collection<T> insertWithoutCascade(Collection<T> entityList);
+
+    Collection<T> updateWithoutCascade(Collection<T> entityList);
+
+    Collection<T> insertOrUpdateWithoutCascade(Collection<T> entityList);
+
     Collection<T> insertOrUpdateTable(Collection<T> entityList);
+
+    Collection<T> insertOrUpdateTable(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue);
 
     Collection<T> insertOrUpdateTable(Collection<T> entityList, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer);
 
-    Collection<T> insertOrUpdate(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue);
-
-    Collection<T> insertOrUpdate(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer);
+    Collection<T> insertOrUpdateTable(Collection<T> entityList, @NotNull String refColumnName, @NotNull Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer);
 
     int update(@NotBlank String columns, String condition, Object... args);
 
     int update(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 
     int update(@NotBlank String columns, String condition, T example);
+
+    int[] batchUpdate(@NotBlank String columns, String condition, List<Object[]> paramsList);
 
     int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
 
