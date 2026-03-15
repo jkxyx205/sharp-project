@@ -1148,7 +1148,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return value;
     }
 
-    private PGobject postgresJsonHandler(String type, Object value) {
+    private Object postgresJsonHandler(String type, Object value) {
         PGobject pGobject = new PGobject();
         pGobject.setType(type);
 
