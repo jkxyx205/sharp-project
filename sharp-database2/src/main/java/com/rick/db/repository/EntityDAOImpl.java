@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.rick.common.util.*;
 import com.rick.db.config.Context;
 import com.rick.db.repository.model.DatabaseType;
+import com.rick.db.repository.model.EntityId;
 import com.rick.db.repository.support.*;
 import com.rick.db.util.OperatorUtils;
 import lombok.AccessLevel;
@@ -878,8 +879,8 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 update(tableMeta.getUpdateColumn(), tableMeta.getIdMeta().getIdColumnName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), args);
             }
 
-            if (Objects.nonNull(insertUpdateCallback)) {
-                insertUpdateCallback.handler(insert, entity, args);
+            if (Objects.nonNull(insertUpdateCallback) && entity instanceof EntityId<?>) {
+                insertUpdateCallback.handler(insert, (EntityId) entity, args);
             }
 
             if (cascade && hasSaveReference()) {

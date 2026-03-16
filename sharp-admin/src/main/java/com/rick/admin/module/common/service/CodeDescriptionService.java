@@ -35,7 +35,7 @@ public class CodeDescriptionService {
             }
         }
         // TODO
-        codeDescriptionDAO.insertOrUpdate(list, "category", category.getCode());
+        codeDescriptionDAO.insertOrUpdateTable(list, "category", category.getCode());
     }
 
     public Optional<CodeDescription> findOne(CodeDescription.CategoryEnum category, String code) {
