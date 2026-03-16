@@ -268,7 +268,9 @@
                 let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
                 if (formAction === 'link') {
                     openOnNewTab(id, '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly + ((params ? ("&" + $.param(params)) : "")), name || report.name);
-                } else {
+                } else if (formAction === 'replace') {
+                    location.href = '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly + ((params ? ("&" + $.param(params)) : ""))
+                }  else {
                     $.dialog({
                         title,
                         url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + '?readonly=' + readonly,

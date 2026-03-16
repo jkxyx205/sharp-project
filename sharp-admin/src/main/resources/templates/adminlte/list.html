@@ -429,7 +429,9 @@
                             addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/layout/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
                         } else if (formAction === 'drawer') {
                             openDrawerDialog('/forms/page/' + form_id + (!id ? '' : '/' + id) + queryString, 'id' + (/*[[${s}]]*/) + 'drawer-dialog', false)
-                        } else {
+                        }  else if (formAction === 'replace') {
+                            location.href = '/forms/page/' + form_id + (!id ? '' : '/' + id) + queryString
+                        }  else {
                             $.dialog({
                                 title: /*[[${report.name}]]*/,
                                 url: '/forms/page/' + form_id + (!id ? '' : '/' + id) + queryString,

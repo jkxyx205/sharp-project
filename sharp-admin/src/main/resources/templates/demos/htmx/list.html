@@ -334,10 +334,13 @@
                         let formAction = /*[[${report.additionalInfo != null && report.additionalInfo['formAction'] != null ? report.additionalInfo['formAction'] : '' } + '']]*/
                         let formPage = /*[[${report.additionalInfo != null && report.additionalInfo['formPage'] != null ? report.additionalInfo['formPage'] : '' } + '']]*/
                         let queryString = '?readonly=' + this.readonly + ((search ? ("&" + $.param(search)) : ""))+ ((formPage ? ("&" + "formPage=" + formPage) : "")) + "&" + location.search.substring(1)
+
                         if (formAction === 'link') {
                             addTab((!id ? "edit" + new Date().getTime() : "edit" + id), '/forms/page/layout/' + form_id + (!id ? '' : '/' + id) + queryString, "编辑-" + (/*[[${report.name}]]*/));
                         } else if (formAction === 'drawer') {
                             openDrawerDialog('/forms/page/' + form_id + (!id ? '' : '/' + id) + queryString, 'id' + (/*[[${s}]]*/) + 'drawer-dialog', false)
+                        } else if (formAction === 'replace') {
+                            location.href = '/forms/page/' + form_id + (!id ? '' : '/' + id) + queryString
                         } else {
                             $.dialog({
                                 title: /*[[${report.name}]]*/,
