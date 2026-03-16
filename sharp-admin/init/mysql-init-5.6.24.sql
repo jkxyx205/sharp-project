@@ -5,9 +5,9 @@
 # https://sequel-ace.com/
 # https://github.com/Sequel-Ace/Sequel-Ace
 #
-# Host: localhost (MySQL 9.1.0)
+# Host: 106.15.102.17 (MySQL 5.6.24)
 # Database: sharp-admin
-# Generation Time: 2025-11-12 09:55:04 +0000
+# Generation Time: 2026-03-16 02:03:42 +0000
 # ************************************************************
 
 
@@ -24,11 +24,11 @@ SET NAMES utf8mb4;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_access_info` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `content` text,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -36,29 +36,32 @@ CREATE TABLE `sys_access_info` (
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_code_description` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '外部可见，唯一code',
-  `description` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sort` int DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `id` bigint(20) NOT NULL COMMENT '主键',
+  `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
+  `description` varchar(32) DEFAULT NULL,
+  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') DEFAULT NULL,
+  `sort` int(11) DEFAULT NULL,
+  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='编号-描述 表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='编号-描述 表';
 
 LOCK TABLES `sys_code_description` WRITE;
 /*!40000 ALTER TABLE `sys_code_description` DISABLE KEYS */;
 
 INSERT INTO `sys_code_description` (`id`, `code`, `description`, `category`, `sort`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(946731527121694720,'PG1','采购组织1','PURCHASING_ORG',0,1,'2025-04-24 09:46:03',1,'2025-04-24 09:46:03',b'0'),
-	(946731527121694721,'M1','采购组织2','PURCHASING_ORG',1,1,'2025-04-24 09:46:03',1,'2025-04-24 09:46:03',b'0'),
-	(946731527209775104,'M1','物料组1','MATERIAL',0,1,'2025-04-24 09:46:03',1,'2025-04-24 09:46:03',b'0'),
-	(946731527209775105,'M3','物料组3','MATERIAL',1,1,'2025-04-24 09:46:03',1,'2025-04-24 09:46:03',b'0'),
-	(946731527209775106,'M4','物料组4','MATERIAL',2,1,'2025-04-24 09:46:03',1,'2025-04-24 09:46:03',b'0');
+	(946731527121694720,'PG1','采购组织1','PURCHASING_ORG',0,1,'2025-04-24 09:46:03',1,'2025-11-28 16:51:25',b'0'),
+	(946731527121694721,'M1','采购组织2','PURCHASING_ORG',1,1,'2025-04-24 09:46:03',1,'2025-11-28 16:51:25',b'0'),
+	(946731527209775104,'M1','物料组1','MATERIAL',0,1,'2025-04-24 09:46:03',1,'2025-11-28 16:50:19',b'1'),
+	(946731527209775105,'M3','物料组3','MATERIAL',1,1,'2025-04-24 09:46:03',1,'2025-11-28 16:50:19',b'1'),
+	(946731527209775106,'M4','物料组4','MATERIAL',2,1,'2025-04-24 09:46:03',1,'2025-11-28 16:50:19',b'1'),
+	(1025838852394225664,'MM1','物料组1','MATERIAL',0,1,'2025-11-28 16:50:19',1,'2025-11-28 16:51:25',b'0'),
+	(1025838852608135168,'MM3','物料组3','MATERIAL',1,1,'2025-11-28 16:50:19',1,'2025-11-28 16:51:25',b'0'),
+	(1025838852692021248,'MM4','物料组4','MATERIAL',2,1,'2025-11-28 16:50:19',1,'2025-11-28 16:51:25',b'0');
 
 /*!40000 ALTER TABLE `sys_code_description` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -68,19 +71,19 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_dict` (
-  `id` bigint DEFAULT NULL,
-  `type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `label` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `sort` int DEFAULT NULL,
-  `remark` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL,
+  `id` bigint(20) DEFAULT NULL,
+  `type` varchar(32) NOT NULL,
+  `name` varchar(32) NOT NULL,
+  `label` varchar(32) NOT NULL,
+  `sort` int(11) DEFAULT NULL,
+  `remark` varchar(32) DEFAULT NULL,
+  `create_by` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint DEFAULT NULL,
+  `update_by` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`type`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `sys_dict` WRITE;
 /*!40000 ALTER TABLE `sys_dict` DISABLE KEYS */;
@@ -98,8 +101,8 @@ VALUES
 	(993184320610910208,'MATERIAL_TYPE','qps','qps222',22,NULL,1,'2025-08-30 14:12:52',1,'2025-08-30 14:13:16',b'0'),
 	(965742162547331072,'MATERIAL_TYPE','UAT','SUATSUAT',92,NULL,1,'2025-06-15 20:47:32',1,'2025-06-18 06:36:09',b'0'),
 	(993192096057802752,'MATERIAL_TYPE','USD','美刀2',0,NULL,1,'2025-08-30 14:43:46',1,'2025-08-30 14:43:52',b'0'),
-	(862375391526948864,'UNIT','BAG','包',9,NULL,1,'2024-11-28 11:16:22',1,'2025-06-18 08:18:34',b'0'),
-	(1,'UNIT','EA','北北',99,NULL,1,'2024-11-28 11:16:22',1,'2025-11-11 20:00:23',b'0'),
+	(862375391526948864,'UNIT','BAG','包',9,NULL,1,'2024-11-28 11:16:22',1,'2026-03-16 09:51:06',b'0'),
+	(1,'UNIT','EA','北北',99,NULL,1,'2024-11-28 11:16:22',1,'2025-11-22 23:49:19',b'0'),
 	(2,'UNIT','KG','千克',1,NULL,1,'2024-11-28 11:16:22',1,'2025-06-16 14:11:53',b'0'),
 	(965722206296363008,'UNIT','KGG','拆',0,NULL,1,'2025-06-15 19:28:14',1,'2025-08-31 11:54:57',b'0');
 
@@ -111,20 +114,20 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_document` (
-  `id` bigint NOT NULL,
+  `id` bigint(20) NOT NULL,
   `name` varchar(255) NOT NULL,
   `extension` varchar(16) DEFAULT NULL,
   `content_type` varchar(128) DEFAULT NULL,
-  `size` int DEFAULT NULL,
+  `size` int(11) DEFAULT NULL,
   `group_name` varchar(255) NOT NULL,
   `path` varchar(255) NOT NULL,
-  `create_by` bigint DEFAULT NULL,
+  `create_by` bigint(20) DEFAULT NULL,
   `create_time` datetime NOT NULL,
-  `update_by` bigint DEFAULT NULL,
+  `update_by` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `sys_document` WRITE;
 /*!40000 ALTER TABLE `sys_document` DISABLE KEYS */;
@@ -164,22 +167,22 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_form` (
-  `id` bigint NOT NULL,
-  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `form_advice_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `table_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `repository_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `storage_strategy` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `tpl_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `additional_info` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `create_by` bigint NOT NULL,
+  `id` bigint(20) NOT NULL,
+  `code` varchar(32) DEFAULT NULL,
+  `name` varchar(32) NOT NULL,
+  `form_advice_name` varchar(32) DEFAULT NULL,
+  `table_name` varchar(32) DEFAULT NULL,
+  `repository_name` varchar(32) DEFAULT NULL,
+  `storage_strategy` varchar(16) DEFAULT NULL,
+  `tpl_name` varchar(32) DEFAULT NULL,
+  `additional_info` text,
+  `create_by` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint NOT NULL,
+  `update_by` bigint(20) NOT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `sys_form` WRITE;
 /*!40000 ALTER TABLE `sys_form` DISABLE KEYS */;
@@ -198,25 +201,25 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_form_configurer` (
-  `id` bigint NOT NULL,
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `label` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `validators` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `options` varchar(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `data_source` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `default_value` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `placeholder` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  `name` varchar(32) DEFAULT NULL,
+  `label` varchar(16) NOT NULL,
+  `type` varchar(32) NOT NULL,
+  `validators` text,
+  `options` varchar(5000) DEFAULT NULL,
+  `data_source` varchar(32) DEFAULT NULL,
+  `default_value` varchar(64) DEFAULT NULL,
+  `placeholder` varchar(32) DEFAULT NULL,
   `is_disabled` bit(1) DEFAULT NULL,
-  `cpn_value_converter_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `additional_info` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `create_by` bigint NOT NULL,
+  `cpn_value_converter_name` varchar(32) DEFAULT NULL,
+  `additional_info` varchar(1024) DEFAULT NULL,
+  `create_by` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint NOT NULL,
+  `update_by` bigint(20) NOT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `sys_form_configurer` WRITE;
 /*!40000 ALTER TABLE `sys_form_configurer` DISABLE KEYS */;
@@ -247,18 +250,18 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_form_cpn_configurer` (
-  `id` bigint NOT NULL,
-  `form_id` bigint NOT NULL,
-  `config_id` bigint NOT NULL,
-  `order_num` int DEFAULT NULL,
-  `additional_info` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `create_by` bigint NOT NULL,
+  `id` bigint(20) NOT NULL,
+  `form_id` bigint(20) NOT NULL,
+  `config_id` bigint(20) NOT NULL,
+  `order_num` int(11) DEFAULT NULL,
+  `additional_info` text,
+  `create_by` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint NOT NULL,
+  `update_by` bigint(20) NOT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `sys_form_cpn_configurer` WRITE;
 /*!40000 ALTER TABLE `sys_form_cpn_configurer` DISABLE KEYS */;
@@ -289,18 +292,18 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_permission` (
-  `id` bigint NOT NULL COMMENT '主键',
+  `id` bigint(20) NOT NULL COMMENT '主键',
   `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
   `name` varchar(32) DEFAULT NULL COMMENT '权限名称',
-  `pid` bigint DEFAULT NULL COMMENT '父权限',
-  `permission_order` int DEFAULT NULL COMMENT 'permission_order',
-  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `pid` bigint(20) DEFAULT NULL COMMENT '父权限',
+  `permission_order` int(11) DEFAULT NULL COMMENT 'permission_order',
+  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='权限表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限表';
 
 LOCK TABLES `sys_permission` WRITE;
 /*!40000 ALTER TABLE `sys_permission` DISABLE KEYS */;
@@ -345,10 +348,10 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_property` (
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(32) NOT NULL,
+  `value` varchar(255) NOT NULL,
   PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -356,27 +359,27 @@ CREATE TABLE `sys_property` (
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_report` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `tpl_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` bigint(20) NOT NULL COMMENT '主键',
+  `code` varchar(32) DEFAULT NULL,
+  `name` varchar(32) DEFAULT NULL,
+  `tpl_name` varchar(32) DEFAULT NULL,
   `pageable` bit(1) DEFAULT NULL,
-  `sidx` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sord` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `query_sql` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `sidx` varchar(32) DEFAULT NULL,
+  `sord` varchar(16) DEFAULT NULL,
+  `query_sql` text,
   `summary` bit(1) DEFAULT b'0',
-  `report_column_list` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `summary_column_names` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `query_field_list` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `additional_info` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `report_advice_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL,
+  `report_column_list` text,
+  `summary_column_names` text,
+  `query_field_list` text,
+  `additional_info` text,
+  `report_advice_name` varchar(64) DEFAULT NULL,
+  `create_by` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  `update_by` bigint DEFAULT NULL,
+  `update_by` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `is_deleted` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='报表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表';
 
 LOCK TABLES `sys_report` WRITE;
 /*!40000 ALTER TABLE `sys_report` DISABLE KEYS */;
@@ -400,16 +403,16 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_role` (
-  `id` bigint NOT NULL COMMENT '主键',
+  `id` bigint(20) NOT NULL COMMENT '主键',
   `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
   `name` varchar(32) DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='角色';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色';
 
 LOCK TABLES `sys_role` WRITE;
 /*!40000 ALTER TABLE `sys_role` DISABLE KEYS */;
@@ -427,11 +430,11 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_role_permission` (
-  `role_id` bigint NOT NULL,
-  `permission_id` bigint NOT NULL,
+  `role_id` bigint(20) NOT NULL,
+  `permission_id` bigint(20) NOT NULL,
   `is_deleted` bit(1) NOT NULL DEFAULT b'0',
   UNIQUE KEY `sys_role_permission_pk` (`role_id`,`permission_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `sys_role_permission` WRITE;
 /*!40000 ALTER TABLE `sys_role_permission` DISABLE KEYS */;
@@ -478,27 +481,27 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_user` (
-  `id` bigint NOT NULL COMMENT '主键',
+  `id` bigint(20) NOT NULL COMMENT '主键',
   `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
   `name` varchar(32) DEFAULT NULL COMMENT '姓名',
   `password` varchar(128) DEFAULT NULL COMMENT '密码',
   `birthday` date DEFAULT NULL COMMENT '生日',
   `is_available` bit(1) DEFAULT NULL COMMENT '是否可用',
-  `attachment` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT '附件',
-  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `attachment` text COMMENT '附件',
+  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='用户信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户信息';
 
 LOCK TABLES `sys_user` WRITE;
 /*!40000 ALTER TABLE `sys_user` DISABLE KEYS */;
 
 INSERT INTO `sys_user` (`id`, `code`, `name`, `password`, `birthday`, `is_available`, `attachment`, `create_by`, `create_time`, `update_by`, `update_time`, `is_deleted`)
 VALUES
-	(1,'ADMIN','BS','$2a$10$DbZnHsxNr67IOCFEoD8xRukVsA7PSWKC3rwj15JmxuoZKKq4revvi','2024-11-28',b'1',NULL,1,'2023-05-29 14:55:03',1,'2025-11-11 20:00:07',b'0'),
+	(1,'ADMIN','BS','$2a$10$DbZnHsxNr67IOCFEoD8xRukVsA7PSWKC3rwj15JmxuoZKKq4revvi','2024-11-28',b'1',NULL,1,'2023-05-29 14:55:03',1,'2026-03-16 09:51:06',b'0'),
 	(786079661661646848,'TEST','测试','$2a$10$03ELdomnPVX3GqBd9t3jPuF1eaxrwcLZlAJOg6P1nbZJs0oG4N5vS','2025-08-30',b'1',NULL,1,'2023-05-29 14:55:03',1,'2025-08-30 14:32:26',b'0'),
 	(993189332623835136,'2323','北北2','$2a$10$u0ZNnKciy5IeP/s82yqmy.ToHgwTc/IyIZLJFuWNkSjiNc2sEU0k.','2025-08-30',b'1',NULL,1,'2025-08-30 14:32:47',1,'2025-08-30 14:34:12',b'1'),
 	(993189973249245184,'322','32232','$2a$10$99Evl/dvlLZv94eDDdQVaeyBAkSvx7kQxYn1eGpjkom.cLmFM8zlK','2025-08-05',b'1',NULL,1,'2025-08-30 14:35:20',1,'2025-11-12 11:55:32',b'1'),
@@ -513,11 +516,11 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `sys_user_role` (
-  `user_id` bigint NOT NULL,
-  `role_id` bigint NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `role_id` bigint(20) NOT NULL,
   `is_deleted` bit(1) NOT NULL DEFAULT b'0',
   UNIQUE KEY `sys_user_role_pk` (`user_id`,`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `sys_user_role` WRITE;
 /*!40000 ALTER TABLE `sys_user_role` DISABLE KEYS */;
@@ -537,29 +540,29 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `t_complex_model` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `material_type_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `unit_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `work_status` int DEFAULT NULL COMMENT '状态',
-  `category_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `age` int NOT NULL COMMENT '年龄',
+  `id` bigint(20) NOT NULL COMMENT '主键',
+  `name` varchar(32) DEFAULT NULL,
+  `material_type_code` varchar(32) DEFAULT NULL,
+  `unit_code` varchar(32) DEFAULT NULL,
+  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') DEFAULT NULL,
+  `work_status` int(11) DEFAULT NULL COMMENT '状态',
+  `category_code` varchar(32) DEFAULT NULL,
+  `age` int(11) NOT NULL COMMENT '年龄',
   `birthday` date DEFAULT NULL COMMENT '出生时间',
-  `category_list` json NOT NULL COMMENT '分类',
-  `category_dict_list` json NOT NULL COMMENT '字典分类',
+  `category_list` text NOT NULL COMMENT '分类',
+  `category_dict_list` text NOT NULL COMMENT '字典分类',
   `marriage` bit(1) NOT NULL COMMENT '婚否',
-  `attachment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `school_experience` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `map` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `embedded_value` json DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `attachment` text,
+  `school_experience` text,
+  `map` text,
+  `embedded_value` text,
+  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT NULL COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='测试';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试';
 
 LOCK TABLES `t_complex_model` WRITE;
 /*!40000 ALTER TABLE `t_complex_model` DISABLE KEYS */;
@@ -581,31 +584,31 @@ UNLOCK TABLES;
 # ------------------------------------------------------------
 
 CREATE TABLE `t_student` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '外部可见，唯一code',
-  `name` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '姓名',
-  `gender` enum('M','F') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `email` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` bigint(20) NOT NULL COMMENT '主键',
+  `code` varchar(32) NOT NULL COMMENT '外部可见，唯一code',
+  `name` varchar(16) NOT NULL COMMENT '姓名',
+  `gender` enum('M','F') DEFAULT NULL,
+  `email` varchar(32) DEFAULT NULL,
   `birthday` date DEFAULT NULL COMMENT '出生日期',
-  `age` int DEFAULT NULL COMMENT '年龄',
+  `age` int(11) DEFAULT NULL COMMENT '年龄',
   `is_marriage` bit(1) DEFAULT b'0' COMMENT '婚否',
-  `unit_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `attachments` json DEFAULT NULL,
-  `avatar` json DEFAULT NULL,
-  `hobby_list` json DEFAULT NULL,
-  `material_type` json DEFAULT NULL COMMENT '物料类型',
-  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '分类',
+  `unit_code` varchar(32) DEFAULT NULL,
+  `attachments` text,
+  `avatar` text,
+  `hobby_list` text,
+  `material_type` text COMMENT '物料类型',
+  `category` enum('MATERIAL','PURCHASING_ORG','PACKAGING','SALES_ORG') DEFAULT NULL COMMENT '分类',
   `is_available` bit(1) DEFAULT b'0' COMMENT '是否可用',
-  `remark` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '简介',
-  `user_id` bigint DEFAULT NULL,
-  `user_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL COMMENT '创建人',
+  `remark` varchar(32) DEFAULT NULL COMMENT '简介',
+  `user_id` bigint(20) DEFAULT NULL,
+  `user_code` varchar(32) DEFAULT NULL,
+  `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新人',
+  `update_by` bigint(20) DEFAULT NULL COMMENT '更新人',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `is_deleted` bit(1) DEFAULT b'0' COMMENT '是否逻辑删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='学生表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学生表';
 
 LOCK TABLES `t_student` WRITE;
 /*!40000 ALTER TABLE `t_student` DISABLE KEYS */;
@@ -618,7 +621,7 @@ VALUES
 	(906928548739047424,'00035','TEST2','M','10502165791@qq.com','2025-01-01',90,b'1','EA','[{\"id\": \"906928521023086592\", \"url\": \"http://localhost:7892/upload/906928520754651136.svg\", \"name\": \"采购讨论3\", \"path\": \"906928520754651136.svg\", \"size\": 441964, \"fullName\": \"采购讨论3.svg\", \"fullPath\": \"upload/906928520754651136.svg\", \"extension\": \"svg\", \"groupName\": \"upload\", \"contentType\": \"image/svg+xml\"}]','{\"id\": \"906928534818152448\", \"url\": \"http://localhost:7892/images/906928534776209408.jpeg\", \"name\": \"1369-1\", \"path\": \"906928534776209408.jpeg\", \"size\": 78402, \"fullName\": \"1369-1.jpeg\", \"fullPath\": \"images/906928534776209408.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"images\", \"contentType\": \"image/jpeg\"}','[\"FOOTBALL\"]','[{\"code\": \"M1\"}, {\"code\": \"M1\"}]','MATERIAL',b'1','0022',1,'admin',1,'2025-01-04 13:43:14',1,'2025-08-31 10:41:54',b'0'),
 	(993494022410473472,'0003','徐稼渊','M','jkxyx205@163.com','2024-09-03',18,b'1','EA','[{\"id\": \"993494015250796544\", \"url\": \"http://127.0.0.1:7892/upload/993494015238213632.jpeg\", \"name\": \"WechatIMG740\", \"path\": \"993494015238213632.jpeg\", \"size\": 179599, \"fullName\": \"WechatIMG740.jpeg\", \"fullPath\": \"upload/993494015238213632.jpeg\", \"extension\": \"jpeg\", \"groupName\": \"upload\", \"contentType\": \"image/jpeg\"}]','{\"id\": \"993493983751573504\", \"url\": \"http://127.0.0.1:7892/images/993493983420223488.png\", \"name\": \"avatar\", \"path\": \"993493983420223488.png\", \"size\": 474418, \"fullName\": \"avatar.png\", \"fullPath\": \"images/993493983420223488.png\", \"extension\": \"png\", \"groupName\": \"images\", \"contentType\": \"image/png\"}','[\"FOOTBALL\"]','[{\"code\": \"232323\"}]','MATERIAL',b'1','2323',993191048798814208,'3233',1,'2025-08-31 10:43:31',1,'2025-08-31 11:29:45',b'0'),
 	(993494811031900160,'111111','1112','F','nakolis912@lxheir.com','2025-11-12',11,b'1','KG','[{\"id\": \"993494753335054336\", \"url\": \"http://127.0.0.1:7892/upload/993494753322471424.png\", \"name\": \"default_avatar\", \"path\": \"993494753322471424.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"upload/993494753322471424.png\", \"extension\": \"png\", \"groupName\": \"upload\", \"contentType\": \"image/png\"}]','{\"id\": \"993494738977951744\", \"url\": \"http://127.0.0.1:7892/images/993494738625630208.png\", \"name\": \"default_avatar\", \"path\": \"993494738625630208.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"images/993494738625630208.png\", \"extension\": \"png\", \"groupName\": \"images\", \"contentType\": \"image/png\"}','[\"BASKETBALL\", \"FOOTBALL\"]','[{\"code\": \"232323\"}]','MATERIAL',b'1','11',1,'admin',1,'2025-08-31 10:46:39',1,'2025-11-12 17:32:07',b'0'),
-	(1020051341008982016,'1121','北北','F','1050216579@qq.com','2025-11-05',23,b'1','KG','[{\"id\": \"1020051287976202240\", \"url\": \"http://127.0.0.1:7892/upload/1020051287804235776.png\", \"name\": \"default_avatar\", \"path\": \"1020051287804235776.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"upload/1020051287804235776.png\", \"extension\": \"png\", \"groupName\": \"upload\", \"contentType\": \"image/png\"}]',NULL,'[\"FOOTBALL\"]','[{\"code\": \"FKA\"}, {\"code\": \"M1\"}]','MATERIAL',b'0','11',1,'ADMIN',1,'2025-11-12 17:32:49',1,'2025-11-12 17:32:49',b'0');
+	(1020051341008982016,'1121','北北1','F','1050216579@qq.com','2025-11-05',23,b'1','KG','[{\"id\": \"1020051287976202240\", \"url\": \"http://127.0.0.1:7892/upload/1020051287804235776.png\", \"name\": \"default_avatar\", \"path\": \"1020051287804235776.png\", \"size\": 4937, \"fullName\": \"default_avatar.png\", \"fullPath\": \"upload/1020051287804235776.png\", \"extension\": \"png\", \"groupName\": \"upload\", \"contentType\": \"image/png\"}]',NULL,'[\"FOOTBALL\"]','[{\"code\": \"FKA\", \"label\": \"FKA\"}, {\"code\": \"M1\", \"label\": \"FF\"}]','MATERIAL',b'0','11',1,'ADMIN',1,'2025-11-12 17:32:49',1,'2025-11-28 18:22:15',b'0');
 
 /*!40000 ALTER TABLE `t_student` ENABLE KEYS */;
 UNLOCK TABLES;
