@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class UserService {
 
     UserDAO userDAO;
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> findByUsername(@NotBlank String username) {
         Optional<User> optional = userDAO.selectByCode(username);
         if (optional.isPresent()) {
             User user = optional.get();
