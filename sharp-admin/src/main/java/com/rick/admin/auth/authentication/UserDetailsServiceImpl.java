@@ -57,6 +57,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) {
+        if (StringUtils.isBlank(username)) {
+            throw new UsernameNotFoundException("帐号不能为空");
+        }
+
         UserDetails saLoginUserDetails = saLogin(username);
         if (saLoginUserDetails != null) {
             return saLoginUserDetails;
