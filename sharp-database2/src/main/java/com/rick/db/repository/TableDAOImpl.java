@@ -7,12 +7,13 @@ import com.rick.db.repository.support.SqlHelper;
 import com.rick.db.util.OperatorUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.*;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -20,6 +21,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -37,7 +39,8 @@ import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REG
  */
 @Repository
 @RequiredArgsConstructor
-public class TableDAOImpl implements TableDAO {
+@Slf4j
+public class TableDAOImpl implements com.rick.db.repository.TableDAO {
 
     @Getter
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -45,6 +48,12 @@ public class TableDAOImpl implements TableDAO {
     @Resource
     @Qualifier("dbConversionService")
     private ConversionService conversionService;
+
+    private static final int IN_SIZE = 1000;
+
+    private static final String SQL_PATH_IN = "IN";
+
+    private static final String SQL_PATH_NOT_IN = "NOT IN";
 
     @Override
     public boolean exists(String sql, Object... args) {
@@ -57,43 +66,136 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public int update(String tableName, String columns, String condition, Object... args) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), args);
+    public int update(String tableName, String columnsCondition, String condition, Object... args) {
+        String sql = buildUpdateSql(tableName, columnsCondition, condition);
+        int rows = namedParameterJdbcTemplate.getJdbcTemplate().update(sql, args);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], affected [{}] rows", sql, Arrays.toString(args), rows);
+        }
+        return rows;
     }
 
     @Override
-    public int update(String tableName, String columns, String condition, Map<String, Object> paramMap) {
-        return namedParameterJdbcTemplate.update("UPDATE " + tableName + " SET " + columns + SqlHelper.buildWhere(condition), paramMap);
+    public int update(String tableName, String columnsCondition, String condition, Map<String, Object> paramMap) {
+        String sql = buildUpdateSql(tableName, columnsCondition, condition);
+        int rows = namedParameterJdbcTemplate.update(sql, paramMap);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], paramMap => [{}], affected [{}] rows", sql, paramMap, rows);
+        }
+        return rows;
     }
 
     @Override
     public int[] batchUpdate(String tableName, String columnsCondition, String condition, List<Object[]> paramsList) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().batchUpdate("UPDATE " + tableName + " SET " + columnsCondition + SqlHelper.buildWhere(condition), paramsList);
+        String sql = buildUpdateSql(tableName, columnsCondition, condition);
+        int[] rows = namedParameterJdbcTemplate.getJdbcTemplate().batchUpdate(sql, paramsList);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], paramsList => [{}], affected [{}] rows", sql, paramsListToString(paramsList), Arrays.toString(rows));
+        }
+        return rows;
     }
 
     @Override
     public int deleteIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
-        return delete(tableName, deleteColumn+ " IN(:params)", Maps.of("params", deleteValues));
+        if (deleteValues.size() > IN_SIZE) {
+            return deleteBySize(tableName, deleteColumn, SQL_PATH_IN, deleteValues, null, null);
+        }
+
+        return delete(tableName, deleteColumn + " IN(:params)", Maps.of("params", deleteValues));
     }
 
     @Override
     public int deleteNotIn(String tableName, String deleteColumn, Collection<?> deleteValues) {
-        return delete(tableName, deleteColumn+ " NOT IN(:params)", Maps.of("params", deleteValues));
+        if (deleteValues.size() > IN_SIZE) {
+            return deleteBySize(tableName, deleteColumn, SQL_PATH_NOT_IN, deleteValues, null, null);
+        }
+        return delete(tableName, deleteColumn + " NOT IN(:params)", Maps.of("params", deleteValues));
     }
 
     @Override
     public int delete(String tableName, String condition, Object... args) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().update("DELETE FROM "+ tableName + SqlHelper.buildWhere(condition), args);
+        String sql = buildDeleteSql(tableName, condition);
+        int rows = namedParameterJdbcTemplate.getJdbcTemplate().update(sql, args);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], affected [{}] rows", sql, Arrays.toString(args), rows);
+        }
+
+        return rows;
     }
 
     @Override
     public int delete(String tableName, String condition, Map<String, Object> paramMap) {
-        return namedParameterJdbcTemplate.update("DELETE FROM "+ tableName + SqlHelper.buildWhere(condition), paramMap);
+        String sql = buildDeleteSql(tableName, condition);
+        int rows = namedParameterJdbcTemplate.update(sql, paramMap);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], paramMap => [{}], affected [{}] rows", sql, paramMap, rows);
+        }
+        return rows;
+    }
+
+    /**
+     * 大数据量分批删除
+     * @param tableName
+     * @param deleteColumn
+     * @param sqlPatch
+     * @param deleteValues
+     * @param conditionParams
+     * @param conditionSQL
+     * @return
+     */
+    private int deleteBySize(String tableName, String deleteColumn, String sqlPatch, Collection<?> deleteValues, Object[] conditionParams, String conditionSQL) {
+        Assert.notEmpty(deleteValues, "deleteValues cannot be null");
+        int size = deleteValues.size();
+        // 处理单值
+//        if (size == 1) {
+//            if (SQL_PATH_IN.equals(sqlPatch)) {
+//                return delete(tableName, deleteValues.toArray(), deleteColumn + " = ?");
+//            } else if (SQL_PATH_NOT_IN.equals(sqlPatch)) {
+//                return delete(tableName, deleteValues.toArray(), deleteColumn + " <> ?");
+//            }
+//        }
+
+        if (SQL_PATH_NOT_IN.equals(sqlPatch) && size > IN_SIZE) {
+            throw new RuntimeException("SQL_PATH_NOT_IN in的个数不能超过" + IN_SIZE);
+        }
+
+        int count;
+        if (size % IN_SIZE == 0) {
+            count = size / IN_SIZE;
+        } else {
+            count = size / IN_SIZE + 1;
+        }
+
+        Object[] valueArray = deleteValues.toArray();
+        int deletedCount = 0;
+        for (int i = 1; i <= count; i++) {
+            int lastIndex = (i == count) ? size : i * IN_SIZE;
+            Object[] currentDeleteValue = Arrays.copyOfRange(valueArray, (i - 1) * IN_SIZE, lastIndex);
+            // remove old records
+            String inSql = formatInSQLPlaceHolder(currentDeleteValue.length);
+            String deleteSQL = String.format("DELETE FROM " + tableName + " WHERE " + deleteColumn + " " + sqlPatch + "%s" + (StringUtils.isBlank(conditionSQL) ? "" : " AND " + conditionSQL), inSql);
+
+            Object[] mergedParams = currentDeleteValue;
+            if (ArrayUtils.isNotEmpty(conditionParams)) {
+                mergedParams = new Object[currentDeleteValue.length + conditionParams.length];
+                System.arraycopy(currentDeleteValue, 0, mergedParams, 0, currentDeleteValue.length);
+                for (int j = 0; j < conditionParams.length; j++) {
+                    mergedParams[currentDeleteValue.length + j] = conditionParams[j];
+                }
+            }
+
+            deletedCount += namedParameterJdbcTemplate.getJdbcTemplate().update(deleteSQL, mergedParams);
+            if (log.isDebugEnabled()) {
+                log.debug("SQL => [{}], args:=> [{}], affect rows = [{}]", deleteSQL, Arrays.toString(mergedParams), deletedCount);
+            }
+        }
+
+        return deletedCount;
     }
 
     @Override
     public int insert(String tableName, String columnNames, Object... args) {
-        String[] columns = columnNames.split("\\s*,\\s*"); // 按逗号分隔并去掉空格
+        String[] columns = columnNames.split(COLUMN_NAME_SEPARATOR_REGEX); // 按逗号分隔并去掉空格
 
         if (columns.length != args.length) {
             throw new IllegalArgumentException("列名数量与参数数量不一致");
@@ -119,9 +221,13 @@ public class TableDAOImpl implements TableDAO {
 //        String insertSQL = getInsertSQL(tableName, columnNames);
 //
 //        return namedParameterJdbcTemplate.getJdbcTemplate().update(insertSQL, params);
-        return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
+        int rows = new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
                 .usingColumns(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
                 .execute(paramMap);
+        if (log.isDebugEnabled()) {
+            log.debug("INSERT INTO [{}], columns: [{}], paramMap => [{}], affected [{}] rows", tableName, columnNames, paramMap, rows);
+        }
+        return rows;
     }
 
     @Override
@@ -147,6 +253,10 @@ public class TableDAOImpl implements TableDAO {
             ids.add(keyHolder.getKey());
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], generated keys:=> [{}]", insertSQL, paramsListToString(paramsList), ids);
+        }
+
         return ids;
     }
 
@@ -166,16 +276,23 @@ public class TableDAOImpl implements TableDAO {
     @Override
     public Number insertAndReturnKey(String tableName, String columnNames, Map<String, Object> params, String... idColumnName) {
         Set<String> toRemove = new HashSet<>(Arrays.asList(idColumnName));
-        return new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
+        Number key = new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate()).withTableName(tableName)
                 .usingGeneratedKeyColumns(idColumnName)
                 .usingColumns(Arrays.stream(columnNames.split(COLUMN_NAME_SEPARATOR_REGEX))
                         .filter(s -> !toRemove.contains(s))
                         .toArray(String[]::new))
                 .executeAndReturnKey(params);
+        if (log.isDebugEnabled()) {
+            log.debug("INSERT INTO [{}], columns: [{}], params:=> [{}], generated key:=> [{}]", tableName, columnNames, params, key);
+        }
+        return key;
     }
 
     @Override
     public void execute(String sql) {
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}]", sql);
+        }
         namedParameterJdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
@@ -206,12 +323,20 @@ public class TableDAOImpl implements TableDAO {
 
     @Override
     public List<Map<String, Object>> select(String sql, Object... args) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().query(sql, new ColumnMapRowMapper(), args);
+        List<Map<String, Object>> results = namedParameterJdbcTemplate.getJdbcTemplate().query(sql, new ColumnMapRowMapper(), args);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], results = [{}]", sql, Arrays.toString(args), results);
+        }
+        return results;
     }
 
     @Override
     public <E> List<E> select(Class<E> clazz, String sql, Object... args) {
-        return namedParameterJdbcTemplate.getJdbcTemplate().query(sql, determineRowMapper(clazz), args);
+        List<E> results = namedParameterJdbcTemplate.getJdbcTemplate().query(sql, determineRowMapper(clazz), args);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], results = [{}]", sql, Arrays.toString(args), results);
+        }
+        return results;
     }
 
     @Override
@@ -226,6 +351,10 @@ public class TableDAOImpl implements TableDAO {
             m.put((K) rs.getObject(1), (V) rs.getObject(2));
         }, args);
 
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], results = [{}]", sql, args, m);
+        }
+
         return m;
     }
 
@@ -235,8 +364,12 @@ public class TableDAOImpl implements TableDAO {
     }
 
     @Override
-    public <E> List<E> select(String sql, Map<String, Object> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback) {
-        return jdbcTemplateCallback.select(namedParameterJdbcTemplate, sql, paramMap);
+    public <E> List<E> select(String sql, Map<String, Object> paramMap, com.rick.db.repository.JdbcTemplateCallback<E> jdbcTemplateCallback) {
+        List<E> results = jdbcTemplateCallback.select(namedParameterJdbcTemplate, sql, paramMap);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], results = [{}]", sql, paramMap, results);
+        }
+        return results;
     }
 
     @Override
@@ -249,7 +382,9 @@ public class TableDAOImpl implements TableDAO {
 
             return null;
         });
-
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], paramMap => [{}], results = [{}]", sql, paramMap, m);
+        }
         return m;
     }
 
@@ -268,7 +403,10 @@ public class TableDAOImpl implements TableDAO {
         // 删除
         if (CollectionUtils.isEmpty(guestInstanceIds)) {
             String deleteSql = String.format("DELETE FROM %s WHERE %s = ?", refTableName, keyColumn);
-            namedParameterJdbcTemplate.getJdbcTemplate().update(deleteSql, keyInstance);
+            int rows = namedParameterJdbcTemplate.getJdbcTemplate().update(deleteSql, keyInstance);
+            if (log.isDebugEnabled()) {
+                log.debug("SQL => [{}], args => [{}], affected [{}] rows", deleteSql, keyInstance, rows);
+            }
             return;
         }
 
@@ -277,12 +415,18 @@ public class TableDAOImpl implements TableDAO {
         deleteParams.put("keyInstance", keyInstance);
         // 1. 删除
         String deleteSql = String.format("DELETE FROM %s WHERE %s = :keyInstance AND %s NOT IN (:guestInstanceIds)", refTableName, keyColumn, guestColumn);
-        namedParameterJdbcTemplate.update(deleteSql, deleteParams);
+        int rows = namedParameterJdbcTemplate.update(deleteSql, deleteParams);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], paramMap => [{}], affected [{}] rows", deleteSql, deleteParams, rows);
+        }
 
         // 2. 插入新增
         // 2.1 库中
         String queryAllGuestInstanceIdsSQL = String.format("SELECT %s FROM %s WHERE %s = ?", guestColumn, refTableName, keyColumn);
         List<?> dbGuestInstanceIds = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(queryAllGuestInstanceIdsSQL, guestInstanceIds.iterator().next().getClass(), keyInstance);
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], args => [{}], results = [{}]", queryAllGuestInstanceIdsSQL, keyInstance, dbGuestInstanceIds);
+        }
         // 2.2 新增
         List<?> newGuestInstanceIds = guestInstanceIds.stream().filter(guestId -> !dbGuestInstanceIds.contains(guestId)).collect(Collectors.toList());
         if (newGuestInstanceIds.size() == 0) {
@@ -291,7 +435,9 @@ public class TableDAOImpl implements TableDAO {
 
         String insertSQL = String.format("INSERT INTO %s(%s, %s) VALUES(?, ?)", refTableName, keyColumn, guestColumn);
         List<Object[]> addParams = newGuestInstanceIds.stream().map(guestInstanceId -> new Object[] {keyInstance, guestInstanceId}).collect(Collectors.toList());
-
+        if (log.isDebugEnabled()) {
+            log.debug("SQL => [{}], paramsList => [{}]", insertSQL, paramsListToString(addParams));
+        }
         namedParameterJdbcTemplate.getJdbcTemplate().batchUpdate(insertSQL, addParams);
     }
 
@@ -415,5 +561,33 @@ public class TableDAOImpl implements TableDAO {
         protected String lowerCaseName(String name) {
             return name.toLowerCase(Locale.US);
         }
+    }
+
+    private String paramsListToString(List<Object[]> paramsList) {
+        return paramsList.stream()
+                .map(Arrays::toString)
+                .collect(Collectors.joining("\n"));
+    }
+
+    private String buildUpdateSql(String tableName, String columnsCondition, String condition) {
+        return "UPDATE " + tableName + " SET " + columnsCondition + SqlHelper.buildWhere(condition);
+    }
+
+    private String buildDeleteSql(String tableName, String condition) {
+        return "DELETE FROM "+ tableName + SqlHelper.buildWhere(condition);
+    }
+
+    /**
+     * if paramSize == 4 format as (?, ?, ?, ?)
+     *
+     * @param paramSize
+     * @return
+     */
+    public static String formatInSQLPlaceHolder(int paramSize) {
+        if (paramSize > IN_SIZE) {
+            throw new RuntimeException("SQL_PATH_NOT_IN in的个数不能超过" + IN_SIZE);
+        }
+
+        return "(" + String.join(",", Collections.nCopies(paramSize, "?")) + ")";
     }
 }
