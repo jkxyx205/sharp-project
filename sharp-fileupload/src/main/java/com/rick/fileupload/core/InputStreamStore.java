@@ -57,4 +57,20 @@ public interface InputStreamStore {
      * @throws IOException
      */
     byte[] getByteArray(String groupName, String path) throws IOException;
+
+    /**
+     * 下载 OSS 某文件夹下的所有文件
+     *
+     * @param path OSS 文件夹前缀，如 "images/" 或 "data/logs/2024/"
+     * @param localDir  本地保存根目录
+     */
+    default void downloadFolder(String path, String localDir) throws InterruptedException {}
+
+    /**
+     * 下载 OSS 单个文件到本地
+     *
+     * @param path    OSS 文件路径，如 "images/photo.jpg"
+     * @param localPath 本地保存路径，如 "/tmp/download/photo.jpg"
+     */
+    default void downloadFile(String path, String localPath) {}
 }
