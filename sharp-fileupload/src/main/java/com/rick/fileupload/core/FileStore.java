@@ -117,4 +117,13 @@ public class FileStore implements InputStreamStore {
         return inputStreamStore.getByteArray(groupName, path);
     }
 
+    @Override
+    public void downloadFolder(String path, String localDir) throws InterruptedException {
+        inputStreamStore.downloadFolder(path, localDir);
+    }
+
+    @Override
+    public void downloadFile(String path, String localPath) {
+        inputStreamStore.downloadFile(path, localPath);
+    }
 }
