@@ -32,6 +32,10 @@ public interface TableDAO {
 
     Optional<Map<String, Object>> selectForObject(String sql, Map<String, Object> paramMap);
 
+    <E> Optional<E> selectForObject(@NotNull Class<E> clazz, String sql, Object... args);
+
+    <E> Optional<E> selectForObject(@NotNull Class<E> clazz, String sql, Map<String, Object> paramMap);
+
     <E> List<E> select(String sql, Map<String, Object> paramMap, JdbcTemplateCallback<E> jdbcTemplateCallback);
 
     boolean exists(@NotBlank String sql, Object... args);

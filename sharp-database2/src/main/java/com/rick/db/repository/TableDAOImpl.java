@@ -11,9 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -40,7 +42,7 @@ import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REG
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class TableDAOImpl implements com.rick.db.repository.TableDAO {
+public class TableDAOImpl implements TableDAO {
 
     @Getter
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -396,6 +398,16 @@ public class TableDAOImpl implements com.rick.db.repository.TableDAO {
     @Override
     public Optional<Map<String, Object>> selectForObject(String sql, Map<String, Object> paramMap) {
         return OperatorUtils.expectedAsOptional(select(sql, paramMap));
+    }
+
+    @Override
+    public <E> Optional<E> selectForObject(Class<E> clazz, String sql, Object... args) {
+        return OperatorUtils.expectedAsOptional(select(clazz, sql, args));
+    }
+
+    @Override
+    public <E> Optional<E> selectForObject(Class<E> clazz, String sql, Map<String, Object> paramMap) {
+        return OperatorUtils.expectedAsOptional(select(clazz, sql, paramMap));
     }
 
     @Override
