@@ -14,8 +14,16 @@ import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REG
 @UtilityClass
 public class SqlHelper {
 
+    public static String buildSelect(String tableName, String columnNames) {
+        return "SELECT " + columnNames + " FROM " + tableName;
+    }
+
     public static String buildWhere(String condition) {
         return StringUtils.isBlank(condition) ? "" : " WHERE " + condition;
+    }
+
+    public static String buildSelectWhere(String tableName, String columnNames, String condition) {
+        return buildSelect(tableName, columnNames) + buildWhere(condition);
     }
 
     public static String getInsertSQL(String tableName, String columnNames) {
