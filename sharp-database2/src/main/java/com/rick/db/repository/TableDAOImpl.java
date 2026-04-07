@@ -3,6 +3,7 @@ package com.rick.db.repository;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.util.Maps;
 import com.rick.common.util.ObjectUtils;
+import com.rick.db.config.SharpDatabaseProperties;
 import com.rick.db.repository.support.SqlHelper;
 import com.rick.db.util.OperatorUtils;
 import lombok.Getter;
@@ -33,7 +34,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REGEX;
+import static com.rick.db.repository.support.Constants.*;
 
 /**
  * @author Rick.Xu
@@ -46,6 +47,9 @@ public class TableDAOImpl implements TableDAO {
 
     @Getter
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Resource
+    private SharpDatabaseProperties sharpDatabaseProperties;
 
     @Resource
     @Qualifier("dbConversionService")
@@ -69,6 +73,11 @@ public class TableDAOImpl implements TableDAO {
 
     @Override
     public int update(String tableName, String columnsCondition, String condition, Object... args) {
+        // 判断是否字段发生更新
+        if (!hasUpdate(tableName, columnsCondition, condition, args)) {
+            return 0;
+        }
+
         String sql = buildUpdateSql(tableName, columnsCondition, condition);
         int rows = namedParameterJdbcTemplate.getJdbcTemplate().update(sql, args);
         if (log.isDebugEnabled()) {
@@ -79,6 +88,11 @@ public class TableDAOImpl implements TableDAO {
 
     @Override
     public int update(String tableName, String columnsCondition, String condition, Map<String, Object> paramMap) {
+        // 判断是否字段发生更新
+        if (!hasUpdate(tableName, columnsCondition, condition, paramMap)) {
+            return 0;
+        }
+
         String sql = buildUpdateSql(tableName, columnsCondition, condition);
         int rows = namedParameterJdbcTemplate.update(sql, paramMap);
         if (log.isDebugEnabled()) {
@@ -595,11 +609,191 @@ public class TableDAOImpl implements TableDAO {
      * @param paramSize
      * @return
      */
-    public static String formatInSQLPlaceHolder(int paramSize) {
+    private String formatInSQLPlaceHolder(int paramSize) {
         if (paramSize > IN_SIZE) {
             throw new RuntimeException("SQL_PATH_NOT_IN in的个数不能超过" + IN_SIZE);
         }
 
         return "(" + String.join(",", Collections.nCopies(paramSize, "?")) + ")";
+    }
+
+    private boolean hasUpdate(String tableName, String columnsCondition, String condition, Object... args) {
+        if (!sharpDatabaseProperties.isTrackIfHasUpdate()) {
+            return true;
+        }
+
+        String columnsConditionFieldNames = extractFieldNames(columnsCondition);
+        String selectSQL = SqlHelper.buildSelectWhere(tableName, columnsConditionFieldNames, condition);
+
+        int columnsConditionFieldNamesArgsLength = columnsConditionFieldNames.split(COLUMN_NAME_SEPARATOR_REGEX).length;
+        List<Map<String, Object>> dbMapList = select(selectSQL, Arrays.copyOfRange(args, args.length - columnsConditionFieldNamesArgsLength, args.length));
+        if (CollectionUtils.isEmpty(dbMapList)) {
+            return true;
+        }
+
+        List<String> columnNameList = extractFieldArray(columnsCondition);
+
+        for (Map<String, Object> dbMap : dbMapList) {
+            for (int i = 0; i < columnNameList.size(); i++) {
+                String columnName = columnNameList.get(i);
+                if (Objects.equals(columnName, ID_COLUMN_NAME)
+                        || Objects.equals(columnName, CREATE_ID_COLUMN_NAME)
+                        || Objects.equals(columnName, CREATE_TIME_COLUMN_NAME)
+                        || Objects.equals(columnName, UPDATE_ID_COLUMN_NAME)
+                        || Objects.equals(columnName, UPDATE_TIME_COLUMN_NAME)) {
+                    continue;
+                }
+
+                Object paramValue = args[i];
+                if (checkIfChanged(dbMap, columnName, paramValue)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasUpdate(String tableName, String columnsCondition, String condition, Map<String, Object> paramMap) {
+        if (!sharpDatabaseProperties.isTrackIfHasUpdate()) {
+            return true;
+        }
+
+        String selectSQL = SqlHelper.buildSelectWhere(tableName, extractFieldNames(columnsCondition), condition);
+        List<Map<String, Object>> dbMapList = select(selectSQL, paramMap);
+
+//        if (CollectionUtils.isEmpty(dbMapList) && Objects.nonNull(paramMap.get(ID_COLUMN_NAME)) && condition.indexOf(":" + ID_COLUMN_NAME) > -1) {
+//            // 处理 Id.GenerationType.ASSIGN
+//            return true;
+//        }
+        if (CollectionUtils.isEmpty(dbMapList)) {
+            return true;
+        }
+
+        Map<String, String> columnNameParamMap = extractFieldMap(columnsCondition);
+
+        for (Map<String, Object> dbMap : dbMapList) {
+            for (Map.Entry<String, String> columnNameEntry : columnNameParamMap.entrySet()) {
+                String columnName = columnNameEntry.getKey();
+                if (Objects.equals(columnName, ID_COLUMN_NAME)
+                        || Objects.equals(columnName, CREATE_ID_COLUMN_NAME)
+                        || Objects.equals(columnName, CREATE_TIME_COLUMN_NAME)
+                        || Objects.equals(columnName, UPDATE_ID_COLUMN_NAME)
+                        || Objects.equals(columnName, UPDATE_TIME_COLUMN_NAME)) {
+                    continue;
+                }
+
+                Object paramValue = paramMap.get(columnNameParamMap.get(columnName));
+
+                if (checkIfChanged(dbMap, columnName, paramValue)) return true;
+
+//                if (isSameOrRelated(paramValue, dbValue)) {
+//                    if (compareSameOrRelated(paramValue, dbValue) == 0) {
+//                        continue;
+//                    }
+//                }
+//
+//                paramValue = ObjectUtils.toString(paramValue);
+//                dbValue = ObjectUtils.toString(dbValue);
+//
+//                if (!Objects.equals(dbValue, paramValue)) {
+//                    return true;
+//                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkIfChanged(Map<String, Object> dbMap, String columnName, Object paramValue) {
+        Object dbValue = dbMap.get(columnName);
+
+        if (isSameOrRelated(paramValue, dbValue) && compareSameOrRelated(paramValue, dbValue) == 0) {
+            // 同类型且相等，跳过
+        } else if (!Objects.equals(org.apache.commons.lang3.ObjectUtils.toString(dbValue), org.apache.commons.lang3.ObjectUtils.toString(paramValue))) {
+            if (log.isDebugEnabled()) {
+                log.debug("checkIfChanged: columnName【{}】changed from【{}】to【{}】", columnName, dbValue, paramValue);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private List<String> extractFieldArray(String sqlUpdateParams) {
+        return Arrays.stream(sqlUpdateParams.split(","))
+                .map(pair -> pair.split("=", 2)[0].trim())
+                .collect(Collectors.toList());
+    }
+
+    private boolean isSameOrRelated(Object obj1, Object obj2) {
+        if (obj1 == null || obj2 == null) return false;
+
+        Class<?> class1 = obj1.getClass();
+        Class<?> class2 = obj2.getClass();
+
+        // 同一个类
+        if (class1 == class2) return true;
+
+        // 判断继承关系
+        return class1.isAssignableFrom(class2) || class2.isAssignableFrom(class1);
+    }
+
+    private int compareSameOrRelated(Object paramValue, Object dbValue) {
+        if (paramValue == null && dbValue == null) return 0;
+        if (paramValue == null) return -1;
+        if (dbValue == null) return 1;
+
+        // 两者都实现了 Comparable
+        if (paramValue instanceof Comparable && dbValue instanceof Comparable) {
+            // 同类型直接比较
+            if (paramValue.getClass() == dbValue.getClass()) {
+                return ((Comparable) paramValue).compareTo(dbValue);
+            }
+
+            // 跨类型：统一转为 String 比较
+            return paramValue.toString().compareTo(dbValue.toString());
+
+        }
+
+        return -1;
+    }
+
+//    private int compare(Object paramValue, Object dbValue) {
+//        if (paramValue == null && dbValue == null) return 0;
+//        if (paramValue == null) return -1;
+//        if (dbValue == null) return 1;
+//
+//        // 两者都实现了 Comparable
+//        if (paramValue instanceof Comparable && dbValue instanceof Comparable) {
+//            // 同类型直接比较
+//            if (paramValue.getClass() == dbValue.getClass()) {
+//                return ((Comparable) paramValue).compareTo(dbValue);
+//            }
+//
+//            // 跨类型：统一转为 String 比较
+//            return paramValue.toString().compareTo(dbValue.toString());
+//        }
+//
+//        throw new IllegalArgumentException("对象未实现 Comparable 接口，无法比较: "
+//                + paramValue.getClass() + " vs " + dbValue.getClass());
+//    }
+
+    private String extractFieldNames(String sqlUpdateParams) {
+        String[] pairs = sqlUpdateParams.split(",");
+        return Arrays.stream(pairs)
+                .map(pair -> pair.split("=")[0].trim())
+                .collect(Collectors.joining(", "));
+    }
+
+    private Map<String, String> extractFieldMap(String sqlUpdateParams) {
+        return Arrays.stream(sqlUpdateParams.split(","))
+                .map(pair -> pair.split("=", 2))
+                .collect(Collectors.toMap(
+                        parts -> parts[0].trim(),
+                        parts -> parts[1].trim()
+                                .replaceAll("^:", "")        // 去掉前缀 :
+                                .replaceAll("::[a-zA-Z]+$", "") // 去掉 postgres 类型转换 ::json 等
+                                .trim(),
+                        (a, b) -> a,
+                        LinkedHashMap::new
+                ));
     }
 }
