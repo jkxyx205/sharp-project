@@ -25,4 +25,6 @@ public class SharpDatabaseProperties {
     private boolean initDatabaseMetaData = false;
 
     private String entityBasePackage;
+
+    private boolean trackIfHasUpdate = true;
 }
