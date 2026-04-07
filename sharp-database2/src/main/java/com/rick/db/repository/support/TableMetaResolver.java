@@ -44,6 +44,9 @@ public class TableMetaResolver {
                                       String columnPrefix, String propertyPrefix) {
         Field[] allFields = uniqueFields(FieldUtils.getAllFields(entityClass));
         for (Field field : allFields) {
+            String propertyName = propertyPrefix + field.getName();
+            tableMeta.getFieldPropertyNameMap().put(field, propertyName);
+
             Select select = field.getAnnotation(Select.class);
 
             Embedded embedded = field.getAnnotation(Embedded.class);
@@ -121,7 +124,6 @@ public class TableMetaResolver {
             }
 
             if (!tableMeta.getColumnPropertyNameMap().keySet().contains(columnName)) {
-                String propertyName = propertyPrefix + field.getName();
                 tableMeta.getColumnPropertyNameMap().put(columnName, propertyName);
                 selectColumnBuilder.append(columnName + " AS \"" + propertyName + "\"").append(", ");
                 columnNameBuilder.append(columnName).append(", ");
@@ -130,8 +132,6 @@ public class TableMetaResolver {
                 }
 
                 tableMeta.getFieldColumnNameMap().put(field, columnName);
-                tableMeta.getFieldPropertyNameMap().put(field, propertyName);
-
                 tableMeta.getColumnNameMap().put(columnName, columnAnnotation);
             }
 
