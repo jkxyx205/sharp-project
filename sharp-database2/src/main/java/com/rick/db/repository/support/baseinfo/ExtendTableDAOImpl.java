@@ -2,8 +2,10 @@ package com.rick.db.repository.support.baseinfo;
 
 import com.rick.db.repository.*;
 import com.rick.db.repository.support.SqlHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -22,9 +24,12 @@ import static com.rick.db.repository.support.Constants.*;
  * @author Rick.Xu
  * @date 2025/8/27 21:17
  */
+@Slf4j
 public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 
     private Map<String, EntityDAO<?, ?>> tableNameDAOMap;
+
+    private boolean trackIfHasUpdate = true;
 
     public ExtendTableDAOImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         super(namedParameterJdbcTemplate);
@@ -56,7 +61,12 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
 //        return getNamedParameterJdbcTemplate().update("UPDATE " + tableName + " SET " + columnsCondition + SqlHelper.buildWhere(condition), paramMap);
         return super.update(tableName, columnsCondition, condition, paramMap);
     }
+
     private boolean hasUpdate(String tableName, String columnsCondition, String condition, Object... args) {
+        if (!trackIfHasUpdate) {
+            return true;
+        }
+
         String columnsConditionFieldNames = extractFieldNames(columnsCondition);
         String selectSQL = SqlHelper.buildSelectWhere(tableName, columnsConditionFieldNames, condition);
 
@@ -80,15 +90,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
                 }
 
                 Object paramValue = args[i];
-
-                Object dbValue = dbMap.get(columnName);
-                if (paramValue instanceof String && Objects.nonNull(dbValue)) {
-                    dbValue =  String.valueOf(dbValue);
-                }
-
-                if (!Objects.equals(dbValue, paramValue)) {
-                    return true;
-                }
+                if (checkIfChanged(dbMap, columnName, paramValue)) return true;
             }
         }
 
@@ -96,6 +98,10 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
     }
 
     private boolean hasUpdate(String tableName, String columnsCondition, String condition, Map<String, Object> paramMap) {
+        if (!trackIfHasUpdate) {
+            return true;
+        }
+
         String selectSQL = SqlHelper.buildSelectWhere(tableName, extractFieldNames(columnsCondition), condition);
         List<Map<String, Object>> dbMapList = select(selectSQL, paramMap);
 
@@ -110,27 +116,49 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         Map<String, String> columnNameParamMap = extractFieldMap(columnsCondition);
 
         for (Map<String, Object> dbMap : dbMapList) {
-            for (Map.Entry<String, Object> dbMapEntry : dbMap.entrySet()) {
-                if (Objects.equals(dbMapEntry.getKey(), ID_COLUMN_NAME)
-                        || Objects.equals(dbMapEntry.getKey(), CREATE_ID_COLUMN_NAME)
-                        || Objects.equals(dbMapEntry.getKey(), CREATE_TIME_COLUMN_NAME)
-                        || Objects.equals(dbMapEntry.getKey(), UPDATE_ID_COLUMN_NAME)
-                        || Objects.equals(dbMapEntry.getKey(), UPDATE_TIME_COLUMN_NAME)) {
+            for (Map.Entry<String, String> columnNameEntry : columnNameParamMap.entrySet()) {
+                String columnName = columnNameEntry.getKey();
+                if (Objects.equals(columnName, ID_COLUMN_NAME)
+                        || Objects.equals(columnName, CREATE_ID_COLUMN_NAME)
+                        || Objects.equals(columnName, CREATE_TIME_COLUMN_NAME)
+                        || Objects.equals(columnName, UPDATE_ID_COLUMN_NAME)
+                        || Objects.equals(columnName, UPDATE_TIME_COLUMN_NAME)) {
                     continue;
                 }
 
-                Object paramValue = paramMap.get(columnNameParamMap.get(dbMapEntry.getKey()));
-                Object dbValue = dbMapEntry.getValue();
-                if (paramValue instanceof String && Objects.nonNull(dbValue)) {
-                    dbValue =  String.valueOf(dbValue);
-                }
+                Object paramValue = paramMap.get(columnNameParamMap.get(columnName));
 
-                if (!Objects.equals(dbValue, paramValue)) {
-                    return true;
-                }
+                if (checkIfChanged(dbMap, columnName, paramValue)) return true;
+
+//                if (isSameOrRelated(paramValue, dbValue)) {
+//                    if (compareSameOrRelated(paramValue, dbValue) == 0) {
+//                        continue;
+//                    }
+//                }
+//
+//                paramValue = ObjectUtils.toString(paramValue);
+//                dbValue = ObjectUtils.toString(dbValue);
+//
+//                if (!Objects.equals(dbValue, paramValue)) {
+//                    return true;
+//                }
             }
         }
 
+        return false;
+    }
+
+    private boolean checkIfChanged(Map<String, Object> dbMap, String columnName, Object paramValue) {
+        Object dbValue = dbMap.get(columnName);
+
+        if (isSameOrRelated(paramValue, dbValue) && compareSameOrRelated(paramValue, dbValue) == 0) {
+            // 同类型且相等，跳过
+        } else if (!Objects.equals(ObjectUtils.toString(dbValue), ObjectUtils.toString(paramValue))) {
+            if (log.isDebugEnabled()) {
+                log.debug("checkIfChanged: columnName【{}】changed from 【{}】to【{}】", columnName, dbValue, paramValue);
+            }
+            return true;
+        }
         return false;
     }
 
@@ -280,7 +308,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
                 .collect(Collectors.joining(", "));
     }
 
-    public Map<String, String> extractFieldMap(String sqlUpdateParams) {
+    private Map<String, String> extractFieldMap(String sqlUpdateParams) {
         return Arrays.stream(sqlUpdateParams.split(","))
                 .map(pair -> pair.split("=", 2))
                 .collect(Collectors.toMap(
@@ -294,10 +322,63 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
                 ));
     }
 
-    public List<String> extractFieldArray(String sqlUpdateParams) {
+    private List<String> extractFieldArray(String sqlUpdateParams) {
         return Arrays.stream(sqlUpdateParams.split(","))
                 .map(pair -> pair.split("=", 2)[0].trim())
                 .collect(Collectors.toList());
     }
+
+    private boolean isSameOrRelated(Object obj1, Object obj2) {
+        if (obj1 == null || obj2 == null) return false;
+
+        Class<?> class1 = obj1.getClass();
+        Class<?> class2 = obj2.getClass();
+
+        // 同一个类
+        if (class1 == class2) return true;
+
+        // 判断继承关系
+        return class1.isAssignableFrom(class2) || class2.isAssignableFrom(class1);
+    }
+
+    private int compareSameOrRelated(Object paramValue, Object dbValue) {
+        if (paramValue == null && dbValue == null) return 0;
+        if (paramValue == null) return -1;
+        if (dbValue == null) return 1;
+
+        // 两者都实现了 Comparable
+        if (paramValue instanceof Comparable && dbValue instanceof Comparable) {
+            // 同类型直接比较
+            if (paramValue.getClass() == dbValue.getClass()) {
+                return ((Comparable) paramValue).compareTo(dbValue);
+            }
+
+            // 跨类型：统一转为 String 比较
+            return paramValue.toString().compareTo(dbValue.toString());
+
+        }
+
+        return -1;
+    }
+
+//    private int compare(Object paramValue, Object dbValue) {
+//        if (paramValue == null && dbValue == null) return 0;
+//        if (paramValue == null) return -1;
+//        if (dbValue == null) return 1;
+//
+//        // 两者都实现了 Comparable
+//        if (paramValue instanceof Comparable && dbValue instanceof Comparable) {
+//            // 同类型直接比较
+//            if (paramValue.getClass() == dbValue.getClass()) {
+//                return ((Comparable) paramValue).compareTo(dbValue);
+//            }
+//
+//            // 跨类型：统一转为 String 比较
+//            return paramValue.toString().compareTo(dbValue.toString());
+//        }
+//
+//        throw new IllegalArgumentException("对象未实现 Comparable 接口，无法比较: "
+//                + paramValue.getClass() + " vs " + dbValue.getClass());
+//    }
 
 }
