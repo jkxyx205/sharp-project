@@ -39,8 +39,10 @@ public class AjaxInstanceController {
         return ResultUtils.success(String.valueOf(values.get(SharpDbConstants.ID_COLUMN_NAME)));
     }
 
-    @PutMapping("{formId}/{instanceId}")
-    @PostMapping("{formId}/{instanceId}")
+    @RequestMapping(
+            value = "{formId}/{instanceId}",
+            method = {RequestMethod.PUT, RequestMethod.POST}
+    )
     public Result<String> update(@RequestBody Map<String, Object> values, @PathVariable Long formId, @PathVariable Long instanceId) throws BindException {
         formService.post(formId, instanceId, values);
         return ResultUtils.success(String.valueOf(instanceId));
