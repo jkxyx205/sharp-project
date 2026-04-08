@@ -23,7 +23,7 @@ public class ServiceMethodValidationInterceptor {
     /**
      * 扫描service目录下，类名是Service结尾的类
      */
-    @Pointcut("execution(public * *..*.service.*Service.*(..))")
+    @Pointcut("within(com.rick..service..*) && execution(public * *Service.*(..))")
     public void serviceParamsValidPointcut(){}
 
     @Before("serviceParamsValidPointcut()")
