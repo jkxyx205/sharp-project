@@ -26,5 +26,5 @@ public class SharpDatabaseProperties {
 
     private String entityBasePackage;
 
-    private boolean trackIfHasUpdate = true;
+    private boolean trackIfHasUpdate = false;
 }
