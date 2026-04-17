@@ -14,7 +14,6 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -51,11 +50,15 @@ final public class DictUtils {
         return Optional.empty();
     }
 
+    public static void fillDictLabel(Object obj) {
+        fillDictLabel(obj, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
     /**
      * 任意对象， 可以是 entity Map List Dict
      * @param obj
      */
-    public static void fillDictLabel(Object obj) {
+    private static void fillDictLabel(Object obj, Set<Object> visited) {
         if (obj == null) {
             return;
         }
@@ -66,14 +69,17 @@ final public class DictUtils {
             Iterator iterator = iterable.iterator();
             while (iterator.hasNext()) {
                 obj = iterator.next();
-                fillDictLabel(obj);
+                fillDictLabel(obj, visited);
             }
         } else if (Map.class.isAssignableFrom(obj.getClass())) {
             // Map
             Map map = (Map)obj;
-            fillDictLabel(map.keySet());
-            fillDictLabel(map.values());
+            fillDictLabel(map.keySet(), visited);
+            fillDictLabel(map.values(), visited);
         }
+
+        // 已访问过，直接跳过，打破循环引用
+        if (!visited.add(obj)) return;
 
         if (obj instanceof DictValue) {
             DictValue dictValue = (DictValue) obj;
@@ -82,71 +88,62 @@ final public class DictUtils {
             }
 
             return;
-        } else if (!mayEntityObject(obj)) {
+        } else if (!ObjectUtils.mayPureObject(obj)) {
             return;
         }
 
         Field[] allFields = FieldUtils.getAllFields(obj.getClass());
         for (Field field : allFields) {
-            Method method;
-            try {
-                method = obj.getClass().getMethod("get" + String.valueOf(field.getName().charAt(0)).toUpperCase() + field.getName().substring(1));
-                Object fieldValue = ReflectionUtils.invokeMethod(method, obj);
-                if (fieldValue == null) {
-                    continue;
-                }
+            ReflectionUtils.makeAccessible(field);
+            Object fieldValue = ReflectionUtils.getField(field, obj);
+            if (fieldValue == null) {
+                continue;
+            }
 
-                DictType dictType = field.getAnnotation(DictType.class);
-                if (field.getType() == DictValue.class && dictType != null && fieldValue != null) {
+            DictType dictType = field.getAnnotation(DictType.class);
+            if (field.getType() == DictValue.class && dictType != null && fieldValue != null) {
 
-                    DictValue dictValue = (DictValue) fieldValue;
-                    if (StringUtils.isNotBlank(dictValue.getCode())) {
-                        String type = dictType.type();
-                        if (StringUtils.isNotBlank(type)) {
-                            Optional<Dict> dictLabel = getDictLabel(type, dictValue.getCode());
-                            dictLabel.ifPresent(value -> {
-                                dictValue.setLabel(value.getLabel());
-                                dictValue.setType(value.getType());
-                            });
-                        }
-
-                        String sql = dictType.sql();
-                        if(StringUtils.isBlank(dictValue.getLabel()) && StringUtils.isNotBlank(sql)) {
-                            OperatorUtils.expectedAsOptional(tableDAO.select(DictValue.class, sql, dictValue.getCode())).ifPresent(value -> dictValue.setLabel(value.getLabel()));
-                        }
+                DictValue dictValue = (DictValue) fieldValue;
+                if (StringUtils.isNotBlank(dictValue.getCode())) {
+                    String type = dictType.type();
+                    if (StringUtils.isNotBlank(type)) {
+                        Optional<Dict> dictLabel = getDictLabel(type, dictValue.getCode());
+                        dictLabel.ifPresent(value -> {
+                            dictValue.setLabel(value.getLabel());
+                            dictValue.setType(value.getType());
+                        });
                     }
-                } else if (Iterable.class.isAssignableFrom(fieldValue.getClass())) {
-                    // 集合
-                    Iterable iterable = (Iterable) fieldValue;
-                    Iterator iterator = iterable.iterator();
-                    while (iterator.hasNext()) {
-                        fieldValue = iterator.next();
-                        if (fieldValue instanceof DictValue) {
-                            Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
-                            if (dictLabel.isPresent()) {
-                                ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
-                                ((DictValue)fieldValue).setType(dictType.type());
-                            }
-                        } else if (mayEntityObject(fieldValue)) {
-                            fillDictLabel(fieldValue);
-                        }
+
+                    String sql = dictType.sql();
+                    if(StringUtils.isBlank(dictValue.getLabel()) && StringUtils.isNotBlank(sql)) {
+                        OperatorUtils.expectedAsOptional(tableDAO.select(DictValue.class, sql, dictValue.getCode())).ifPresent(value -> dictValue.setLabel(value.getLabel()));
                     }
-                } else if (Map.class.isAssignableFrom(fieldValue.getClass())) {
-                    // Map
-                    Map map = (Map)fieldValue;
-                    fillDictLabel(map.keySet());
-                    fillDictLabel(map.values());
-                } else if (mayEntityObject(fieldValue)) {
-                    fillDictLabel(fieldValue);
                 }
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
+            } else if (Iterable.class.isAssignableFrom(fieldValue.getClass())) {
+                // 集合
+                Iterable iterable = (Iterable) fieldValue;
+                Iterator iterator = iterable.iterator();
+                while (iterator.hasNext()) {
+                    fieldValue = iterator.next();
+                    if (fieldValue instanceof DictValue) {
+                        Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
+                        if (dictLabel.isPresent()) {
+                            ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
+                            ((DictValue)fieldValue).setType(dictType.type());
+                        }
+                    } else if (ObjectUtils.mayPureObject(fieldValue)) {
+                        fillDictLabel(fieldValue, visited);
+                    }
+                }
+            } else if (Map.class.isAssignableFrom(fieldValue.getClass())) {
+                // Map
+                Map map = (Map)fieldValue;
+                fillDictLabel(map.keySet(), visited);
+                fillDictLabel(map.values(), visited);
+            } else if (ObjectUtils.mayPureObject(fieldValue)) {
+                fillDictLabel(fieldValue, visited);
             }
 
         }
-    }
-
-    private static boolean mayEntityObject(Object obj) {
-        return ObjectUtils.mayPureObject(obj);
     }
 }
