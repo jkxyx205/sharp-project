@@ -49,9 +49,14 @@ final public class DictUtils {
 
     /**
      * 任意对象， 可以是 entity Map List Dict
+     *
      * @param obj
      */
     public static void fillDictLabel(Object obj) {
+        fillDictLabel(obj, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
+    private static void fillDictLabel(Object obj, Set<Object> visited) {
         if (obj == null) {
             return;
         }
@@ -62,16 +67,19 @@ final public class DictUtils {
             Iterator iterator = iterable.iterator();
             while (iterator.hasNext()) {
                 obj = iterator.next();
-                fillDictLabel(obj);
+                fillDictLabel(obj, visited);
             }
         } else if (Map.class.isAssignableFrom(obj.getClass())) {
             // Map
-            Map map = (Map)obj;
-            fillDictLabel(map.keySet());
-            fillDictLabel(map.values());
+            Map map = (Map) obj;
+            fillDictLabel(map.keySet(), visited);
+            fillDictLabel(map.values(), visited);
         }
 
-       if (obj instanceof DictValue) {
+        // 已访问过，直接跳过，打破循环引用
+        if (!visited.add(obj)) return;
+
+        if (obj instanceof DictValue) {
             DictValue dictValue = (DictValue) obj;
             if (StringUtils.isNotBlank(dictValue.getCode()) && StringUtils.isNotBlank(dictValue.getType())) {
                 getDictLabel(dictValue.getType(), dictValue.getCode()).ifPresent(dict -> dictValue.setLabel(dict.getLabel()));
@@ -82,7 +90,7 @@ final public class DictUtils {
             return;
         }
 
-       Field[] allFields = FieldUtils.getAllFields(obj.getClass());
+        Field[] allFields = FieldUtils.getAllFields(obj.getClass());
         for (Field field : allFields) {
             Method method;
             try {
@@ -111,24 +119,23 @@ final public class DictUtils {
                         fieldValue = iterator.next();
                         if (fieldValue instanceof DictValue) {
                             Optional<Dict> dictLabel = getDictLabel(dictType.type(), ((DictValue) fieldValue).getCode());
-                            ((DictValue)fieldValue).setLabel(dictLabel.get().getLabel());
-                            ((DictValue)fieldValue).setType(dictType.type());
+                            ((DictValue) fieldValue).setLabel(dictLabel.get().getLabel());
+                            ((DictValue) fieldValue).setType(dictType.type());
                         } else if (mayEntityObject(fieldValue)) {
-                            fillDictLabel(fieldValue);
+                            fillDictLabel(fieldValue, visited);
                         }
                     }
                 } else if (Map.class.isAssignableFrom(fieldValue.getClass())) {
                     // Map
-                    Map map = (Map)fieldValue;
-                    fillDictLabel(map.keySet());
-                    fillDictLabel(map.values());
+                    Map map = (Map) fieldValue;
+                    fillDictLabel(map.keySet(), visited);
+                    fillDictLabel(map.values(), visited);
                 } else if (mayEntityObject(fieldValue)) {
-                    fillDictLabel(fieldValue);
+                    fillDictLabel(fieldValue, visited);
                 }
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
