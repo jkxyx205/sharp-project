@@ -50,14 +50,14 @@ final public class DictUtils {
         return Optional.empty();
     }
 
-    public static void fillDictLabel(Object obj) {
-        fillDictLabel(obj, Collections.newSetFromMap(new IdentityHashMap<>()));
-    }
-
     /**
      * 任意对象， 可以是 entity Map List Dict
      * @param obj
      */
+    public static void fillDictLabel(Object obj) {
+        fillDictLabel(obj, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
     private static void fillDictLabel(Object obj, Set<Object> visited) {
         if (obj == null) {
             return;
@@ -143,7 +143,6 @@ final public class DictUtils {
             } else if (ObjectUtils.mayPureObject(fieldValue)) {
                 fillDictLabel(fieldValue, visited);
             }
-
         }
     }
 }
