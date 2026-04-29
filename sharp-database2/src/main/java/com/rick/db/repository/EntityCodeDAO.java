@@ -4,6 +4,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -12,21 +13,21 @@ import java.util.Optional;
  */
 public interface EntityCodeDAO<T, ID> extends EntityDAO<T, ID> {
 
+    Optional<T> selectByCode(@NotBlank String code);
+
+    List<T> selectByCodes(@NotEmpty Collection<String> codes);
+
     /**
-     * 获取 code 字段数据
+     * 根据 code & 字段 获取值
      * @param code
-     * @param propertyName
+     * @param columnName
      * @param clazz
      * @return
      * @param <S>
      */
-    <S> Optional<S> selectByCode(@NotBlank String code, @NotBlank String propertyName, Class<S> clazz);
+    <S> Optional<S> selectByCode(@NotBlank String code, @NotBlank String columnName, Class<S> clazz);
 
-    <S> List<S> selectByCodes(@NotEmpty Collection<String> codes, @NotBlank String propertyName, Class<S> clazz);
-
-    Optional<T> selectByCode(@NotBlank String code);
-
-    List<T> selectByCodes(@NotEmpty Collection<String> codes);
+    <S> Map<ID, S> selectByCodes(@NotEmpty Collection<String> codes, @NotBlank String columnName, Class<S> clazz);
 
     Optional<ID> selectIdByCode(@NotBlank String code);
 

@@ -5,6 +5,7 @@ import com.rick.db.repository.model.EntityIdCode;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -20,21 +21,6 @@ public class BaseCodeServiceImpl<D extends EntityCodeDAO<T, ID>, T extends Entit
     }
 
     @Override
-    public <S> Optional<S> selectByCode(String code, String propertyName, Class<S> clazz) {
-        return baseDAO.selectByCode(code, propertyName, clazz);
-    }
-
-    @Override
-    public <S> List<S> selectByCodes(Collection<String> codes, String propertyName, Class<S> clazz) {
-        return baseDAO.selectByCodes(codes, propertyName, clazz);
-    }
-
-    @Override
-    public Optional<T> selectByCode(String code) {
-        return baseDAO.selectByCode(code);
-    }
-
-    @Override
     public List<T> selectByCodes(Collection<String> codes) {
         return baseDAO.selectByCodes(codes);
     }
@@ -42,6 +28,21 @@ public class BaseCodeServiceImpl<D extends EntityCodeDAO<T, ID>, T extends Entit
     @Override
     public Optional<ID> selectIdByCode(String code) {
         return baseDAO.selectIdByCode(code);
+    }
+
+    @Override
+    public <S> Optional<S> selectByCode(String code, String columnName, Class<S> clazz) {
+        return baseDAO.selectByCode(code, columnName, clazz);
+    }
+
+    @Override
+    public <S> Map<ID, S> selectByCodes(Collection<String> codes, String columnName, Class<S> clazz) {
+        return baseDAO.selectByCodes(codes, columnName, clazz);
+    }
+
+    @Override
+    public Optional<T> selectByCode(String code) {
+        return baseDAO.selectByCode(code);
     }
 
     @Override

@@ -34,18 +34,13 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public List<T> selectAll() {
-        return baseDAO.selectAll();
+    public <S> Optional<S> selectById(ID id, String columnName, Class<S> clazz) {
+        return baseDAO.selectById(id, columnName, clazz);
     }
 
     @Override
-    public <S> Optional<S> selectById(ID id, String propertyName, Class<S> clazz) {
-        return baseDAO.selectById(id, propertyName, clazz);
-    }
-
-    @Override
-    public <S> List<S> selectByIds(Collection<ID> ids, String propertyName, Class<S> clazz) {
-        return baseDAO.selectByIds(ids, propertyName, clazz);
+    public <S> Map<ID, S> selectByIds(Collection<ID> ids, String columnName, Class<S> clazz) {
+        return baseDAO.selectByIds(ids, columnName, clazz);
     }
 
     @Override
@@ -61,6 +56,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     @Override
     public <K, V> Map<K, V> selectForKeyValue(String columns, String condition, T example) {
         return baseDAO.selectForKeyValue(columns, condition, example);
+    }
+
+    @Override
+    public List<T> selectAll() {
+        return baseDAO.selectAll();
     }
 
     @Override
