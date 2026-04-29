@@ -71,18 +71,18 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     }
 
     @Override
-    public <S> Optional<S> selectByCode(String code, String columnName, Class<S> clazz) {
+    public <S> Optional<S> selectByCode(String code, String propertyName, Class<S> clazz) {
         Assert.hasText(code, "code cannot be null");
-        Assert.hasText(columnName, "columnName cannot be null");
-        List<S> values = select(clazz, columnName, "code = ?", code);
+        Assert.hasText(propertyName, "propertyName cannot be null");
+        List<S> values = select(clazz, getTableMeta().getColumnNameByPropertyName(propertyName), "code = ?", code);
         return OperatorUtils.expectedAsOptional(values);
     }
 
     @Override
-    public <S> List<S> selectByCodes(Collection<String> codes, String columnName, Class<S> clazz){
+    public <S> List<S> selectByCodes(Collection<String> codes, String propertyName, Class<S> clazz){
         Assert.notEmpty(codes, "codes cannot be null");
-        Assert.hasText(columnName, "columnName cannot be null");
-        List<S> values = select(clazz, columnName, "code IN (:codes)", Maps.of("codes", codes));
+        Assert.hasText(propertyName, "propertyName cannot be null");
+        List<S> values = select(clazz, getTableMeta().getColumnNameByPropertyName(propertyName), "code IN (:codes)", Maps.of("codes", codes));
         return values;
     }
 

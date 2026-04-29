@@ -27,14 +27,14 @@ public interface EntityDAO<T, ID> {
     /**
      * 获取 id 字段数据
      * @param id
-     * @param columnName
+     * @param propertyName
      * @param clazz
      * @return
      * @param <S>
      */
-    <S> Optional<S> selectById(@NotNull ID id, @NotBlank String columnName, Class<S> clazz);
+    <S> Optional<S> selectById(@NotNull ID id, @NotBlank String propertyName, Class<S> clazz);
 
-    <S> List<S> selectByIds(@NotEmpty Collection<ID> ids, @NotBlank String columnName, Class<S> clazz);
+    <S> List<S> selectByIds(@NotEmpty Collection<ID> ids, @NotBlank String propertyName, Class<S> clazz);
 
     <K, V> Map<K, V> selectForKeyValue(@NotBlank String columns, String condition, Map<String, Object> paramMap);
 

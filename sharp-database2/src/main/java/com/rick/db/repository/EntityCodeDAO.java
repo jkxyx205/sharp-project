@@ -15,14 +15,14 @@ public interface EntityCodeDAO<T, ID> extends EntityDAO<T, ID> {
     /**
      * 获取 code 字段数据
      * @param code
-     * @param columnName
+     * @param propertyName
      * @param clazz
      * @return
      * @param <S>
      */
-    <S> Optional<S> selectByCode(@NotBlank String code, @NotBlank String columnName, Class<S> clazz);
+    <S> Optional<S> selectByCode(@NotBlank String code, @NotBlank String propertyName, Class<S> clazz);
 
-    <S> List<S> selectByCodes(@NotEmpty Collection<String> codes, @NotBlank String columnName, Class<S> clazz);
+    <S> List<S> selectByCodes(@NotEmpty Collection<String> codes, @NotBlank String propertyName, Class<S> clazz);
 
     Optional<T> selectByCode(@NotBlank String code);
 

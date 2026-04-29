@@ -69,6 +69,12 @@ public class TableMeta<T> {
 
     private String[] columnNameArrayCache;
 
+    private Map<String, Field> columnNameFieldMapCache = new HashMap<>();
+
+    private Map<String, Field> propertyNameFieldMapCache = new HashMap<>();
+
+    private Map<String, String> propertyNameColumnMapCache = new HashMap<>();
+
     public TableMeta(Class<T> entityClass, Table table, String tableName, String referenceColumnId, Map<Field, Reference> referenceMap, Map<Field, String> fieldColumnNameMap, Map<Field, String> fieldPropertyNameMap, Map<String, String> columnPropertyNameMap, Map<String, Column> columnNameMap) {
         this.entityClass = entityClass;
         this.table = table;
@@ -82,23 +88,24 @@ public class TableMeta<T> {
     }
 
     public Field getFieldByColumnName(String columnName) {
-        for (Map.Entry<Field, String> entry : fieldColumnNameMap.entrySet()) {
-            if (Objects.equals(columnName, entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-
-        return null;
+        return getField(columnName, columnNameFieldMapCache, fieldColumnNameMap);
     }
 
+
     public Field getFieldByPropertyName(String propertyName) {
-        for (Map.Entry<Field, String> entry : fieldPropertyNameMap.entrySet()) {
+        return getField(propertyName, propertyNameFieldMapCache, fieldPropertyNameMap);
+    }
+
+    public String getColumnNameByPropertyName(String propertyName) {
+        String columName = propertyNameColumnMapCache.get(propertyName);
+        for (Map.Entry<String, String> entry : columnPropertyNameMap.entrySet()) {
             if (Objects.equals(propertyName, entry.getValue())) {
-                return entry.getKey();
+                columName =  entry.getKey();
+                propertyNameColumnMapCache.put(propertyName, columName);
             }
         }
 
-        return null;
+        return columName;
     }
 
     public String getSelectConditionSQL() {
@@ -240,6 +247,20 @@ public class TableMeta<T> {
 
     void setColumnNames(String columnNames) {
         this.columnNames = columnNames;
+    }
+
+    private Field getField(String key, Map<String, Field> keyFieldMapCache, Map<Field, String> fieldMap) {
+        Field field = keyFieldMapCache.get(key);
+        if (Objects.isNull(field)) {
+            for (Map.Entry<Field, String> entry : fieldMap.entrySet()) {
+                if (Objects.equals(key, entry.getValue())) {
+                    field = entry.getKey();
+                    keyFieldMapCache.put(key, field);
+                }
+            }
+        }
+
+        return field;
     }
 }
 

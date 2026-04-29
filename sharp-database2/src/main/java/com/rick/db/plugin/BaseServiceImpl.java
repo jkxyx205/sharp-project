@@ -39,13 +39,13 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
-    public <S> Optional<S> selectById(ID id, String columnName, Class<S> clazz) {
-        return baseDAO.selectById(id, columnName, clazz);
+    public <S> Optional<S> selectById(ID id, String propertyName, Class<S> clazz) {
+        return baseDAO.selectById(id, propertyName, clazz);
     }
 
     @Override
-    public <S> List<S> selectByIds(Collection<ID> ids, String columnName, Class<S> clazz) {
-        return baseDAO.selectByIds(ids, columnName, clazz);
+    public <S> List<S> selectByIds(Collection<ID> ids, String propertyName, Class<S> clazz) {
+        return baseDAO.selectByIds(ids, propertyName, clazz);
     }
 
     @Override

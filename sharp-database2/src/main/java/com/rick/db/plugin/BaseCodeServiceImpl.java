@@ -20,13 +20,13 @@ public class BaseCodeServiceImpl<D extends EntityCodeDAO<T, ID>, T extends Entit
     }
 
     @Override
-    public <S> Optional<S> selectByCode(String code, String columnName, Class<S> clazz) {
-        return baseDAO.selectByCode(code, columnName, clazz);
+    public <S> Optional<S> selectByCode(String code, String propertyName, Class<S> clazz) {
+        return baseDAO.selectByCode(code, propertyName, clazz);
     }
 
     @Override
-    public <S> List<S> selectByCodes(Collection<String> codes, String columnName, Class<S> clazz) {
-        return baseDAO.selectByCodes(codes, columnName, clazz);
+    public <S> List<S> selectByCodes(Collection<String> codes, String propertyName, Class<S> clazz) {
+        return baseDAO.selectByCodes(codes, propertyName, clazz);
     }
 
     @Override
