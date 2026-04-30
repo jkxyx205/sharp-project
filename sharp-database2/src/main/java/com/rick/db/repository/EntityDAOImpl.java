@@ -103,7 +103,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     public <S> Optional<S> selectById(ID id, String columnName, Class<S> clazz) {
         Assert.notNull(id, "id cannot be null");
         Assert.hasText(columnName, "columnName cannot be null");
-        List<S> values = select(clazz, columnName, tableMeta.getIdMeta().getIdColumnName() + " = ?", id);
+        List<S> values = selectWithoutCascade(clazz, columnName, tableMeta.getIdMeta().getIdColumnName() + " = ?", id);
         return OperatorUtils.expectedAsOptional(values);
     }
 

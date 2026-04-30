@@ -74,7 +74,7 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
     public <S> Optional<S> selectByCode(String code, String columnName, Class<S> clazz) {
         Assert.hasText(code, "code cannot be null");
         Assert.hasText(columnName, columnName);
-        List<S> values = select(clazz, columnName, "code = ?", code);
+        List<S> values = selectWithoutCascade(clazz, columnName, "code = ?", code);
         return OperatorUtils.expectedAsOptional(values);
     }
 
