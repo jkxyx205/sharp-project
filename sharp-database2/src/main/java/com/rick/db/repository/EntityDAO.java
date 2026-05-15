@@ -155,4 +155,8 @@ public interface EntityDAO<T, ID> {
 
     Map<String, Object> entityToMap(T entity);
 
+    List<T> selectWithoutCascade(String condition, Object... args);
+
+    List<T> selectWithoutCascade(String columns, String condition, Object... args);
+
 }

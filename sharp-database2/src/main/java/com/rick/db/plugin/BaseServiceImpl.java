@@ -331,4 +331,14 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     public Map<String, Object> entityToMap(T entity) {
         return baseDAO.entityToMap(entity);
     }
+
+    @Override
+    public List<T> selectWithoutCascade(String condition, Object... args) {
+        return baseDAO.selectWithoutCascade(condition, args);
+    }
+
+    @Override
+    public List<T> selectWithoutCascade(String columns, String condition, Object... args) {
+        return baseDAO.selectWithoutCascade(columns, condition, args);
+    }
 }

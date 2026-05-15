@@ -2,6 +2,7 @@ package com.rick.db.repository;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.rick.common.function.SFunction;
 import com.rick.common.util.*;
 import com.rick.db.config.Context;
 import com.rick.db.repository.model.DatabaseType;
@@ -1043,6 +1044,21 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Override
     public int[] batchUpdate(String columns, String condition, List<Object[]> paramsList) {
         return new int[0];
+    }
+
+    @Override
+    public List<T> selectWithoutCascade(String condition, Object... args) {
+        return selectWithoutCascade(tableMeta.getSelectColumn(), condition, args);
+    }
+    @Override
+    public List<T> selectWithoutCascade(String columns, String condition, Object... args) {
+        List<T> materialList = selectWithoutCascade(tableMeta.getEntityClass(), columns, condition, args);
+        return materialList;
+    }
+
+    protected  <S> String obtainColumnName(SFunction<T, S> function) {
+        String propertyName = function.getPropertyName();
+        return tableMeta.getColumnNameByPropertyName(propertyName) + " AS \""+propertyName+"\"";
     }
 
     private void setIdValue(Object entity, Object id) {

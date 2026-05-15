@@ -1,5 +1,6 @@
 package com.rick.db.repository.support.category;
 
+import com.rick.common.function.SFunction;
 import com.rick.common.http.exception.BizException;
 import com.rick.common.util.Maps;
 import com.rick.db.repository.EntityCodeDAOImpl;
@@ -23,6 +24,16 @@ import java.util.function.Consumer;
  * @date 2025/11/14 11:59
  */
 public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<E>, ID, E extends Enum<E>> extends EntityCodeDAOImpl<T, ID> {
+
+    private String categoryColumnName;
+
+    public CategoryEntityCodeDAOImpl() {
+        this("category");
+    }
+
+    public CategoryEntityCodeDAOImpl(String categoryColumnName) {
+        this.categoryColumnName = categoryColumnName;
+    }
 
     public void insertOrUpdate(@NotNull E category, Collection<T> list) {
         insertOrUpdate(category, list, true, null);
@@ -62,7 +73,20 @@ public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<
 //    }
 
     public Optional<T> selectByCategoryAndCode(@NotNull E category, @NotBlank String code) {
-        return OperatorUtils.expectedAsOptional(select("code = ? AND category = ?", code, category.name()));
+        return OperatorUtils.expectedAsOptional(select("code = ? AND "+categoryColumnName+" = ?", code, getValue(category)));
+    }
+
+    public <S> Optional<S> selectByCategoryAndCode(@NotNull E category, @NotBlank String code, SFunction<T, S> function) {
+//        String propertyName = function.getPropertyName();
+//        return selectByCode(code, getTableMeta().getColumnNameByPropertyName(propertyName), function.getPropertyType());
+//        List<T> list = selectWithoutCascade( "code, " + obtainColumnName(function), categoryColumnName + " = ? AND code = ?", category, code);
+        List<T> list = selectWithoutCascade(obtainColumnName(function), categoryColumnName + " = ? AND code = ?", category, code);
+        return OperatorUtils.expectedAsOptional(list).map(function::apply);
+    }
+
+    public <S> Optional<S> selectByCategoryAndCode(@NotNull E category, @NotBlank String code, String columnName, Class<S> clazz) {
+        List<S> list = selectWithoutCascade(clazz, columnName, categoryColumnName + " = ? AND code = ?", category, code);
+        return OperatorUtils.expectedAsOptional(list);
     }
 
     public List<T> selectAll(@NotNull E category) {
@@ -76,6 +100,18 @@ public class CategoryEntityCodeDAOImpl<T extends EntityIdCode<ID> & RowCategory<
                 t.setId(option.get().getId());
             }
         }
+    }
+
+    private Object getValue(E category) {
+        if (Objects.isNull(category)) {
+            return "";
+        }
+
+        if (Enum.class.isAssignableFrom(category.getClass())) {
+            return category.toString();
+        }
+
+        return category;
     }
 
 //    private void fillEntityIdsByCodes(EntityCodeDAO<T, ID> entityCodeDAO, Collection<T> entities) {
