@@ -293,6 +293,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public int updateWithPropertyNames(String propertyNames, String condition, T example) {
+        return baseDAO.updateWithPropertyNames(propertyNames, condition, example);
+    }
+
+    @Override
     public int[] batchUpdate(String columns, String condition, List<Object[]> paramsList) {
         return new int[0];
     }
@@ -308,6 +313,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public int updateByIdWithPropertyNames(String propertyNames, ID id, T example) {
+        return baseDAO.updateByIdWithPropertyNames(propertyNames, id, example);
+    }
+
+    @Override
     public int updateByIds(String columns, Collection<ID> ids, Map<String, Object> paramMap) {
         return baseDAO.updateByIds(columns, ids, paramMap);
     }
@@ -315,6 +325,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     @Override
     public int updateByIds(String columns, Collection<ID> ids, T example) {
         return baseDAO.updateByIds(columns, ids, example);
+    }
+
+    @Override
+    public int updateByIdsWithPropertyNames(String propertyNames, Collection<ID> ids, T example) {
+        return baseDAO.updateByIdsWithPropertyNames(propertyNames, ids, example);
     }
 
     @Override

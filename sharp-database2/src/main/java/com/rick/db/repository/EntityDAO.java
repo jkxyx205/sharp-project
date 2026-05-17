@@ -137,6 +137,8 @@ public interface EntityDAO<T, ID> {
 
     int update(@NotBlank String columns, String condition, T example);
 
+    int updateWithPropertyNames(@NotBlank String propertyNames, String condition, T example);
+
     int[] batchUpdate(@NotBlank String columns, String condition, List<Object[]> paramsList);
 
     int updateById(@NotBlank String columns, @NotNull ID id, Object... args);
@@ -145,9 +147,21 @@ public interface EntityDAO<T, ID> {
 
     int updateById(@NotBlank String columns, @NotNull ID id, T example);
 
+    /**
+     * 根据 propertyNames 更新
+     * @see int updateById(@NotBlank String columns, @NotNull ID id, T example);
+     * @param propertyNames
+     * @param id
+     * @param example
+     * @return
+     */
+    int updateByIdWithPropertyNames(@NotBlank String propertyNames, @NotNull ID id, T example);
+
     int updateByIds(@NotBlank String columns, Collection<ID> ids, Map<String, Object> paramMap);
 
     int updateByIds(@NotBlank String columns, Collection<ID> ids, T example);
+
+    int updateByIdsWithPropertyNames(@NotBlank String propertyNames, Collection<ID> ids, T example);
 
     TableMeta getTableMeta();
 
