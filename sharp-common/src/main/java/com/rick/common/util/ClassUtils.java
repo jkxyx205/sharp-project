@@ -47,8 +47,27 @@ public class ClassUtils {
      * @return
      */
     public static Class<?>[] getFieldGenericClass(Class<?> subClass, Field field) {
-        Type[] type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-        return typeToClass(subClass, type);
+        // 1. 获取字段类型
+        Type fieldType = field.getGenericType();
+
+        // 2. 已经是具体类型，直接返回
+        if (fieldType instanceof Class<?>) {
+            return new Class<?>[] {(Class<?>) fieldType};
+        }
+
+        // 3. 字段本身就是 TypeVariable，如 private T item
+        if (fieldType instanceof TypeVariable<?>) {
+            Class<?> clazz = resolveTypeVariable(subClass, (TypeVariable<?>)fieldType);// ✅ T → 实际类型
+            return new Class<?>[] {clazz};
+        }
+
+        // 4. List<T> 或 List<PurchaseOrder.Item> 这种带泛型的类型
+        if (fieldType instanceof ParameterizedType) {
+            Type[] type = ((ParameterizedType) fieldType).getActualTypeArguments();
+            return typeToClass(subClass, type);
+        }
+
+        throw new IllegalArgumentException("Cannot resolve type for field: " + field.getName());
     }
 
     /**
