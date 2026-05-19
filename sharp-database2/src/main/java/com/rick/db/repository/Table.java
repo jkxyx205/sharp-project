@@ -12,4 +12,9 @@ import java.lang.annotation.*;
 public @interface Table {
     String value() default "";
     String comment() default  "";
+    /**
+     * 默认是类名小写第一个字母 + "_id"
+     * @return
+     */
+    String referenceColumnId() default "";
 }
