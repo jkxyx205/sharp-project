@@ -116,7 +116,7 @@ public class TableMetaResolver {
             Id idAnnotation = AnnotatedElementUtils.getMergedAnnotation(field, Id.class);
 
             if (Objects.nonNull(idAnnotation) && Objects.isNull(tableMeta.idMeta)) {
-                tableMeta.idMeta = new TableMeta.IdMeta(getIdClass(entityClass, field.getName()), idAnnotation, columnName, field.getName(), field);
+                tableMeta.idMeta = new TableMeta.IdMeta(getIdClass(entityClass, field), idAnnotation, columnName, field.getName(), field);
             }
 
             if (AnnotatedElementUtils.hasAnnotation(field, Version.class)) {
@@ -138,19 +138,23 @@ public class TableMetaResolver {
         }
     }
 
-    private Class getIdClass(Class<?> clazz, String propertyName) {
-        Class<?>[] classGenericsTypes;
-        Class<?> curClazz = clazz;
+//    private Class getIdClass(Class<?> clazz, String propertyName) {
+//        Class<?>[] classGenericsTypes;
+//        Class<?> curClazz = clazz;
+//
+//        while (curClazz != Object.class) {
+//            classGenericsTypes = ClassUtils.getClassGenericsTypes(curClazz);
+//            if (classGenericsTypes != null) {
+//                return classGenericsTypes[0];
+//            }
+//            curClazz = curClazz.getSuperclass();
+//        }
+//
+//        return ClassUtils.getField(clazz, propertyName).getType();
+//    }
 
-        while (curClazz != Object.class) {
-            classGenericsTypes = ClassUtils.getClassGenericsTypes(curClazz);
-            if (classGenericsTypes != null) {
-                return classGenericsTypes[0];
-            }
-            curClazz = curClazz.getSuperclass();
-        }
-
-        return ClassUtils.getField(clazz, propertyName).getType();
+    private Class<?> getIdClass(Class<?> subClass, Field field) {
+        return ClassUtils.getFieldGenericClass(subClass, field)[0];
     }
 
     public static Field[] uniqueFields(Field[] fields) {
