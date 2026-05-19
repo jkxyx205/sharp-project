@@ -23,8 +23,32 @@ public class ClassUtils {
      * @return
      */
     public static Class<?>[] getFieldGenericClass(Field field) {
+        return getFieldGenericClass(null, field);
+    }
+
+    /**
+     * public class OrderEntity<T extends ItemEntity> extends BaseCodeDescriptionEntity<Long> {
+     *     @Valid
+     *     @Size(min = 1)
+     *     @OneToMany(mappedBy = "headerId", joinColumnId = "header_id")
+     *     List<T> itemList;
+     * }
+     *
+     * public class PurchaseOrder extends OrderEntity<PurchaseOrder.Item> {
+     *
+     * }
+     *
+     * 根据 itemList 的 field，获取真实范型的 class，必须传 subClass，才能获取到 PurchaseOrder.Item.class，getFieldGenericClass(PurchaseOrder.class, itemList.field)
+     * 如果不传入 subClass， getFieldGenericClass(itemList.field) 只能获取 ItemEntity.class
+     *
+     *
+     * @param subClass 实际泛型绑定在哪个类
+     * @param field
+     * @return
+     */
+    public static Class<?>[] getFieldGenericClass(Class<?> subClass, Field field) {
         Type[] type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-        return typeToClass(type);
+        return typeToClass(subClass, type);
     }
 
     /**
@@ -37,7 +61,7 @@ public class ClassUtils {
         if (genericSuperclass instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) genericSuperclass)
                     .getActualTypeArguments();
-            return typeToClass(actualTypeArguments);
+            return typeToClass(null, actualTypeArguments);
         }
 
         return null;
@@ -143,7 +167,7 @@ public class ClassUtils {
         }
     }
 
-    private static Class<?>[] typeToClass(Type[] actualTypeArguments) {
+    private static Class<?>[] typeToClass(Class<?> subClass, Type[] actualTypeArguments) {
         if (actualTypeArguments == null || actualTypeArguments.length == 0) {
             return new Class<?>[0];
         }
@@ -162,15 +186,18 @@ public class ClassUtils {
                 classes[i] = (Class<?>) ((ParameterizedType) type).getRawType();
 
             } else if (type instanceof TypeVariable<?>) {
-                // 处理 T 等泛型变量
-                TypeVariable<?> tv = (TypeVariable<?>) type;
-                Type[] bounds = tv.getBounds(); // T extends Number → bounds[0] = Number.class
-                if (bounds != null && bounds.length > 0 && bounds[0] instanceof Class<?>) {
-                    classes[i] = (Class<?>) bounds[0];  // 上界
+                if (Objects.nonNull(subClass)) {
+                    classes[i] = resolveTypeVariable(subClass, (TypeVariable)type);
                 } else {
-                    classes[i] = Object.class; // 无上界 → Object
+                    // 处理 T 等泛型变量
+                    TypeVariable<?> tv = (TypeVariable<?>) type;
+                    Type[] bounds = tv.getBounds(); // T extends Number → bounds[0] = Number.class
+                    if (bounds != null && bounds.length > 0 && bounds[0] instanceof Class<?>) {
+                        classes[i] = (Class<?>) bounds[0];  // 上界
+                    } else {
+                        classes[i] = Object.class; // 无上界 → Object
+                    }
                 }
-
             } else if (type instanceof GenericArrayType) {
                 // T[] 或 List<String>[] 这种类型
                 Type componentType = ((GenericArrayType) type).getGenericComponentType();
@@ -184,6 +211,40 @@ public class ClassUtils {
         }
 
         return classes;
+    }
+
+    private static Class<?> resolveTypeVariable(Class<?> subClass, TypeVariable<?> typeVar) {
+        // typeVar 声明在哪个类上（OrderEntity），找到它的位置 index
+        Class<?> declaringClass = (Class<?>) typeVar.getGenericDeclaration();
+        TypeVariable<?>[] typeParams = declaringClass.getTypeParameters();
+
+        int index = -1;
+        for (int i = 0; i < typeParams.length; i++) {
+            if (typeParams[i].getName().equals(typeVar.getName())) {
+                index = i;
+                break;
+            }
+        }
+
+        // 从 subClass 向上找，直到找到 extends declaringClass<XxxType> 的那一层
+        Class<?> current = subClass;
+        while (current != null) {
+            Type genericSuper = current.getGenericSuperclass();
+            if (genericSuper instanceof ParameterizedType) {
+                ParameterizedType pt = (ParameterizedType)genericSuper;
+                if (pt.getRawType().equals(declaringClass)) {
+                    // 找到了 PurchaseOrder extends OrderEntity<PurchaseOrder.Item>
+                    Type actualType = pt.getActualTypeArguments()[index];
+                    if (actualType instanceof Class<?>) {
+                        Class<?> clazz = (Class<?>) actualType;
+                        return clazz; // ✅ PurchaseOrder.Item
+                    }
+                }
+            }
+            current = current.getSuperclass();
+        }
+
+        throw new IllegalArgumentException("Cannot resolve TypeVariable: " + typeVar);
     }
 
     private static Class<?> resolveToClass(Type type) {

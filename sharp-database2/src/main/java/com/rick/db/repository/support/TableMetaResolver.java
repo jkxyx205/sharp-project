@@ -56,7 +56,7 @@ public class TableMetaResolver {
                     reference.select = select;
                     reference.field = field;
                     if (Collection.class.isAssignableFrom(field.getType())) {
-                        reference.referenceClass = ClassUtils.getFieldGenericClass(field)[0];
+                        reference.referenceClass = ClassUtils.getFieldGenericClass(entityClass, field)[0];
                     } else {
                         reference.referenceClass = field.getType();
                     }
@@ -77,13 +77,13 @@ public class TableMetaResolver {
 
                 if (Objects.nonNull(manyToMany)) {
                     reference.manyToMany = manyToMany;
-                    reference.referenceClass = ClassUtils.getFieldGenericClass(field)[0];
+                    reference.referenceClass = ClassUtils.getFieldGenericClass(entityClass, field)[0];
                 } else if (Objects.nonNull(oneToMany)) {
                     reference.oneToMany = oneToMany;
                     if (oneToMany.oneToOne()) {
                         reference.referenceClass = field.getType();
                     } else {
-                        reference.referenceClass = ClassUtils.getFieldGenericClass(field)[0];
+                        reference.referenceClass = ClassUtils.getFieldGenericClass(entityClass, field)[0];
                     }
                 } else if (Objects.nonNull(manyToOne)) {
                     reference.manyToOne = manyToOne;
@@ -92,7 +92,7 @@ public class TableMetaResolver {
                 } else if (Objects.nonNull(select)) {
                     reference.select = select;
                     if (Collection.class.isAssignableFrom(field.getType())) {
-                        reference.referenceClass = ClassUtils.getFieldGenericClass(field)[0];
+                        reference.referenceClass = ClassUtils.getFieldGenericClass(entityClass, field)[0];
                     } else {
                         reference.referenceClass = field.getType();
                     }
