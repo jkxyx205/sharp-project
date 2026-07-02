@@ -17,7 +17,7 @@ function sharpFormInit(formDOM, idDOM, options, reloadTabIds, elseValid) {
 
         if (options.readonly == 'true' || options.readonly == true) {
             $("form.readonly :input").prop("disabled", true);
-            $('table .operator').hide()
+            $('form.readonly table .operator').hide()
         } else {
         }
     })
