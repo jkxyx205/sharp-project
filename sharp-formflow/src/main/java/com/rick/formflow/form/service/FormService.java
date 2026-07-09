@@ -12,8 +12,6 @@ import com.rick.formflow.form.dao.FormCpnValueDAO;
 import com.rick.formflow.form.dao.FormDAO;
 import com.rick.formflow.form.service.bo.FormBO;
 import com.rick.formflow.form.service.model.FormCache;
-import com.rick.meta.dict.entity.Dict;
-import com.rick.meta.dict.service.DictService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -53,7 +51,7 @@ public class FormService {
 
     private final ApplicationContext applicationContext;
 
-    private final DictService dictService;
+//    private final DictService dictService;
 
     public Form saveOrUpdate(@Valid Form form) {
         formDAO.insertOrUpdate(form);
@@ -148,10 +146,10 @@ public class FormService {
         for (FormCpn formCpn : formCpnList) {
             CpnConfigurer cpnConfigurer = configIdMap.get(formCpn.getConfigId());
 
-            if (StringUtils.isNotBlank(cpnConfigurer.getDatasource())) {
-                List<Dict> dictList = dictService.getDictByType(cpnConfigurer.getDatasource());
-                cpnConfigurer.setOptions(dictList.stream().map(dictDO -> new CpnConfigurer.CpnOption(dictDO.getName(), dictDO.getLabel())).collect(Collectors.toList()));
-            }
+//            if (StringUtils.isNotBlank(cpnConfigurer.getDatasource())) {
+//                List<Dict> dictList = dictService.getDictByType(cpnConfigurer.getDatasource());
+//                cpnConfigurer.setOptions(dictList.stream().map(dictDO -> new CpnConfigurer.CpnOption(dictDO.getName(), dictDO.getLabel())).collect(Collectors.toList()));
+//            }
 
             Cpn cpn = CpnManager.getCpnByType(cpnConfigurer.getCpnType());
 
