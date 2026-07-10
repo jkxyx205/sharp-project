@@ -26,15 +26,8 @@ public class CpnConfigurerDAO extends EntityDAOImpl<CpnConfigurer, Long> {
     private DictService dictService;
 
     @Override
-    public List<CpnConfigurer> select(Map<String, Object> paramMap) {
-        List<CpnConfigurer> list = super.select(paramMap);
-        datasourceOptionsHandler(list);
-        return list;
-    }
-
-    @Override
-    public <E> List<E> select(Class<E> clazz, String columns, String condition, Map<String, Object> paramMap) {
-        List<E> list = super.select(clazz, columns, condition, paramMap);
+    protected  <E> List<E> select(Class<E> clazz, String sql, Map<String, Object> paramMap) {
+        List<E> list = super.select(clazz, sql, paramMap);
         datasourceOptionsHandler((List<CpnConfigurer>) list);
         return list;
     }

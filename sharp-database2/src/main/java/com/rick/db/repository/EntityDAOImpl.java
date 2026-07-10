@@ -243,7 +243,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return select(clazz, tableMeta.getSelectSQL(columns) + SqlHelper.buildWhere(condition), paramMap);
     }
 
-    private  <E> List<E> select(Class<E> clazz, String sql, Map<String, Object> paramMap) {
+    protected <E> List<E> select(Class<E> clazz, String sql, Map<String, Object> paramMap) {
         return (List<E>) watchSelect(() -> {
             List<E> list = selectWithoutCascade(clazz, sql, paramMap);
             cascadeSelect(clazz, (List<T>) list);
