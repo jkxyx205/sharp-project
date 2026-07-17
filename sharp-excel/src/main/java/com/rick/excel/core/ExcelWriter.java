@@ -10,10 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.CellCopyPolicy;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.*;
@@ -22,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -319,14 +317,29 @@ public class ExcelWriter {
             return;
         }
 
-        if (object instanceof Boolean) {
+        if (object instanceof RichTextString) {
+            // 调用方已经构造好富文本（比如带高亮、下划线的关键词），直接写入
+            cell.setCellValue((RichTextString)object);
+        } else if (object instanceof Boolean) {
             cell.setCellValue((Boolean) object);
         } else if (Date.class.isAssignableFrom(object.getClass())) {
-            cell.setCellValue(Time2StringUtils.format((Date) object));
+            if (cell.getCellType() == CellType.STRING) {
+                cell.setCellValue(Time2StringUtils.format((Date) object));
+            } else {
+                cell.setCellValue((Date)object);
+            }
         } else if (object.getClass() == LocalDate.class) {
-            cell.setCellValue(Time2StringUtils.format((LocalDate) object));
+            if (cell.getCellType() == CellType.STRING) {
+                cell.setCellValue(Time2StringUtils.format((LocalDate) object));
+            } else {
+                cell.setCellValue((LocalDate)object);
+            }
         } else if (object.getClass() == LocalDateTime.class) {
-            cell.setCellValue(Time2StringUtils.format((LocalDateTime) object));
+            if (cell.getCellType() == CellType.STRING) {
+                cell.setCellValue(Time2StringUtils.format((LocalDateTime) object));
+            } else {
+                cell.setCellValue((LocalDateTime)object);
+            }
         }/*else if (object instanceof java.util.Date) { // 显示数字，表示 是一个 Excel 格式的序列号日期，可读性差
             cell.setCellValue((java.util.Date) object);
         } else if (object instanceof LocalDateTime) {
@@ -335,8 +348,21 @@ public class ExcelWriter {
             cell.setCellValue((LocalDate)object);
         } */else if (object instanceof Calendar) {
             cell.setCellValue((Calendar)object);
+        } else if (object instanceof BigDecimal) {
+            // 高精度金额，避免 double 精度丢失，按需选择数值或字符串
+            cell.setCellValue(((BigDecimal)object).doubleValue());
+        } else if (object instanceof Long || object instanceof Integer) {
+            // 长整型 ID 等大数，写成字符串防止精度丢失/科学计数法
+            long value = ((Number) object).longValue();
+            if (Math.abs(value) > 999_999_999_999_999L) { // 超过 double 精确表示整数的安全范围
+                cell.setCellValue(String.valueOf(value));
+            } else {
+                cell.setCellValue((double) value);
+            }
+
         } else if (object instanceof Number) {
-            cell.setCellValue(Double.valueOf(String.valueOf(object)));
+//            cell.setCellValue(Double.valueOf(String.valueOf(object)));
+            cell.setCellValue(((Number)object).doubleValue());
         } else {
             cell.setCellValue(String.valueOf(object));
         }

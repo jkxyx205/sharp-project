@@ -11,4 +11,8 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 public interface ExcelWriterHook {
 
     void afterCellWrite(ExcelCell ecell, XSSFCell cell);
+
+    default boolean setCellValue(XSSFCell cell, Object object) {
+        return false;
+    }
 }
