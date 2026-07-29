@@ -18,7 +18,7 @@ public class BaseCodeApi<S extends BaseServiceImpl<? extends EntityCodeDAO<T, ID
         super(baseService);
     }
 
-    @GetMapping("code/{code}")
+    @GetMapping("codes/{code}")
     public T findByCode(@PathVariable String code) {
         return (T) getEntityFromOptional(((EntityCodeDAO) entityDAO).selectByCode(code), code);
     }
