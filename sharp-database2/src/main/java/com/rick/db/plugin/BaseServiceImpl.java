@@ -244,6 +244,11 @@ public class BaseServiceImpl<D extends EntityDAO<T, ID>, T extends EntityId<ID>,
     }
 
     @Override
+    public T patch(T entity) {
+        return baseDAO.patch(entity);
+    }
+
+    @Override
     public T insertOrUpdate(T entity) {
         return baseDAO.insertOrUpdate(entity);
     }

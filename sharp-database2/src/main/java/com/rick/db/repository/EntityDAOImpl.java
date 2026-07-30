@@ -3,7 +3,6 @@ package com.rick.db.repository;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.rick.common.function.SFunction;
-import com.rick.common.util.*;
 import com.rick.db.config.Context;
 import com.rick.db.repository.model.DatabaseType;
 import com.rick.db.repository.model.EntityId;
@@ -660,7 +659,31 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public T update(T entity) {
+        Assert.notNull(getIdValue(entity), "id cannot be null");
         return insertOrUpdate0(entity, false);
+    }
+
+    @Override
+    public T patch(T entity) {
+        Assert.notNull(getIdValue(entity), "id cannot be null");
+        Map<String, String> columnPropertyNameMap = tableMeta.getColumnPropertyNameMap();
+        List<String> patchColumns = new ArrayList<>(columnPropertyNameMap.size());
+
+        for (Map.Entry<String, String> entry : columnPropertyNameMap.entrySet()) {
+            String propertyName = entry.getValue();
+            if (!Objects.equals(entry.getValue(), tableMeta.getIdMeta().getIdColumnName())) {
+                Object value = getPropertyValue(entity, propertyName);
+                if (Objects.nonNull(value)) {
+                    patchColumns.add(entry.getKey());
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(patchColumns)) {
+            update(patchColumns.stream().collect(Collectors.joining(", ")), tableMeta.getIdMeta().getIdColumnName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), entity);
+        }
+
+        return entity;
     }
 
     @Override
@@ -690,6 +713,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
     @Override
     public T updateWithoutCascade(T entity) {
 //        tableDAO.update(tableMeta.getTableName(), tableMeta.getColumnNames(), tableMeta.getIdMeta().getIdColumnName() + " = ?",  entityToMap(entity));
+        Assert.notNull(getIdValue(entity), "id cannot be null");
         insertOrUpdate0(entity, false, false);
         return entity;
     }
@@ -978,7 +1002,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public int updateById(String columns, ID id, Object... args) {
-        return update(columns, tableMeta.getIdMeta().getIdColumnName() + " = :id", ArrayUtils.addAll(args, id));
+        return update(columns, tableMeta.getIdMeta().getIdColumnName() + " = ?", ArrayUtils.addAll(args, id));
     }
 
     public int updateById(String columns, ID id, Map<String, Object> paramMap) {
