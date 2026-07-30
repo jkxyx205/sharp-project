@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,7 @@ public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID
     @GetMapping("one")
     public T one(HttpServletRequest request) {
         Map<String, Object> params = HttpServletRequestUtils.getParameterMap(request);
-        return getEntityFromOptional(OperatorUtils.expectedAsOptional(entityDAO.select(SQLParamCleaner.formatSql(" WHERE " + entityDAO.getTableMeta().getConditionSQL(), params, new HashMap<>()).replaceAll(" WHERE ", ""), params)), params);
+        return getEntityFromOptional(OperatorUtils.expectedAsOptional(entityDAO.select(SQLParamCleaner.formatSql(entityDAO.getTableMeta().getConditionSQL(), params, new HashMap<>()), params)), params);
     }
 
 //    @GetMapping("one")
@@ -66,19 +67,19 @@ public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID
 //    }
 
 //    @PostMapping
-//    public EntityId save(@RequestBody T t) {
+//    public EntityId save(@Valid @RequestBody T t) {
 //        baseService.save(t);
 //        return EntityId.builder().id(t.getId()).build();
 //    }
 
 //    @PutMapping("{id}")
-//    public EntityId update(@RequestBody T t, @PathVariable Long id) {
+//    public EntityId update(@Valid  @RequestBody T t, @PathVariable Long id) {
 //        t.setId(id);
 //        return this.update(t);
 //    }
 //
 //    @PutMapping
-//    public EntityId update(@RequestBody T t) {
+//    public EntityId update(@Valid  @RequestBody T t) {
 //        baseService.update(t);
 //        return t;
 //    }
@@ -94,14 +95,21 @@ public class BaseApi<S extends BaseServiceImpl<? extends EntityDAO<T, ID>, T, ID
     }
 
     @PutMapping("{id}")
-    public T update(@PathVariable ID id, @RequestBody T t) {
+    public T update(@PathVariable ID id, @Valid @RequestBody T t) {
         t.setId(id);
         baseService.update(t);
         return t;
     }
 
+    @PatchMapping("{id}")
+    public T patch(@PathVariable ID id, @Valid @RequestBody T t) {
+        t.setId(id);
+        baseService.patch(t);
+        return t;
+    }
+
     @PostMapping
-    public T saveOrUpdate(@RequestBody T t) {
+    public T saveOrUpdate(@Valid @RequestBody T t) {
         baseService.insertOrUpdate(t);
         return t;
     }
