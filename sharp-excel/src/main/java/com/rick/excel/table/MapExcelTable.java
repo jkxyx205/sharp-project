@@ -52,10 +52,12 @@ public class MapExcelTable extends AbstractExportTable<Map<String, Object>> {
             if (Objects.nonNull(row.get(columnName))) {
                 Object value = row.get(columnName);
                 BigDecimal amount = BigDecimal.ZERO;
-                if (value.getClass() == String.class) {
+                if (value instanceof BigDecimal) {
+                    amount =  (BigDecimal) value;
+                } else if (value.getClass() == String.class) {
                     amount = new BigDecimal((String)value);
                 } else if (Number.class.isAssignableFrom(value.getClass())) {
-                    amount = new BigDecimal(((Number)value).doubleValue());
+                    amount = new BigDecimal(value.toString());
                 }
 
                 totalAmount = totalAmount.add(amount);
