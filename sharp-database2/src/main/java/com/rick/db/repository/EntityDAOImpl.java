@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.rick.common.function.SFunction;
 import com.rick.common.util.*;
+import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Context;
 import com.rick.db.repository.model.DatabaseType;
 import com.rick.db.repository.model.EntityId;
@@ -65,6 +66,9 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Autowired(required = false)
     private InsertUpdateCallback insertUpdateCallback;
+
+    @Resource
+    private ValidatorHelper validatorHelper;
 
     public EntityDAOImpl() {
         Class<?>[] actualTypeArguments = ClassUtils.getClassGenericsTypes(getClass());
@@ -675,7 +679,10 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
             if (!Objects.equals(entry.getValue(), tableMeta.getIdMeta().getIdColumnName())) {
                 Object value = getPropertyValue(entity, propertyName);
                 if (Objects.nonNull(value)) {
-                    patchColumns.add(entry.getKey());
+                    if (Arrays.stream(tableMeta.getUpdateColumnArray()).anyMatch(s -> s.equals(entry.getKey()))) {
+                        validatorHelper.validateProperty(entity, propertyName);
+                        patchColumns.add(entry.getKey());
+                    }
                 }
             }
         }

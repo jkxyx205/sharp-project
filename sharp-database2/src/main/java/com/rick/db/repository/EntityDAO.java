@@ -105,7 +105,7 @@ public interface EntityDAO<T, ID> {
 
     T update(@Valid @NotNull T entity);
 
-    T patch(@Valid @NotNull T entity);
+    T patch(@NotNull T entity);
 
     T insertOrUpdate(@Valid @NotNull T entity);
 
