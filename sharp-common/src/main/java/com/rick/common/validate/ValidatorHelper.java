@@ -43,6 +43,11 @@ public class ValidatorHelper {
         handResult(result);
     }
 
+    public <T> void validateProperty(T target, String propertyName){
+        Set<ConstraintViolation<T>> result = validator.validateProperty(target, propertyName);
+        handResult(result);
+    }
+
     private <T> void handResult(Set<ConstraintViolation<T>> result) {
         if (!result.isEmpty()) {
             throw new ConstraintViolationException(result);
