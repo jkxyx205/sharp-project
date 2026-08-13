@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
+import java.util.Objects;
 
 import static com.rick.db.repository.support.Constants.COLUMN_NAME_SEPARATOR_REGEX;
 
@@ -38,5 +39,16 @@ public class SqlHelper {
                 tableName,
                 columnNames,
                 columnsCondition);
+    }
+
+    /**
+     *
+     * @param columnName material_code
+     * @param value M01
+     * @param holderParam :materialCode /  ?
+     * @return
+     */
+    public String buildNullColumnCondition(String columnName, Object value, String holderParam) {
+        return (Objects.isNull(value) ? columnName + " IS NULL" : columnName + " = " + holderParam);
     }
 }
