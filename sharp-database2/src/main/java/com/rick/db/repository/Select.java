@@ -14,6 +14,8 @@ public @interface Select {
 
     String value();
 
+    Class<?> entityClass() default Void.class;
+
     String params() default "";
 
     /**
@@ -21,5 +23,11 @@ public @interface Select {
      * @return
      */
     String[] nullWhenParamsIsNull() default {};
+
+    /**
+     * 级联查找
+     * @return
+     */
+    boolean cascadeSelect() default true;
 
 }

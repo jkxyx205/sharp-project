@@ -20,9 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
@@ -411,7 +409,8 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                             params = new HashMap<>(mappingKv.length);
                             for (String kv : mappingKv) {
                                 String[] kvArr = kv.split("@");
-                                Object value = beanWrapper.getPropertyValue(kvArr[1]);
+//                                Object value = beanWrapper.getPropertyValue(kvArr[1]);
+                                Object value = getPropertyValueSafely(beanWrapper, kvArr[1]);
                                 params.put(kvArr[0], value);
                                 if (notNullKeys.contains(kvArr[0]) && Objects.isNull(value)) {
                                     valueNull = true;
@@ -427,7 +426,20 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                         if (valueNull) {
                             beanWrapper.setPropertyValue(tableMeta.getFieldPropertyNameMap().get(reference.getField()), null);
                         } else {
-                            List<?> selectList = tableDAO.select(reference.getReferenceClass(), select.value(), params);
+                            String selectSQL = null;
+                            if (select.entityClass() != Void.class) {
+                                selectSQL = EntityDAOManager.getDAO(select.entityClass()).getTableMeta().getSelectSQL() + " ";
+                            }
+
+                            List<?> selectList = tableDAO.select(reference.getReferenceClass(), ObjectUtils.defaultIfNull(selectSQL, "") + select.value(), params);
+                            if (CollectionUtils.isNotEmpty(selectList) && select.cascadeSelect()) {
+                                Object selectObject = selectList.get(0);
+                                if (EntityId.class.isAssignableFrom(selectObject.getClass())) {
+                                    EntityDAO entityDAO = EntityDAOManager.getDAO(selectObject.getClass());
+                                    entityDAO.cascadeSelect(selectList);
+                                }
+                            }
+
                             Object value = Collection.class.isAssignableFrom(reference.getField().getType()) ? selectList : OperatorUtils.expectedAsOptional(selectList).orElse(null);
                             beanWrapper.setPropertyValue(tableMeta.getFieldPropertyNameMap().get(reference.getField()), value);
                         }
@@ -435,6 +447,29 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 }
             }
         }
+    }
+
+    /**
+     * BeanWrapper 的 getPropertyValue("a.b") 不会自动安全导航。当 a == null 时，访问 b 就会抛 NullValueInNestedPathException。
+     * @param beanWrapper
+     * @param propertyPath
+     * @return
+     */
+    private Object getPropertyValueSafely(BeanWrapper beanWrapper, String propertyPath) {
+        String[] properties = propertyPath.split("\\.");
+
+        Object current = beanWrapper.getWrappedInstance();
+
+        for (String property : properties) {
+            if (current == null) {
+                return null;
+            }
+
+            BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(current);
+            current = wrapper.getPropertyValue(property);
+        }
+
+        return current;
     }
 
     @Override
