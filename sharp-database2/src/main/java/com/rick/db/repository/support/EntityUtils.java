@@ -2,6 +2,7 @@ package com.rick.db.repository.support;
 
 import com.rick.db.repository.model.BaseEntityInfoGetter;
 import com.rick.db.repository.model.EntityId;
+import com.rick.db.repository.model.EntityIdCode;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
 
@@ -11,6 +12,15 @@ import org.springframework.beans.BeanUtils;
  */
 @UtilityClass
 public class EntityUtils {
+
+    public void copyPropertiesAndResetAdditionalFields(Object source, EntityId target) {
+        copyPropertiesAndResetAdditionalFields(source, target, (String[])null);
+    }
+
+    public void copyPropertiesAndResetAdditionalFields(Object source, EntityId target, String... ignoreProperties) {
+        BeanUtils.copyProperties(source, target, ignoreProperties);
+        EntityUtils.resetAdditionalFields(target);
+    }
 
     public void resetAdditionalFields(EntityId entity) {
         entity.setId(null);
@@ -22,15 +32,10 @@ public class EntityUtils {
             ((BaseEntityInfoGetter)entity).getBaseEntityInfo().setUpdateTime(null);
             ((BaseEntityInfoGetter)entity).getBaseEntityInfo().setDeleted(null);
         }
-    }
 
-    public void copyPropertiesAndResetAdditionalFields(Object source, EntityId target) {
-        copyPropertiesAndResetAdditionalFields(source, target, (String[])null);
-    }
-
-    public void copyPropertiesAndResetAdditionalFields(Object source, EntityId target, String... ignoreProperties) {
-        BeanUtils.copyProperties(source, target, ignoreProperties);
-        EntityUtils.resetAdditionalFields(target);
+        if (entity instanceof EntityIdCode) {
+            ((EntityIdCode)entity).setCode(null);
+        }
     }
 
     public boolean isEntityClass(Class<?> clazz) {
