@@ -399,7 +399,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 } else if (Objects.nonNull(reference.getSelect())) {
                     Select select = reference.getSelect();
                     String[] mappingKv = StringUtils.isBlank(select.params()) ? null : select.params().split(COLUMN_NAME_SEPARATOR_REGEX);
-                    Set<String> notNullKeys = Arrays.stream(select.nullWhenParamsIsNull()).collect(Collectors.toSet());
+//                    Set<String> notNullKeys = Arrays.stream(select.nullWhenParamsIsNull()).collect(Collectors.toSet());
                     for (T t : list) {
                         BeanWrapperImpl beanWrapper = new BeanWrapperImpl(t);
                         boolean valueNull = false;
@@ -411,15 +411,14 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                                 String[] kvArr = kv.split("@");
 //                                Object value = beanWrapper.getPropertyValue(kvArr[1]);
                                 Object value = getPropertyValueSafely(beanWrapper, kvArr[1]);
-                                params.put(kvArr[0], value);
-                                if (notNullKeys.contains(kvArr[0]) && Objects.isNull(value)) {
+                                if (/*notNullKeys.contains(kvArr[0]) && */Objects.isNull(value)) {
                                     valueNull = true;
                                     break;
                                 }
-
-                                if (Objects.isNull(value)) {
-                                    params.put(kvArr[0], "null");
-                                }
+                                params.put(kvArr[0], value);
+//                                if (Objects.isNull(value)) {
+//                                    params.put(kvArr[0], "null");
+//                                }
                             }
                         }
 

@@ -20,8 +20,10 @@ public @interface Select {
 
     /**
      * 允许某个参数为null的时候， 直接返回结果null，无需数据库查询
+     * update：直接某个参数为null的时候， 直接返回结果null，不需要配置该属性
      * @return
      */
+    @Deprecated
     String[] nullWhenParamsIsNull() default {};
 
     /**
