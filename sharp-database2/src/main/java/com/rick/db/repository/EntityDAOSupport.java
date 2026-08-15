@@ -81,7 +81,7 @@ public class EntityDAOSupport {
         return list;
     }
 
-    public <T> List<T> select(Class<T> clazz, String sql, Object args) {
+    public <T> List<T> select(Class<T> clazz, String sql, Object... args) {
         List<T> list = tableDAO.select(clazz, sql, args);
         select(list);
         return list;
