@@ -102,7 +102,7 @@ public class EntityCodeDAOImpl<T extends EntityIdCode<ID>, ID> extends EntityDAO
 
     @Override
     public List<ID> selectIdsByCodes(Collection<String> codes) {
-        return select(getTableMeta().getIdMeta().getIdClass(), getTableMeta().getIdMeta().getIdPropertyName(), "code IN (:codes)", Maps.of("code", codes));
+        return select(getTableMeta().getIdMeta().getIdClass(), getTableMeta().getIdMeta().getIdPropertyName(), "code IN (:codes)", Maps.of("codes", codes));
     }
 
     private void fillEntityIdByCode(T t) {

@@ -571,7 +571,7 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
 
     @Override
     public Collection<T> insertOrUpdateTable(Collection<T> entityList, String refColumnName, Object refValue) {
-        return insertOrUpdateTable(entityList,  true, null);
+        return insertOrUpdateTable(entityList, refColumnName, refValue, true, null);
     }
 
     @Override
