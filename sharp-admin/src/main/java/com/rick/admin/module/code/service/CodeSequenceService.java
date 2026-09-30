@@ -36,6 +36,45 @@ public class CodeSequenceService {
     }
 
     /**
+     * 预览下一个编号，但不持久化递增（未保存前不占用序号，下次进入仍可使用）。
+     * 仅用于新增表单渲染时的默认编号展示，真正占用序号应在保存时调用 {@link #getCodeSequence}。
+     */
+    public String peekCodeSequence(String category, String prefix) {
+        return peekCodeSequence(category, prefix, Time2StringUtils.format(Instant.now()).replaceAll("\\s+|-|:", "").substring(0, 8), 2);
+    }
+
+    /**
+     * 预览下一个编号，但不持久化递增（未保存前不占用序号，下次进入仍可使用）。
+     * 仅用于新增表单渲染时的默认编号展示，真正占用序号应在保存时调用 {@link #getCodeSequence}。
+     */
+    public String peekCodeSequence(String category, String prefix, String name, int sequenceLen) {
+        int sequence = peekNextSequence(category, prefix, name);
+        return StringUtils.defaultString(prefix, "") + name + StringUtils.leftPad("" + (sequence + 1), sequenceLen, "0");
+    }
+
+    /**
+     * 只读查询当前已使用的序号，不递增、不落库。
+     */
+    private int peekNextSequence(String category, String prefix, String name) {
+        return SQLUtils.execute(con -> {
+            int sequence = 0;
+            try (PreparedStatement queryPreparedStatement = con.prepareStatement("SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ?")) {
+                queryPreparedStatement.setString(1, category);
+                queryPreparedStatement.setString(2, prefix);
+                queryPreparedStatement.setString(3, name);
+
+                try (ResultSet resultSet = queryPreparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        sequence = resultSet.getInt(1);
+                    }
+                }
+            }
+
+            return sequence;
+        });
+    }
+
+    /**
      *
      * @param category 分类
      * @param prefix 前缀
