@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Instant;
 
 @Service
@@ -112,35 +113,48 @@ public class CodeSequenceService {
     public int[] getNextSequences(String category, String prefix, String name, int size) {
         int[] sequences = new int[size];
 
-        synchronized (category) {
-            int seq = SQLUtils.execute(con -> {
-                int sequence = 0;
-                try (PreparedStatement queryPreparedStatement = con.prepareStatement("SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ?")){
-                    queryPreparedStatement.setString(1, category);
-                    queryPreparedStatement.setString(2, prefix);
-                    queryPreparedStatement.setString(3, name);
-
-                    try (ResultSet resultSet = queryPreparedStatement.executeQuery()){
-                        if (resultSet.next()) {
-                            sequence = resultSet.getInt(1);
+        // 单连接事务内 SELECT ... FOR UPDATE 取行锁 + UPDATE，由 DB 行锁保证并发安全（集群也安全），
+        // 无需 JVM 锁，也不区分数据库方言。WHERE 必须含 name，避免覆盖同名分类下的其它行。
+        int newSeq = SQLUtils.execute(con -> {
+            boolean originalAutoCommit = con.getAutoCommit();
+            con.setAutoCommit(false);
+            try {
+                int sequence;
+                try (PreparedStatement ps = con.prepareStatement(
+                        "SELECT sequence FROM core_code_sequence WHERE category = ? AND prefix = ? AND name = ? FOR UPDATE")) {
+                    ps.setString(1, category);
+                    ps.setString(2, prefix);
+                    ps.setString(3, name);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            throw new IllegalStateException("core_code_sequence row not found: category=" + category + ", prefix=" + prefix + ", name=" + name);
                         }
+                        sequence = rs.getInt(1);
                     }
                 }
 
-                try (PreparedStatement preparedStatement = con.prepareStatement("UPDATE core_code_sequence SET sequence = ?, name = ?  WHERE category = ? AND prefix = ? ")){
-                    preparedStatement.setInt(1, sequence + size);
-                    preparedStatement.setString(2, name);
-                    preparedStatement.setString(3, category);
-                    preparedStatement.setString(4, prefix);
-                    preparedStatement.executeUpdate();
+                int newSequence = sequence + size;
+                try (PreparedStatement ps = con.prepareStatement(
+                        "UPDATE core_code_sequence SET sequence = ? WHERE category = ? AND prefix = ? AND name = ?")) {
+                    ps.setInt(1, newSequence);
+                    ps.setString(2, category);
+                    ps.setString(3, prefix);
+                    ps.setString(4, name);
+                    ps.executeUpdate();
                 }
 
-                return sequence;
-            });
-
-            for (int i = 1; i <= size; i++) {
-                sequences[i - 1] = seq + i;
+                con.commit();
+                return newSequence;
+            } catch (SQLException | RuntimeException e) {
+                try { con.rollback(); } catch (SQLException ignore) {}
+                throw e;
+            } finally {
+                try { con.setAutoCommit(originalAutoCommit); } catch (SQLException ignore) {}
             }
+        });
+
+        for (int i = 1; i <= size; i++) {
+            sequences[i - 1] = newSeq - size + i;
         }
 
         return sequences;
