@@ -12,14 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
@@ -27,7 +24,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import javax.sql.DataSource;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -313,28 +309,16 @@ public class TableDAOImpl implements TableDAO {
     }
 
     /**
-     * 获取新的 connection 连接
+     * 以 Connection 执行 JDBC 回调。连接经 {@code DataSourceUtils} 获取：
+     * 存在 Spring 事务时复用事务连接（可回滚），否则从 DataSource 获取并自动释放；
+     * SQLException 转译为 DataAccessException 抛出（不再吞异常返回 null）
      * @param action
      * @return
      * @param <T>
      */
     @Override
     public <T> T execute(ConnectionCallback<T> action) {
-        DataSource dataSource = namedParameterJdbcTemplate.getJdbcTemplate().getDataSource();
-        Connection con = null;
-        try {
-//            con = DataSourceUtils.getConnection(dataSource); // 从 spring 上下文中获取连接
-            con = dataSource.getConnection();
-            return action.doInConnection(con);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (con != null) {
-                DataSourceUtils.releaseConnection(con, dataSource);
-            }
-        }
-
-        return null;
+        return namedParameterJdbcTemplate.getJdbcTemplate().execute(action);
     }
 
     @Override
