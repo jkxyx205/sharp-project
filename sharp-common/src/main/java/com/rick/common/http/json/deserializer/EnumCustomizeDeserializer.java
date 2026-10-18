@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.databind.node.JsonNodeType.NUMBER;
 import static com.fasterxml.jackson.databind.node.JsonNodeType.STRING;
@@ -92,7 +93,12 @@ public class EnumCustomizeDeserializer extends JsonDeserializer<Enum<?>> impleme
      * 通过code反序列化枚举
      */
     private Enum<?> deserializeByCode(Class<? extends Enum> enumClass, Object code, Class codeClass, JsonParser jsonParser) throws IOException {
-        if (code == null || (code instanceof String && ((String)code).trim().isEmpty())) {
+        // code 允许为 ''
+//        if (code == null || (code instanceof String && ((String)code).trim().isEmpty())) {
+//            return null;
+//        }
+
+        if (Objects.isNull(code)) {
             return null;
         }
 

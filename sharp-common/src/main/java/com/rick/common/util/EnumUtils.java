@@ -1,11 +1,11 @@
 package com.rick.common.util;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +25,12 @@ public class EnumUtils {
      * @return 如果没有找到返回null
      */
     public static Enum valueOfCode(Class enumType, String code) {
-        if (StringUtils.isBlank(code)) {
+        // code 允许为 ''
+//        if (StringUtils.isBlank(code)) {
+//            return null;
+//        }
+
+        if (Objects.isNull(code)) {
             return null;
         }
 
