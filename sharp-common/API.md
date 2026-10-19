@@ -138,10 +138,15 @@ Ajax 判定走 `HttpServletRequestUtils.isAjaxRequest`；非 Ajax 请求 forward
 #### `ObjectUtils`（`@UtilityClass`）
 `mayPureObject(Object|Class)` —— 判定是否「纯对象」（非 Number/CharSequence/Boolean/Enum/Array/Temporal/Collection/Map/Primitive）。用于决定是否按 JSON 存储等。
 
-#### `EnumUtils`（`@UtilityClass`）
-- `Enum valueOfCode(Class enumType, String code)` —— 优先调用枚举的静态 `valueOfCode(...)`（参数为 String 或 int），失败回退 `Enum.valueOf`；找不到返回 null
-- `List<String> getCodes(Class)` —— 所有常量 toString
-- `Object getCode(Enum)` —— 反射调 `getCode()`，失败返回 `name()`
+#### `com.rick.common.util.model.IEnum<C>`（interface）
+枚举 code/label 契约：`C getCode()` + `String getLabel()`。实现它的枚举享受 `EnumUtils` 的 O(1) code 缓存查找与类型安全 API。
+
+#### `EnumUtils`（`@UtilityClass @Slf4j`）
+- `<C, E extends Enum<E> & IEnum<C>> E fromCode(Class<E> enumType, C code)` —— 类型安全版本，仅支持 `IEnum` 枚举；内部维护 `Class -> {code -> 常量}` 的 `ConcurrentHashMap` 缓存，O(1) 查找；code 支持任意类型（如 `IEnum<Integer>` 传 Integer）；`enumType`/`code` 为 null 或非枚举返回 null；缓存构建时发现重复 code 抛 `IllegalStateException`
+- `Enum<?> valueOfCode(Class<?> enumType, String code)` —— String code 版本，与 `fromCode` 共享缓存：`IEnum` 枚举直接走缓存 map；非 `IEnum` 枚举优先调用其静态 `valueOfCode(...)`（`Method` 已缓存，参数为 String 或 int），调用失败（仅记 debug 日志）或无该方法时回退 `Enum.valueOf` 按常量名称解析；code 允许为 `''`，null 返回 null
+- `List<String> getCodes(Class)` —— `IEnum` 枚举返回所有常量的 `getCode()`，否则返回所有常量 toString
+- `Object getCode(Enum)` / `Object getLabel(Enum)` —— 反射调 `getCode()`/`getLabel()`，失败返回 `name()`
+- `Object getData(Enum, String getMethodName)` —— 上述两者的通用反射实现
 
 #### `BigDecimalUtils`（`@UtilityClass`）
 `eq/neq/lt/le/gt/ge(BigDecimal,BigDecimal)`（用 `compareTo`）与 `formatBigDecimalValue(value[, scale, RoundingMode])`（默认 2 位四舍五入、去尾零）。
