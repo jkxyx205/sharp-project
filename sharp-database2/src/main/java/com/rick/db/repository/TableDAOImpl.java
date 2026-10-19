@@ -1,5 +1,6 @@
 package com.rick.db.repository;
 
+import com.google.common.collect.Lists;
 import com.rick.common.util.JsonUtils;
 import com.rick.common.util.Maps;
 import com.rick.common.util.ObjectUtils;
@@ -382,11 +383,11 @@ public class TableDAOImpl implements TableDAO {
                 m.put((K) rs.getObject(1), (V) rs.getObject(2));
             });
 
-            return null;
+            return Lists.newArrayList(m);
         });
-        if (log.isDebugEnabled()) {
-            log.debug("SQL => [{}], paramMap => [{}], results = [{}]", sql, paramMap, m);
-        }
+//        if (log.isDebugEnabled()) {
+//            log.debug("SQL => [{}], paramMap => [{}], results = [{}]", sql, paramMap, m);
+//        }
         return m;
     }
 
