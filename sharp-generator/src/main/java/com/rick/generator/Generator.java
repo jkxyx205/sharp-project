@@ -93,12 +93,14 @@ public class Generator {
             boolean overwrite = Objects.equals(config.get(GENERATOR_CODE), true);
 
             // 2. 创建 code 模版
+            boolean isCodeEntity = BaseCodeEntity.class.isAssignableFrom(entityClass);
             // 2.1 DAO
-            generatorDAO(overwrite, entityName, rootPackageName, rootPackagePath,  "dao", BaseCodeEntity.class.isAssignableFrom(entityClass));
+            generatorDAO(overwrite, entityName, rootPackageName, rootPackagePath,  "dao", isCodeEntity);
             // 2.2 service
-            generatorService(overwrite, entityName, rootPackageName, rootPackagePath,  "service");
+            generatorService(overwrite, entityName, rootPackageName, rootPackagePath,  "service", isCodeEntity);
             // 2.3 controller
             generatorBaseFormController((String) config.get(PROJECT), overwrite, entityName, rootPackageName, rootPackagePath,  "controller", (String)config.get(FORM_PAGE));
+            generatorApiController((String) config.get(PROJECT), overwrite, entityName, rootPackageName, rootPackagePath,  "controller", isCodeEntity);
             // 2.4 report
             if ((Boolean) config.get(REPORT) == true) {
                 generatorReport(entityClass, entityName, (String) config.get(REPORT_TEST_PATH), (String) config.get(REPORT_TEST_PACKAGE));
@@ -152,19 +154,19 @@ public class Generator {
                 .replace("${NAME}", entityName);
     }
 
-    private void generatorService(boolean overwrite, String entityName, String rootPackageName, String rootPackagePath, String curPackageName) throws IOException {
-        String serviceCodeTemplate = serviceCodeTemplate(entityName, rootPackageName);
+    private void generatorService(boolean overwrite, String entityName, String rootPackageName, String rootPackagePath, String curPackageName, boolean isCodeEntity) throws IOException {
+        String serviceCodeTemplate = serviceCodeTemplate(entityName, rootPackageName, isCodeEntity);
         // 写文件
         writeCodeTemplate(overwrite, rootPackagePath, curPackageName, entityName + "Service.java", serviceCodeTemplate);
     }
 
-    private String serviceCodeTemplate(String entityName, String rootPackageName) {
+    private String serviceCodeTemplate(String entityName, String rootPackageName, boolean isCodeEntity) {
         String camelName = (entityName.substring(0,1).toLowerCase() + entityName.substring(1));
         String template = "package ${PACKAGE_NAME}.service;\n" +
                 "\n" +
                 "import ${PACKAGE_NAME}.dao.${NAME}DAO;\n" +
                 "import ${PACKAGE_NAME}.entity.${NAME};\n" +
-                "import com.rick.db.service.BaseServiceImpl;\n" +
+                "import com.rick.db.service.Base"+(isCodeEntity ? "Code" : "")+"ServiceImpl;\n" +
                 "import org.springframework.stereotype.Service;\n" +
                 "\n" +
                 "/**\n" +
@@ -172,7 +174,7 @@ public class Generator {
                 " * @date "+ Time2StringUtils.format(LocalDateTime.now()) +"\n" +
                 " */\n" +
                 "@Service\n" +
-                "public class ${NAME}Service extends BaseServiceImpl<${NAME}DAO, ${NAME}> {\n" +
+                "public class ${NAME}Service extends Base"+(isCodeEntity ? "Code" : "")+"ServiceImpl<${NAME}DAO, ${NAME}, Long> {\n" +
                 "\n" +
                 "    public ${NAME}Service(${NAME}DAO "+camelName+"DAO) {\n" +
                 "        super("+camelName+"DAO);\n" +
@@ -201,8 +203,8 @@ public class Generator {
                 "\n" +
                 "import com.rick."+project+".common.api.BaseFormController;\n" +
                 "import com.rick."+project+".common.exception.ResourceNotFoundException;\n" +
-                "import com.rick."+project+".module."+camelName+".entity."+entityName+";\n" +
-                "import com.rick."+project+".module."+camelName+".service."+entityName+"Service;\n" +
+                "import ${PACKAGE_NAME}.entity.${NAME};\n" +
+                "import ${PACKAGE_NAME}.service.${NAME}Service;\n" +
                 "import com.rick.db.plugin.dao.core.EntityDAOManager;\n" +
                 "import lombok.AccessLevel;\n" +
                 "import lombok.experimental.FieldDefaults;\n" +
@@ -221,7 +223,7 @@ public class Generator {
                 "@Controller\n" +
                 "@RequestMapping(\""+camelName+"s\")\n" +
                 "@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)\n" +
-                "public class "+entityName+"Controller extends BaseFormController<${NAME}, "+entityName+"Service> {\n" +
+                "public class "+entityName+"Controller extends BaseFormController<"+entityName+"Service, ${NAME}, Long> {\n" +
                 "\n" +
                 "    public "+entityName+"Controller("+entityName+"Service "+camelName+"Service) {\n" +
                 "        super("+camelName+"Service, \""+formPage+"\");\n" +
@@ -245,6 +247,44 @@ public class Generator {
                 "    protected String comment() {\n" +
                 "        return EntityDAOManager.getTableMeta(baseService.getBaseDAO().getEntityClass()).getTable().comment();\n" +
                 "    }\n" +
+                "}";
+
+        return template.replace("${PACKAGE_NAME}", rootPackageName)
+                .replace("${NAME}", entityName);
+    }
+
+    private void generatorApiController(String project, boolean overwrite, String entityName, String rootPackageName, String rootPackagePath, String curPackageName, boolean isCodeEntity) throws IOException {
+        Assert.hasText(project, "[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
+        String controllerCodeTemplate = apiCodeTemplate(project, entityName, rootPackageName, isCodeEntity);
+        // 写文件
+        writeCodeTemplate(overwrite, rootPackagePath, curPackageName, entityName + "Controller.java", controllerCodeTemplate);
+    }
+
+    private String apiCodeTemplate(String project, String entityName, String rootPackageName, boolean isCodeEntity) {
+        String camelName = (entityName.substring(0,1).toLowerCase() + entityName.substring(1));
+        String template = "package ${PACKAGE_NAME}.controller;\n" +
+                "\n" +
+                "import com.rick."+project+".common.api.Base"+(isCodeEntity ? "Code" : "")+"Api;\n" +
+                "import ${PACKAGE_NAME}.entity.${NAME};\n" +
+                "import ${PACKAGE_NAME}.service.${NAME}Service;\n" +
+                "import lombok.AccessLevel;\n" +
+                "import lombok.experimental.FieldDefaults;\n" +
+                "import org.springframework.web.bind.annotation.RestController;\n" +
+                "import org.springframework.web.bind.annotation.RequestMapping;\n" +
+                "\n" +
+                "/**\n" +
+                " * @author Rick.Xu\n" +
+                " * @date "+ Time2StringUtils.format(LocalDateTime.now()) +"\n" +
+                " */\n" +
+                "@RestController\n" +
+                "@RequestMapping(\""+camelName+"s\")\n" +
+                "@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)\n" +
+                "public class "+entityName+"Controller extends Base"+(isCodeEntity ? "Code" : "")+"Api<"+entityName+"Service,${NAME}, Long> {\n" +
+                "\n" +
+                "    public "+entityName+"Controller("+entityName+"Service "+camelName+"Service) {\n" +
+                "        super("+camelName+"Service);\n" +
+                "    }\n" +
+                "\n" +
                 "}";
 
         return template.replace("${PACKAGE_NAME}", rootPackageName)
