@@ -27,11 +27,11 @@
             <artifactId>sharp-database2</artifactId>
             <version>${sharp.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.rick.report</groupId>
-            <artifactId>sharp-report</artifactId>
-            <version>${sharp.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.rick.report</groupId>-->
+<!--            <artifactId>sharp-report</artifactId>-->
+<!--            <version>${sharp.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.rick.meta</groupId>
             <artifactId>sharp-meta</artifactId>
