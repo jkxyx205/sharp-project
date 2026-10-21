@@ -39,6 +39,7 @@ com.rick.db/
 │       └── support/    ColumnAutoFill+DefaultColumnAutoFill / ConditionAdvice+DefaultConditionAdvice / EntityCodeIdFillService / IdToEntityConverterFactory / BaseEntityUtils
 ├── service/           Service 层
 │   ├── BaseServiceImpl(模板 Service)
+│   ├── BaseCodeServiceImpl(带 code 实体的模板 Service)
 │   ├── GridService(分页引擎)
 │   ├── SharpService(SQL 执行引擎，含 NestedRowMapper)
 │   ├── SharpServiceHandler(回调接口)
@@ -80,7 +81,7 @@ org.springframework.jdbc.core.namedparam/
 - **`AbstractCoreDAO`** 是通用 SQL 拼装层：基于 `tableName` + `columnNames`（逗号分隔）提供通用 insert/update/delete/count/select/exists/checkId，封装 `ColumnAutoFill`（自动填充 create_time/update_time/is_deleted/id）与 `ConditionAdvice`（自动注入逻辑删除条件）两个可替换的钩子。
 - **`EntityDAOImpl`** 在 `AbstractCoreDAO` 之上引入 `TableMeta`（来自 `TableMetaResolver`），按实体类的 `@Column/@Id/@OneToMany/@ManyToOne/@ManyToMany/@Select/@Sql/@Version/@Embedded` 注解驱动 SQL 生成，并实现级联查询（`cascadeSelect`）与级联写入（`cascadeInsertOrUpdate`）。
 - **`GridService`** 是分页引擎，组合 `SharpService` 与 `AbstractSqlFormatter`，负责 count + 分页 SQL 包装 + PageModel 校验。
-- **`BaseServiceImpl`** 是业务 Service 的可选模板，组合 `EntityDAO` 与 `SharpService`，提供标准 CRUD 委托。
+- **`BaseServiceImpl`** 是业务 Service 的可选模板，组合 `EntityDAO` 与 `SharpService`，提供标准 CRUD 委托。**`BaseCodeServiceImpl`** 继承它并要求 DAO 为 `EntityCodeDAO`，额外提供 `findByCode`/`assertCodeExists` 等 code 操作的委托（Service 风格命名）。
 - **`SharpServiceHandler`** 是回调接口，配合 `MappedSharpService` 让上层用 MyBatis 写动态 SQL、用 `SharpService` 执行（统一命名参数与格式化）。
 
 ### 2.2 实体基类继承体系

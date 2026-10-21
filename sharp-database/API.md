@@ -11,7 +11,7 @@
 - [3. 实体基类体系](#3-实体基类体系)
 - [4. 注解](#4-注解)
 - [5. DAO 体系（EntityDAO / EntityCodeDAO / MapDAO）](#5-dao-体系)
-- [6. Service 层（BaseServiceImpl / SharpService / SharpServiceHandler）](#6-service-层)
+- [6. Service 层（BaseServiceImpl / BaseCodeServiceImpl / SharpService / SharpServiceHandler）](#6-service-层)
 - [7. GridService / GridUtils 分页查询](#7-gridservice--gridutils-分页查询)
 - [8. 工具类（SQLUtils / DbUtils / QueryUtils / DbScriptUtils / IdDescriptionUtils）](#8-工具类)
 - [9. DTO（Grid / PageModel / QueryModel）](#9-dto)
@@ -281,6 +281,17 @@ CoreDAO<ID>                                   (根接口：通用 CRUD/count/exi
 | `findAll` / `findAllWithoutCascade` | `List<T>` | 全表（带/不带级联） |
 | `findByConditionWithoutCascade` | `List<T> findByConditionWithoutCascade(Map<String,?> params, String condition)` | 直接拼 `baseDAO.getSelectSQL() + " WHERE " + condition`，走 `sharpService.query`，**不带级联** |
 | `exists` | `boolean exists(T e, String conditionSQL)` / `(Map, String)` | 委托 `baseDAO.existsByParams` |
+
+### 6.1.1 `BaseCodeServiceImpl<D extends EntityCodeDAO<T,ID>, T extends BaseCodeEntity<ID>, ID>`
+
+`com.rick.db.service.BaseCodeServiceImpl`。继承 `BaseServiceImpl`，为带 code 的实体提供 Service 层 code 便捷方法，**全部一行委托给 `baseDAO`**，语义与 [5.3 `EntityCodeDAO`](#53-entitycodedaot-id-额外方法) 对应方法一致（仅命名改为 Service 风格 `find*`）。构造器 `BaseCodeServiceImpl(D baseDAO)` 调 `super(baseDAO)`。
+
+| 分组 | 方法 |
+|---|---|
+| 查实体 | `findByCode(String)` → `Optional<T>`、`findByCodes(Collection<String>)` → `List<T>`、`findByCodesAsMap(Collection<String>)` → `Map<String,T>`（key=code） |
+| 查 id/code/单值 | `findIdByCode(String)` → `Optional<ID>`、`findIdByCodeOrThrowException(String)` → `ID`、`findIdsByCodes(Collection<String>)`、`findCodeById(Long)` → `Optional<String>`、`findDescriptionByCode(String)`、`findSingleValueByCode(String code, String columnName, Class<S>)` |
+| 查映射/差集 | `findCodeIdMap(Collection<String>)` → `Map<String,ID>`、`findNotExistsCodes(Collection<String>)` → `Set<String>` |
+| 断言 | `assertCodeNotExists(String)`、`assertCodeExists(String)` / `(String, Map, String)`、`assertCodesExists(Collection<String>)` / `(Collection<String>, Map, String)`、`assertCodesExistsAndUnDuplicate(List<String>)`、`assertCodesUnDuplicate(List<String>)`，失败抛 `BizException` |
 
 ### 6.2 `SharpService`
 
