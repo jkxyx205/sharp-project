@@ -167,13 +167,18 @@ public class Generator {
                 "import ${PACKAGE_NAME}.dao.${NAME}DAO;\n" +
                 "import ${PACKAGE_NAME}.entity.${NAME};\n" +
                 "import com.rick.db.service.Base"+(isCodeEntity ? "Code" : "")+"ServiceImpl;\n" +
+                "import lombok.AccessLevel;\n" +
+                "import lombok.experimental.FieldDefaults;\n" +
                 "import org.springframework.stereotype.Service;\n" +
+                "import org.springframework.validation.annotation.Validated;\n" +
                 "\n" +
                 "/**\n" +
                 " * @author Rick.Xu\n" +
                 " * @date "+ Time2StringUtils.format(LocalDateTime.now()) +"\n" +
                 " */\n" +
                 "@Service\n" +
+                "@Validated\n" +
+                "@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)\n" +
                 "public class ${NAME}Service extends Base"+(isCodeEntity ? "Code" : "")+"ServiceImpl<${NAME}DAO, ${NAME}, Long> {\n" +
                 "\n" +
                 "    public ${NAME}Service(${NAME}DAO "+camelName+"DAO) {\n" +
