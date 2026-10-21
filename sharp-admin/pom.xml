@@ -116,7 +116,7 @@
             <version>${sharp.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.rick</groupId>
+            <groupId>com.rick.generator</groupId>
             <artifactId>sharp-generator</artifactId>
             <version>${sharp.version}</version>
         </dependency>
