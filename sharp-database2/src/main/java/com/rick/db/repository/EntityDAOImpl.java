@@ -6,6 +6,7 @@ import com.rick.common.function.SFunction;
 import com.rick.common.util.*;
 import com.rick.common.validate.ValidatorHelper;
 import com.rick.db.config.Context;
+import com.rick.db.repository.model.BaseEntityInfoGetter;
 import com.rick.db.repository.model.DatabaseType;
 import com.rick.db.repository.model.EntityId;
 import com.rick.db.repository.support.*;
@@ -720,8 +721,13 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
                 }
             }
         }
-
         if (CollectionUtils.isNotEmpty(patchColumns)) {
+            // 同时更新 update_by = :baseEntityInfo.updateBy, update_time = :baseEntityInfo.updateTime, is_deleted = :baseEntityInfo.deleted
+            if (BaseEntityInfoGetter.class.isAssignableFrom(entity.getClass())) {
+                patchColumns.add("update_by");
+                patchColumns.add("update_time");
+                patchColumns.add("is_deleted");
+            }
             update(patchColumns.stream().collect(Collectors.joining(", ")), tableMeta.getIdMeta().getIdColumnName() + " = :" + tableMeta.getIdMeta().getIdPropertyName(), entity);
         }
 
