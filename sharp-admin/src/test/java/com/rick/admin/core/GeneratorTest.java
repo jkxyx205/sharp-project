@@ -26,7 +26,7 @@ public class GeneratorTest {
 
     @Test
     public void testGeneratorThymeleaf() throws IOException {
-        tableDAO.execute("Drop TABLE t_student");
+        tableDAO.execute("DROP TABLE IF EXISTS t_student");
 
         generator.execute(Student.class,
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
@@ -52,7 +52,7 @@ public class GeneratorTest {
 
     @Test
     public void testGeneratorVue() throws IOException {
-        tableDAO.execute("Drop TABLE t_student");
+        tableDAO.execute("DROP TABLE IF EXISTS t_student");
 
         generator.execute(Student.class,
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
@@ -78,7 +78,7 @@ public class GeneratorTest {
 
     @Test
     public void testGeneratorReact() throws IOException {
-        tableDAO.execute("Drop TABLE t_student");
+        tableDAO.execute("DROP TABLE IF EXISTS t_student");
 
         generator.execute(Student.class,
                 "/Users/rick/Space/Workspace/sharp-project/sharp-admin/src/main/java/com/rick/admin/module/student",
