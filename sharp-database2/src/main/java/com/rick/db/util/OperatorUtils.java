@@ -7,9 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,5 +44,14 @@ public class OperatorUtils {
 
     public static <R, T> Map<R, List<T>> groupMap(List<T> list, SFunction<T, R> function) {
         return list.stream().collect(Collectors.groupingBy(t -> function.isMethodReference() ? (R) new BeanWrapperImpl(t).getPropertyValue(function.getPropertyName()) : function.apply(t)));
+    }
+
+    public boolean hasDuplicates(List<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return false;
+        }
+
+        Set<String> set = new HashSet<>(codes);
+        return set.size() < codes.size();
     }
 }
