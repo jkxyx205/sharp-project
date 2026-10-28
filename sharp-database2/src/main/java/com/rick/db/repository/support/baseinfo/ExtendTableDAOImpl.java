@@ -88,7 +88,7 @@ public class ExtendTableDAOImpl extends TableDAOImpl implements TableDAO {
         if (Objects.nonNull(tableNameDAOMap.get(tableName))) {
             Map<String, Object> mergedParamMap = new HashMap<>(paramMap);
             mergedParamMap.put("deleted", true);
-            return update(tableName, LOGIC_DELETE_COLUMN_NAME + " = :deleted", condition + " AND "+LOGIC_DELETE_COLUMN_NAME+" = false", mergedParamMap);
+            return update(tableName, LOGIC_DELETE_COLUMN_NAME + " = :deleted, " + UPDATE_ID_COLUMN_NAME + " = :baseEntityInfo.updateBy, " + UPDATE_TIME_COLUMN_NAME + " = :baseEntityInfo.updateTime", condition + " AND " + LOGIC_DELETE_COLUMN_NAME + " = false", mergedParamMap);
         } else {
             return super.delete(tableName, condition, paramMap);
         }
