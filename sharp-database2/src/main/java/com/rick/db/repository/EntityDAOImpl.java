@@ -643,50 +643,6 @@ public class EntityDAOImpl<T, ID> implements EntityDAO<T, ID> {
         return deletedIds;
     }
 
-    protected Collection<T> insertOrUpdate0(Collection<T> entityList, String refColumnName, Object refValue, boolean deleteItem, Consumer<Collection<ID>> deletedIdsConsumer) {
-        if (deleteItem && Objects.nonNull(deletedIdsConsumer)) {
-            // 检查 id 是否允许被删除
-            Collection<ID> deletedIds = resolveDeletedIds(entityList, select(tableMeta.getIdMeta().getIdClass(), tableMeta.getIdMeta().getIdPropertyName(), refColumnName + " = :refValue", Maps.of("refValue", refValue)));
-            if (CollectionUtils.isNotEmpty(deletedIds))
-                deletedIdsConsumer.accept(deletedIds);
-        }
-
-        if (CollectionUtils.isEmpty(entityList) && deleteItem) {
-            if (Objects.isNull(refColumnName)) {
-                deleteAll();
-            } else {
-                delete(refColumnName + " = ?", refValue);
-            }
-        } else {
-            if (deleteItem) {
-                Set<?> ids = entityList.stream().map(e -> getIdValue(e)).filter(id -> Objects.nonNull(id)).collect(Collectors.toSet());
-                if (CollectionUtils.isEmpty(ids)) {
-                    if (Objects.isNull(refColumnName)) {
-                        deleteAll();
-                    } else {
-                        delete(refColumnName + " = ?", refValue);
-                    }
-                } else {
-                    Map<String, Object> paramMap = new LinkedHashMap();
-                    paramMap.put("ids", ids);
-                    paramMap.put("referenceId", refValue);
-
-                    if (Objects.isNull(refColumnName)) {
-                        delete("id NOT IN (:ids)", paramMap);
-                    } else {
-                        delete("id NOT IN (:ids) AND "+ refColumnName +" = :referenceId", paramMap);
-                    }
-                }
-            }
-
-            for (T referenceEntity : entityList) {
-                insertOrUpdate(referenceEntity);
-            }
-        }
-
-        return entityList;
-    }
-
     @Override
     public T insertOrUpdate(T entity) {
         return insertOrUpdate0(entity, Objects.isNull(getIdValue(entity)));
